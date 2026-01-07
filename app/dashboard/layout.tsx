@@ -1,4 +1,3 @@
-// app/dashboard/layout.tsx
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { SideNav } from "./components/side-nav";
@@ -9,17 +8,24 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // 1. Initialize Supabase Client
   const supabase = await createSupabaseServerClient();
+
+  // 2. Check for a valid user session
+  // getUser() is safer than getSession() for server-side route protection
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // 3. The "Bouncer": Redirect if not logged in
   if (!user) {
     redirect("/login");
   }
 
+  // 4. Extract user details for the UI
   const userEmail = user.email ?? "Unknown";
 
+  // 5. Define the Sign Out Server Action
   async function signOutAction() {
     "use server";
     const supabase = await createSupabaseServerClient();
@@ -32,7 +38,7 @@ export default async function DashboardLayout({
       {/* Desktop Sidebar */}
       <SideNav userEmail={userEmail} signOutAction={signOutAction} />
 
-      {/* Mobile Header */}
+      {/* Mobile Header (Visible on small screens) */}
       <MobileHeader userEmail={userEmail} signOutAction={signOutAction} />
 
       {/* Main Content Area */}
