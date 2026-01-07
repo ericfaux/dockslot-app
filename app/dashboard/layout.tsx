@@ -34,17 +34,17 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className="min-h-screen bg-gray-950">
       {/* Desktop Sidebar */}
       <SideNav userEmail={userEmail} signOutAction={signOutAction} />
 
       {/* Mobile Header (Visible on small screens) */}
       <MobileHeader userEmail={userEmail} signOutAction={signOutAction} />
 
-      {/* Main Content Area */}
+      {/* Main Content Area - Maritime Helm Theme */}
       <main className="md:pl-64 pt-16 md:pt-0">
-        <div className="min-h-screen bg-zinc-50 text-zinc-900">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="min-h-screen bg-gray-950">
+          <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4">
             {children}
           </div>
         </div>
