@@ -1,4 +1,4 @@
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -15,13 +15,13 @@ export const createSupabaseMiddlewareClient = (request: NextRequest) => {
 
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
-      get(name) {
+      get(name: string) {
         return request.cookies.get(name)?.value;
       },
-      set(name, value, options) {
+      set(name: string, value: string, options: CookieOptions) {
         response.cookies.set({ name, value, ...options });
       },
-      remove(name, options) {
+      remove(name: string, options: CookieOptions) {
         response.cookies.set({ name, value: "", ...options, maxAge: 0 });
       },
     },
