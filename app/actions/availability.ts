@@ -213,3 +213,155 @@ export async function upsertAvailabilityWindows(
   return { success: true, data: data as AvailabilityWindow[] };
 }
 
+// ============================================================================
+// Create Default Availability
+// ============================================================================
+
+/**
+ * Default availability configuration for new captains
+ * - All days active except Monday (common off day)
+ * - Start time: 06:00:00
+ * - End time: 21:00:00
+ */
+const DEFAULT_AVAILABILITY_CONFIG = {
+  start_time: '06:00:00',
+  end_time: '21:00:00',
+  // Sunday=0, Monday=1, ..., Saturday=6
+  // Monday is off by default (common off day for charter operations)
+  activeDays: [0, 2, 3, 4, 5, 6], // Sunday, Tuesday-Saturday active
+};
+
+/**
+ * Creates default availability windows for a captain.
+ * Creates 7 rows (one per day of the week) with reasonable defaults:
+ * - All days active except Monday
+ * - Hours: 06:00 AM to 09:00 PM
+ *
+ * This function is idempotent - it will not create duplicate rows.
+ * Uses upsert with onConflict to handle existing entries.
+ *
+ * @param captainId - The captain's user ID
+ * @returns ActionResult indicating success or failure
+ */
+export async function createDefaultAvailability(
+  captainId: string
+): Promise<ActionResult<AvailabilityWindow[]>> {
+  const supabase = await createSupabaseServerClient();
+
+  // Validate captain ID format
+  if (!isValidUUID(captainId)) {
+    return {
+      success: false,
+      error: 'Invalid captain ID format',
+      code: 'VALIDATION',
+    };
+  }
+
+  // Build the default availability data for all 7 days
+  const defaultWindows = Array.from({ length: 7 }, (_, dayOfWeek) => ({
+    owner_id: captainId,
+    day_of_week: dayOfWeek,
+    start_time: DEFAULT_AVAILABILITY_CONFIG.start_time,
+    end_time: DEFAULT_AVAILABILITY_CONFIG.end_time,
+    is_active: DEFAULT_AVAILABILITY_CONFIG.activeDays.includes(dayOfWeek),
+  }));
+
+  // Upsert all 7 windows
+  // Using onConflict to avoid duplicates if called multiple times
+  const { data, error } = await supabase
+    .from('availability_windows')
+    .upsert(defaultWindows, {
+      onConflict: 'owner_id,day_of_week',
+      ignoreDuplicates: true, // Don't update if already exists
+    })
+    .select();
+
+  if (error) {
+    console.error('Error creating default availability:', error);
+    return {
+      success: false,
+      error: 'Failed to create default availability windows',
+      code: 'UNKNOWN',
+    };
+  }
+
+  return { success: true, data: data as AvailabilityWindow[] };
+}
+
+/**
+ * Checks if a captain has any availability windows configured.
+ *
+ * @param captainId - The captain's user ID
+ * @returns ActionResult with boolean indicating if availability exists
+ */
+export async function hasAvailabilityWindows(
+  captainId: string
+): Promise<ActionResult<boolean>> {
+  const supabase = await createSupabaseServerClient();
+
+  if (!isValidUUID(captainId)) {
+    return {
+      success: false,
+      error: 'Invalid captain ID format',
+      code: 'VALIDATION',
+    };
+  }
+
+  const { count, error } = await supabase
+    .from('availability_windows')
+    .select('*', { count: 'exact', head: true })
+    .eq('owner_id', captainId);
+
+  if (error) {
+    console.error('Error checking availability windows:', error);
+    return {
+      success: false,
+      error: 'Failed to check availability windows',
+      code: 'UNKNOWN',
+    };
+  }
+
+  return { success: true, data: (count ?? 0) > 0 };
+}
+
+/**
+ * Ensures a captain has availability windows.
+ * If none exist, creates default windows.
+ * Used during auth callback or dashboard load.
+ *
+ * @param captainId - The captain's user ID
+ * @returns ActionResult indicating if defaults were created
+ */
+export async function ensureAvailabilityExists(
+  captainId: string
+): Promise<ActionResult<{ created: boolean }>> {
+  // Check if availability already exists
+  const hasWindowsResult = await hasAvailabilityWindows(captainId);
+
+  if (!hasWindowsResult.success) {
+    return {
+      success: false,
+      error: hasWindowsResult.error,
+      code: hasWindowsResult.code,
+    };
+  }
+
+  // If windows already exist, nothing to do
+  if (hasWindowsResult.data) {
+    return { success: true, data: { created: false } };
+  }
+
+  // Create default availability
+  const createResult = await createDefaultAvailability(captainId);
+
+  if (!createResult.success) {
+    return {
+      success: false,
+      error: createResult.error,
+      code: createResult.code,
+    };
+  }
+
+  return { success: true, data: { created: true } };
+}
+

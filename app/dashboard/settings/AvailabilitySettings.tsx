@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition, useEffect } from 'react';
-import { Loader2, Clock, Save } from 'lucide-react';
+import { Loader2, Clock, Save, AlertCircle } from 'lucide-react';
 import { AvailabilityWindow } from '@/lib/db/types';
 import { upsertAvailabilityWindows } from '@/app/actions/availability';
 
@@ -57,6 +57,10 @@ export function AvailabilitySettings({ initialWindows }: AvailabilitySettingsPro
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  // Track if this is a first-time setup (no existing windows)
+  const [isFirstTimeSetup] = useState(() => initialWindows.length === 0);
+  const [hasBeenSaved, setHasBeenSaved] = useState(false);
 
   // Initialize windows state from props or defaults
   const [windows, setWindows] = useState<AvailabilityWindowInput[]>(() => {
@@ -147,7 +151,10 @@ export function AvailabilitySettings({ initialWindows }: AvailabilitySettingsPro
             is_active: w.is_active,
           })));
         }
-        setSuccess('Availability saved successfully');
+        setHasBeenSaved(true);
+        setSuccess(isFirstTimeSetup && !hasBeenSaved
+          ? 'Availability set up successfully! Guests can now book trips.'
+          : 'Availability saved successfully');
         setTimeout(() => setSuccess(null), 3000);
       } else {
         setError(result.error || 'Failed to save availability');
@@ -167,6 +174,22 @@ export function AvailabilitySettings({ initialWindows }: AvailabilitySettingsPro
       <p className="mb-6 text-sm text-slate-400">
         Set your available hours for each day of the week. Guests can only book during these times.
       </p>
+
+      {/* First-time setup banner */}
+      {isFirstTimeSetup && !hasBeenSaved && (
+        <div className="mb-4 flex items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3">
+          <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-400" />
+          <div>
+            <p className="text-sm font-medium text-amber-300">
+              Set up your availability to start accepting bookings
+            </p>
+            <p className="mt-1 text-xs text-amber-400/80">
+              Review the default hours below and click &quot;Save Availability&quot; to enable your booking page.
+              We&apos;ve pre-filled sensible defaults (6 AM - 9 PM, Monday off).
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Error Message */}
       {error && (

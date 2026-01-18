@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 import { createSupabaseServerClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import { getProfile } from '@/app/actions/profile';
-import { getAvailabilityWindows } from '@/app/actions/availability';
+import { getAvailabilityWindows, ensureAvailabilityExists } from '@/app/actions/availability';
 import { SettingsClient } from './SettingsClient';
 
 export default async function SettingsPage() {
@@ -19,6 +19,10 @@ export default async function SettingsPage() {
   if (!user) {
     redirect('/login');
   }
+
+  // Ensure user has availability windows (creates defaults if missing)
+  // This is a fallback for users who signed up before the database trigger was added
+  await ensureAvailabilityExists(user.id);
 
   // Fetch profile and availability windows in parallel
   const [profileResult, availabilityResult] = await Promise.all([
