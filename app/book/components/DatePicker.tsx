@@ -39,28 +39,31 @@ interface DatePickerProps {
   availableDates: DateAvailability[];
   selectedDate: string | null;
   onSelectDate: (date: string) => void;
-  timeSlots: TimeSlot[];
-  selectedTime: string | null;
-  onSelectTime: (time: string) => void;
-  isLoadingSlots: boolean;
+  timeSlots?: TimeSlot[];
+  selectedTime?: string | null;
+  onSelectTime?: (time: string) => void;
+  isLoadingSlots?: boolean;
   maxAdvanceDays?: number;
   selectedDateInfo?: {
     is_blackout?: boolean;
     blackout_reason?: string | null;
     has_active_window?: boolean;
   } | null;
+  /** When true, hides the internal time slots panel (use when pairing with external TimeSlotPicker) */
+  hideTimeSlots?: boolean;
 }
 
 export function DatePicker({
   availableDates,
   selectedDate,
   onSelectDate,
-  timeSlots,
-  selectedTime,
+  timeSlots = [],
+  selectedTime = null,
   onSelectTime,
-  isLoadingSlots,
+  isLoadingSlots = false,
   maxAdvanceDays = 60,
   selectedDateInfo,
+  hideTimeSlots = false,
 }: DatePickerProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
@@ -147,9 +150,9 @@ export function DatePicker({
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6">
+    <div className={`flex flex-col ${hideTimeSlots ? '' : 'lg:flex-row'} gap-6`}>
       {/* Calendar */}
-      <div className="flex-1">
+      <div className={hideTimeSlots ? 'w-full' : 'flex-1'}>
         <div className="rounded-lg border border-slate-700 bg-slate-900 p-4">
           {/* Month Navigation */}
           <div className="flex items-center justify-between mb-4">
@@ -271,75 +274,77 @@ export function DatePicker({
         </div>
       </div>
 
-      {/* Time Slots */}
-      <div className="lg:w-72">
-        <div className="rounded-lg border border-slate-700 bg-slate-900 p-4">
-          <h3 className="text-lg font-semibold text-white mb-4">
-            {selectedDate
-              ? `Times for ${format(new Date(selectedDate + 'T12:00:00'), 'MMM d')}`
-              : 'Select a date'}
-          </h3>
+      {/* Time Slots - hidden when using external TimeSlotPicker */}
+      {!hideTimeSlots && (
+        <div className="lg:w-72">
+          <div className="rounded-lg border border-slate-700 bg-slate-900 p-4">
+            <h3 className="text-lg font-semibold text-white mb-4">
+              {selectedDate
+                ? `Times for ${format(new Date(selectedDate + 'T12:00:00'), 'MMM d')}`
+                : 'Select a date'}
+            </h3>
 
-          {!selectedDate && (
-            <p className="text-sm text-slate-400">
-              Choose a date from the calendar to see available times.
-            </p>
-          )}
+            {!selectedDate && (
+              <p className="text-sm text-slate-400">
+                Choose a date from the calendar to see available times.
+              </p>
+            )}
 
-          {selectedDate && isLoadingSlots && (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-cyan-400" />
-            </div>
-          )}
+            {selectedDate && isLoadingSlots && (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-cyan-400" />
+              </div>
+            )}
 
-          {selectedDate && !isLoadingSlots && timeSlots.length === 0 && (
-            <div className="text-sm">
-              {selectedDateInfo?.is_blackout ? (
-                <div className="flex items-start gap-2">
-                  <Ban className="h-4 w-4 text-rose-400 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="text-slate-300 font-medium">Date blocked out</p>
-                    {selectedDateInfo.blackout_reason && (
-                      <p className="text-slate-500 mt-1">{selectedDateInfo.blackout_reason}</p>
-                    )}
+            {selectedDate && !isLoadingSlots && timeSlots.length === 0 && (
+              <div className="text-sm">
+                {selectedDateInfo?.is_blackout ? (
+                  <div className="flex items-start gap-2">
+                    <Ban className="h-4 w-4 text-rose-400 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-slate-300 font-medium">Date blocked out</p>
+                      {selectedDateInfo.blackout_reason && (
+                        <p className="text-slate-500 mt-1">{selectedDateInfo.blackout_reason}</p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ) : selectedDateInfo?.has_active_window === false ? (
-                <div className="flex items-start gap-2">
-                  <CalendarOff className="h-4 w-4 text-slate-500 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="text-slate-400">Captain doesn&apos;t operate on this day</p>
+                ) : selectedDateInfo?.has_active_window === false ? (
+                  <div className="flex items-start gap-2">
+                    <CalendarOff className="h-4 w-4 text-slate-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-slate-400">Captain doesn&apos;t operate on this day</p>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <p className="text-slate-400">
-                  No available times for this date. All slots may be booked.
-                </p>
-              )}
-            </div>
-          )}
+                ) : (
+                  <p className="text-slate-400">
+                    No available times for this date. All slots may be booked.
+                  </p>
+                )}
+              </div>
+            )}
 
-          {selectedDate && !isLoadingSlots && timeSlots.length > 0 && (
-            <div className="grid grid-cols-2 gap-2 max-h-[400px] overflow-y-auto">
-              {timeSlots.map((slot) => (
-                <button
-                  key={slot.start_time}
-                  onClick={() => slot.available && onSelectTime(slot.start_time)}
-                  disabled={!slot.available}
-                  className={`
-                    px-3 py-2 rounded-md text-sm font-medium transition-all
-                    ${!slot.available ? 'bg-slate-800/50 text-slate-600 cursor-not-allowed line-through' : ''}
-                    ${slot.available && selectedTime !== slot.start_time ? 'bg-slate-800 text-white hover:bg-cyan-500/20 hover:text-cyan-400' : ''}
-                    ${selectedTime === slot.start_time ? 'bg-cyan-500 text-white' : ''}
-                  `}
-                >
-                  {formatTime(slot.start_time)}
-                </button>
-              ))}
-            </div>
-          )}
+            {selectedDate && !isLoadingSlots && timeSlots.length > 0 && onSelectTime && (
+              <div className="grid grid-cols-2 gap-2 max-h-[400px] overflow-y-auto">
+                {timeSlots.map((slot) => (
+                  <button
+                    key={slot.start_time}
+                    onClick={() => slot.available && onSelectTime(slot.start_time)}
+                    disabled={!slot.available}
+                    className={`
+                      px-3 py-2 rounded-md text-sm font-medium transition-all
+                      ${!slot.available ? 'bg-slate-800/50 text-slate-600 cursor-not-allowed line-through' : ''}
+                      ${slot.available && selectedTime !== slot.start_time ? 'bg-slate-800 text-white hover:bg-cyan-500/20 hover:text-cyan-400' : ''}
+                      ${selectedTime === slot.start_time ? 'bg-cyan-500 text-white' : ''}
+                    `}
+                  >
+                    {formatTime(slot.start_time)}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
