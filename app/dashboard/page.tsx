@@ -3,6 +3,8 @@
 // Design: "The Captain's Horizon" - Garmin/Simrad/Raymarine inspired interface
 
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getBookingsWithFilters } from "@/lib/data/bookings";
+import { format, parseISO } from "date-fns";
 import {
   Anchor,
   Wind,
@@ -14,12 +16,12 @@ import {
   MessageSquare,
   Navigation,
   Users,
-  FileCheck,
-  CreditCard,
 } from "lucide-react";
+import { FloatPlanCard } from "./components/FloatPlanCard";
+import { BookingStatus, ACTIVE_BOOKING_STATUSES } from "@/lib/db/types";
 
 // ═══════════════════════════════════════════════════════════════════════════
-// MOCK DATA - Replace with real data fetching
+// MOCK DATA - Weather would come from external API in production
 // ═══════════════════════════════════════════════════════════════════════════
 
 const WEATHER_DATA = {
@@ -27,25 +29,6 @@ const WEATHER_DATA = {
   windSpeed: 8,
   windDirection: "NE",
   sunset: "7:42 PM",
-};
-
-const NEXT_TRIP = {
-  time: "2:00 PM",
-  tripType: "Half-Day Offshore",
-  guestName: "Johnson Party",
-  partySize: 4,
-  status: "confirmed" as const,
-  depositPaid: true,
-  waiversSigned: 3,
-  waiversTotal: 4,
-};
-
-const METRICS = {
-  revenuePercent: 70,
-  seasonDaysRemaining: 45,
-  seasonDaysTotal: 120,
-  pendingWaivers: 2,
-  maxPending: 10,
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -188,61 +171,6 @@ function RockerSwitch({ icon, label, onClick }: RockerSwitchProps) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// STATUS BADGE COMPONENT
-// ═══════════════════════════════════════════════════════════════════════════
-
-type TripStatus = "confirmed" | "pending_deposit" | "weather_hold" | "cancelled";
-
-interface StatusBadgeProps {
-  status: TripStatus;
-}
-
-function StatusBadge({ status }: StatusBadgeProps) {
-  const statusConfig = {
-    confirmed: {
-      label: "Confirmed",
-      dotColor: "bg-emerald-500",
-      textColor: "text-emerald-700",
-      bgColor: "bg-emerald-50",
-      borderColor: "border-emerald-200",
-    },
-    pending_deposit: {
-      label: "Awaiting Deposit",
-      dotColor: "bg-amber-500",
-      textColor: "text-amber-700",
-      bgColor: "bg-amber-50",
-      borderColor: "border-amber-200",
-    },
-    weather_hold: {
-      label: "Weather Hold",
-      dotColor: "bg-cyan-500",
-      textColor: "text-cyan-700",
-      bgColor: "bg-cyan-50",
-      borderColor: "border-cyan-200",
-    },
-    cancelled: {
-      label: "Cancelled",
-      dotColor: "bg-rose-500",
-      textColor: "text-rose-700",
-      bgColor: "bg-rose-50",
-      borderColor: "border-rose-200",
-    },
-  };
-
-  const config = statusConfig[status];
-
-  return (
-    <div
-      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 ${config.bgColor} ${config.borderColor}`}
-    >
-      <div className={`h-2 w-2 rounded-full ${config.dotColor}`} />
-      <span className={`text-xs font-semibold ${config.textColor}`}>
-        {config.label}
-      </span>
-    </div>
-  );
-}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // HORIZON WIDGET - Hero visualization with tide wave
@@ -446,98 +374,6 @@ function HorizonWidget({ captainName = "Captain" }: HorizonWidgetProps) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// FLOAT PLAN CARD - Next trip display
-// ═══════════════════════════════════════════════════════════════════════════
-
-function FloatPlanCard() {
-  const borderColorMap = {
-    confirmed: "border-l-emerald-500",
-    pending_deposit: "border-l-amber-500",
-    weather_hold: "border-l-cyan-500",
-    cancelled: "border-l-rose-500",
-  };
-
-  return (
-    <div
-      className={`overflow-hidden rounded-lg border-l-8 bg-white ${borderColorMap[NEXT_TRIP.status]}`}
-      style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.3)" }}
-    >
-      <div className="p-5">
-        {/* Header Row */}
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <div className="font-mono text-2xl font-bold text-slate-900">
-              {NEXT_TRIP.time}
-            </div>
-            <div className="font-mono text-lg font-semibold text-slate-700">
-              {NEXT_TRIP.tripType}
-            </div>
-          </div>
-          <StatusBadge status={NEXT_TRIP.status} />
-        </div>
-
-        {/* Guest Info Panel */}
-        <div className="mt-4 rounded-md border border-slate-200 bg-slate-50 p-4">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            {/* Left: Guest Details */}
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-200">
-                <Users className="h-5 w-5 text-slate-600" />
-              </div>
-              <div>
-                <div className="font-mono text-base font-semibold text-slate-900">
-                  {NEXT_TRIP.guestName}
-                </div>
-                <div className="text-sm text-slate-500">
-                  {NEXT_TRIP.partySize} guests
-                </div>
-              </div>
-            </div>
-
-            {/* Right: Status Indicators */}
-            <div className="flex flex-wrap gap-4">
-              {/* Waivers */}
-              <div className="flex items-center gap-2">
-                <FileCheck
-                  className={`h-4 w-4 ${NEXT_TRIP.waiversSigned === NEXT_TRIP.waiversTotal ? "text-emerald-500" : "text-amber-500"}`}
-                />
-                <span
-                  className={`text-sm font-medium ${NEXT_TRIP.waiversSigned === NEXT_TRIP.waiversTotal ? "text-emerald-600" : "text-amber-600"}`}
-                >
-                  {NEXT_TRIP.waiversSigned}/{NEXT_TRIP.waiversTotal} waivers
-                </span>
-              </div>
-              {/* Payment */}
-              <div className="flex items-center gap-2">
-                <CreditCard
-                  className={`h-4 w-4 ${NEXT_TRIP.depositPaid ? "text-emerald-500" : "text-amber-500"}`}
-                />
-                <span
-                  className={`text-sm font-medium ${NEXT_TRIP.depositPaid ? "text-emerald-600" : "text-amber-600"}`}
-                >
-                  {NEXT_TRIP.depositPaid ? "Deposit Paid" : "Deposit Pending"}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Depart Button */}
-        <button
-          className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 px-6 py-4 font-mono text-lg font-bold uppercase tracking-wide text-white transition-all duration-75 ease-out hover:bg-slate-800 active:translate-y-1 active:border-b-0"
-          style={{
-            borderBottom: "4px solid #0f172a",
-            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
-          }}
-        >
-          <Navigation className="h-5 w-5" />
-          DEPART
-        </button>
-      </div>
-    </div>
-  );
-}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // MAIN DASHBOARD PAGE
@@ -551,6 +387,69 @@ export default async function DashboardPage() {
 
   const displayName =
     user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Captain";
+
+  // Fetch today's bookings for the Float Plan
+  const today = format(new Date(), "yyyy-MM-dd");
+  let nextTrip = null;
+  let pendingCount = 0;
+
+  if (user) {
+    try {
+      // Get today's active bookings, sorted by start time
+      const todayBookings = await getBookingsWithFilters({
+        captainId: user.id,
+        startDate: today,
+        endDate: today,
+        status: ACTIVE_BOOKING_STATUSES as BookingStatus[],
+        sortField: "scheduled_start",
+        sortDir: "asc",
+        limit: 10,
+      });
+
+      // Find the next upcoming trip (first one that hasn't started yet or is in progress)
+      const now = new Date();
+      const upcomingBooking = todayBookings.bookings.find((b) => {
+        const startTime = parseISO(b.scheduled_start);
+        const endTime = parseISO(b.scheduled_end);
+        // Show if it hasn't ended yet
+        return endTime > now;
+      });
+
+      if (upcomingBooking) {
+        // For now, use mock waiver data until waiver system is integrated
+        nextTrip = {
+          id: upcomingBooking.id,
+          time: format(parseISO(upcomingBooking.scheduled_start), "h:mm a"),
+          tripType: upcomingBooking.trip_type?.title || "Charter Trip",
+          guestName: upcomingBooking.guest_name,
+          partySize: upcomingBooking.party_size,
+          status: upcomingBooking.status,
+          paymentStatus: upcomingBooking.payment_status,
+          waiversSigned: upcomingBooking.party_size - 1, // Mock: assume most signed
+          waiversTotal: upcomingBooking.party_size,
+        };
+      }
+
+      // Count pending deposit bookings
+      const pendingBookings = await getBookingsWithFilters({
+        captainId: user.id,
+        status: ["pending_deposit"],
+        limit: 100,
+      });
+      pendingCount = pendingBookings.totalCount;
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+    }
+  }
+
+  // Mock metrics (would come from aggregation queries in production)
+  const METRICS = {
+    revenuePercent: 70,
+    seasonDaysRemaining: 45,
+    seasonDaysTotal: 120,
+    pendingItems: pendingCount,
+    maxPending: 10,
+  };
 
   return (
     <div className="space-y-6">
@@ -577,7 +476,7 @@ export default async function DashboardPage() {
             color="blue"
           />
           <FuelGauge
-            value={METRICS.pendingWaivers}
+            value={METRICS.pendingItems}
             maxValue={METRICS.maxPending}
             label="Pending"
             unit="items"
@@ -594,7 +493,7 @@ export default async function DashboardPage() {
           </span>
           <div className="h-px flex-1 bg-slate-800" />
         </div>
-        <FloatPlanCard />
+        <FloatPlanCard booking={nextTrip} />
       </section>
 
       {/* ═══ SECTION 4: ROCKER SWITCHES / QUICK ACTIONS ═══ */}
