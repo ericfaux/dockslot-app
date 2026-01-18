@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { Profile } from '@/lib/db/types';
 import { updateProfile } from '@/app/actions/profile';
+import { BookingLinkCard } from '@/components/BookingLinkCard';
 
 interface SettingsClientProps {
   initialProfile: Profile | null;
@@ -104,6 +105,11 @@ export function SettingsClient({ initialProfile, userEmail }: SettingsClientProp
         <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
           {success}
         </div>
+      )}
+
+      {/* Booking Link - Show at top for easy access */}
+      {initialProfile?.id && (
+        <BookingLinkCard captainId={initialProfile.id} />
       )}
 
       {/* Profile Information */}
