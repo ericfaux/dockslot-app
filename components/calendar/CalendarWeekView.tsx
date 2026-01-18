@@ -10,17 +10,20 @@ import {
   addWeeks,
   subWeeks,
 } from 'date-fns';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, CalendarX } from 'lucide-react';
 import { DayColumn } from './DayColumn';
 import { TimeColumn } from './TimeColumn';
-import { CalendarBooking, CalendarView } from './types';
+import { CalendarBooking, CalendarView, BlackoutDate } from './types';
 
 interface CalendarWeekViewProps {
   date: Date;
   bookings: CalendarBooking[];
+  blackoutDates?: BlackoutDate[];
   onDateChange: (date: Date) => void;
   onViewChange: (view: CalendarView) => void;
   onBlockClick?: (booking: CalendarBooking) => void;
+  onQuickBlockClick?: () => void;
+  onBlackoutClick?: (blackout: BlackoutDate) => void;
   isLoading?: boolean;
 }
 
@@ -31,9 +34,12 @@ const PIXELS_PER_HOUR = 60;
 export function CalendarWeekView({
   date,
   bookings,
+  blackoutDates = [],
   onDateChange,
   onViewChange,
   onBlockClick,
+  onQuickBlockClick,
+  onBlackoutClick,
   isLoading,
 }: CalendarWeekViewProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -67,6 +73,15 @@ export function CalendarWeekView({
 
     return grouped;
   }, [weekDays, bookings]);
+
+  // Map blackout dates by date string for quick lookup
+  const blackoutsByDate = useMemo(() => {
+    const mapped = new Map<string, BlackoutDate>();
+    blackoutDates.forEach((blackout) => {
+      mapped.set(blackout.blackout_date, blackout);
+    });
+    return mapped;
+  }, [blackoutDates]);
 
   // Auto-scroll to current time on mount
   useEffect(() => {
@@ -113,6 +128,15 @@ export function CalendarWeekView({
           >
             TODAY
           </button>
+          {onQuickBlockClick && (
+            <button
+              onClick={onQuickBlockClick}
+              className="flex items-center gap-1.5 rounded-md px-3 py-1.5 font-mono text-xs font-medium text-rose-400 transition-colors hover:bg-rose-400/10"
+            >
+              <CalendarX className="h-3.5 w-3.5" />
+              QUICK BLOCK
+            </button>
+          )}
         </div>
 
         {/* Date Range */}
@@ -175,6 +199,7 @@ export function CalendarWeekView({
               const dateKey = format(day, 'yyyy-MM-dd');
               const dayBookings = bookingsByDay.get(dateKey) || [];
               const isToday = isSameDay(day, today);
+              const blackoutDate = blackoutsByDate.get(dateKey);
 
               return (
                 <DayColumn
@@ -186,6 +211,8 @@ export function CalendarWeekView({
                   pixelsPerHour={PIXELS_PER_HOUR}
                   isToday={isToday}
                   onBlockClick={onBlockClick}
+                  blackoutDate={blackoutDate}
+                  onBlackoutClick={onBlackoutClick}
                 />
               );
             })}

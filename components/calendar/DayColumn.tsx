@@ -1,7 +1,8 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { format, parseISO, isSameDay } from 'date-fns';
+import { X } from 'lucide-react';
 import { CalendarBlock } from './CalendarBlock';
 import { NowIndicator } from './NowIndicator';
 import { DayColumnProps, CalendarBooking } from './types';
@@ -24,8 +25,12 @@ export function DayColumn({
   pixelsPerHour,
   isToday,
   onBlockClick,
+  blackoutDate,
+  onBlackoutClick,
 }: DayColumnProps) {
   const totalHeight = (endHour - startHour) * pixelsPerHour;
+  const [showTooltip, setShowTooltip] = useState(false);
+  const isBlocked = !!blackoutDate;
 
   // Calculate positions for each booking
   const positionedBookings = useMemo((): PositionedBooking[] => {
@@ -63,21 +68,48 @@ export function DayColumn({
     <div className="flex flex-1 flex-col border-r border-slate-700/50 last:border-r-0">
       {/* Day Header */}
       <div
-        className={`flex flex-col items-center border-b border-slate-700/50 py-3 ${
-          isToday ? 'bg-cyan-500/10' : 'bg-slate-800/50'
+        className={`relative flex flex-col items-center border-b border-slate-700/50 py-3 ${
+          isBlocked ? 'bg-rose-500/10' : isToday ? 'bg-cyan-500/10' : 'bg-slate-800/50'
         }`}
+        onMouseEnter={() => isBlocked && setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+        onClick={() => isBlocked && blackoutDate && onBlackoutClick?.(blackoutDate)}
+        role={isBlocked ? 'button' : undefined}
+        tabIndex={isBlocked ? 0 : undefined}
       >
-        <span className="font-mono text-xs uppercase tracking-wider text-slate-500">
+        {/* Blocked indicator */}
+        {isBlocked && (
+          <div className="absolute right-1 top-1">
+            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-rose-500/30">
+              <X className="h-3 w-3 text-rose-400" />
+            </div>
+          </div>
+        )}
+        <span className={`font-mono text-xs uppercase tracking-wider ${isBlocked ? 'text-rose-400' : 'text-slate-500'}`}>
           {dayName}
         </span>
         <span
           className={`font-mono text-xl font-bold ${
-            isToday ? 'text-cyan-400' : 'text-slate-300'
+            isBlocked ? 'text-rose-400 line-through' : isToday ? 'text-cyan-400' : 'text-slate-300'
           }`}
         >
           {dayNumber}
         </span>
-        <span className="font-mono text-[10px] text-slate-600">{monthName}</span>
+        <span className={`font-mono text-[10px] ${isBlocked ? 'text-rose-500' : 'text-slate-600'}`}>{monthName}</span>
+
+        {/* Tooltip for blocked reason */}
+        {isBlocked && showTooltip && (
+          <div className="absolute left-1/2 top-full z-50 mt-2 -translate-x-1/2 transform">
+            <div className="whitespace-nowrap rounded-lg border border-rose-500/30 bg-slate-800 px-3 py-2 text-xs shadow-lg">
+              <div className="font-medium text-rose-400">Blocked</div>
+              {blackoutDate?.reason && (
+                <div className="mt-1 max-w-[200px] truncate text-slate-400">{blackoutDate.reason}</div>
+              )}
+              <div className="mt-1 text-slate-500">Click to unblock</div>
+            </div>
+            <div className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 transform border-l border-t border-rose-500/30 bg-slate-800" />
+          </div>
+        )}
       </div>
 
       {/* Time Grid */}
@@ -100,8 +132,21 @@ export function DayColumn({
           />
         ))}
 
+        {/* Blocked day overlay */}
+        {isBlocked && (
+          <div className="pointer-events-none absolute inset-0 bg-rose-500/5">
+            {/* Diagonal stripes pattern */}
+            <div
+              className="absolute inset-0 opacity-20"
+              style={{
+                backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(244, 63, 94, 0.1) 10px, rgba(244, 63, 94, 0.1) 20px)',
+              }}
+            />
+          </div>
+        )}
+
         {/* Today highlight */}
-        {isToday && (
+        {isToday && !isBlocked && (
           <div className="pointer-events-none absolute inset-0 bg-cyan-500/5" />
         )}
 

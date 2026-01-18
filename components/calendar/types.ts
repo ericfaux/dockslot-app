@@ -6,6 +6,14 @@ import { BookingStatus } from '@/lib/db/types';
 
 export type CalendarView = 'day' | 'week' | 'month';
 
+export interface BlackoutDate {
+  id: string;
+  owner_id: string;
+  blackout_date: string;
+  reason: string | null;
+  created_at: string;
+}
+
 export interface CalendarBooking {
   id: string;
   guest_name: string;
@@ -33,6 +41,10 @@ export interface CalendarProps {
   onDateChange?: (date: Date) => void;
   onViewChange?: (view: CalendarView) => void;
   onBlockClick?: (booking: CalendarBooking) => void;
+  onQuickBlockClick?: () => void;
+  onBlackoutClick?: (blackout: BlackoutDate) => void;
+  blackoutDates?: BlackoutDate[];
+  refreshKey?: number;
 }
 
 export interface DayColumnProps {
@@ -43,6 +55,8 @@ export interface DayColumnProps {
   pixelsPerHour: number;
   isToday: boolean;
   onBlockClick?: (booking: CalendarBooking) => void;
+  blackoutDate?: BlackoutDate;
+  onBlackoutClick?: (blackout: BlackoutDate) => void;
 }
 
 export interface CalendarBlockProps {
