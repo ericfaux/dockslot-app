@@ -2,6 +2,8 @@
 // Captain's Dashboard - Maritime Chart Plotter Aesthetic
 // Design: "The Captain's Horizon" - Garmin/Simrad/Raymarine inspired interface
 
+export const dynamic = 'force-dynamic';
+
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { getBookingsWithFilters } from "@/lib/data/bookings";
 import { format, parseISO } from "date-fns";

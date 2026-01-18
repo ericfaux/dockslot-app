@@ -2,6 +2,8 @@
 // Manifest Page - View upcoming bookings with passenger details
 // Design: Maritime Chart Plotter Aesthetic with Dark Theme
 
+export const dynamic = 'force-dynamic';
+
 import { createSupabaseServerClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import { getUpcomingBookingsWithPassengers } from '@/app/actions/manifest';
