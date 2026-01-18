@@ -936,3 +936,220 @@ export async function lookupBookingByToken(
 
   return { success: true, data: booking };
 }
+
+// ============================================================================
+// Guest Reschedule (Token-Based)
+// ============================================================================
+
+export interface RescheduleInfoResult {
+  booking: BookingWithDetails;
+  offers: RescheduleOffer[];
+  captain: {
+    business_name: string | null;
+    full_name: string | null;
+  } | null;
+}
+
+export async function getBookingRescheduleInfo(
+  token: string,
+  clientIp?: string
+): Promise<ActionResult<RescheduleInfoResult>> {
+  // Rate limiting
+  if (clientIp && !checkRateLimit(clientIp)) {
+    return { success: false, error: 'Too many lookup attempts. Please try again later.', code: 'UNAUTHORIZED' };
+  }
+
+  if (!token || token.length < 6) {
+    return { success: false, error: 'Invalid confirmation code', code: 'VALIDATION' };
+  }
+
+  const booking = await getBookingByToken(token);
+  if (!booking) {
+    return { success: false, error: 'Booking not found or code has expired', code: 'NOT_FOUND' };
+  }
+
+  // Booking must be on weather hold to view reschedule options
+  if (booking.status !== 'weather_hold') {
+    return {
+      success: false,
+      error: 'This booking is not currently on weather hold',
+      code: 'VALIDATION'
+    };
+  }
+
+  // Fetch reschedule offers
+  const supabase = await createSupabaseServerClient();
+  const { data: offers, error: offersError } = await supabase
+    .from('reschedule_offers')
+    .select('*')
+    .eq('booking_id', booking.id)
+    .order('proposed_start', { ascending: true });
+
+  if (offersError) {
+    console.error('Error fetching reschedule offers:', offersError);
+    return { success: false, error: 'Failed to load reschedule options', code: 'UNKNOWN' };
+  }
+
+  // Fetch captain info
+  const { data: captain } = await supabase
+    .from('profiles')
+    .select('business_name, full_name')
+    .eq('id', booking.captain_id)
+    .single();
+
+  return {
+    success: true,
+    data: {
+      booking,
+      offers: offers as RescheduleOffer[],
+      captain,
+    },
+  };
+}
+
+export async function guestSelectRescheduleOffer(
+  token: string,
+  offerId: string,
+  clientIp?: string
+): Promise<ActionResult<Booking>> {
+  // Rate limiting
+  if (clientIp && !checkRateLimit(clientIp)) {
+    return { success: false, error: 'Too many attempts. Please try again later.', code: 'UNAUTHORIZED' };
+  }
+
+  if (!token || token.length < 6) {
+    return { success: false, error: 'Invalid confirmation code', code: 'VALIDATION' };
+  }
+
+  if (!offerId || !isValidUUID(offerId)) {
+    return { success: false, error: 'Invalid offer ID', code: 'VALIDATION' };
+  }
+
+  const booking = await getBookingByToken(token);
+  if (!booking) {
+    return { success: false, error: 'Booking not found or code has expired', code: 'NOT_FOUND' };
+  }
+
+  if (booking.status !== 'weather_hold') {
+    return { success: false, error: 'This booking is not on weather hold', code: 'VALIDATION' };
+  }
+
+  const supabase = await createSupabaseServerClient();
+
+  // Get the offer and verify it belongs to this booking
+  const { data: offer, error: offerError } = await supabase
+    .from('reschedule_offers')
+    .select('*')
+    .eq('id', offerId)
+    .eq('booking_id', booking.id)
+    .single();
+
+  if (offerError || !offer) {
+    return { success: false, error: 'Reschedule offer not found', code: 'NOT_FOUND' };
+  }
+
+  // Check if offer has expired
+  if (offer.expires_at && new Date(offer.expires_at) < new Date()) {
+    return { success: false, error: 'This reschedule offer has expired', code: 'VALIDATION' };
+  }
+
+  // Check if offer is already selected
+  if (offer.is_selected) {
+    return { success: false, error: 'This offer has already been selected', code: 'VALIDATION' };
+  }
+
+  // Check vessel availability for the new time
+  if (booking.vessel_id) {
+    const vesselAvailability = await checkVesselAvailability({
+      vesselId: booking.vessel_id,
+      scheduledStart: offer.proposed_start,
+      scheduledEnd: offer.proposed_end,
+      excludeBookingId: booking.id,
+    });
+    if (!vesselAvailability.available) {
+      return { success: false, error: 'This time slot is no longer available', code: 'CONFLICT' };
+    }
+  }
+
+  // Update the booking with new schedule
+  const { data, error } = await supabase
+    .from('bookings')
+    .update({
+      scheduled_start: offer.proposed_start,
+      scheduled_end: offer.proposed_end,
+      original_date_if_rescheduled: booking.scheduled_start,
+      status: 'rescheduled',
+      weather_hold_reason: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', booking.id)
+    .select()
+    .single();
+
+  if (error || !data) {
+    console.error('Error accepting reschedule:', error);
+    return { success: false, error: 'Failed to reschedule booking', code: 'UNKNOWN' };
+  }
+
+  // Mark the offer as selected
+  await supabase
+    .from('reschedule_offers')
+    .update({ is_selected: true })
+    .eq('id', offerId);
+
+  await logBookingChange({
+    bookingId: booking.id,
+    entryType: 'rescheduled',
+    description: 'Guest selected new date from weather hold offers',
+    oldValue: {
+      scheduled_start: booking.scheduled_start,
+      scheduled_end: booking.scheduled_end,
+    },
+    newValue: {
+      scheduled_start: offer.proposed_start,
+      scheduled_end: offer.proposed_end,
+    },
+    actorType: 'guest',
+  });
+
+  return { success: true, data: data as Booking };
+}
+
+export async function guestRequestDifferentDates(
+  token: string,
+  message: string,
+  clientIp?: string
+): Promise<ActionResult<void>> {
+  // Rate limiting
+  if (clientIp && !checkRateLimit(clientIp)) {
+    return { success: false, error: 'Too many attempts. Please try again later.', code: 'UNAUTHORIZED' };
+  }
+
+  if (!token || token.length < 6) {
+    return { success: false, error: 'Invalid confirmation code', code: 'VALIDATION' };
+  }
+
+  if (!message || message.trim().length === 0) {
+    return { success: false, error: 'Please provide a message', code: 'VALIDATION' };
+  }
+
+  const booking = await getBookingByToken(token);
+  if (!booking) {
+    return { success: false, error: 'Booking not found or code has expired', code: 'NOT_FOUND' };
+  }
+
+  if (booking.status !== 'weather_hold') {
+    return { success: false, error: 'This booking is not on weather hold', code: 'VALIDATION' };
+  }
+
+  // Log the request as a guest communication
+  await logBookingChange({
+    bookingId: booking.id,
+    entryType: 'guest_communication',
+    description: `Guest requested different reschedule dates: ${message.trim().slice(0, 500)}`,
+    newValue: { message: message.trim() },
+    actorType: 'guest',
+  });
+
+  return { success: true };
+}

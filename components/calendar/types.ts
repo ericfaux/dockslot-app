@@ -14,6 +14,8 @@ export interface CalendarBooking {
   scheduled_end: string;
   status: BookingStatus;
   payment_status: string;
+  weather_hold_reason?: string | null;
+  original_date_if_rescheduled?: string | null;
   vessel?: {
     id: string;
     name: string;
@@ -70,10 +72,10 @@ export const STATUS_COLORS: Record<BookingStatus, {
     dot: 'bg-emerald-500',
   },
   weather_hold: {
-    bg: 'bg-cyan-500/20',
-    border: 'border-cyan-500',
-    text: 'text-cyan-300',
-    dot: 'bg-cyan-500',
+    bg: 'bg-amber-500/20',
+    border: 'border-amber-500',
+    text: 'text-amber-300',
+    dot: 'bg-amber-500',
   },
   rescheduled: {
     bg: 'bg-blue-500/20',

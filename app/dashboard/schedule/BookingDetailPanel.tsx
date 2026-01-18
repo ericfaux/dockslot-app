@@ -15,14 +15,16 @@ import {
   XCircle,
   Navigation,
   AlertCircle,
+  CalendarClock,
 } from 'lucide-react';
-import { CalendarBooking, STATUS_COLORS, STATUS_LABELS } from '@/components/calendar';
+import { CalendarBooking, STATUS_COLORS, STATUS_LABELS, WeatherHoldModal, RescheduleOffers } from '@/components/calendar';
 import {
   cancelBooking,
   markNoShow,
   completeBooking,
   setWeatherHold,
   clearWeatherHold,
+  createRescheduleOffers,
 } from '@/app/actions/bookings';
 
 interface BookingDetailPanelProps {
@@ -32,7 +34,13 @@ interface BookingDetailPanelProps {
   onUpdated: () => void;
 }
 
-type ActionType = 'complete' | 'cancel' | 'no_show' | 'weather_hold' | 'clear_weather';
+type ActionType = 'complete' | 'cancel' | 'no_show' | 'clear_weather';
+
+interface RescheduleSlot {
+  date: string;
+  startTime: string;
+  endTime: string;
+}
 
 /**
  * BookingDetailPanel - Slide-over panel showing booking details and actions
@@ -46,8 +54,8 @@ export function BookingDetailPanel({
 }: BookingDetailPanelProps) {
   const [isPending, startTransition] = useTransition();
   const [actionError, setActionError] = useState<string | null>(null);
-  const [weatherReason, setWeatherReason] = useState('');
-  const [showWeatherInput, setShowWeatherInput] = useState(false);
+  const [showWeatherModal, setShowWeatherModal] = useState(false);
+  const [isWeatherPending, setIsWeatherPending] = useState(false);
 
   if (!booking) return null;
 
@@ -87,15 +95,6 @@ export function BookingDetailPanel({
           case 'no_show':
             result = await markNoShow(booking.id);
             break;
-          case 'weather_hold':
-            if (!weatherReason.trim()) {
-              setActionError('Please enter a weather reason');
-              return;
-            }
-            result = await setWeatherHold(booking.id, weatherReason);
-            setShowWeatherInput(false);
-            setWeatherReason('');
-            break;
           case 'clear_weather':
             result = await clearWeatherHold(booking.id);
             break;
@@ -110,6 +109,43 @@ export function BookingDetailPanel({
         setActionError(err instanceof Error ? err.message : 'An error occurred');
       }
     });
+  };
+
+  const handleWeatherHold = async (reason: string, slots: RescheduleSlot[]) => {
+    setActionError(null);
+    setIsWeatherPending(true);
+
+    try {
+      // First set the weather hold
+      const holdResult = await setWeatherHold(booking.id, reason);
+      if (!holdResult.success) {
+        setActionError(holdResult.error || 'Failed to set weather hold');
+        setIsWeatherPending(false);
+        return;
+      }
+
+      // Then create reschedule offers
+      const formattedSlots = slots.map(slot => ({
+        start: `${slot.date}T${slot.startTime}:00`,
+        end: `${slot.date}T${slot.endTime}:00`,
+      }));
+
+      const offersResult = await createRescheduleOffers(booking.id, formattedSlots);
+      if (!offersResult.success) {
+        setActionError(offersResult.error || 'Weather hold set, but failed to create reschedule offers');
+        setIsWeatherPending(false);
+        setShowWeatherModal(false);
+        onUpdated();
+        return;
+      }
+
+      setIsWeatherPending(false);
+      setShowWeatherModal(false);
+      onUpdated();
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'An error occurred');
+      setIsWeatherPending(false);
+    }
   };
 
   // Determine available actions based on status
@@ -231,6 +267,20 @@ export function BookingDetailPanel({
             </div>
           </div>
 
+          {/* Reschedule Offers (for weather hold) */}
+          {booking.status === 'weather_hold' && (
+            <div className="space-y-3">
+              <h3 className="font-mono text-xs uppercase tracking-wider text-slate-500">
+                <CloudRain className="inline h-3.5 w-3.5 mr-1.5" />
+                Weather Hold Status
+              </h3>
+              <RescheduleOffers
+                bookingId={booking.id}
+                weatherHoldReason={booking.weather_hold_reason}
+              />
+            </div>
+          )}
+
           {/* Error Message */}
           {actionError && (
             <div className="flex items-center gap-2 rounded-lg bg-rose-500/10 p-3 text-sm text-rose-400">
@@ -239,40 +289,19 @@ export function BookingDetailPanel({
             </div>
           )}
 
-          {/* Weather Hold Input */}
-          {showWeatherInput && (
-            <div className="space-y-2">
-              <label className="font-mono text-xs text-slate-400">Weather Reason</label>
-              <input
-                type="text"
-                value={weatherReason}
-                onChange={(e) => setWeatherReason(e.target.value)}
-                placeholder="e.g., Small craft advisory, high winds..."
-                className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
-              />
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleAction('weather_hold')}
-                  disabled={isPending}
-                  className="flex-1 rounded-lg bg-cyan-500/20 px-4 py-2 font-mono text-sm font-medium text-cyan-400 transition-colors hover:bg-cyan-500/30 disabled:opacity-50"
-                >
-                  {isPending ? 'Setting...' : 'Set Weather Hold'}
-                </button>
-                <button
-                  onClick={() => {
-                    setShowWeatherInput(false);
-                    setWeatherReason('');
-                  }}
-                  className="rounded-lg px-4 py-2 font-mono text-sm text-slate-400 transition-colors hover:bg-slate-800"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
+          {/* Weather Hold Modal */}
+          {showWeatherModal && (
+            <WeatherHoldModal
+              booking={booking}
+              isOpen={showWeatherModal}
+              onClose={() => setShowWeatherModal(false)}
+              onSubmit={handleWeatherHold}
+              isPending={isWeatherPending}
+            />
           )}
 
           {/* Actions */}
-          {!isTerminal && !showWeatherInput && (
+          {!isTerminal && (
             <div className="space-y-3">
               <h3 className="font-mono text-xs uppercase tracking-wider text-slate-500">
                 Actions
@@ -297,9 +326,9 @@ export function BookingDetailPanel({
               <div className="grid grid-cols-2 gap-2">
                 {canSetWeatherHold && (
                   <button
-                    onClick={() => setShowWeatherInput(true)}
+                    onClick={() => setShowWeatherModal(true)}
                     disabled={isPending}
-                    className="flex items-center justify-center gap-2 rounded-lg bg-cyan-500/10 px-4 py-3 font-mono text-sm font-medium text-cyan-400 transition-colors hover:bg-cyan-500/20 disabled:opacity-50"
+                    className="flex items-center justify-center gap-2 rounded-lg bg-amber-500/10 px-4 py-3 font-mono text-sm font-medium text-amber-400 transition-colors hover:bg-amber-500/20 disabled:opacity-50"
                   >
                     <CloudRain className="h-4 w-4" />
                     Weather Hold
