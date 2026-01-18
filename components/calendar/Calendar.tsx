@@ -3,7 +3,8 @@
 import { useState, useCallback, useEffect } from 'react';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfDay, endOfDay } from 'date-fns';
 import { CalendarWeekView } from './CalendarWeekView';
-import { CalendarProps, CalendarView, CalendarBooking } from './types';
+import { CalendarProps, CalendarView, CalendarBooking, BlackoutDate } from './types';
+import { getBlackoutDates } from '@/app/actions/blackout';
 
 /**
  * Calendar - Main calendar component with multiple view modes
@@ -16,10 +17,14 @@ export function Calendar({
   onDateChange,
   onViewChange,
   onBlockClick,
+  onQuickBlockClick,
+  onBlackoutClick,
+  refreshKey = 0,
 }: CalendarProps) {
   const [currentDate, setCurrentDate] = useState(initialDate);
   const [currentView, setCurrentView] = useState<CalendarView>(initialView);
   const [bookings, setBookings] = useState<CalendarBooking[]>([]);
+  const [blackoutDates, setBlackoutDates] = useState<BlackoutDate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,45 +49,54 @@ export function Calendar({
     }
   }, []);
 
-  // Fetch bookings for the current date range
-  const fetchBookings = useCallback(async () => {
+  // Fetch bookings and blackout dates for the current date range
+  const fetchData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
     try {
       const { start, end } = getDateRange(currentDate, currentView);
-      const startDate = format(start, 'yyyy-MM-dd');
-      const endDate = format(end, 'yyyy-MM-dd');
+      const startDateStr = format(start, 'yyyy-MM-dd');
+      const endDateStr = format(end, 'yyyy-MM-dd');
 
-      const params = new URLSearchParams({
-        captainId,
-        startDate,
-        endDate,
-        includeHistorical: 'false',
-        limit: '100',
-      });
+      // Fetch bookings and blackout dates in parallel
+      const [bookingsResponse, blackoutsResult] = await Promise.all([
+        fetch(`/api/bookings?${new URLSearchParams({
+          captainId,
+          startDate: startDateStr,
+          endDate: endDateStr,
+          includeHistorical: 'false',
+          limit: '100',
+        })}`),
+        getBlackoutDates(captainId, start, end),
+      ]);
 
-      const response = await fetch(`/api/bookings?${params}`);
-
-      if (!response.ok) {
+      if (!bookingsResponse.ok) {
         throw new Error('Failed to fetch bookings');
       }
 
-      const data = await response.json();
-      setBookings(data.bookings || []);
+      const bookingsData = await bookingsResponse.json();
+      setBookings(bookingsData.bookings || []);
+
+      if (blackoutsResult.success && blackoutsResult.data) {
+        setBlackoutDates(blackoutsResult.data);
+      } else {
+        setBlackoutDates([]);
+      }
     } catch (err) {
-      console.error('Error fetching bookings:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load bookings');
+      console.error('Error fetching calendar data:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load calendar');
       setBookings([]);
+      setBlackoutDates([]);
     } finally {
       setIsLoading(false);
     }
   }, [captainId, currentDate, currentView, getDateRange]);
 
-  // Fetch bookings when date or view changes
+  // Fetch data when date, view, or refreshKey changes
   useEffect(() => {
-    fetchBookings();
-  }, [fetchBookings]);
+    fetchData();
+  }, [fetchData, refreshKey]);
 
   // Handle date change
   const handleDateChange = useCallback((date: Date) => {
@@ -108,7 +122,7 @@ export function Calendar({
         <div className="text-center">
           <div className="mb-2 text-rose-400">{error}</div>
           <button
-            onClick={fetchBookings}
+            onClick={fetchData}
             className="rounded-md bg-slate-800 px-4 py-2 font-mono text-sm text-cyan-400 transition-colors hover:bg-slate-700"
           >
             Retry
@@ -118,6 +132,11 @@ export function Calendar({
     );
   }
 
+  // Handle blackout click
+  const handleBlackoutClick = useCallback((blackout: BlackoutDate) => {
+    onBlackoutClick?.(blackout);
+  }, [onBlackoutClick]);
+
   // Render based on current view
   switch (currentView) {
     case 'week':
@@ -125,9 +144,12 @@ export function Calendar({
         <CalendarWeekView
           date={currentDate}
           bookings={bookings}
+          blackoutDates={blackoutDates}
           onDateChange={handleDateChange}
           onViewChange={handleViewChange}
           onBlockClick={handleBlockClick}
+          onQuickBlockClick={onQuickBlockClick}
+          onBlackoutClick={handleBlackoutClick}
           isLoading={isLoading}
         />
       );
@@ -138,9 +160,12 @@ export function Calendar({
         <CalendarWeekView
           date={currentDate}
           bookings={bookings}
+          blackoutDates={blackoutDates}
           onDateChange={handleDateChange}
           onViewChange={handleViewChange}
           onBlockClick={handleBlockClick}
+          onQuickBlockClick={onQuickBlockClick}
+          onBlackoutClick={handleBlackoutClick}
           isLoading={isLoading}
         />
       );

@@ -1,8 +1,11 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { Calendar, CalendarBooking, STATUS_COLORS, STATUS_LABELS } from '@/components/calendar';
+import { useState, useCallback, useTransition } from 'react';
+import { Calendar, CalendarBooking, BlackoutDate, STATUS_COLORS, STATUS_LABELS } from '@/components/calendar';
 import { BookingDetailPanel } from './BookingDetailPanel';
+import { BlackoutModal } from './BlackoutModal';
+import { UnblockConfirmModal } from './UnblockConfirmModal';
+import { createBlackoutDate, createBlackoutDateRange, deleteBlackoutDate } from '@/app/actions/blackout';
 
 interface ScheduleClientProps {
   captainId: string;
@@ -16,6 +19,13 @@ interface ScheduleClientProps {
 export function ScheduleClient({ captainId }: ScheduleClientProps) {
   const [selectedBooking, setSelectedBooking] = useState<CalendarBooking | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+
+  // Blackout modal state
+  const [isBlackoutModalOpen, setIsBlackoutModalOpen] = useState(false);
+  const [selectedBlackout, setSelectedBlackout] = useState<BlackoutDate | null>(null);
+  const [isUnblockModalOpen, setIsUnblockModalOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [isPending, startTransition] = useTransition();
 
   const handleBlockClick = useCallback((booking: CalendarBooking) => {
     setSelectedBooking(booking);
@@ -34,12 +44,69 @@ export function ScheduleClient({ captainId }: ScheduleClientProps) {
     handleClosePanel();
   }, [handleClosePanel]);
 
+  // Blackout handlers
+  const handleQuickBlockClick = useCallback(() => {
+    setIsBlackoutModalOpen(true);
+  }, []);
+
+  const handleBlackoutClick = useCallback((blackout: BlackoutDate) => {
+    setSelectedBlackout(blackout);
+    setIsUnblockModalOpen(true);
+  }, []);
+
+  const handleCloseBlackoutModal = useCallback(() => {
+    setIsBlackoutModalOpen(false);
+  }, []);
+
+  const handleCloseUnblockModal = useCallback(() => {
+    setIsUnblockModalOpen(false);
+    setTimeout(() => setSelectedBlackout(null), 300);
+  }, []);
+
+  const handleCreateBlackout = useCallback(async (startDate: Date, endDate: Date | null, reason?: string) => {
+    startTransition(async () => {
+      let result;
+      if (endDate) {
+        result = await createBlackoutDateRange(captainId, startDate, endDate, reason);
+      } else {
+        result = await createBlackoutDate(captainId, startDate, reason);
+      }
+
+      if (result.success) {
+        setIsBlackoutModalOpen(false);
+        setRefreshKey((k) => k + 1);
+      } else {
+        // Error is handled by the modal through the isPending state
+        console.error('Failed to create blackout:', result.error);
+      }
+    });
+  }, [captainId]);
+
+  const handleDeleteBlackout = useCallback(async () => {
+    if (!selectedBlackout) return;
+
+    startTransition(async () => {
+      const result = await deleteBlackoutDate(selectedBlackout.id);
+
+      if (result.success) {
+        setIsUnblockModalOpen(false);
+        setSelectedBlackout(null);
+        setRefreshKey((k) => k + 1);
+      } else {
+        console.error('Failed to delete blackout:', result.error);
+      }
+    });
+  }, [selectedBlackout]);
+
   return (
     <div className="relative h-full">
       {/* Calendar */}
       <Calendar
         captainId={captainId}
         onBlockClick={handleBlockClick}
+        onQuickBlockClick={handleQuickBlockClick}
+        onBlackoutClick={handleBlackoutClick}
+        refreshKey={refreshKey}
       />
 
       {/* Booking Detail Panel (slide-over) */}
@@ -48,6 +115,23 @@ export function ScheduleClient({ captainId }: ScheduleClientProps) {
         isOpen={isPanelOpen}
         onClose={handleClosePanel}
         onUpdated={handleBookingUpdated}
+      />
+
+      {/* Blackout Modal */}
+      <BlackoutModal
+        isOpen={isBlackoutModalOpen}
+        onClose={handleCloseBlackoutModal}
+        onSubmit={handleCreateBlackout}
+        isPending={isPending}
+      />
+
+      {/* Unblock Confirmation Modal */}
+      <UnblockConfirmModal
+        blackout={selectedBlackout}
+        isOpen={isUnblockModalOpen}
+        onClose={handleCloseUnblockModal}
+        onConfirm={handleDeleteBlackout}
+        isPending={isPending}
       />
     </div>
   );
