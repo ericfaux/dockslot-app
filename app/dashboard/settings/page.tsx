@@ -19,7 +19,7 @@ export default async function SettingsPage() {
 
   // Fetch profile
   const result = await getProfile();
-  const profile = result.success ? result.data : null;
+  const profile = result.success && result.data ? result.data : null;
 
   return (
     <div className="space-y-6">
