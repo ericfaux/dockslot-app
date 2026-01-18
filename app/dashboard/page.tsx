@@ -20,6 +20,7 @@ import {
   Users,
 } from "lucide-react";
 import { FloatPlanCard } from "./components/FloatPlanCard";
+import { BookingLinkCard } from "@/components/BookingLinkCard";
 import { BookingStatus, ACTIVE_BOOKING_STATUSES } from "@/lib/db/types";
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -497,6 +498,19 @@ export default async function DashboardPage() {
         </div>
         <FloatPlanCard booking={nextTrip} />
       </section>
+
+      {/* ═══ SECTION 3.5: BOOKING LINK ═══ */}
+      {user && (
+        <section aria-label="Booking Link">
+          <div className="mb-3 flex items-center gap-2">
+            <span className="font-mono text-xs uppercase tracking-widest text-slate-500">
+              Share
+            </span>
+            <div className="h-px flex-1 bg-slate-800" />
+          </div>
+          <BookingLinkCard captainId={user.id} compact />
+        </section>
+      )}
 
       {/* ═══ SECTION 4: ROCKER SWITCHES / QUICK ACTIONS ═══ */}
       <section aria-label="Quick Actions">
