@@ -3,8 +3,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { parseISO } from 'date-fns';
 import { Anchor, AlertTriangle, ArrowLeft, Clock, DollarSign, Loader2 } from 'lucide-react';
-import { DatePicker, type DateAvailability, type TimeSlot } from '../../components/DatePicker';
+import { DatePicker, type DateAvailability } from '../../components/DatePicker';
+import { TimeSlotPicker, type AvailableSlot } from '../../components/TimeSlotPicker';
 import {
   getPublicCaptainProfile,
   getPublicTripType,
@@ -30,15 +32,13 @@ export default function SelectDateTimePage({ params }: Props) {
   const [tripType, setTripType] = useState<PublicTripType | null>(null);
   const [availableDates, setAvailableDates] = useState<DateAvailability[]>([]);
 
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
-  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
-  const [selectedDateInfo, setSelectedDateInfo] = useState<{
-    is_blackout?: boolean;
-    blackout_reason?: string | null;
-    has_active_window?: boolean;
-  } | null>(null);
+  // Date selection state (as string YYYY-MM-DD for DatePicker compatibility)
+  const [selectedDateStr, setSelectedDateStr] = useState<string | null>(null);
+  // Time slot selection state (full slot object with start/end times)
+  const [selectedSlot, setSelectedSlot] = useState<AvailableSlot | null>(null);
+
+  // Convert selectedDateStr to Date object for TimeSlotPicker
+  const selectedDate = selectedDateStr ? parseISO(selectedDateStr) : null;
 
   // Resolve params
   useEffect(() => {
@@ -113,97 +113,35 @@ export default function SelectDateTimePage({ params }: Props) {
     loadData();
   }, [captainId, tripTypeId, fetchDateRangeAvailability]);
 
-  // Fetch time slots when date changes
-  useEffect(() => {
-    if (!selectedDate || !captainId || !tripTypeId) {
-      setTimeSlots([]);
-      setSelectedDateInfo(null);
-      return;
-    }
+  // Handle date selection - clear time slot when date changes
+  const handleDateSelect = (dateStr: string) => {
+    setSelectedDateStr(dateStr);
+    setSelectedSlot(null); // Clear slot when date changes
+  };
 
-    async function loadTimeSlots() {
-      setIsLoadingSlots(true);
-      setSelectedTime(null);
+  // Handle time slot selection
+  const handleSlotSelect = (slot: AvailableSlot) => {
+    setSelectedSlot(slot);
+  };
 
-      try {
-        const response = await fetch(
-          `/api/availability/${captainId}/${tripTypeId}?date=${selectedDate}`
-        );
-        const result = await response.json();
-
-        if (result.success && result.data) {
-          // Convert ISO datetime slots to HH:MM format for the TimeSlot interface
-          const slots: TimeSlot[] = result.data.slots.map((slot: {
-            start_time: string;
-            end_time: string;
-            display_start: string;
-            display_end: string;
-          }) => {
-            // Extract HH:MM from the display time or ISO string
-            const startMatch = slot.display_start?.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
-            let startTimeHHMM = '00:00';
-
-            if (startMatch) {
-              let hours = parseInt(startMatch[1], 10);
-              const minutes = startMatch[2];
-              const period = startMatch[3].toUpperCase();
-
-              if (period === 'PM' && hours !== 12) hours += 12;
-              if (period === 'AM' && hours === 12) hours = 0;
-
-              startTimeHHMM = `${String(hours).padStart(2, '0')}:${minutes}`;
-            }
-
-            const endMatch = slot.display_end?.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
-            let endTimeHHMM = '00:00';
-
-            if (endMatch) {
-              let hours = parseInt(endMatch[1], 10);
-              const minutes = endMatch[2];
-              const period = endMatch[3].toUpperCase();
-
-              if (period === 'PM' && hours !== 12) hours += 12;
-              if (period === 'AM' && hours === 12) hours = 0;
-
-              endTimeHHMM = `${String(hours).padStart(2, '0')}:${minutes}`;
-            }
-
-            return {
-              start_time: startTimeHHMM,
-              end_time: endTimeHHMM,
-              available: true, // All returned slots are available
-              display_start: slot.display_start,
-              display_end: slot.display_end,
-            };
-          });
-
-          setTimeSlots(slots);
-
-          // Set date info for showing context in the UI
-          if (result.data.date_info) {
-            setSelectedDateInfo({
-              is_blackout: result.data.date_info.is_blackout,
-              blackout_reason: result.data.date_info.blackout_reason,
-              has_active_window: result.data.date_info.has_active_window,
-            });
-          }
-        } else {
-          setTimeSlots([]);
-          setSelectedDateInfo(null);
-        }
-      } catch {
-        setTimeSlots([]);
-        setSelectedDateInfo(null);
-      }
-
-      setIsLoadingSlots(false);
-    }
-
-    loadTimeSlots();
-  }, [selectedDate, captainId, tripTypeId]);
-
+  // Handle continue to next step
   const handleContinue = () => {
-    if (!selectedDate || !selectedTime) return;
+    if (!selectedDateStr || !selectedSlot) return;
+
+    // Extract HH:MM from display_start for the time field (backwards compatible)
+    const startMatch = selectedSlot.display_start?.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+    let startTimeHHMM = '00:00';
+
+    if (startMatch) {
+      let hours = parseInt(startMatch[1], 10);
+      const minutes = startMatch[2];
+      const period = startMatch[3].toUpperCase();
+
+      if (period === 'PM' && hours !== 12) hours += 12;
+      if (period === 'AM' && hours === 12) hours = 0;
+
+      startTimeHHMM = `${String(hours).padStart(2, '0')}:${minutes}`;
+    }
 
     // Store selection in session storage for the next step
     sessionStorage.setItem(
@@ -211,8 +149,13 @@ export default function SelectDateTimePage({ params }: Props) {
       JSON.stringify({
         captainId,
         tripTypeId,
-        date: selectedDate,
-        time: selectedTime,
+        date: selectedDateStr,
+        time: startTimeHHMM, // HH:MM format for backwards compatibility
+        // Extended slot information
+        startTime: selectedSlot.start_time, // ISO datetime
+        endTime: selectedSlot.end_time, // ISO datetime
+        displayStart: selectedSlot.display_start,
+        displayEnd: selectedSlot.display_end,
       })
     );
 
@@ -350,33 +293,73 @@ export default function SelectDateTimePage({ params }: Props) {
           </div>
         </div>
 
-        {/* Date Picker */}
-        <DatePicker
-          availableDates={availableDates}
-          selectedDate={selectedDate}
-          onSelectDate={setSelectedDate}
-          timeSlots={timeSlots}
-          selectedTime={selectedTime}
-          onSelectTime={setSelectedTime}
-          isLoadingSlots={isLoadingSlots}
-          maxAdvanceDays={profile?.advance_booking_days || 60}
-          selectedDateInfo={selectedDateInfo}
-        />
+        {/* Date & Time Selection - Responsive Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Calendar - Takes 2 columns on large screens */}
+          <div className="lg:col-span-2">
+            <DatePicker
+              availableDates={availableDates}
+              selectedDate={selectedDateStr}
+              onSelectDate={handleDateSelect}
+              maxAdvanceDays={profile?.advance_booking_days || 60}
+              hideTimeSlots={true}
+            />
+          </div>
+
+          {/* Time Slot Picker - Takes 1 column on large screens */}
+          <div className="lg:col-span-1">
+            <TimeSlotPicker
+              captainId={captainId}
+              tripTypeId={tripTypeId}
+              selectedDate={selectedDate}
+              onSlotSelect={handleSlotSelect}
+              selectedSlot={selectedSlot}
+            />
+          </div>
+        </div>
+
+        {/* Selection Summary */}
+        {selectedDateStr && selectedSlot && (
+          <div className="mt-6 rounded-lg border border-cyan-500/30 bg-cyan-500/5 p-4">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-4 text-sm">
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-400">Date:</span>
+                  <span className="text-white font-medium">{selectedDateStr}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-400">Time:</span>
+                  <span className="text-white font-medium">
+                    {selectedSlot.display_start} - {selectedSlot.display_end}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-cyan-400">
+                <Clock className="h-4 w-4" />
+                <span>{tripType ? formatDuration(tripType.duration_hours) : ''}</span>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Continue Button */}
         <div className="mt-8">
           <button
             onClick={handleContinue}
-            disabled={!selectedDate || !selectedTime}
+            disabled={!selectedDateStr || !selectedSlot}
             className={`
               w-full py-4 rounded-lg font-semibold text-lg transition-all
-              ${!selectedDate || !selectedTime
+              ${!selectedDateStr || !selectedSlot
                 ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
                 : 'bg-cyan-500 text-white hover:bg-cyan-600 shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40'
               }
             `}
           >
-            Continue
+            {!selectedDateStr
+              ? 'Select a date to continue'
+              : !selectedSlot
+              ? 'Select a time to continue'
+              : 'Continue'}
           </button>
         </div>
       </main>
