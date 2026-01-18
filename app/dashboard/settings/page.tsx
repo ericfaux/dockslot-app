@@ -7,6 +7,7 @@ export const dynamic = 'force-dynamic';
 import { createSupabaseServerClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import { getProfile } from '@/app/actions/profile';
+import { getAvailabilityWindows } from '@/app/actions/availability';
 import { SettingsClient } from './SettingsClient';
 
 export default async function SettingsPage() {
@@ -19,9 +20,16 @@ export default async function SettingsPage() {
     redirect('/login');
   }
 
-  // Fetch profile
-  const result = await getProfile();
-  const profile = result.success && result.data ? result.data : null;
+  // Fetch profile and availability windows in parallel
+  const [profileResult, availabilityResult] = await Promise.all([
+    getProfile(),
+    getAvailabilityWindows(),
+  ]);
+
+  const profile = profileResult.success && profileResult.data ? profileResult.data : null;
+  const availabilityWindows = availabilityResult.success && availabilityResult.data
+    ? availabilityResult.data
+    : [];
 
   return (
     <div className="space-y-6">
@@ -39,7 +47,11 @@ export default async function SettingsPage() {
       </section>
 
       {/* Settings Client Component */}
-      <SettingsClient initialProfile={profile} userEmail={user.email || ''} />
+      <SettingsClient
+        initialProfile={profile}
+        initialAvailabilityWindows={availabilityWindows}
+        userEmail={user.email || ''}
+      />
 
       {/* Bottom Accent Bar */}
       <div
