@@ -2,6 +2,7 @@
 import {
   Anchor,
   CalendarDays,
+  LayoutDashboard,
   Users,
   Ship,
   Settings,
@@ -15,6 +16,11 @@ export interface NavLink {
 }
 
 export const navLinks: NavLink[] = [
+  {
+    href: "/dashboard",
+    label: "Dashboard",
+    icon: LayoutDashboard,
+  },
   {
     href: "/dashboard/trips",
     label: "Trips",

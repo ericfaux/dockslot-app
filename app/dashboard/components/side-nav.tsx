@@ -26,7 +26,10 @@ export function SideNav({ userEmail, signOutAction }: SideNavProps) {
         <nav className="flex-1 py-4 overflow-y-auto">
           <ul className="space-y-1 px-3">
             {navLinks.map((link) => {
-              const isActive = pathname.startsWith(link.href);
+              const isActive =
+                link.href === "/dashboard"
+                  ? pathname === "/dashboard"
+                  : pathname.startsWith(link.href);
               const Icon = link.icon;
 
               return (
