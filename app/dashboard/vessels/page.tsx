@@ -2,6 +2,8 @@
 // Vessels Management Page - Fleet Configuration
 // Design: Maritime Chart Plotter Aesthetic with Dark Theme
 
+export const dynamic = 'force-dynamic';
+
 import { createSupabaseServerClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import { getVessels } from '@/app/actions/vessels';
