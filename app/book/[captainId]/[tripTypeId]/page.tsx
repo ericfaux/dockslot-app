@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Anchor, AlertTriangle, ArrowLeft, Clock, DollarSign, Loader2 } from 'lucide-react';
@@ -8,8 +8,6 @@ import { DatePicker, type DateAvailability, type TimeSlot } from '../../componen
 import {
   getPublicCaptainProfile,
   getPublicTripType,
-  getAvailableDates,
-  getAvailability,
   type PublicCaptainProfile,
   type PublicTripType,
 } from '@/app/actions/public-booking';
@@ -36,6 +34,11 @@ export default function SelectDateTimePage({ params }: Props) {
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
+  const [selectedDateInfo, setSelectedDateInfo] = useState<{
+    is_blackout?: boolean;
+    blackout_reason?: string | null;
+    has_active_window?: boolean;
+  } | null>(null);
 
   // Resolve params
   useEffect(() => {
@@ -44,6 +47,36 @@ export default function SelectDateTimePage({ params }: Props) {
       setTripTypeId(p.tripTypeId);
     });
   }, [params]);
+
+  // Fetch date range availability from API
+  const fetchDateRangeAvailability = useCallback(async (
+    cId: string,
+    tId: string
+  ): Promise<DateAvailability[]> => {
+    try {
+      const response = await fetch(`/api/availability/${cId}/${tId}`);
+      const result = await response.json();
+
+      if (result.success && result.data?.dates) {
+        return result.data.dates.map((d: {
+          date: string;
+          has_availability: boolean;
+          is_blackout?: boolean;
+          blackout_reason?: string | null;
+          has_active_window?: boolean;
+        }) => ({
+          date: d.date,
+          has_availability: d.has_availability,
+          is_blackout: d.is_blackout,
+          blackout_reason: d.blackout_reason,
+          has_active_window: d.has_active_window,
+        }));
+      }
+      return [];
+    } catch {
+      return [];
+    }
+  }, []);
 
   // Fetch initial data
   useEffect(() => {
@@ -56,7 +89,7 @@ export default function SelectDateTimePage({ params }: Props) {
       const [profileResult, tripTypeResult, datesResult] = await Promise.all([
         getPublicCaptainProfile(captainId),
         getPublicTripType(captainId, tripTypeId),
-        getAvailableDates(captainId),
+        fetchDateRangeAvailability(captainId, tripTypeId),
       ]);
 
       if (!profileResult.success) {
@@ -73,17 +106,18 @@ export default function SelectDateTimePage({ params }: Props) {
 
       setProfile(profileResult.data!);
       setTripType(tripTypeResult.data!);
-      setAvailableDates(datesResult.success ? datesResult.data! : []);
+      setAvailableDates(datesResult);
       setIsLoading(false);
     }
 
     loadData();
-  }, [captainId, tripTypeId]);
+  }, [captainId, tripTypeId, fetchDateRangeAvailability]);
 
   // Fetch time slots when date changes
   useEffect(() => {
     if (!selectedDate || !captainId || !tripTypeId) {
       setTimeSlots([]);
+      setSelectedDateInfo(null);
       return;
     }
 
@@ -91,12 +125,75 @@ export default function SelectDateTimePage({ params }: Props) {
       setIsLoadingSlots(true);
       setSelectedTime(null);
 
-      const result = await getAvailability(captainId, tripTypeId, selectedDate!);
+      try {
+        const response = await fetch(
+          `/api/availability/${captainId}/${tripTypeId}?date=${selectedDate}`
+        );
+        const result = await response.json();
 
-      if (result.success && result.data) {
-        setTimeSlots(result.data.time_slots);
-      } else {
+        if (result.success && result.data) {
+          // Convert ISO datetime slots to HH:MM format for the TimeSlot interface
+          const slots: TimeSlot[] = result.data.slots.map((slot: {
+            start_time: string;
+            end_time: string;
+            display_start: string;
+            display_end: string;
+          }) => {
+            // Extract HH:MM from the display time or ISO string
+            const startMatch = slot.display_start?.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+            let startTimeHHMM = '00:00';
+
+            if (startMatch) {
+              let hours = parseInt(startMatch[1], 10);
+              const minutes = startMatch[2];
+              const period = startMatch[3].toUpperCase();
+
+              if (period === 'PM' && hours !== 12) hours += 12;
+              if (period === 'AM' && hours === 12) hours = 0;
+
+              startTimeHHMM = `${String(hours).padStart(2, '0')}:${minutes}`;
+            }
+
+            const endMatch = slot.display_end?.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+            let endTimeHHMM = '00:00';
+
+            if (endMatch) {
+              let hours = parseInt(endMatch[1], 10);
+              const minutes = endMatch[2];
+              const period = endMatch[3].toUpperCase();
+
+              if (period === 'PM' && hours !== 12) hours += 12;
+              if (period === 'AM' && hours === 12) hours = 0;
+
+              endTimeHHMM = `${String(hours).padStart(2, '0')}:${minutes}`;
+            }
+
+            return {
+              start_time: startTimeHHMM,
+              end_time: endTimeHHMM,
+              available: true, // All returned slots are available
+              display_start: slot.display_start,
+              display_end: slot.display_end,
+            };
+          });
+
+          setTimeSlots(slots);
+
+          // Set date info for showing context in the UI
+          if (result.data.date_info) {
+            setSelectedDateInfo({
+              is_blackout: result.data.date_info.is_blackout,
+              blackout_reason: result.data.date_info.blackout_reason,
+              has_active_window: result.data.date_info.has_active_window,
+            });
+          }
+        } else {
+          setTimeSlots([]);
+          setSelectedDateInfo(null);
+        }
+      } catch {
         setTimeSlots([]);
+        setSelectedDateInfo(null);
       }
 
       setIsLoadingSlots(false);
@@ -263,6 +360,7 @@ export default function SelectDateTimePage({ params }: Props) {
           onSelectTime={setSelectedTime}
           isLoadingSlots={isLoadingSlots}
           maxAdvanceDays={profile?.advance_booking_days || 60}
+          selectedDateInfo={selectedDateInfo}
         />
 
         {/* Continue Button */}
