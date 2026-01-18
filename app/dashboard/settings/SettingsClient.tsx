@@ -13,12 +13,14 @@ import {
   FileText,
   ChevronDown
 } from 'lucide-react';
-import { Profile } from '@/lib/db/types';
+import { Profile, AvailabilityWindow } from '@/lib/db/types';
 import { updateProfile } from '@/app/actions/profile';
 import { BookingLinkCard } from '@/components/BookingLinkCard';
+import { AvailabilitySettings } from './AvailabilitySettings';
 
 interface SettingsClientProps {
   initialProfile: Profile | null;
+  initialAvailabilityWindows: AvailabilityWindow[];
   userEmail: string;
 }
 
@@ -34,7 +36,7 @@ const TIMEZONES = [
   { value: 'America/Puerto_Rico', label: 'Atlantic Time (AST)' },
 ];
 
-export function SettingsClient({ initialProfile, userEmail }: SettingsClientProps) {
+export function SettingsClient({ initialProfile, initialAvailabilityWindows, userEmail }: SettingsClientProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -300,6 +302,9 @@ export function SettingsClient({ initialProfile, userEmail }: SettingsClientProp
           </div>
         </div>
       </section>
+
+      {/* Weekly Availability */}
+      <AvailabilitySettings initialWindows={initialAvailabilityWindows} />
 
       {/* Hibernation Mode */}
       <section className={sectionClassName}>
