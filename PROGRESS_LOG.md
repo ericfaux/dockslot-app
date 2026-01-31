@@ -1,5 +1,37 @@
 # DockSlot Development Progress
 
+## Latest Session: 2026-01-31 (Part 4 - Auth Cookie Persistence Fix)
+
+### Build #24: Supabase Cookie Handling Fix 🚨 CRITICAL FIX
+- **Commit:** 7f0b067
+- **Issue:** Users being signed out when clicking schedule tab or navigating between dashboard pages
+- **Root Cause Analysis:**
+  - Outdated cookie implementation in Supabase server clients
+  - Used deprecated `get/set/remove` pattern instead of modern `getAll/setAll`
+  - Session sync issues between middleware, server components, and API routes
+  - API routes (like `/api/bookings`) couldn't read refreshed session cookies from middleware
+- **Solution:**
+  - ✅ Updated all Supabase server client creation to use `getAll/setAll` cookie methods
+  - ✅ Fixed `/utils/supabase/server.ts` (server components)
+  - ✅ Fixed `/lib/supabase/server.ts` (API routes)
+  - ✅ Fixed `/lib/supabase/middleware.ts` (middleware session refresh)
+  - ✅ Fixed TypeScript duplicate field errors in booking types
+- **Files Changed:**
+  - `utils/supabase/server.ts` - Server component auth
+  - `lib/supabase/server.ts` - API route auth
+  - `lib/supabase/middleware.ts` - Middleware session refresh
+  - `components/calendar/types.ts` - TypeScript fixes
+  - `lib/data/bookings.ts` - TypeScript fixes
+  - `lib/db/types.ts` - TypeScript fixes
+- **Impact:** Auth sessions now persist correctly across:
+  - Navigation between dashboard tabs
+  - API calls from client components
+  - Page refreshes
+- **Testing:** Clean build, deployed to production
+- **Status:** DEPLOYED ✅ - Modern @supabase/ssr pattern, proper session handling
+
+---
+
 ## Latest Session: 2026-01-31 (Part 3 - Critical Bug Fixes)
 
 ### Build #23: Dashboard Authentication Sign-Out Bug 🚨 CRITICAL FIX
