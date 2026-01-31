@@ -34,6 +34,7 @@ import BookingNotesEditor from '../components/BookingNotesEditor';
 import BookingTimeline from '../components/BookingTimeline';
 import DuplicateBookingModal from '../components/DuplicateBookingModal';
 import BookingQuickActions from '../components/BookingQuickActions';
+import ContactQuickActions from '../components/ContactQuickActions';
 
 interface BookingDetailPanelProps {
   booking: CalendarBooking | null;
@@ -319,6 +320,13 @@ export function BookingDetailPanel({
               </span>
             </div>
           </div>
+
+          {/* Contact Information */}
+          <ContactQuickActions
+            email={booking.guest_email}
+            phone={booking.guest_phone}
+            name={booking.guest_name}
+          />
 
           {/* Captain's Notes & Tags */}
           <BookingNotesEditor
