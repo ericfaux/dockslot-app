@@ -1112,6 +1112,110 @@ Reviewed Phase 1 from HEARTBEAT.md roadmap. **Findings:**
 
 ---
 
+### Build #41: Guest Review & Rating System ✅
+- **Commit:** 4126187
+- **Feature:** Beyond-MVP - Complete review and rating system for completed trips
+- Database schema: `reviews` table
+  - Overall rating (1-5 stars, required)
+  - Vessel rating (1-5 stars, optional)
+  - Captain rating (1-5 stars, optional)
+  - Experience rating (1-5 stars, optional)
+  - Review title and text (optional)
+  - Featured flag (captain selects)
+  - Public/private toggle
+  - Captain response with timestamp
+  - One review per booking constraint
+- PostgreSQL function: `get_captain_ratings()`
+  - Total reviews count
+  - Average ratings (overall, vessel, captain, experience)
+  - Rating distribution (1-5 star counts)
+  - Filtered by public & approved reviews
+- API endpoints:
+  - `POST /api/reviews` - Guest review submission (token-based, no login)
+  - `GET /api/reviews?captainId=X` - Public reviews list with ratings
+  - `PATCH /api/reviews/[id]` - Captain management (feature, respond, toggle)
+  - `DELETE /api/reviews/[id]` - Captain deletion
+- Guest review submission:
+  - Public page at `/review/[token]` (booking management token)
+  - Trip details display (guest, vessel, trip type, date)
+  - Star rating component with hover effects
+  - 4 rating categories (overall + 3 detailed)
+  - Written review (title + text)
+  - Validation (completed trips only, no duplicates)
+  - Success confirmation screen
+- Captain reviews dashboard at `/dashboard/reviews`:
+  - Ratings summary cards (4 metrics)
+  - Full reviews list with actions
+  - Toggle public/private visibility
+  - Mark reviews as featured
+  - Respond to reviews inline
+  - Delete reviews with confirmation
+  - Beautiful maritime-themed UI
+- StarRating component:
+  - Interactive 5-star selector
+  - Hover effects
+  - Large and normal sizes
+  - Fill animation
+- Integration:
+  - Added to navigation sidebar (Star icon)
+  - Booking logs for review submissions
+  - Audit logs for captain actions
+
+**Code Added:**
+- `/supabase/migrations/20260131_reviews.sql` - Schema + function (120 lines)
+- `/app/api/reviews/route.ts` - Submit & list reviews (185 lines)
+- `/app/api/reviews/[id]/route.ts` - Update & delete (155 lines)
+- `/app/review/[token]/page.tsx` - Guest submission page (120 lines)
+- `/app/review/[token]/ReviewSubmissionForm.tsx` - Form component (240 lines)
+- `/app/dashboard/reviews/page.tsx` - Captain page (45 lines)
+- `/app/dashboard/reviews/ReviewsClient.tsx` - Management UI (460 lines)
+- Updated `/app/dashboard/components/nav-links.tsx` - Navigation
+
+**Use Cases:**
+- Collect guest feedback after trips
+- Build social proof for marketing
+- Respond to reviews professionally
+- Feature best testimonials
+- Hide negative reviews temporarily
+- Track service quality trends
+- Identify improvement areas
+- Showcase ratings on profile
+
+**Guest Experience:**
+- No login required (token-based)
+- Simple star rating interface
+- Optional written feedback
+- Immediate confirmation
+- Mobile-friendly design
+- Can only review once per trip
+
+**Captain Features:**
+- View all reviews (public + private)
+- Respond to guest feedback
+- Feature best reviews
+- Hide problematic reviews
+- Delete spam/inappropriate reviews
+- See rating trends and averages
+- Rating distribution visualization
+
+**Technical Highlights:**
+- Token-based guest access (secure, no auth)
+- One review per booking constraint
+- PostgreSQL aggregate functions
+- Star rating with hover states
+- Inline response editing
+- Real-time UI updates
+- Audit trail for all actions
+- Type-safe API responses
+
+**Status:** Review & rating system deployed! ✅
+
+---
+
+*Last updated: 2026-01-31 12:15 UTC*
+
+---
+
 ### Build #33: Message Templates System ✅
 - **Commit:** 30b2757
 - **Feature:** Beyond-MVP - Reusable message templates for guest communications
