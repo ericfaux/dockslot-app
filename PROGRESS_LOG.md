@@ -341,3 +341,45 @@ Reviewed Phase 1 from HEARTBEAT.md roadmap. **Findings:**
 ---
 
 *Last updated: 2026-01-31 06:00 UTC*
+
+---
+
+### Build #25: Booking Notes & Tags System ✅
+- **Commit:** 4951c87
+- **Feature:** Beyond-MVP - Captain organization & trip preparation
+- Full notes and tags system for booking organization
+- API endpoint: `/api/bookings/[id]/notes` (PATCH)
+- BookingNotesEditor component with inline editing UI
+- Tag presets: VIP, First Timer, Anniversary, Birthday, Corporate, etc.
+- Custom tag creation with autocomplete
+- Visual tag chips with removal in edit mode
+- Private captain notes (multiline text)
+- Integrated into booking detail panel
+- Database migration with GIN index for tag search
+- Full TypeScript type support across all layers
+- Audit logging for all changes
+- Beautiful UI matching maritime theme
+
+**Code Added:**
+- `/app/api/bookings/[id]/notes/route.ts` - API endpoint (105 lines)
+- `/app/dashboard/components/BookingNotesEditor.tsx` - UI component (250 lines)
+- `/supabase/migrations/20260131_booking_notes_tags.sql` - DB schema
+- Updated `/app/dashboard/schedule/BookingDetailPanel.tsx` - Integration
+- Updated `/components/calendar/types.ts` - Added fields to CalendarBooking
+- Updated `/lib/db/types.ts` - Added fields to Booking interface
+- Updated `/lib/data/bookings.ts` - Added fields to queries
+
+**Use Cases:**
+- Track VIP guests for special treatment
+- Note first-timers for extra attention
+- Remember special occasions (anniversaries, proposals, etc.)
+- Categorize corporate vs personal bookings
+- Track groups with kids for safety prep
+- Note photography clients (slow down for shots)
+- Search/filter bookings by tags (ready for future feature)
+
+**Status:** Captain productivity tools expanding! ✅
+
+---
+
+*Last updated: 2026-01-31 08:00 UTC*
