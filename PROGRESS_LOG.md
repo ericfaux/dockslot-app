@@ -286,6 +286,35 @@
 
 ---
 
+### Build #24: Booking Conflict Detection & Prevention ✅
+- **Commit:** cce53b1
+- **Feature:** Beyond-MVP - Operations safety & conflict prevention
+- Intelligent booking conflict detection library
+- Prevents double-booking of vessels automatically
+- Two types of conflict detection:
+  - **Direct overlap:** Checks if booking times overlap with existing bookings
+  - **Buffer violation:** Respects captain's buffer time setting (default 30 min)
+- Smart query optimization:
+  - Only checks same vessel
+  - Only checks active bookings (confirmed, rescheduled, pending_deposit)
+  - Efficient date range filtering
+- Returns HTTP 409 Conflict with detailed information:
+  - Conflict reason message
+  - List of conflicting bookings (guest names, times)
+  - Helps guests/captains understand why booking failed
+- Integrated into booking creation API
+- Supports exclusion for rescheduling (won't conflict with itself)
+- Uses date-fns `areIntervalsOverlapping` for accurate time math
+- Prevents embarrassing double-bookings automatically
+
+**Code Added:**
+- `/lib/booking-conflicts.ts` - Conflict detection library (180 lines)
+- Updated `/app/api/bookings/route.ts` - Integration into POST endpoint
+
+**Safety Impact:** Prevents costly scheduling mistakes ✅
+
+---
+
 ## Heartbeat Investigation: 2026-01-31 06:00 UTC
 
 ### Investigation: Guest Booking Flow Status
