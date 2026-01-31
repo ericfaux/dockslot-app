@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { format, parseISO, startOfMonth, eachMonthOfInterval, subMonths } from 'date-fns';
 
 interface Booking {
@@ -17,6 +17,8 @@ interface Props {
 }
 
 export function AnalyticsCharts({ bookings }: Props) {
+  const [hoveredMonth, setHoveredMonth] = useState<string | null>(null);
+
   // Revenue by month (last 6 months)
   const monthlyRevenue = useMemo(() => {
     const now = new Date();
@@ -57,27 +59,43 @@ export function AnalyticsCharts({ bookings }: Props) {
   return (
     <div className="space-y-6">
       {/* Revenue Chart */}
-      <div className="rounded-lg border border-slate-700 bg-slate-800 p-6">
-        <h3 className="mb-6 text-lg font-semibold text-white">Revenue Trend (Last 6 Months)</h3>
-        <div className="space-y-3">
+      <div className="rounded-lg border border-slate-700 bg-slate-800 p-4 sm:p-6 overflow-hidden">
+        <h3 className="mb-4 sm:mb-6 text-base sm:text-lg font-semibold text-white">Revenue Trend (Last 6 Months)</h3>
+        <div className="space-y-2 sm:space-y-3">
           {monthlyRevenue.map((data, index) => (
-            <div key={index} className="flex items-center gap-4">
-              <div className="w-12 text-sm text-slate-400">{data.month}</div>
+            <div 
+              key={index} 
+              className="flex items-center gap-4 group"
+              onMouseEnter={() => setHoveredMonth(data.month)}
+              onMouseLeave={() => setHoveredMonth(null)}
+            >
+              <div className="w-12 text-sm text-slate-400 group-hover:text-cyan-400 transition-colors">
+                {data.month}
+              </div>
               <div className="flex-1">
                 <div className="flex items-center gap-3">
-                  <div className="relative h-8 flex-1 overflow-hidden rounded-full bg-slate-700">
+                  <div className="relative h-8 flex-1 overflow-hidden rounded-full bg-slate-700 group-hover:bg-slate-600 transition-colors">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all duration-500"
+                      className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all duration-500 group-hover:from-cyan-400 group-hover:to-blue-400"
                       style={{
                         width: `${(data.revenue / maxRevenue) * 100}%`,
                       }}
                     />
+                    {hoveredMonth === data.month && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-xs font-bold text-white drop-shadow-lg">
+                          ${data.revenue.toLocaleString()} ({data.count} trips)
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <div className="w-24 text-right">
-                    <p className="text-sm font-medium text-white">
+                    <p className="text-sm font-medium text-white group-hover:text-cyan-400 transition-colors">
                       ${data.revenue.toLocaleString()}
                     </p>
-                    <p className="text-xs text-slate-500">{data.count} trips</p>
+                    <p className="text-xs text-slate-500 group-hover:text-slate-400 transition-colors">
+                      {data.count} trips
+                    </p>
                   </div>
                 </div>
               </div>
