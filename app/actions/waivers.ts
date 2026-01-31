@@ -1,6 +1,6 @@
 'use server';
 
-import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { createSupabaseServerClient } from '@/utils/supabase/server';
 import { headers } from 'next/headers';
 import {
   WaiverTemplate,
