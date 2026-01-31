@@ -4,6 +4,7 @@
 
 import { createSupabaseServiceClient } from "@/utils/supabase/service";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { 
   Anchor, 
   MapPin, 
@@ -222,11 +223,12 @@ export default async function CaptainProfilePage({ params }: CaptainProfileProps
                     </div>
 
                     {/* Book Button */}
-                    <button
-                      className="w-full rounded-lg bg-cyan-500 px-4 py-3 font-semibold text-slate-900 transition-all hover:bg-cyan-400 active:scale-95"
+                    <Link
+                      href={`/book/${captainId}/${trip.id}`}
+                      className="block w-full rounded-lg bg-cyan-500 px-4 py-3 text-center font-semibold text-slate-900 transition-all hover:bg-cyan-400 active:scale-95"
                     >
                       Book This Trip
-                    </button>
+                    </Link>
                   </div>
                 </div>
               ))}
