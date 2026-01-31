@@ -138,7 +138,8 @@ export function BookingCard({ booking }: BookingCardProps) {
           <button
             onClick={handlePrintManifest}
             className="mt-2 flex items-center gap-1.5 rounded-lg border border-slate-600 bg-slate-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-slate-600"
-            title="Print passenger manifest"
+            title="Print passenger manifest for Coast Guard compliance"
+            aria-label={`Print passenger manifest for ${booking.guest_name}'s trip`}
           >
             <Printer className="h-3.5 w-3.5" />
             Print Manifest

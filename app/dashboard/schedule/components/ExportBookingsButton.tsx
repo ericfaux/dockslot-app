@@ -7,9 +7,11 @@ import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
 export function ExportBookingsButton() {
   const [isOpen, setIsOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [exportStatus, setExportStatus] = useState<string | null>(null);
 
   const handleExport = async (preset?: string) => {
     setExporting(true);
+    setExportStatus('Generating CSV...');
 
     try {
       let url = '/api/bookings/export?format=csv';
@@ -32,6 +34,8 @@ export function ExportBookingsButton() {
         url += `&status=confirmed,completed`;
       }
 
+      setExportStatus('Downloading file...');
+      
       // Trigger download
       const response = await fetch(url);
 
@@ -49,10 +53,15 @@ export function ExportBookingsButton() {
       document.body.removeChild(a);
       window.URL.revokeObjectURL(downloadUrl);
 
-      setIsOpen(false);
+      setExportStatus('Export complete! ✓');
+      setTimeout(() => {
+        setIsOpen(false);
+        setExportStatus(null);
+      }, 1500);
     } catch (error) {
       console.error('Export error:', error);
-      alert('Failed to export bookings. Please try again.');
+      setExportStatus('Export failed. Please try again.');
+      setTimeout(() => setExportStatus(null), 3000);
     } finally {
       setExporting(false);
     }
@@ -152,9 +161,13 @@ export function ExportBookingsButton() {
                 </button>
               </div>
 
-              {exporting && (
-                <div className="mt-3 text-center text-xs text-cyan-400">
-                  Generating CSV...
+              {exportStatus && (
+                <div className={`mt-3 text-center text-xs font-medium ${
+                  exportStatus.includes('failed') ? 'text-rose-400' :
+                  exportStatus.includes('complete') ? 'text-green-400' :
+                  'text-cyan-400'
+                }`}>
+                  {exportStatus}
                 </div>
               )}
             </div>

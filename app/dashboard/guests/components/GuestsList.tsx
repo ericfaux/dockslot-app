@@ -256,11 +256,17 @@ export function GuestsList({ guests }: Props) {
 
                   {/* Actions */}
                   <div className="mt-4 flex gap-2">
-                    <button className="flex items-center gap-2 rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-cyan-700">
+                    <a
+                      href={`mailto:${guest.email}?subject=Thank you for choosing us!&body=Hi ${guest.name},%0D%0A%0D%0AThank you for being a valued customer!`}
+                      className="flex items-center gap-2 rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-cyan-700"
+                    >
                       <Mail className="h-4 w-4" />
                       Send Email
-                    </button>
-                    <button className="flex items-center gap-2 rounded-lg border border-slate-600 bg-slate-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-600">
+                    </a>
+                    <button 
+                      onClick={() => alert(`Discount feature coming soon! For now, contact ${guest.name} at ${guest.email} directly.`)}
+                      className="flex items-center gap-2 rounded-lg border border-slate-600 bg-slate-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-600"
+                    >
                       <DollarSign className="h-4 w-4" />
                       Offer Discount
                     </button>
