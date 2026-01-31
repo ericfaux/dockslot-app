@@ -383,3 +383,67 @@ Reviewed Phase 1 from HEARTBEAT.md roadmap. **Findings:**
 ---
 
 *Last updated: 2026-01-31 08:00 UTC*
+
+---
+
+### Build #26: Advanced Booking Search & Filters ✅
+- **Commit:** 9c8bee2
+- **Feature:** Beyond-MVP - Captain search & organization tools (extends Build #25)
+- Comprehensive bookings list page at `/dashboard/bookings`
+- Advanced filter system with multiple criteria:
+  - Full-text search (guest name, email, phone)
+  - Tag-based filtering (uses GIN index from Build #25)
+  - Booking status multi-select (all statuses)
+  - Payment status filters (unpaid, deposit paid, fully paid)
+  - Date range filtering
+- Beautiful UI features:
+  - Collapsible filter panel to save space
+  - Active filter pills with quick remove
+  - Filter count badge
+  - "Clear All" button
+  - Search-as-you-type
+  - Loading states
+- BookingsListClient component:
+  - Real-time filter application
+  - Rich booking cards with all key info
+  - Tag chips on each booking
+  - Captain notes preview (truncated)
+  - Click-through to schedule detail view
+  - Results count
+  - Empty state guidance
+- API enhancements:
+  - `/api/bookings/tags` - Get all unique tags for autocomplete
+  - Extended `/api/bookings` GET with tags & paymentStatus params
+  - Enhanced search using Supabase `.or()` for multi-field search
+- Navigation: Added "All Bookings" to sidebar with List icon
+
+**Code Added:**
+- `/app/dashboard/bookings/page.tsx` - Server component (50 lines)
+- `/app/dashboard/bookings/BookingsListClient.tsx` - List view (340 lines)
+- `/app/dashboard/schedule/BookingFilters.tsx` - Filter component (370 lines)
+- `/app/api/bookings/tags/route.ts` - Tags endpoint (70 lines)
+- Updated `/app/api/bookings/route.ts` - Added filter params
+- Updated `/lib/data/bookings.ts` - Extended filters interface
+- Updated `/app/dashboard/components/nav-links.tsx` - Navigation link
+
+**Use Cases:**
+- Find all VIP bookings quickly
+- Search guest by partial name/email/phone
+- See all pending deposits at a glance
+- Filter by date range for monthly reviews
+- Find all anniversary/birthday bookings
+- Quick access to bookings with notes
+- Export-ready filtered views (future feature)
+
+**Technical Highlights:**
+- Uses Supabase array overlap operator for tag filtering
+- Multi-field OR search for guest details
+- Filter state management with React hooks
+- URL-based filter persistence ready (future enhancement)
+- Optimized queries with proper indexing
+
+**Status:** Advanced search tools deployed! ✅
+
+---
+
+*Last updated: 2026-01-31 08:15 UTC*
