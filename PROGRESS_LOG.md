@@ -1530,6 +1530,82 @@ Reviewed Phase 1 from HEARTBEAT.md roadmap. **Findings:**
 
 ---
 
+### Build #45: Captain Onboarding Wizard ✅
+- **Commit:** e5842d9
+- **Feature:** Beyond-MVP - Guided setup wizard for new captains
+- Onboarding page: `/onboarding`
+- Multi-step wizard (5 steps):
+  - **Step 0:** Welcome screen with overview
+  - **Step 1:** Business information (name, bio, location, contact)
+  - **Step 2:** First vessel setup (name, type, capacity, description)
+  - **Step 3:** First trip type (title, description, duration, pricing, deposit)
+  - **Step 4:** Completion confirmation with auto-redirect
+- Database schema:
+  - `onboarding_completed` boolean flag
+  - `onboarding_step` current progress tracking
+  - `onboarding_completed_at` timestamp
+- Progress visualization:
+  - Step indicators with icons
+  - Completed/active/pending states
+  - Progress line between steps
+- Form features:
+  - Auto-save at each step
+  - Validation for required fields
+  - Error handling with user-friendly messages
+  - Loading states during saves
+  - Back/Continue navigation
+- Integration:
+  - Auto-creates profile if doesn't exist
+  - Skips wizard if already completed
+  - Redirects to dashboard on completion
+  - Persistent progress (resume if interrupted)
+- Beautiful UI:
+  - Maritime color scheme
+  - Gradient backgrounds
+  - Icon-based step indicators
+  - Responsive grid layouts
+  - Mobile-friendly forms
+
+**Code Added:**
+- `/app/onboarding/page.tsx` - Server component (50 lines)
+- `/app/onboarding/OnboardingWizard.tsx` - Wizard UI (655 lines)
+- `/supabase/migrations/20260131_onboarding_status.sql` - Schema (20 lines)
+
+**Features:**
+- Guided first-time setup
+- Beautiful step-by-step wizard
+- Progress tracking and persistence
+- Auto-save functionality
+- Skip if already completed
+- Form validation
+- Error handling
+- Mobile responsive
+
+**Use Cases:**
+- New captain account setup
+- First-time user onboarding
+- Quick business configuration
+- Vessel registration
+- Trip type creation
+- Getting started guide
+
+**Technical Highlights:**
+- Client component with state management
+- Multi-step form logic
+- API integration for profile/vessel/trip creation
+- Progress persistence in database
+- Auto-redirect on completion
+- Error boundary and recovery
+- Loading states for async operations
+
+**Status:** Onboarding wizard deployed! ✅
+
+---
+
+*Last updated: 2026-01-31 15:45 UTC*
+
+---
+
 ### Build #33: Message Templates System ✅
 - **Commit:** 30b2757
 - **Feature:** Beyond-MVP - Reusable message templates for guest communications
