@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 import { FloatPlanCard } from "./components/FloatPlanCard";
 import { BookingLinkCard } from "@/components/BookingLinkCard";
+import { ActionItemsWidget } from "./components/ActionItemsWidget";
+import { getActionItems } from "@/app/actions/action-items";
 import { BookingStatus, ACTIVE_BOOKING_STATUSES } from "@/lib/db/types";
 import { checkMarineConditions } from "@/lib/weather/noaa";
 import { getBuoyData } from "@/lib/weather/buoy";
@@ -557,6 +559,9 @@ export default async function DashboardPage() {
     }
   }
 
+  // Fetch action items
+  const actionItems = user ? await getActionItems() : [];
+
   // Mock metrics (would come from aggregation queries in production)
   const METRICS = {
     revenuePercent: 70,
@@ -613,6 +618,17 @@ export default async function DashboardPage() {
           <div className="h-px flex-1 bg-slate-800" />
         </div>
         <FloatPlanCard booking={nextTrip} />
+      </section>
+
+      {/* ═══ SECTION 3.3: ACTION ITEMS ═══ */}
+      <section aria-label="Action Items">
+        <div className="mb-3 flex items-center gap-2">
+          <span className="font-mono text-xs uppercase tracking-widest text-slate-500">
+            Attention
+          </span>
+          <div className="h-px flex-1 bg-slate-800" />
+        </div>
+        <ActionItemsWidget items={actionItems} />
       </section>
 
       {/* ═══ SECTION 3.5: BOOKING LINK ═══ */}
