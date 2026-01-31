@@ -447,3 +447,57 @@ Reviewed Phase 1 from HEARTBEAT.md roadmap. **Findings:**
 ---
 
 *Last updated: 2026-01-31 08:15 UTC*
+
+---
+
+### Build #27: Booking Timeline/Activity Log Viewer ✅
+- **Commit:** 8a6bd08
+- **Feature:** Beyond-MVP - Full booking history visibility & audit trail
+- Complete activity timeline for every booking
+- API endpoint: `/api/bookings/[id]/timeline` (GET)
+- BookingTimeline component with chronological event display
+- Shows two data sources:
+  - **Booking Logs:** Status changes, payments, waivers, reschedules, communications
+  - **Audit Logs:** Field updates, notes changes, all modifications
+- Visual timeline features:
+  - Vertical timeline with connecting lines
+  - Color-coded event icons (emerald for payments, amber for status changes, etc.)
+  - Expandable/collapsible (show 5 events, expand for all)
+  - Formatted timestamps (relative + absolute)
+  - Event metadata display
+  - Empty state handling
+- Event types tracked:
+  - booking_created, status_changed, payment_received, payment_refunded
+  - waiver_signed, passenger_added, rescheduled, weather_hold_set
+  - note_added, guest_communication, balance_requested
+  - Field updates (captain notes, tags, etc.)
+- Integrated into booking detail panel sidebar
+- Chronological sorting (newest first)
+- Beautiful UI matching maritime theme
+
+**Code Added:**
+- `/app/api/bookings/[id]/timeline/route.ts` - Timeline API (95 lines)
+- `/app/dashboard/components/BookingTimeline.tsx` - Timeline UI (340 lines)
+- Updated `/app/dashboard/schedule/BookingDetailPanel.tsx` - Integration
+
+**Use Cases:**
+- Customer support: "When did guest pay? What changed?"
+- Audit trail: Full history of all booking modifications
+- Dispute resolution: Timestamped record of all events
+- Training: See what actions create which log events
+- Debugging: Track down when/why bookings changed
+- Compliance: Complete paper trail for records
+
+**Technical Highlights:**
+- Dual data source merging (booking_logs + audit_logs)
+- Icon/color mapping for 12+ event types
+- Date formatting with date-fns
+- Expandable UI with show more/less toggle
+- TypeScript type safety for all event types
+- Error handling and loading states
+
+**Status:** Complete booking transparency deployed! ✅
+
+---
+
+*Last updated: 2026-01-31 08:20 UTC*
