@@ -15,6 +15,7 @@ import BookingFilters, { BookingFilterState } from '../schedule/BookingFilters'
 import { BookingWithDetails } from '@/lib/db/types'
 import { STATUS_COLORS, STATUS_LABELS } from '@/components/calendar/types'
 import { ExportButton } from './ExportButton'
+import FilterPresetsMenu from '../components/FilterPresetsMenu'
 import Link from 'next/link'
 
 interface BookingsListClientProps {
@@ -100,11 +101,19 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
 
   return (
     <div className="space-y-6">
-      {/* Filters */}
-      <BookingFilters
-        onFilterChange={setFilters}
-        availableTags={availableTags}
-      />
+      {/* Filters & Presets */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-end">
+          <FilterPresetsMenu
+            currentFilters={filters}
+            onApplyPreset={setFilters}
+          />
+        </div>
+        <BookingFilters
+          onFilterChange={setFilters}
+          availableTags={availableTags}
+        />
+      </div>
 
       {/* Results Count & Export */}
       <div className="flex items-center justify-between">
