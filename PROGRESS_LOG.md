@@ -814,3 +814,65 @@ Reviewed Phase 1 from HEARTBEAT.md roadmap. **Findings:**
 ---
 
 *Last updated: 2026-01-31 09:10 UTC*
+
+---
+
+### Build #33: Message Templates System ✅
+- **Commit:** 30b2757
+- **Feature:** Beyond-MVP - Reusable message templates for guest communications
+- Complete message template management system
+- Settings page: `/dashboard/settings/templates`
+- API endpoints:
+  - `GET /api/message-templates` - List all templates
+  - `POST /api/message-templates` - Create template
+  - `PATCH /api/message-templates/[id]` - Update template
+  - `DELETE /api/message-templates/[id]` - Delete template
+  - `POST /api/message-templates/[id]` - Increment use count
+- Template features:
+  - **Name:** Template identifier
+  - **Category:** reminder, weather, instructions, cancellation, general
+  - **Subject:** Optional email subject
+  - **Body:** Template text with placeholders
+  - **Use count:** Tracks popularity
+- Placeholder support:
+  - `{guest_name}` - Guest's name
+  - `{date}` - Trip date
+  - `{time}` - Trip time
+  - `{vessel}` - Vessel name
+  - `{meeting_spot}` - Meeting location
+- UI features:
+  - Template cards with category badges
+  - Quick copy to clipboard
+  - Edit/delete actions
+  - Template editor modal
+  - Use count display
+  - Beautiful grid layout
+- Database: New `message_templates` table with indexes
+
+**Code Added:**
+- `/app/api/message-templates/route.ts` - List & create (115 lines)
+- `/app/api/message-templates/[id]/route.ts` - Update/delete/use (175 lines)
+- `/app/dashboard/settings/templates/page.tsx` - Settings page (35 lines)
+- `/app/dashboard/settings/templates/TemplatesClient.tsx` - UI (380 lines)
+- `/supabase/migrations/20260131_message_templates.sql` - DB schema (28 lines)
+
+**Use Cases:**
+- Trip reminder: "Hi {guest_name}, your trip on {vessel} is tomorrow at {time}!"
+- Weather update: "Captain here - checking in on tomorrow's forecast..."
+- Meeting instructions: "Meet at {meeting_spot} at {time}. Look for {vessel}."
+- Cancellation message: "Due to weather, we need to reschedule your {date} trip..."
+- General communication: Save frequently sent messages
+
+**Technical Highlights:**
+- Placeholder system for dynamic content
+- Category-based organization
+- Use count tracking for analytics
+- Copy to clipboard with one click
+- Modal editor with validation
+- Sorted by popularity (use_count desc)
+
+**Status:** Message templates deployed! ✅
+
+---
+
+*Last updated: 2026-01-31 09:20 UTC*
