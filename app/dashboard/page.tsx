@@ -26,6 +26,7 @@ import { BookingStatus, ACTIVE_BOOKING_STATUSES } from "@/lib/db/types";
 import { checkMarineConditions } from "@/lib/weather/noaa";
 import { getBuoyData } from "@/lib/weather/buoy";
 import SunCalc from "suncalc";
+import { weatherCache } from "@/lib/cache";
 
 interface WeatherData {
   waterTemp: number | null;
@@ -439,48 +440,61 @@ export default async function DashboardPage() {
       // Fetch real weather data if coordinates available
       if (profile.meeting_spot_latitude && profile.meeting_spot_longitude) {
         try {
-          // Fetch NOAA marine forecast for wind
-          const conditions = await checkMarineConditions(
-            profile.meeting_spot_latitude,
-            profile.meeting_spot_longitude,
-            new Date()
-          );
+          const cacheKey = `weather:${profile.meeting_spot_latitude}:${profile.meeting_spot_longitude}`;
+          
+          // Check cache first (5-minute TTL)
+          let cachedWeather = weatherCache.get<WeatherData>(cacheKey);
+          
+          if (cachedWeather) {
+            // Use cached data
+            weatherData = cachedWeather;
+          } else {
+            // Fetch NOAA marine forecast for wind
+            const conditions = await checkMarineConditions(
+              profile.meeting_spot_latitude,
+              profile.meeting_spot_longitude,
+              new Date()
+            );
 
-          // Parse wind data from forecast
-          if (conditions.forecast?.periods[0]) {
-            const period = conditions.forecast.periods[0];
-            
-            // Parse wind speed (e.g., "10 to 15 mph" -> take max)
-            const windMatch = period.windSpeed.match(/(\d+)\s*(?:to\s*(\d+))?\s*mph/);
-            if (windMatch) {
-              const maxWind = parseInt(windMatch[2] || windMatch[1]);
-              weatherData.windSpeed = Math.round(maxWind * 0.868976); // Convert mph to knots
-              weatherData.windDirection = period.windDirection;
+            // Parse wind data from forecast
+            if (conditions.forecast?.periods[0]) {
+              const period = conditions.forecast.periods[0];
+              
+              // Parse wind speed (e.g., "10 to 15 mph" -> take max)
+              const windMatch = period.windSpeed.match(/(\d+)\s*(?:to\s*(\d+))?\s*mph/);
+              if (windMatch) {
+                const maxWind = parseInt(windMatch[2] || windMatch[1]);
+                weatherData.windSpeed = Math.round(maxWind * 0.868976); // Convert mph to knots
+                weatherData.windDirection = period.windDirection;
+              }
             }
-          }
 
-          // Fetch NOAA buoy data for water temperature
-          const buoyData = await getBuoyData(
-            profile.meeting_spot_latitude,
-            profile.meeting_spot_longitude
-          );
-          
-          if (buoyData?.waterTemperature) {
-            weatherData.waterTemp = Math.round(buoyData.waterTemperature);
-          }
+            // Fetch NOAA buoy data for water temperature
+            const buoyData = await getBuoyData(
+              profile.meeting_spot_latitude,
+              profile.meeting_spot_longitude
+            );
+            
+            if (buoyData?.waterTemperature) {
+              weatherData.waterTemp = Math.round(buoyData.waterTemperature);
+            }
 
-          // Calculate sunset time using suncalc (no API needed!)
-          const sunTimes = SunCalc.getTimes(
-            new Date(),
-            profile.meeting_spot_latitude,
-            profile.meeting_spot_longitude
-          );
-          
-          weatherData.sunset = formatInTimeZone(
-            sunTimes.sunset,
-            captainTimezone,
-            'h:mm a'
-          );
+            // Calculate sunset time using suncalc (no API needed!)
+            const sunTimes = SunCalc.getTimes(
+              new Date(),
+              profile.meeting_spot_latitude,
+              profile.meeting_spot_longitude
+            );
+            
+            weatherData.sunset = formatInTimeZone(
+              sunTimes.sunset,
+              captainTimezone,
+              'h:mm a'
+            );
+
+            // Cache for 5 minutes
+            weatherCache.set(cacheKey, weatherData, 300000);
+          }
         } catch (error) {
           console.error('Failed to fetch weather data:', error);
           // Gracefully degrade - leave weatherData as nulls
