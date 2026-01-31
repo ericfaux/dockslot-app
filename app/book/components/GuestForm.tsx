@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { User, Mail, Phone, Users, MapPin, MessageSquare, Plus, Trash2 } from 'lucide-react';
+import { User, Mail, Phone, Users, MapPin, MessageSquare, Plus, Trash2, Gift } from 'lucide-react';
 import { MAX_PARTY_SIZE } from '@/lib/db/types';
 
 export interface PassengerInfo {
@@ -17,6 +17,7 @@ export interface GuestFormData {
   party_size: number;
   passengers: PassengerInfo[];
   special_requests: string;
+  referral_code?: string;
 }
 
 interface GuestFormProps {
@@ -45,6 +46,7 @@ export function GuestForm({
     party_size: initialData?.party_size || 1,
     passengers: initialData?.passengers || [],
     special_requests: initialData?.special_requests || '',
+    referral_code: initialData?.referral_code || '',
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof GuestFormData, string>>>({});
@@ -316,6 +318,30 @@ export function GuestForm({
         <p className="mt-1 text-xs text-slate-500">
           {formData.special_requests.length}/2000 characters
         </p>
+      </div>
+
+      {/* Referral Code Section */}
+      <div className="rounded-lg border border-slate-700 bg-slate-900 p-6">
+        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+          <Gift className="h-5 w-5 text-cyan-400" />
+          Referral Code
+          <span className="text-sm font-normal text-slate-400">(Optional)</span>
+        </h3>
+
+        <div>
+          <input
+            type="text"
+            id="referral_code"
+            value={formData.referral_code || ''}
+            onChange={(e) => setFormData((prev) => ({ ...prev, referral_code: e.target.value.toUpperCase() }))}
+            className={inputClasses}
+            placeholder="Enter referral code (e.g., SARAH2024)"
+            maxLength={20}
+          />
+          <p className="mt-1 text-xs text-slate-500">
+            Have a referral code? Enter it here to receive your discount!
+          </p>
+        </div>
       </div>
 
       {/* Submit Error */}

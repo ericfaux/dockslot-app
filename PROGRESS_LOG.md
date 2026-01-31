@@ -2,8 +2,76 @@
 
 ## Latest Session: 2026-01-31 (Part 6 - Guest Referral Program)
 
-### Build #49: Guest Referral Program System ✅
+### Build #50: Guest Referral Code Application in Booking Flow ✅
 - **Commit:** (pending)
+- **Feature:** Beyond-MVP - Complete guest-facing referral system
+- Updated GuestForm component:
+  - Added referral_code field to GuestFormData interface
+  - New referral code input section with Gift icon
+  - Auto-uppercase code input for consistency
+  - Help text explaining discounts
+- Updated booking creation API (`/api/bookings`):
+  - Validates referral codes against active codes
+  - Checks referral program settings (enabled, min value)
+  - Calculates referee discount using PostgreSQL function
+  - Applies discount to balance_due automatically
+  - Creates referral tracking record
+  - Updates referral code statistics (times_used, value, rewards)
+  - Links booking to referral via referral_id
+- Automated referral code generation:
+  - New cron job: `/api/cron/generate-referral-codes`
+  - Runs daily at 9 AM UTC
+  - Auto-creates codes for guests who completed first trip (last 7 days)
+  - Only creates codes if referral program enabled
+  - One code per guest per captain
+  - Audit log tracking for auto-generated codes
+- Vercel cron schedule updated (4 jobs total)
+- Discount calculation:
+  - Supports percentage, fixed amount, or free trip rewards
+  - Respects minimum booking value threshold
+  - Applies referee discount immediately at booking
+  - Tracks referrer reward for future use
+  - Reward expiration based on captain settings
+- Referral status tracking:
+  - Status: pending → qualified → rewarded
+  - Referee reward: applied immediately (discount)
+  - Referrer reward: tracked for future redemption
+  - Both rewards expire after configurable days
+
+**Code Added/Modified:**
+- `/app/book/components/GuestForm.tsx` - Added referral code input (25 lines)
+- `/app/api/bookings/route.ts` - Referral validation & application (85 lines)
+- `/app/api/cron/generate-referral-codes/route.ts` - Auto-code generation (145 lines)
+- `vercel.json` - Added cron schedule
+
+**User Experience:**
+1. Guest receives referral code from friend (e.g., SARAH2024)
+2. Guest books trip, enters code in booking form
+3. Discount applied automatically at checkout
+4. Both referrer and referee earn rewards
+5. After trip completes, guest auto-receives their own code
+6. Guest can share code with friends to earn rewards
+
+**Technical Highlights:**
+- Real-time code validation during booking
+- Automatic discount calculation via PostgreSQL RPC
+- Referral tracking with full audit trail
+- Auto-code generation for organic growth
+- Reward expiration handling
+- Statistics tracking (usage, value, rewards earned)
+
+**Status:** Complete referral cycle deployed! ✅
+
+---
+
+*Last updated: 2026-01-31 22:10 UTC*
+
+---
+
+## Latest Session: 2026-01-31 (Part 6 - Guest Referral Program)
+
+### Build #49: Guest Referral Program System ✅
+- **Commit:** c8e5098
 - **Feature:** Beyond-MVP - Complete referral system for organic growth
 - Database schema:
   - `referral_settings` - Per-captain program configuration

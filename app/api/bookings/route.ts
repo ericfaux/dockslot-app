@@ -179,6 +179,7 @@ export async function POST(request: NextRequest) {
       total_price_cents,
       deposit_paid_cents,
       balance_due_cents,
+      referral_code,
     } = body;
 
     // Validate required fields
@@ -243,6 +244,54 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Handle referral code (if provided)
+    let referralCodeData = null;
+    let referralDiscountCents = 0;
+    let referralSettings = null;
+    
+    if (referral_code && referral_code.trim()) {
+      const codeUpper = referral_code.trim().toUpperCase();
+      
+      // Fetch referral code
+      const { data: code } = await supabase
+        .from('referral_codes')
+        .select('*')
+        .eq('captain_id', captain_id)
+        .eq('code', codeUpper)
+        .eq('is_active', true)
+        .single();
+      
+      if (code) {
+        // Fetch referral settings
+        const { data: settings } = await supabase
+          .from('referral_settings')
+          .select('*')
+          .eq('captain_id', captain_id)
+          .eq('is_enabled', true)
+          .single();
+        
+        if (settings) {
+          // Check minimum booking value
+          if (total_price_cents >= settings.min_booking_value_cents) {
+            // Calculate referee discount
+            const { data: rewards } = await supabase.rpc('calculate_referral_rewards', {
+              p_captain_id: captain_id,
+              p_booking_value_cents: total_price_cents,
+            });
+            
+            if (rewards && rewards.length > 0) {
+              referralDiscountCents = rewards[0].referee_reward_cents;
+              referralCodeData = code;
+              referralSettings = settings;
+            }
+          }
+        }
+      }
+    }
+
+    // Apply referral discount to balance due
+    const finalBalanceDue = Math.max(0, (balance_due_cents || total_price_cents || 0) - referralDiscountCents);
+
     // Create booking
     const { data: booking, error: bookingError } = await supabase
       .from('bookings')
@@ -260,7 +309,9 @@ export async function POST(request: NextRequest) {
         payment_status: 'unpaid',
         total_price_cents: total_price_cents || 0,
         deposit_paid_cents: deposit_paid_cents || 0,
-        balance_due_cents: balance_due_cents || total_price_cents || 0,
+        balance_due_cents: finalBalanceDue,
+        referral_code: referralCodeData?.code || null,
+        referral_discount_cents: referralDiscountCents,
       })
       .select()
       .single();
@@ -304,6 +355,65 @@ export async function POST(request: NextRequest) {
     if (passengerError) {
       console.error('Error creating passenger:', passengerError);
       // Don't fail booking creation
+    }
+
+    // Create referral tracking record (if referral code was used)
+    if (referralCodeData && referralSettings) {
+      // Calculate rewards
+      const { data: rewards } = await supabase.rpc('calculate_referral_rewards', {
+        p_captain_id: captain_id,
+        p_booking_value_cents: total_price_cents,
+      });
+
+      if (rewards && rewards.length > 0) {
+        const { referrer_reward_cents, referee_reward_cents } = rewards[0];
+        
+        // Calculate expiry dates
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + referralSettings.reward_expiry_days);
+        
+        // Create referral record
+        const { data: referral, error: referralError } = await supabase
+          .from('referrals')
+          .insert({
+            captain_id,
+            referral_code_id: referralCodeData.id,
+            referrer_email: referralCodeData.guest_email,
+            referrer_name: referralCodeData.guest_name,
+            referee_email: guest_email,
+            referee_name: guest_name,
+            booking_id: booking.id,
+            booking_value_cents: total_price_cents,
+            referrer_reward_cents,
+            referee_reward_cents,
+            referrer_reward_applied: false,
+            referee_reward_applied: true, // Applied immediately as discount
+            referrer_reward_expires_at: expiresAt.toISOString(),
+            referee_reward_expires_at: expiresAt.toISOString(),
+            status: 'qualified',
+          })
+          .select()
+          .single();
+
+        if (!referralError && referral) {
+          // Update booking with referral_id
+          await supabase
+            .from('bookings')
+            .update({ referral_id: referral.id })
+            .eq('id', booking.id);
+
+          // Update referral code stats
+          await supabase
+            .from('referral_codes')
+            .update({
+              times_used: referralCodeData.times_used + 1,
+              total_bookings_value_cents: referralCodeData.total_bookings_value_cents + total_price_cents,
+              total_rewards_earned_cents: referralCodeData.total_rewards_earned_cents + referrer_reward_cents,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', referralCodeData.id);
+        }
+      }
     }
 
     // Create booking log entry
@@ -354,7 +464,7 @@ export async function POST(request: NextRequest) {
           captainName: profile.business_name || profile.full_name || 'Your Captain',
           totalPrice: `$${((total_price_cents || 0) / 100).toFixed(2)}`,
           depositPaid: `$${((deposit_paid_cents || 0) / 100).toFixed(2)}`,
-          balanceDue: `$${((balance_due_cents || 0) / 100).toFixed(2)}`,
+          balanceDue: `$${(finalBalanceDue / 100).toFixed(2)}`,
           managementUrl,
         }).catch(err => {
           console.error('Failed to send booking confirmation email:', err);
