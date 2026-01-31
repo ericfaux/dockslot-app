@@ -83,7 +83,7 @@ export async function POST(
         special_requests: originalBooking.special_requests,
         captain_instructions: originalBooking.captain_instructions,
         management_token: managementToken,
-        // Don't copy: captain_notes, tags, weather_hold_reason, etc.
+        // Don't copy: internal_notes, tags, weather_hold_reason, etc.
       })
       .select()
       .single()

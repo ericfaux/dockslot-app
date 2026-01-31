@@ -306,14 +306,14 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
                     )}
 
                     {/* Captain Notes Preview */}
-                    {booking.captain_notes && (
+                    {booking.internal_notes && (
                       <div className="rounded bg-slate-900/50 p-2 text-sm text-slate-400">
                         <span className="font-medium text-slate-300">
                           Note:{' '}
                         </span>
-                        {booking.captain_notes.length > 100
-                          ? `${booking.captain_notes.slice(0, 100)}...`
-                          : booking.captain_notes}
+                        {booking.internal_notes.length > 100
+                          ? `${booking.internal_notes.slice(0, 100)}...`
+                          : booking.internal_notes}
                       </div>
                     )}
                   </div>

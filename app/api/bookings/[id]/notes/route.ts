@@ -44,7 +44,7 @@ export async function PATCH(
 
     // Parse request body
     const body = await request.json()
-    const { captain_notes, tags } = body
+    const { internal_notes, tags } = body
 
     // Validate tags array if provided
     if (tags !== undefined && !Array.isArray(tags)) {
@@ -55,8 +55,8 @@ export async function PATCH(
     }
 
     // Update notes and/or tags
-    const updates: { captain_notes?: string; tags?: string[] } = {}
-    if (captain_notes !== undefined) updates.captain_notes = captain_notes
+    const updates: { internal_notes?: string; tags?: string[] } = {}
+    if (internal_notes !== undefined) updates.internal_notes = internal_notes
     if (tags !== undefined) updates.tags = tags
 
     const { data, error } = await supabase

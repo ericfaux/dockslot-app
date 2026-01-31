@@ -48,7 +48,7 @@ export default function BookingNotesEditor({
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          captain_notes: notes,
+          internal_notes: notes,
           tags: tags,
         }),
       })

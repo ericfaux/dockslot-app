@@ -334,7 +334,7 @@ export function BookingDetailPanel({
           {/* Captain's Notes & Tags */}
           <BookingNotesEditor
             bookingId={booking.id}
-            initialNotes={booking.captain_notes || null}
+            initialNotes={booking.internal_notes || null}
             initialTags={booking.tags || []}
             onUpdate={onUpdated}
           />

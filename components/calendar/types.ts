@@ -27,6 +27,7 @@ export interface CalendarBooking {
   weather_hold_reason?: string | null;
   original_date_if_rescheduled?: string | null;
   captain_notes?: string | null;
+  internal_notes?: string | null;
   tags?: string[];
   vessel?: {
     id: string;

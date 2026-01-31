@@ -123,7 +123,7 @@ interface ExportBooking {
   total_price_cents: number
   deposit_paid_cents: number
   balance_due_cents: number
-  captain_notes: string | null
+  internal_notes: string | null
   tags: string[]
   created_at: string
   vessel?: { name: string } | null
@@ -178,7 +178,7 @@ function generateCSV(bookings: ExportBooking[]): string {
       (booking.deposit_paid_cents / 100).toFixed(2),
       (booking.balance_due_cents / 100).toFixed(2),
       escapeCSV(booking.tags?.join(', ') || ''),
-      escapeCSV(booking.captain_notes || ''),
+      escapeCSV(booking.internal_notes || ''),
       format(parseISO(booking.created_at), 'yyyy-MM-dd HH:mm'),
     ]
   })
