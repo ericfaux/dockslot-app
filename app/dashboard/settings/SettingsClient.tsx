@@ -8,7 +8,7 @@ import {
   User,
   Building2,
   MapPin,
-  Calendar,
+  Calendar as CalendarIcon,
   Moon,
   FileText,
   ChevronDown
@@ -17,11 +17,13 @@ import { Profile, AvailabilityWindow } from '@/lib/db/types';
 import { updateProfile } from '@/app/actions/profile';
 import { BookingLinkCard } from '@/components/BookingLinkCard';
 import { AvailabilitySettings } from './AvailabilitySettings';
+import { CalendarExport } from './components/CalendarExport';
 
 interface SettingsClientProps {
   initialProfile: Profile | null;
   initialAvailabilityWindows: AvailabilityWindow[];
   userEmail: string;
+  calendarToken: string;
 }
 
 // Common US timezones
@@ -36,11 +38,12 @@ const TIMEZONES = [
   { value: 'America/Puerto_Rico', label: 'Atlantic Time (AST)' },
 ];
 
-export function SettingsClient({ initialProfile, initialAvailabilityWindows, userEmail }: SettingsClientProps) {
+export function SettingsClient({ initialProfile, initialAvailabilityWindows, userEmail, calendarToken }: SettingsClientProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [currentCalendarToken, setCurrentCalendarToken] = useState(calendarToken);
 
   // Form state
   const [fullName, setFullName] = useState(initialProfile?.full_name || '');
@@ -87,6 +90,26 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
         setError(result.error || 'Failed to save settings');
       }
     });
+  };
+
+  const handleRegenerateCalendarToken = async () => {
+    try {
+      const response = await fetch('/api/calendar/regenerate', {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to regenerate token');
+      }
+
+      const data = await response.json();
+      setCurrentCalendarToken(data.calendarToken);
+      setSuccess('Calendar token regenerated successfully');
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      setError('Failed to regenerate calendar token');
+      setTimeout(() => setError(null), 3000);
+    }
   };
 
   const inputClassName = "w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-white placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500";
@@ -262,7 +285,7 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
       {/* Booking Settings */}
       <section className={sectionClassName}>
         <div className="mb-4 flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-cyan-400" />
+          <CalendarIcon className="h-5 w-5 text-cyan-400" />
           <h2 className="text-lg font-semibold text-white">Booking Settings</h2>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -380,6 +403,14 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
             This policy is displayed to guests during the booking process.
           </p>
         </div>
+      </section>
+
+      {/* Calendar Export */}
+      <section className={sectionClassName}>
+        <CalendarExport
+          calendarToken={currentCalendarToken}
+          onRegenerate={handleRegenerateCalendarToken}
+        />
       </section>
 
       {/* Save Button */}

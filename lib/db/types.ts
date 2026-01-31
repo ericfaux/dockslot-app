@@ -61,6 +61,7 @@ export interface Profile {
   booking_buffer_minutes: number;
   advance_booking_days: number;
   cancellation_policy: string | null;
+  calendar_token: string | null;
   updated_at: string;
 }
 

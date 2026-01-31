@@ -35,6 +35,22 @@ export default async function SettingsPage() {
     ? availabilityResult.data
     : [];
 
+  // Get calendar token (generate if missing)
+  let calendarToken = profile?.calendar_token;
+  if (!calendarToken) {
+    // Generate token if missing
+    const newToken = Array.from(crypto.getRandomValues(new Uint8Array(32)))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+    
+    await supabase
+      .from('profiles')
+      .update({ calendar_token: newToken })
+      .eq('id', user.id);
+    
+    calendarToken = newToken;
+  }
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -55,6 +71,7 @@ export default async function SettingsPage() {
         initialProfile={profile}
         initialAvailabilityWindows={availabilityWindows}
         userEmail={user.email || ''}
+        calendarToken={calendarToken || ''}
       />
 
       {/* Bottom Accent Bar */}
