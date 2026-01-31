@@ -62,6 +62,11 @@ export const navLinks: NavLink[] = [
     icon: FileText,
   },
   {
+    href: "/dashboard/reports-advanced",
+    label: "Analytics Reports",
+    icon: BarChart3,
+  },
+  {
     href: "/dashboard/guests",
     label: "Guests",
     icon: Users,

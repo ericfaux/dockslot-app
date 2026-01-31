@@ -951,6 +951,84 @@ Reviewed Phase 1 from HEARTBEAT.md roadmap. **Findings:**
 
 ---
 
+### Build #39: Cancellation Policy Management ✅
+- **Commit:** 0e6c8e6
+- **Feature:** Beyond-MVP - Flexible cancellation policies per trip type
+- Database schema additions:
+  - `cancellation_policy_hours` - Full refund window (hours before trip)
+  - `cancellation_refund_percentage` - Partial refund % within window
+  - `cancellation_policy_text` - Custom policy text
+  - `cancellation_requested_at` - Cancellation timestamp
+  - `cancellation_reason` - Guest/captain reason
+- PostgreSQL function: `calculate_cancellation_refund()`
+  - Calculates hours until trip
+  - Determines refund percentage based on policy
+  - Returns refund amount and description
+  - Supports both full and partial refund scenarios
+- API endpoints:
+  - `GET /api/bookings/[id]/cancellation-policy` - Check policy & calculate refund
+  - `PATCH /api/trip-types/[id]` - Update trip type policies
+- CancellationPolicyDisplay component:
+  - Real-time refund calculation
+  - Hours until trip countdown
+  - Full/partial refund indicators
+  - Custom policy text display
+  - Compact and full display modes
+  - Beautiful maritime-themed UI
+- CancellationPolicyEditor component:
+  - Configure policies per trip type
+  - Hour slider (0-168 hours)
+  - Refund percentage slider (0-100%)
+  - Custom policy text field
+  - Live policy preview
+  - Save with validation
+- Settings page at `/dashboard/settings/cancellation`
+  - Manage all trip type policies
+  - Individual save buttons per trip
+  - Success/error feedback
+- Integration: Added to booking detail panel
+
+**Code Added:**
+- `/supabase/migrations/20260131_cancellation_policies.sql` - Schema + function (80 lines)
+- `/app/api/bookings/[id]/cancellation-policy/route.ts` - Policy API (115 lines)
+- `/app/api/trip-types/[id]/route.ts` - Update trip types (95 lines)
+- `/app/dashboard/components/CancellationPolicyDisplay.tsx` - Display component (180 lines)
+- `/app/dashboard/settings/cancellation/CancellationPolicyEditor.tsx` - Editor (280 lines)
+- `/app/dashboard/settings/cancellation/page.tsx` - Settings page (55 lines)
+- Updated `/app/dashboard/schedule/BookingDetailPanel.tsx` - Integration
+
+**Use Cases:**
+- Set 24-hour full refund policy
+- Charge 50% for late cancellations (< 24h)
+- No refund for same-day cancellations
+- Weather exception policy text
+- Corporate vs personal trip policies
+- High-demand trip stricter policies
+- Off-season flexible policies
+
+**Policy Examples:**
+1. **Standard:** 24h full refund, 50% if < 24h
+2. **Flexible:** 12h full refund, 75% if < 12h
+3. **Strict:** 48h full refund, 0% if < 48h
+4. **Premium:** 72h full refund, 25% if < 72h
+
+**Technical Highlights:**
+- PostgreSQL function for server-side calculation
+- Real-time hours-until-trip math
+- Percentage-based refund logic
+- Custom text for edge cases
+- Audit logging for policy changes
+- Type-safe API responses
+- Beautiful slider UI for policies
+
+**Status:** Cancellation policy management deployed! ✅
+
+---
+
+*Last updated: 2026-01-31 11:20 UTC*
+
+---
+
 ### Build #33: Message Templates System ✅
 - **Commit:** 30b2757
 - **Feature:** Beyond-MVP - Reusable message templates for guest communications
