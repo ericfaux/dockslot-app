@@ -150,4 +150,29 @@
 
 ---
 
-*Last updated: 2026-01-31 05:01 UTC*
+## Heartbeat Investigation: 2026-01-31 06:00 UTC
+
+### Investigation: Guest Booking Flow Status
+Reviewed Phase 1 from HEARTBEAT.md roadmap. **Findings:**
+
+**Already Complete:**
+- ✅ Captain profile page (`/c/[captainId]`)
+- ✅ Slot picker calendar (`DateSlotPicker` component + `/api/availability`)
+- ✅ Checkout flow (`BookingForm.tsx`, multi-step)
+- ✅ Guest management (`/manage/[token]`)
+- ✅ Booking confirmation (`/book/[captainId]/[tripTypeId]/confirm`)
+- ✅ Booking detail pages
+- ✅ Weather hold reschedule flow (`/reschedule/[token]`)
+- ✅ Payment flows (`/payment/success`, Stripe integration)
+
+**Code Investigation:**
+- Discovered comprehensive existing booking flow
+- Found DateSlotPicker component (more advanced than needed)
+- Verified API routes for availability, bookings, trip types
+- All Phase 1 features from roadmap are BUILT
+
+**Next Focus:** Phase 1 is complete. Need to review Phases 2-5 for missing features or find new high-value additions beyond original roadmap.
+
+---
+
+*Last updated: 2026-01-31 06:00 UTC*
