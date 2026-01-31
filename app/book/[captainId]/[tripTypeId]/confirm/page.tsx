@@ -7,6 +7,7 @@ import { notFound, redirect } from "next/navigation";
 import { format, parseISO } from "date-fns";
 import { Calendar, Clock, Users, MapPin, Mail, Phone, CheckCircle, CreditCard } from "lucide-react";
 import Link from "next/link";
+import { ManagementLinkCard } from "@/components/booking/ManagementLinkCard";
 
 interface ConfirmPageProps {
   params: Promise<{
@@ -15,12 +16,13 @@ interface ConfirmPageProps {
   }>;
   searchParams: Promise<{
     bookingId?: string;
+    token?: string;
   }>;
 }
 
 export default async function ConfirmPage({ params, searchParams }: ConfirmPageProps) {
   const { captainId, tripTypeId } = await params;
-  const { bookingId } = await searchParams;
+  const { bookingId, token } = await searchParams;
 
   if (!bookingId) {
     redirect(`/book/${captainId}/${tripTypeId}`);
@@ -254,6 +256,11 @@ export default async function ConfirmPage({ params, searchParams }: ConfirmPageP
               Your booking is confirmed. We've sent a confirmation email to {booking.guest_email}
             </p>
           </div>
+        )}
+
+        {/* Booking Management Link */}
+        {token && (
+          <ManagementLinkCard token={token} guestEmail={booking.guest_email} />
         )}
 
         {/* What's Next */}

@@ -90,10 +90,10 @@ export function BookingForm({
         throw new Error(data.error || 'Failed to create booking');
       }
 
-      const { booking } = await response.json();
+      const { booking, managementUrl } = await response.json();
 
-      // Redirect to confirmation/payment page
-      router.push(`/book/${captainId}/${tripTypeId}/confirm?bookingId=${booking.id}`);
+      // Redirect to confirmation/payment page (pass management URL for later)
+      router.push(`/book/${captainId}/${tripTypeId}/confirm?bookingId=${booking.id}&token=${managementUrl?.split('/')[2] || ''}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
       setSubmitting(false);
