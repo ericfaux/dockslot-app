@@ -2,7 +2,7 @@
 // Public Captain Profile Page - Guest Booking Entry Point
 // Design: Premium charter booking experience, mobile-first
 
-import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { createSupabaseServiceClient } from "@/utils/supabase/service";
 import { notFound } from "next/navigation";
 import { 
   Anchor, 
@@ -25,7 +25,7 @@ interface CaptainProfileProps {
 
 export default async function CaptainProfilePage({ params }: CaptainProfileProps) {
   const { captainId } = await params;
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceClient();
 
   // Fetch captain profile
   const { data: profile, error: profileError } = await supabase
@@ -33,6 +33,14 @@ export default async function CaptainProfilePage({ params }: CaptainProfileProps
     .select('*')
     .eq('id', captainId)
     .single();
+
+  // Debug logging
+  if (profileError) {
+    console.error('[Captain Profile] Error fetching profile:', profileError);
+  }
+  if (!profile) {
+    console.log('[Captain Profile] No profile found for ID:', captainId);
+  }
 
   if (profileError || !profile) {
     notFound();

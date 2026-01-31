@@ -1,198 +1,197 @@
-import { NextRequest, NextResponse } from 'next/server';
-import {
-  getAvailableSlots,
-  getDateRangeAvailability,
-  formatSlotTime,
-  type AvailableSlot,
-} from '@/lib/availability';
-import { isValidUUID, isValidDate } from '@/lib/utils/validation';
+// app/api/availability/[captainId]/[tripTypeId]/route.ts
+// API endpoint to fetch available booking slots for a trip type
+// Returns date-keyed object with available time slots
 
-// ============================================================================
-// Types for API Response
-// ============================================================================
+import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { NextRequest, NextResponse } from "next/server";
+import { 
+  format, 
+  parseISO, 
+  addDays, 
+  startOfMonth, 
+  endOfMonth, 
+  eachDayOfInterval,
+  addHours,
+  parse,
+  isBefore,
+  isAfter,
+  startOfDay,
+} from "date-fns";
 
-interface SlotResponse {
-  start_time: string; // ISO datetime
-  end_time: string; // ISO datetime
-  display_start: string; // Formatted time like "9:00 AM"
-  display_end: string; // Formatted time like "1:00 PM"
+interface TimeSlot {
+  start: string; // HH:MM
+  end: string;   // HH:MM
+  available: boolean;
 }
 
-interface AvailabilitySlotsResponse {
-  success: boolean;
-  data?: {
-    date: string;
-    captain_timezone: string;
-    slots: SlotResponse[];
-    date_info: {
-      date: string;
-      day_of_week: number;
-      has_availability: boolean;
-      is_blackout: boolean;
-      blackout_reason?: string | null;
-      is_past: boolean;
-      is_beyond_advance_window: boolean;
-      has_active_window: boolean;
-    };
-  };
-  error?: string;
-  code?: string;
+interface AvailabilityResponse {
+  availability: Record<string, TimeSlot[]>;
 }
-
-interface DateRangeResponse {
-  success: boolean;
-  data?: {
-    dates: Array<{
-      date: string;
-      day_of_week: number;
-      has_availability: boolean;
-      is_blackout: boolean;
-      blackout_reason?: string | null;
-      is_past: boolean;
-      is_beyond_advance_window: boolean;
-      has_active_window: boolean;
-    }>;
-    captain_timezone: string;
-  };
-  error?: string;
-  code?: string;
-}
-
-// ============================================================================
-// GET /api/availability/[captainId]/[tripTypeId]
-//
-// Query parameters:
-// - date: YYYY-MM-DD - Get available slots for a specific date
-// - days: number (optional) - Get date range availability (used when date is not provided)
-//
-// Returns:
-// - If date is provided: Available slots for that date with ISO datetime and display times
-// - If date is not provided: Date range availability for the next N days
-// ============================================================================
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ captainId: string; tripTypeId: string }> }
-): Promise<NextResponse<AvailabilitySlotsResponse | DateRangeResponse>> {
+  context: { params: Promise<{ captainId: string; tripTypeId: string }> }
+) {
+  const { captainId, tripTypeId } = await context.params;
+  const { searchParams } = new URL(request.url);
+  const monthParam = searchParams.get('month'); // format: YYYY-MM
+
+  if (!monthParam) {
+    return NextResponse.json(
+      { error: 'Month parameter required (format: YYYY-MM)' },
+      { status: 400 }
+    );
+  }
+
   try {
-    const resolvedParams = await params;
-    const { captainId, tripTypeId } = resolvedParams;
-    const { searchParams } = new URL(request.url);
-    const date = searchParams.get('date');
-    const daysParam = searchParams.get('days');
+    const supabase = await createSupabaseServerClient();
 
-    // Validate captain ID
-    if (!captainId || !isValidUUID(captainId)) {
+    // Fetch trip type to get duration
+    const { data: tripType, error: tripError } = await supabase
+      .from('trip_types')
+      .select('duration_hours, owner_id')
+      .eq('id', tripTypeId)
+      .single();
+
+    if (tripError || !tripType) {
       return NextResponse.json(
-        {
-          success: false,
-          error: 'Invalid captain ID',
-          code: 'VALIDATION',
-        },
-        { status: 400 }
+        { error: 'Trip type not found' },
+        { status: 404 }
       );
     }
 
-    // Validate trip type ID
-    if (!tripTypeId || !isValidUUID(tripTypeId)) {
+    // Verify captain owns this trip type
+    if (tripType.owner_id !== captainId) {
       return NextResponse.json(
-        {
-          success: false,
-          error: 'Invalid trip type ID',
-          code: 'VALIDATION',
-        },
-        { status: 400 }
+        { error: 'Trip type does not belong to this captain' },
+        { status: 403 }
       );
     }
 
-    // If date is provided, get slots for that specific date
-    if (date) {
-      if (!isValidDate(date)) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: 'Invalid date format. Use YYYY-MM-DD',
-            code: 'VALIDATION',
-          },
-          { status: 400 }
-        );
+    // Fetch captain's profile for buffer settings
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('booking_buffer_minutes, advance_booking_days')
+      .eq('id', captainId)
+      .single();
+
+    const bufferMinutes = profile?.booking_buffer_minutes || 60;
+    const maxAdvanceDays = profile?.advance_booking_days || 90;
+
+    // Fetch availability windows (weekly schedule)
+    const { data: availabilityWindows } = await supabase
+      .from('availability_windows')
+      .select('*')
+      .eq('owner_id', captainId)
+      .eq('is_active', true);
+
+    // Fetch blackout dates for the month
+    const monthStart = startOfMonth(parseISO(`${monthParam}-01`));
+    const monthEnd = endOfMonth(monthStart);
+
+    const { data: blackoutDates } = await supabase
+      .from('blackout_dates')
+      .select('blackout_date, reason')
+      .eq('owner_id', captainId)
+      .gte('blackout_date', format(monthStart, 'yyyy-MM-dd'))
+      .lte('blackout_date', format(monthEnd, 'yyyy-MM-dd'));
+
+    const blackoutSet = new Set(
+      blackoutDates?.map(b => b.blackout_date) || []
+    );
+
+    // Fetch existing bookings for the month (to block out booked slots)
+    const { data: existingBookings } = await supabase
+      .from('bookings')
+      .select('scheduled_start, scheduled_end, status')
+      .eq('captain_id', captainId)
+      .gte('scheduled_start', monthStart.toISOString())
+      .lte('scheduled_start', monthEnd.toISOString())
+      .in('status', ['confirmed', 'pending_deposit', 'weather_hold']);
+
+    // Build availability map
+    const availability: Record<string, TimeSlot[]> = {};
+    const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
+    const now = new Date();
+    const maxBookingDate = addDays(now, maxAdvanceDays);
+
+    for (const day of daysInMonth) {
+      const dateKey = format(day, 'yyyy-MM-dd');
+
+      // Skip if in the past
+      if (isBefore(day, startOfDay(now))) {
+        continue;
       }
 
-      const result = await getAvailableSlots(captainId, tripTypeId, date);
-
-      if (!result.success) {
-        const statusCode = result.code === 'NOT_FOUND' ? 404 :
-                          result.code === 'HIBERNATING' ? 403 : 400;
-        return NextResponse.json(
-          {
-            success: false,
-            error: result.error,
-            code: result.code,
-          },
-          { status: statusCode }
-        );
+      // Skip if beyond advance booking window
+      if (isAfter(day, maxBookingDate)) {
+        continue;
       }
 
-      // Add display times to slots
-      const timezone = result.data!.captain_timezone;
-      const slotsWithDisplay: SlotResponse[] = result.data!.slots.map((slot: AvailableSlot) => ({
-        start_time: slot.start_time,
-        end_time: slot.end_time,
-        display_start: formatSlotTime(slot.start_time, timezone),
-        display_end: formatSlotTime(slot.end_time, timezone),
-      }));
+      // Skip if blackout date
+      if (blackoutSet.has(dateKey)) {
+        continue;
+      }
 
-      return NextResponse.json({
-        success: true,
-        data: {
-          date: result.data!.date,
-          captain_timezone: timezone,
-          slots: slotsWithDisplay,
-          date_info: result.data!.date_info,
-        },
-      });
+      // Get availability window for this day of week
+      const dayOfWeek = day.getDay(); // 0 = Sunday
+      const windowsForDay = availabilityWindows?.filter(
+        w => w.day_of_week === dayOfWeek
+      ) || [];
+
+      if (windowsForDay.length === 0) {
+        continue; // No availability on this day of week
+      }
+
+      // Generate time slots from availability windows
+      const slots: TimeSlot[] = [];
+
+      for (const window of windowsForDay) {
+        const windowStart = parse(window.start_time, 'HH:mm:ss', day);
+        const windowEnd = parse(window.end_time, 'HH:mm:ss', day);
+
+        // Generate slots at 30-minute intervals
+        let slotStart = windowStart;
+
+        while (isBefore(addHours(slotStart, tripType.duration_hours), windowEnd)) {
+          const slotEnd = addHours(slotStart, tripType.duration_hours);
+
+          // Check if this slot overlaps with any existing bookings
+          const isBooked = existingBookings?.some(booking => {
+            const bookingStart = parseISO(booking.scheduled_start);
+            const bookingEnd = parseISO(booking.scheduled_end);
+
+            // Check for overlap
+            return (
+              (isBefore(slotStart, bookingEnd) && isAfter(slotEnd, bookingStart))
+            );
+          });
+
+          // Check if slot is within buffer time from now
+          const isWithinBuffer = isBefore(slotStart, addHours(now, bufferMinutes / 60));
+
+          slots.push({
+            start: format(slotStart, 'HH:mm'),
+            end: format(slotEnd, 'HH:mm'),
+            available: !isBooked && !isWithinBuffer,
+          });
+
+          // Move to next slot (30-minute intervals)
+          slotStart = addHours(slotStart, 0.5);
+        }
+      }
+
+      if (slots.length > 0) {
+        availability[dateKey] = slots;
+      }
     }
 
-    // If no date is provided, return date range availability
-    const days = daysParam ? parseInt(daysParam, 10) : 60;
-    if (isNaN(days) || days < 1 || days > 365) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Days must be a number between 1 and 365',
-          code: 'VALIDATION',
-        },
-        { status: 400 }
-      );
-    }
+    return NextResponse.json({ availability } as AvailabilityResponse);
 
-    const rangeResult = await getDateRangeAvailability(captainId, days);
-
-    if (!rangeResult.success) {
-      const statusCode = rangeResult.code === 'NOT_FOUND' ? 404 :
-                        rangeResult.code === 'HIBERNATING' ? 403 : 400;
-      return NextResponse.json(
-        {
-          success: false,
-          error: rangeResult.error,
-          code: rangeResult.code,
-        },
-        { status: statusCode }
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      data: rangeResult.data,
-    });
   } catch (error) {
     console.error('Error fetching availability:', error);
     return NextResponse.json(
-      {
-        success: false,
-        error: 'Internal server error',
-        code: 'DATABASE',
-      },
+      { error: 'Failed to fetch availability' },
       { status: 500 }
     );
   }
