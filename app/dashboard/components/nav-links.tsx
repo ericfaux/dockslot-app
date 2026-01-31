@@ -6,6 +6,7 @@ import {
   Users,
   Ship,
   Settings,
+  FileSignature,
   type LucideIcon,
 } from "lucide-react";
 
@@ -40,6 +41,11 @@ export const navLinks: NavLink[] = [
     href: "/dashboard/vessels",
     label: "Vessels",
     icon: Ship,
+  },
+  {
+    href: "/dashboard/waivers",
+    label: "Waivers",
+    icon: FileSignature,
   },
   {
     href: "/dashboard/settings",
