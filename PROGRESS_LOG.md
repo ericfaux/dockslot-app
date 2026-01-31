@@ -876,3 +876,64 @@ Reviewed Phase 1 from HEARTBEAT.md roadmap. **Findings:**
 ---
 
 *Last updated: 2026-01-31 09:20 UTC*
+
+---
+
+### Build #34: Booking Quick Actions Menu ✅
+- **Commit:** 97d7cb3
+- **Feature:** Beyond-MVP - Power user keyboard shortcuts & quick access
+- Command palette-style quick actions menu
+- Keyboard shortcut: `Cmd/Ctrl + K` to open
+- Individual action shortcuts:
+  - **E** - Email guest
+  - **S** - Text/SMS guest
+  - **B** - Request balance payment
+  - **W** - Weather hold
+  - **C** - Complete trip
+  - **D** - Duplicate booking
+  - **R** - Trip report
+  - **V** - View on calendar
+- Context-aware actions (only show relevant options based on booking status)
+- BookingQuickActions component:
+  - Beautiful modal UI with icons
+  - Shortcut hints on each action
+  - Escape to close
+  - Click or keyboard navigation
+- Integration: Added to booking detail panel
+- Actions connect to existing functionality
+
+**Code Added:**
+- `/app/dashboard/components/BookingQuickActions.tsx` - Quick actions component (210 lines)
+- Updated `/app/dashboard/schedule/BookingDetailPanel.tsx` - Integration
+
+**Keyboard Shortcuts:**
+- `⌘K` or `Ctrl+K` - Open quick actions
+- `E` - Email guest (opens mailto link)
+- `S` - SMS guest (future integration)
+- `B` - Request balance payment
+- `W` - Set weather hold
+- `C` - Complete trip
+- `D` - Duplicate booking
+- `R` - Trip report (completed trips only)
+- `V` - Navigate to calendar
+- `Esc` - Close menu
+
+**Use Cases:**
+- Fast captain workflow with keyboard
+- Quick email/SMS from booking
+- One-key complete trip
+- Rapid balance payment requests
+- Power users can fly through actions
+
+**Technical Highlights:**
+- Event listener for global keyboard shortcuts
+- Context filtering (e.g., "Complete" only for confirmed/rescheduled)
+- Email integration via mailto links
+- Future-ready for SMS integration
+- Beautiful command palette UX
+
+**Status:** Quick actions deployed! ✅
+
+---
+
+*Last updated: 2026-01-31 09:40 UTC*
