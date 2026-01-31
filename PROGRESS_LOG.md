@@ -1606,6 +1606,48 @@ Reviewed Phase 1 from HEARTBEAT.md roadmap. **Findings:**
 
 ---
 
+### Build #46: Availability Templates (Backend Complete) 🔄
+- **Commit:** c119a5f
+- **Feature:** Beyond-MVP - Recurring weekly availability schedules (backend complete, UI next)
+- **Status:** Backend ✅ | UI 🔄 (placeholder)
+- Database schema: `availability_templates` table
+  - Template name and default flag
+  - Weekly schedule as JSONB
+  - One default template per captain
+- PostgreSQL function: `apply_availability_template()`
+  - Applies template to any date range
+  - Creates availability windows based on schedule
+  - Loops through dates and creates slots
+- API endpoints:
+  - `GET/POST /api/availability-templates` - List/create templates
+  - `PATCH /api/availability-templates/[id]` - Update template
+  - `DELETE /api/availability-templates/[id]` - Delete template
+  - `POST /api/availability-templates/[id]` - Apply to date range
+- Settings page: `/dashboard/settings/availability-templates`
+  - Page created with placeholder UI
+  - Full UI to be built next
+
+**Backend Complete:**
+- Template CRUD operations
+- Apply to date range functionality
+- Default template management
+- Ownership verification
+- Type-safe APIs
+
+**UI Next (Build #47):**
+- Weekly schedule builder
+- Template list/cards
+- Apply template modal
+- Edit template functionality
+
+**Status:** Backend deployed, UI placeholder! ✅
+
+---
+
+*Last updated: 2026-01-31 16:00 UTC*
+
+---
+
 ### Build #33: Message Templates System ✅
 - **Commit:** 30b2757
 - **Feature:** Beyond-MVP - Reusable message templates for guest communications
