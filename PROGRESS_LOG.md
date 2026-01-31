@@ -1,5 +1,84 @@
 # DockSlot Development Progress
 
+## Latest Session: 2026-01-31 (Part 6 - Guest Referral Program)
+
+### Build #49: Guest Referral Program System ✅
+- **Commit:** (pending)
+- **Feature:** Beyond-MVP - Complete referral system for organic growth
+- Database schema:
+  - `referral_settings` - Per-captain program configuration
+  - `referral_codes` - Unique guest referral codes
+  - `referrals` - Tracking who referred whom
+  - Added referral columns to bookings table
+- PostgreSQL functions:
+  - `generate_referral_code()` - Auto-generate unique codes
+  - `calculate_referral_rewards()` - Compute reward amounts
+  - `get_referral_stats()` - Captain analytics
+- API endpoints:
+  - `GET/PUT /api/referral-settings` - Configure program
+  - `GET/POST /api/referral-codes` - List/create codes
+  - `PATCH/DELETE /api/referral-codes/[id]` - Manage codes
+  - `GET /api/referral-stats` - Program statistics
+- Captain dashboard: `/dashboard/settings/referrals`
+  - Program stats (total referrals, qualified, revenue, rewards)
+  - Settings editor (reward types, amounts, expiry)
+  - Referral codes management (view, toggle, delete)
+  - Top referrers leaderboard
+- Reward types:
+  - **Percentage discount** (e.g., 10% off)
+  - **Fixed amount** (e.g., $50 off)
+  - **Free trip** (full value credit)
+- Features:
+  - Separate rewards for referrer and referee
+  - Minimum booking value threshold
+  - Reward expiration (configurable days)
+  - Custom terms and conditions
+  - Code usage tracking
+  - Revenue attribution
+- Navigation: Added "Referrals" to sidebar (Gift icon)
+
+**Code Added:**
+- `/supabase/migrations/20260131_referral_program.sql` - Schema + functions (300 lines)
+- `/app/api/referral-settings/route.ts` - Settings API (165 lines)
+- `/app/api/referral-codes/route.ts` - Codes API (125 lines)
+- `/app/api/referral-codes/[id]/route.ts` - Code management (130 lines)
+- `/app/api/referral-stats/route.ts` - Stats API (40 lines)
+- `/app/dashboard/settings/referrals/page.tsx` - Server component (20 lines)
+- `/app/dashboard/settings/referrals/ReferralProgramClient.tsx` - UI (520 lines)
+- Updated `/lib/db/types.ts` - Added referral types (75 lines)
+- Updated `/app/dashboard/components/nav-links.tsx` - Navigation
+
+**Use Cases:**
+- Reward loyal guests for bringing friends
+- Track referral ROI and top performers
+- Flexible reward configuration per captain
+- Automated code generation
+- Growth marketing without ads
+- Word-of-mouth incentivization
+
+**Next Phase:**
+- Guest referral landing page (apply code during booking)
+- Auto-generate codes for completed bookings
+- Email templates with referral codes
+- Referral tracking in booking flow
+
+**Technical Highlights:**
+- PostgreSQL RPC functions for calculations
+- Unique code generation with fallback
+- Comprehensive stats aggregation
+- Copy-to-clipboard functionality
+- Top referrers leaderboard
+- Active/inactive code management
+- Audit trail for all actions
+
+**Status:** Referral program backend & captain dashboard deployed! ✅
+
+---
+
+*Last updated: 2026-01-31 21:50 UTC*
+
+---
+
 ## Latest Session: 2026-01-31 (Part 5 - Database Schema Fix)
 
 ### Build #25: Profile Lookup Query Fix 🚨 CRITICAL FIX  

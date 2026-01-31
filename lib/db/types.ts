@@ -225,6 +225,77 @@ export interface BookingWithLogs extends BookingWithDetails {
 }
 
 // ============================================================================
+// Referral Types
+// ============================================================================
+
+export type ReferralRewardType = 'percentage' | 'fixed' | 'free_trip';
+export type ReferralStatus = 'pending' | 'qualified' | 'rewarded' | 'expired';
+
+export interface ReferralSettings {
+  captain_id: string;
+  is_enabled: boolean;
+  referrer_reward_type: ReferralRewardType;
+  referrer_reward_value: number; // percentage (1-100) or cents
+  referee_reward_type: ReferralRewardType;
+  referee_reward_value: number; // percentage (1-100) or cents
+  min_booking_value_cents: number;
+  reward_expiry_days: number;
+  terms_text: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ReferralCode {
+  id: string;
+  captain_id: string;
+  code: string;
+  guest_email: string;
+  guest_name: string;
+  times_used: number;
+  total_bookings_value_cents: number;
+  total_rewards_earned_cents: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Referral {
+  id: string;
+  captain_id: string;
+  referral_code_id: string;
+  referrer_email: string;
+  referrer_name: string;
+  referee_email: string;
+  referee_name: string;
+  booking_id: string | null;
+  booking_value_cents: number;
+  referrer_reward_cents: number;
+  referee_reward_cents: number;
+  referrer_reward_applied: boolean;
+  referee_reward_applied: boolean;
+  referrer_reward_expires_at: string | null;
+  referee_reward_expires_at: string | null;
+  status: ReferralStatus;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ReferralStats {
+  total_referrals: number;
+  qualified_referrals: number;
+  total_bookings_value_cents: number;
+  total_rewards_given_cents: number;
+  active_codes: number;
+  top_referrers: Array<{
+    code: string;
+    guest_name: string;
+    times_used: number;
+    total_bookings_value_cents: number;
+    total_rewards_earned_cents: number;
+  }>;
+}
+
+// ============================================================================
 // State Machine
 // ============================================================================
 

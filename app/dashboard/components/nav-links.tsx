@@ -13,6 +13,7 @@ import {
   List,
   Star,
   RefreshCw,
+  Gift,
   type LucideIcon,
 } from "lucide-react";
 
@@ -82,6 +83,11 @@ export const navLinks: NavLink[] = [
     href: "/dashboard/reviews",
     label: "Reviews",
     icon: Star,
+  },
+  {
+    href: "/dashboard/settings/referrals",
+    label: "Referrals",
+    icon: Gift,
   },
   {
     href: "/dashboard/analytics",
