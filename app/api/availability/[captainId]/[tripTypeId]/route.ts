@@ -2,7 +2,7 @@
 // API endpoint to fetch available booking slots for a trip type
 // Returns date-keyed object with available time slots
 
-import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { createSupabaseServiceClient } from "@/utils/supabase/service";
 import { NextRequest, NextResponse } from "next/server";
 import { 
   format, 
@@ -44,7 +44,7 @@ export async function GET(
   }
 
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabaseServiceClient();
 
     // Fetch trip type to get duration
     const { data: tripType, error: tripError } = await supabase

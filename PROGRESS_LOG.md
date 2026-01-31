@@ -846,3 +846,303 @@ Captain can provide custom slots if auto-generation doesn't work.
 
 ---
 
+## 2026-01-31 04:00 UTC (Build #7) - Stripe Payment Integration
+
+### ✅ COMPLETED: Phase 2 - Stripe Payment Integration
+
+**Feature:** Complete deposit payment flow with Stripe Checkout
+
+**Created Files:**
+1. `app/api/stripe/checkout/route.ts` - Stripe Checkout session creation
+2. `app/api/stripe/webhook/route.ts` - Payment confirmation webhook
+3. `components/booking/StripeCheckoutButton.tsx` - Payment button component
+4. `app/payment/success/page.tsx` - Payment success screen
+5. `STRIPE_SETUP.md` - Configuration documentation
+
+**Updated Files:**
+- `app/book/[captainId]/[tripTypeId]/confirm/page.tsx` - Integrated payment button
+- `package.json` - Added Stripe dependencies (@stripe/stripe-js, stripe)
+
+---
+
+**Implementation Details:**
+
+### 1. Stripe Checkout Button Component
+
+**Features:**
+- Clean, branded button design (cyan accent)
+- Loading state with spinner animation
+- Error handling with visible error messages
+- Shows deposit amount on button: "Pay $X.XX Deposit"
+- "Powered by Stripe" trust badge
+- Mobile-optimized touch target
+
+**Flow:**
+1. User clicks button
+2. Component calls `/api/stripe/checkout` with bookingId
+3. Receives Stripe Checkout session URL
+4. Redirects to Stripe-hosted payment page
+5. On success → `/payment/success`
+6. On cancel → back to confirmation page
+
+**Error Handling:**
+- Network failures
+- Missing checkout URL
+- Invalid booking ID
+- Visual error messages in red
+
+---
+
+### 2. Stripe Checkout API Endpoint
+
+**POST `/api/stripe/checkout`**
+
+**Input:**
+```json
+{
+  "bookingId": "uuid"
+}
+```
+
+**Process:**
+1. Validates Stripe secret key is configured
+2. Fetches booking with trip/vessel/profile details
+3. Checks if deposit already paid (prevents double-charge)
+4. Calculates deposit amount (50% of total)
+5. Creates Stripe Checkout session:
+   - Payment method: card only
+   - Mode: payment (one-time)
+   - Line item with trip details
+   - Success URL: `/payment/success?session_id={CHECKOUT_SESSION_ID}&booking_id={id}`
+   - Cancel URL: back to confirmation page
+   - Metadata: bookingId, depositAmount, totalAmount
+
+**Returns:**
+```json
+{
+  "sessionId": "cs_...",
+  "url": "https://checkout.stripe.com/..."
+}
+```
+
+**Security:**
+- Server-side only (API route)
+- Validates booking exists
+- Prevents double payment
+- Uses Stripe API v2026-01-28.clover
+
+---
+
+### 3. Stripe Webhook Handler
+
+**POST `/api/stripe/webhook`**
+
+**Purpose:** Receive payment confirmations from Stripe
+
+**Security:**
+- Verifies webhook signature (STRIPE_WEBHOOK_SECRET)
+- Prevents replay attacks
+- Rejects unsigned requests
+
+**Event Handling:**
+- Listens for `checkout.session.completed`
+- Extracts metadata (bookingId, depositAmount, totalAmount)
+- Updates booking:
+  - `deposit_paid_cents` = depositAmount
+  - `balance_due_cents` = totalAmount - depositAmount
+  - `status` = "confirmed" (from pending_deposit)
+  - `deposit_paid_at` = current timestamp
+- Creates booking log entry:
+  - Actor: system
+  - Type: payment_received
+  - Text: "Deposit payment received via Stripe: $X.XX"
+  - Metadata: stripe_session_id, payment_intent, amount_cents
+
+**Error Handling:**
+- Invalid signature → 400
+- Missing metadata → 400
+- Database errors → 500 (logged)
+- Returns 200 to Stripe on success
+
+**TODO (noted in code):**
+- Send confirmation email to guest
+- Send notification to captain
+
+---
+
+### 4. Payment Success Page
+
+**Route:** `/payment/success?session_id=...&booking_id=...`
+
+**Layout:**
+- Large green success checkmark
+- "Payment Successful!" heading
+- Confirmation email notice
+- Full booking summary card:
+  - Trip type, date, time
+  - Meeting location
+  - Vessel name
+- Payment breakdown card:
+  - Trip total
+  - Deposit paid (green)
+  - Balance due (cyan)
+  - "Balance due at time of trip" note
+- "What's Next" checklist:
+  - Email confirmation
+  - Waiver completion (link in email)
+  - Weather communication
+- Management link button (if token exists)
+- Back link to captain profile
+
+**UX:**
+- Mobile-first responsive
+- Celebratory tone
+- Sets clear expectations
+- Provides next actions
+- Easy access to manage booking
+
+**Data:**
+- Fetches updated booking (with deposit_paid_cents populated)
+- Shows real-time payment status
+- Pulls guest token for management link
+
+---
+
+### 5. Integration with Confirmation Page
+
+**Changes to `/book/.../confirm/page.tsx`:**
+
+**Deposit Unpaid State:**
+- Shows cyan "Secure Payment" card
+- Integrates StripeCheckoutButton
+- Button receives:
+  - `bookingId` (for API call)
+  - `depositAmount` (calculated as 50% of total)
+- Fixed bug: was using `booking.trip_type.deposit_amount` (doesn't exist)
+- Now correctly calculates: `Math.round(booking.total_price_cents * 0.5)`
+
+**Deposit Paid State:**
+- Shows green success card
+- "Deposit Received!" heading
+- Confirmation email message
+- No payment button
+
+---
+
+### 6. Configuration & Documentation
+
+**Required Environment Variables:**
+
+```bash
+# Stripe API Keys
+STRIPE_SECRET_KEY=sk_test_... # or sk_live_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_... # or pk_live_...
+
+# Webhook Secret
+STRIPE_WEBHOOK_SECRET=whsec_...
+```
+
+**Setup Steps (documented in STRIPE_SETUP.md):**
+1. Get API keys from Stripe Dashboard
+2. Configure webhook endpoint
+3. Select events: `checkout.session.completed`
+4. Copy webhook signing secret
+5. Add to Vercel environment variables
+6. Test with Stripe CLI or live payments
+
+**Testing:**
+- Development: Use Stripe CLI for webhook forwarding
+- Production: Use Vercel deployment URL
+
+---
+
+### Testing Results
+
+**Build:**
+- ✅ `npm run build` successful
+- ✅ TypeScript compilation passed
+- ✅ All routes registered correctly
+- ✅ No linting errors
+
+**Routes Added:**
+- `/api/stripe/checkout` (POST)
+- `/api/stripe/webhook` (POST)
+- `/payment/success`
+
+**Deployment:**
+- ✅ Committed to git
+- ✅ Pushed to GitHub (commit d695a92)
+- ⏳ Vercel auto-deploy triggered
+
+**Live Testing:**
+- ✅ Captain profile loads: https://dockslot-app.vercel.app/c/0f957948-88e6-491c-8aff-11a2472ba8b3
+- ⚠️ Booking flow has availability API issue (404) - separate bug to fix
+
+---
+
+### Known Issues
+
+**1. Availability API 404 Error:**
+- Status: Not yet diagnosed
+- Impact: Prevents date selection in booking flow
+- Next: Debug `/api/availability/[captainId]/[tripTypeId]` route
+- Workaround: Can test payment by manually creating bookings via DB
+
+**2. Missing Email Notifications:**
+- Status: Not implemented (noted in webhook TODO)
+- Impact: No automated emails sent
+- Next: Integrate email service (Resend, SendGrid, etc.)
+- Phase: Future enhancement
+
+---
+
+### Security Considerations
+
+**✅ Implemented:**
+- Webhook signature verification
+- Server-side payment validation
+- No client-side secret keys
+- Prevents double-payment
+- Secure token generation for management
+
+**⚠️ To Add (Future):**
+- Rate limiting on checkout endpoint
+- RLS policies on public tables (currently using service role)
+- CAPTCHA on booking form (prevent spam)
+- IP-based fraud detection
+
+---
+
+### Phase 2 Completion
+
+**Stripe Payment Features:**
+- ✅ Checkout session creation
+- ✅ Hosted payment page (Stripe)
+- ✅ Webhook payment confirmation
+- ✅ Booking status updates
+- ✅ Payment success page
+- ✅ Audit logging
+- ✅ Error handling
+- ✅ Mobile-optimized UX
+
+**Next Phase:**
+- Phase 3: Waiver System
+- Or: Fix availability API bug (blocking booking flow)
+
+---
+
+**Files Changed (Build #7):**
+- `app/api/stripe/checkout/route.ts` - NEW
+- `app/api/stripe/webhook/route.ts` - NEW
+- `components/booking/StripeCheckoutButton.tsx` - NEW
+- `app/payment/success/page.tsx` - NEW
+- `STRIPE_SETUP.md` - NEW
+- `app/book/[captainId]/[tripTypeId]/confirm/page.tsx` - Updated (fixed deposit calc)
+- `package.json` + `package-lock.json` - Added Stripe deps
+
+**Commits:**
+- `d695a92` - "feat: integrate Stripe payment processing for deposit checkout"
+
+**Build Time:** ~25 minutes (including testing + documentation)
+
+---
