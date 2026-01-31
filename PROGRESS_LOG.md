@@ -179,3 +179,115 @@
 
 ---
 
+
+## 2026-01-31 03:35 UTC (Build #3) - Guest Booking Flow Complete + Captain Profile Live
+
+### ✅ CAPTAIN PROFILE NOW LIVE
+
+**Fixed:** Added SUPABASE_SERVICE_ROLE_KEY to Vercel environment
+- Captain profile page now returns HTTP 200 (was 500)
+- Content renders correctly: "Eric's Boats", "Naughty Fox", "Sunset cruise"
+- Live URL working: https://dockslot-app.vercel.app/c/0f957948-88e6-491c-8aff-11a2472ba8b3
+
+---
+
+### ✅ BUILT: Complete Guest Booking Flow
+
+**Feature:** Two-step booking form with date selection + guest details
+
+**Created Files:**
+1. **`app/book/[captainId]/[tripTypeId]/page.tsx`** - Booking page (server component)
+2. **`app/book/[captainId]/[tripTypeId]/BookingForm.tsx`** - Interactive form (client component)
+3. **Updated `app/c/[captainId]/page.tsx`** - Added booking links
+
+---
+
+**Booking Page Features:**
+
+**Layout:**
+- Sticky header with back navigation
+- Trip context display (business name + trip type)
+- Trip summary card:
+  - Trip type, duration, vessel info
+  - Total price breakdown
+  - Deposit amount highlighted in cyan
+
+**Progressive Flow:**
+- Step 1: Date & Time Selection
+  - Integrated DateSlotPicker component
+  - Visual calendar with availability
+  - Time slot grid
+  - "Continue" button when slot selected
+
+- Step 2: Guest Details
+  - Party size dropdown (1-6, respects vessel capacity)
+  - Primary contact name (required)
+  - Email address (required, for confirmation)
+  - Phone number (optional, for coordination)
+  - Special requests textarea (optional)
+
+**UX Polish:**
+- Step indicator (1 → 2) with active highlighting
+- Form validation (disabled states until complete)
+- Error messaging for missing data
+- Back/Continue navigation between steps
+- Loading state during submission
+- Submit button shows deposit amount
+
+**Data Handling:**
+- Constructs ISO timestamps from date + time selections
+- Validates all required fields
+- POSTs to `/api/bookings` endpoint
+- Redirects to confirmation page on success
+
+**Mobile Optimization:**
+- Touch-friendly form inputs
+- Proper input types (email, tel, number)
+- Helper text under inputs
+- Adequate spacing for mobile UX
+
+---
+
+**Integration Points:**
+
+**Uses:**
+- DateSlotPicker component (prev Build #2)
+- /api/bookings POST endpoint (already exists)
+- Service role client for fetching public data
+
+**Next:**
+- Confirmation page (with payment)
+- Guest booking management via token
+- Waiver signing flow
+
+---
+
+**Testing:**
+- ✅ Build successful (npm run build)
+- ✅ Routes registered: `/book/[captainId]/[tripTypeId]`
+- ✅ TypeScript compilation passed
+- ⏳ Need to test form submission end-to-end
+- ⏳ Deploy to Vercel in progress
+
+---
+
+**Files Changed (Build #3):**
+- `app/book/[captainId]/[tripTypeId]/page.tsx` - NEW booking page
+- `app/book/[captainId]/[tripTypeId]/BookingForm.tsx` - NEW form component
+- `app/c/[captainId]/page.tsx` - Added booking links
+- `PROGRESS_LOG.md` - Updated
+
+**Commits:**
+- `6742a2f` - "feat: build guest booking flow with date/time selection"
+
+**Deployment:** In progress
+**Status:** Phase 1 booking flow ~70% complete
+
+**Remaining for Phase 1:**
+- [ ] Confirmation page
+- [ ] Payment integration (Stripe)
+- [ ] Guest booking management link/token
+- [ ] Email confirmations
+
+---
+

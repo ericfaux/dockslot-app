@@ -1,460 +1,305 @@
-'use client';
+// app/book/[captainId]/[tripTypeId]/confirm/page.tsx
+// Booking confirmation page - Shows booking details + payment (Stripe)
+// Mobile-first checkout completion
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import {
-  Anchor,
-  AlertTriangle,
-  ArrowLeft,
-  CheckCircle,
-  Copy,
-  Loader2,
-  ExternalLink,
-} from 'lucide-react';
-import { BookingSummary } from '../../../components/BookingSummary';
-import { type GuestFormData, type PassengerInfo } from '../../../components/GuestForm';
-import {
-  getPublicCaptainProfile,
-  getPublicTripType,
-  createPublicBooking,
-  type PublicCaptainProfile,
-  type PublicTripType,
-  type PublicBookingResult,
-} from '@/app/actions/public-booking';
+import { createSupabaseServiceClient } from "@/utils/supabase/service";
+import { notFound, redirect } from "next/navigation";
+import { format, parseISO } from "date-fns";
+import { Calendar, Clock, Users, MapPin, Mail, Phone, CheckCircle, CreditCard } from "lucide-react";
+import Link from "next/link";
 
-interface Props {
+interface ConfirmPageProps {
   params: Promise<{
     captainId: string;
     tripTypeId: string;
   }>;
+  searchParams: Promise<{
+    bookingId?: string;
+  }>;
 }
 
-interface BookingSelection {
-  captainId: string;
-  tripTypeId: string;
-  date: string;
-  time: string;
-}
+export default async function ConfirmPage({ params, searchParams }: ConfirmPageProps) {
+  const { captainId, tripTypeId } = await params;
+  const { bookingId } = await searchParams;
 
-export default function ConfirmBookingPage({ params }: Props) {
-  const router = useRouter();
-  const [captainId, setCaptainId] = useState<string>('');
-  const [tripTypeId, setTripTypeId] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const [profile, setProfile] = useState<PublicCaptainProfile | null>(null);
-  const [tripType, setTripType] = useState<PublicTripType | null>(null);
-  const [selection, setSelection] = useState<BookingSelection | null>(null);
-  const [guestData, setGuestData] = useState<GuestFormData | null>(null);
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [bookingResult, setBookingResult] = useState<PublicBookingResult | null>(null);
-  const [copied, setCopied] = useState(false);
-
-  // Resolve params
-  useEffect(() => {
-    params.then((p) => {
-      setCaptainId(p.captainId);
-      setTripTypeId(p.tripTypeId);
-    });
-  }, [params]);
-
-  // Load data and verify selection
-  useEffect(() => {
-    if (!captainId || !tripTypeId) return;
-
-    async function loadData() {
-      setIsLoading(true);
-      setError(null);
-
-      // Check for booking selection in session storage
-      const storedSelection = sessionStorage.getItem('bookingSelection');
-      const storedGuestData = sessionStorage.getItem('guestFormData');
-
-      if (!storedSelection) {
-        setError('No date and time selected. Please start over.');
-        setIsLoading(false);
-        return;
-      }
-
-      if (!storedGuestData) {
-        setError('No guest information found. Please go back and enter your details.');
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const parsedSelection: BookingSelection = JSON.parse(storedSelection);
-        const parsedGuestData: GuestFormData = JSON.parse(storedGuestData);
-
-        // Verify the selection matches the current URL
-        if (
-          parsedSelection.captainId !== captainId ||
-          parsedSelection.tripTypeId !== tripTypeId
-        ) {
-          setError('Selection mismatch. Please start over.');
-          setIsLoading(false);
-          return;
-        }
-
-        setSelection(parsedSelection);
-        setGuestData(parsedGuestData);
-      } catch {
-        setError('Invalid selection data. Please start over.');
-        setIsLoading(false);
-        return;
-      }
-
-      // Fetch profile and trip type
-      const [profileResult, tripTypeResult] = await Promise.all([
-        getPublicCaptainProfile(captainId),
-        getPublicTripType(captainId, tripTypeId),
-      ]);
-
-      if (!profileResult.success) {
-        setError(profileResult.error || 'Failed to load captain profile');
-        setIsLoading(false);
-        return;
-      }
-
-      if (!tripTypeResult.success) {
-        setError(tripTypeResult.error || 'Failed to load trip type');
-        setIsLoading(false);
-        return;
-      }
-
-      setProfile(profileResult.data!);
-      setTripType(tripTypeResult.data!);
-      setIsLoading(false);
-    }
-
-    loadData();
-  }, [captainId, tripTypeId]);
-
-  const handleConfirm = async () => {
-    if (!selection || !guestData || !tripType) return;
-
-    setIsSubmitting(true);
-    setSubmitError(null);
-
-    const result = await createPublicBooking({
-      captain_id: captainId,
-      trip_type_id: tripTypeId,
-      scheduled_date: selection.date,
-      scheduled_time: selection.time,
-      guest_name: guestData.guest_name,
-      guest_email: guestData.guest_email,
-      guest_phone: guestData.guest_phone || undefined,
-      party_size: guestData.party_size,
-      passengers: guestData.passengers.filter((p: PassengerInfo) => p.full_name),
-      special_requests: guestData.special_requests || undefined,
-    });
-
-    if (!result.success) {
-      setSubmitError(result.error || 'Failed to create booking');
-      setIsSubmitting(false);
-      return;
-    }
-
-    // Clear session storage
-    sessionStorage.removeItem('bookingSelection');
-    sessionStorage.removeItem('guestFormData');
-
-    setBookingResult(result.data!);
-    setIsSubmitting(false);
-  };
-
-  const handleBack = () => {
-    router.push(`/book/${captainId}/${tripTypeId}/details`);
-  };
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const formatPrice = (cents: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(cents / 100);
-  };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-[#0a1628] flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-cyan-400" />
-      </div>
-    );
+  if (!bookingId) {
+    redirect(`/book/${captainId}/${tripTypeId}`);
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-[#0a1628] flex items-center justify-center p-4">
-        <div className="max-w-md w-full text-center">
-          <div className="rounded-lg border border-slate-700 bg-slate-900 p-8">
-            <div className="flex justify-center mb-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-rose-500/10">
-                <AlertTriangle className="h-8 w-8 text-rose-400" />
-              </div>
-            </div>
-            <h1 className="text-xl font-semibold text-white mb-2">Error</h1>
-            <p className="text-slate-400 mb-4">{error}</p>
-            <Link
-              href={`/book/${captainId}`}
-              className="inline-flex items-center gap-2 text-cyan-400 hover:text-cyan-300"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Start over
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
+  const supabase = createSupabaseServiceClient();
+
+  // Fetch booking with related data
+  const { data: booking, error: bookingError } = await supabase
+    .from('bookings')
+    .select(`
+      *,
+      trip_type:trip_types(*),
+      vessel:vessels(*)
+    `)
+    .eq('id', bookingId)
+    .single();
+
+  if (bookingError || !booking) {
+    notFound();
   }
 
-  // Success state - booking created
-  if (bookingResult) {
-    const guestLookupUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/lookup?token=${bookingResult.guest_token}`;
+  // Fetch captain profile
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', captainId)
+    .single();
 
-    return (
-      <div className="min-h-screen bg-[#0a1628]">
-        {/* Header */}
-        <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm">
-          <div className="max-w-3xl mx-auto px-4 py-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-500/10">
-                <Anchor className="h-5 w-5 text-cyan-400" />
-              </div>
-              <div>
-                <h1 className="text-lg font-semibold text-white">
-                  {profile?.business_name || profile?.full_name || 'Charter Captain'}
-                </h1>
-                <p className="text-sm text-slate-400">Booking Confirmed</p>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        {/* Main Content */}
-        <main className="max-w-3xl mx-auto px-4 py-8">
-          <div className="text-center mb-8">
-            <div className="flex justify-center mb-4">
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/10">
-                <CheckCircle className="h-10 w-10 text-emerald-400" />
-              </div>
-            </div>
-            <h2 className="text-2xl font-bold text-white mb-2">Booking Request Submitted!</h2>
-            <p className="text-slate-400">
-              Your booking request has been sent to the captain. You&apos;ll receive a confirmation
-              email once the deposit is paid.
-            </p>
-          </div>
-
-          {/* Booking Details Card */}
-          <div className="rounded-lg border border-slate-700 bg-slate-900 p-6 space-y-6">
-            {/* Confirmation Code */}
-            <div className="text-center pb-6 border-b border-slate-800">
-              <p className="text-sm text-slate-400 mb-2">Your Confirmation Code</p>
-              <div className="flex items-center justify-center gap-3">
-                <span className="text-3xl font-mono font-bold text-cyan-400 tracking-wider">
-                  {bookingResult.confirmation_code}
-                </span>
-                <button
-                  onClick={() => copyToClipboard(bookingResult.confirmation_code)}
-                  className="p-2 rounded-md hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
-                  title="Copy confirmation code"
-                >
-                  <Copy className="h-5 w-5" />
-                </button>
-              </div>
-              {copied && (
-                <p className="text-sm text-emerald-400 mt-2">Copied to clipboard!</p>
-              )}
-            </div>
-
-            {/* Next Steps */}
-            <div>
-              <h3 className="text-lg font-semibold text-white mb-3">Next Steps</h3>
-              <ol className="space-y-3 text-sm text-slate-400">
-                <li className="flex gap-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-cyan-500/20 text-cyan-400 text-xs font-medium">
-                    1
-                  </span>
-                  <span>
-                    Pay your deposit of{' '}
-                    <strong className="text-amber-400">
-                      {formatPrice(bookingResult.deposit_amount_cents)}
-                    </strong>{' '}
-                    to confirm your booking.
-                  </span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-cyan-500/20 text-cyan-400 text-xs font-medium">
-                    2
-                  </span>
-                  <span>
-                    You&apos;ll receive a confirmation email with trip details and meeting
-                    instructions.
-                  </span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-cyan-500/20 text-cyan-400 text-xs font-medium">
-                    3
-                  </span>
-                  <span>
-                    Pay the remaining balance of{' '}
-                    <strong className="text-white">
-                      {formatPrice(
-                        bookingResult.total_price_cents - bookingResult.deposit_amount_cents
-                      )}
-                    </strong>{' '}
-                    on the day of your trip.
-                  </span>
-                </li>
-              </ol>
-            </div>
-
-            {/* Guest Lookup Link */}
-            <div className="pt-6 border-t border-slate-800">
-              <p className="text-sm text-slate-400 mb-3">
-                Save this link to view or manage your booking:
-              </p>
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  readOnly
-                  value={guestLookupUrl}
-                  className="flex-1 rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-300 truncate"
-                />
-                <button
-                  onClick={() => copyToClipboard(guestLookupUrl)}
-                  className="px-3 py-2 rounded-md bg-slate-800 hover:bg-slate-700 text-white text-sm transition-colors"
-                >
-                  Copy
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Back to Captain Page */}
-          <div className="mt-8 text-center">
-            <Link
-              href={`/book/${captainId}`}
-              className="inline-flex items-center gap-2 text-cyan-400 hover:text-cyan-300"
-            >
-              Book another trip
-              <ExternalLink className="h-4 w-4" />
-            </Link>
-          </div>
-        </main>
-
-        {/* Footer */}
-        <footer className="border-t border-slate-800 mt-auto">
-          <div className="max-w-3xl mx-auto px-4 py-6">
-            <p className="text-center text-sm text-slate-500">
-              Powered by DockSlot
-            </p>
-          </div>
-        </footer>
-      </div>
-    );
+  if (!profile) {
+    notFound();
   }
 
-  // Review state - show booking summary
+  // Calculate amounts
+  const depositPaid = booking.deposit_paid_cents;
+  const balanceDue = booking.balance_due_cents;
+  const totalPrice = booking.total_price_cents;
+  const needsDeposit = depositPaid === 0;
+
   return (
-    <div className="min-h-screen bg-[#0a1628]">
+    <div className="min-h-screen bg-slate-950">
       {/* Header */}
-      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-3xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Link
-                href={`/book/${captainId}/${tripTypeId}/details`}
-                className="p-2 rounded-md hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </Link>
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-500/10">
-                  <Anchor className="h-5 w-5 text-cyan-400" />
-                </div>
-                <div>
-                  <h1 className="text-lg font-semibold text-white">
-                    {profile?.business_name || profile?.full_name || 'Charter Captain'}
-                  </h1>
-                  <p className="text-sm text-slate-400">Review & Confirm</p>
-                </div>
-              </div>
+      <div className="border-b border-slate-800 bg-slate-900">
+        <div className="mx-auto max-w-3xl px-4 py-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-500/20">
+              <CheckCircle className="h-6 w-6 text-green-400" />
             </div>
-
-            {/* Step Indicator */}
-            <div className="hidden sm:flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-cyan-500 text-white text-sm font-medium">
-                4
-              </span>
-              <span className="text-sm text-slate-400">of 4</span>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-100">
+                {needsDeposit ? 'Complete Your Booking' : 'Booking Confirmed!'}
+              </h1>
+              <p className="text-sm text-slate-400">
+                Booking #{booking.id.slice(0, 8)}
+              </p>
             </div>
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Main Content */}
-      <main className="max-w-3xl mx-auto px-4 py-8">
-        {/* Page Title */}
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-white mb-2">Review Your Booking</h2>
-          <p className="text-slate-400">
-            Please review your booking details before submitting.
-          </p>
-        </div>
+      <div className="mx-auto max-w-3xl px-4 py-8">
+        {/* Booking Details Card */}
+        <div className="mb-6 rounded-lg border border-slate-700 bg-slate-800 p-6">
+          <h2 className="mb-4 text-lg font-semibold text-slate-100">
+            Trip Details
+          </h2>
 
-        {/* Mobile Step Indicator */}
-        <div className="sm:hidden mb-6">
-          <div className="flex items-center gap-2 text-sm text-slate-400">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-cyan-500 text-white text-xs font-medium">
-              4
-            </span>
-            <span>Step 4 of 4: Review & Confirm</span>
+          <div className="space-y-4">
+            {/* Trip Type */}
+            <div className="flex items-start gap-3">
+              <Calendar className="mt-0.5 h-5 w-5 flex-shrink-0 text-cyan-400" />
+              <div>
+                <div className="font-medium text-slate-100">
+                  {booking.trip_type?.title || 'Charter Trip'}
+                </div>
+                <div className="mt-1 text-sm text-slate-400">
+                  {format(parseISO(booking.scheduled_start), 'EEEE, MMMM d, yyyy')}
+                </div>
+              </div>
+            </div>
+
+            {/* Time */}
+            <div className="flex items-start gap-3">
+              <Clock className="mt-0.5 h-5 w-5 flex-shrink-0 text-cyan-400" />
+              <div>
+                <div className="font-medium text-slate-100">
+                  {format(parseISO(booking.scheduled_start), 'h:mm a')} - {format(parseISO(booking.scheduled_end), 'h:mm a')}
+                </div>
+                <div className="mt-1 text-sm text-slate-400">
+                  {booking.trip_type?.duration_hours} hours
+                </div>
+              </div>
+            </div>
+
+            {/* Party Size */}
+            <div className="flex items-start gap-3">
+              <Users className="mt-0.5 h-5 w-5 flex-shrink-0 text-cyan-400" />
+              <div>
+                <div className="font-medium text-slate-100">
+                  {booking.party_size} {booking.party_size === 1 ? 'guest' : 'guests'}
+                </div>
+                {booking.vessel && (
+                  <div className="mt-1 text-sm text-slate-400">
+                    Aboard {booking.vessel.name}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Meeting Spot */}
+            {profile.meeting_spot_name && (
+              <div className="flex items-start gap-3">
+                <MapPin className="mt-0.5 h-5 w-5 flex-shrink-0 text-cyan-400" />
+                <div>
+                  <div className="font-medium text-slate-100">
+                    {profile.meeting_spot_name}
+                  </div>
+                  {profile.meeting_spot_address && (
+                    <div className="mt-1 text-sm text-slate-400">
+                      {profile.meeting_spot_address}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Booking Summary */}
-        {tripType && selection && guestData && (
-          <BookingSummary
-            tripTitle={tripType.title}
-            tripDescription={tripType.description}
-            durationHours={tripType.duration_hours}
-            priceTotal={tripType.price_total}
-            depositAmount={tripType.deposit_amount}
-            scheduledDate={selection.date}
-            scheduledTime={selection.time}
-            guestData={guestData}
-            meetingSpotName={profile?.meeting_spot_name}
-            meetingSpotAddress={profile?.meeting_spot_address}
-            cancellationPolicy={profile?.cancellation_policy}
-            onConfirm={handleConfirm}
-            onBack={handleBack}
-            isSubmitting={isSubmitting}
-            submitError={submitError}
-          />
-        )}
-      </main>
+        {/* Guest Information Card */}
+        <div className="mb-6 rounded-lg border border-slate-700 bg-slate-800 p-6">
+          <h2 className="mb-4 text-lg font-semibold text-slate-100">
+            Guest Information
+          </h2>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-800 mt-auto">
-        <div className="max-w-3xl mx-auto px-4 py-6">
-          <p className="text-center text-sm text-slate-500">
-            Powered by DockSlot
-          </p>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <Mail className="h-4 w-4 text-slate-400" />
+              <div>
+                <div className="text-sm text-slate-400">Primary Contact</div>
+                <div className="font-medium text-slate-100">{booking.guest_name}</div>
+                <div className="text-sm text-slate-300">{booking.guest_email}</div>
+              </div>
+            </div>
+
+            {booking.guest_phone && (
+              <div className="flex items-center gap-3">
+                <Phone className="h-4 w-4 text-slate-400" />
+                <div>
+                  <div className="text-sm text-slate-400">Phone</div>
+                  <div className="font-medium text-slate-100">{booking.guest_phone}</div>
+                </div>
+              </div>
+            )}
+
+            {booking.special_requests && (
+              <div className="mt-4 rounded-lg border border-slate-700 bg-slate-900 p-4">
+                <div className="mb-1 text-xs font-medium uppercase tracking-wider text-slate-400">
+                  Special Requests
+                </div>
+                <div className="text-sm text-slate-300">{booking.special_requests}</div>
+              </div>
+            )}
+          </div>
         </div>
-      </footer>
+
+        {/* Payment Summary Card */}
+        <div className="mb-6 rounded-lg border border-slate-700 bg-slate-800 p-6">
+          <h2 className="mb-4 text-lg font-semibold text-slate-100">
+            Payment Summary
+          </h2>
+
+          <div className="space-y-3">
+            <div className="flex justify-between text-slate-300">
+              <span>Trip Total</span>
+              <span className="font-medium">${(totalPrice / 100).toFixed(2)}</span>
+            </div>
+
+            {depositPaid > 0 && (
+              <div className="flex justify-between text-green-400">
+                <span>Deposit Paid</span>
+                <span className="font-medium">-${(depositPaid / 100).toFixed(2)}</span>
+              </div>
+            )}
+
+            <div className="border-t border-slate-700 pt-3">
+              <div className="flex justify-between text-lg font-bold">
+                <span className="text-slate-100">
+                  {needsDeposit ? 'Deposit Due Today' : 'Balance Due at Trip'}
+                </span>
+                <span className="text-cyan-400">
+                  ${((needsDeposit ? (booking.trip_type?.deposit_amount || 0) : balanceDue) / 100).toFixed(2)}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Payment Section */}
+        {needsDeposit ? (
+          <div className="mb-6 rounded-lg border border-cyan-500/50 bg-cyan-500/10 p-6">
+            <div className="mb-4 flex items-center gap-3">
+              <CreditCard className="h-6 w-6 text-cyan-400" />
+              <h2 className="text-lg font-semibold text-slate-100">
+                Secure Payment
+              </h2>
+            </div>
+
+            <p className="mb-4 text-sm text-slate-300">
+              Complete your booking by paying the deposit. You'll receive a confirmation email
+              with all trip details and your booking management link.
+            </p>
+
+            <button
+              className="w-full rounded-lg bg-cyan-500 px-6 py-4 font-semibold text-slate-900 transition-all hover:bg-cyan-400"
+            >
+              Pay ${((booking.trip_type?.deposit_amount || 0) / 100).toFixed(2)} Deposit
+            </button>
+
+            <div className="mt-3 text-center text-xs text-slate-500">
+              Powered by Stripe • Secure payment processing
+            </div>
+          </div>
+        ) : (
+          <div className="mb-6 rounded-lg border border-green-500/50 bg-green-500/10 p-6 text-center">
+            <CheckCircle className="mx-auto mb-3 h-12 w-12 text-green-400" />
+            <h3 className="mb-2 text-lg font-semibold text-slate-100">
+              Deposit Received!
+            </h3>
+            <p className="text-sm text-slate-300">
+              Your booking is confirmed. We've sent a confirmation email to {booking.guest_email}
+            </p>
+          </div>
+        )}
+
+        {/* What's Next */}
+        <div className="rounded-lg border border-slate-700 bg-slate-800 p-6">
+          <h2 className="mb-4 text-lg font-semibold text-slate-100">
+            What's Next?
+          </h2>
+
+          <ul className="space-y-3 text-sm text-slate-300">
+            <li className="flex items-start gap-2">
+              <span className="text-cyan-400">•</span>
+              <span>
+                You'll receive a confirmation email with your booking details and a management link
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-cyan-400">•</span>
+              <span>
+                The remaining balance of ${(balanceDue / 100).toFixed(2)} is due at the time of your trip
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-cyan-400">•</span>
+              <span>
+                You'll need to sign a waiver before boarding (we'll send you a link)
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-cyan-400">•</span>
+              <span>
+                The captain will contact you if there are any weather concerns
+              </span>
+            </li>
+          </ul>
+        </div>
+
+        {/* Footer Actions */}
+        <div className="mt-8 text-center">
+          <Link
+            href={`/c/${captainId}`}
+            className="text-sm text-cyan-400 hover:text-cyan-300"
+          >
+            ← Back to captain profile
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }
