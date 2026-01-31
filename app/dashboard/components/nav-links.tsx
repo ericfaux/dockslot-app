@@ -11,6 +11,7 @@ import {
   FileText,
   CreditCard,
   List,
+  Star,
   type LucideIcon,
 } from "lucide-react";
 
@@ -70,6 +71,11 @@ export const navLinks: NavLink[] = [
     href: "/dashboard/guests",
     label: "Guests",
     icon: Users,
+  },
+  {
+    href: "/dashboard/reviews",
+    label: "Reviews",
+    icon: Star,
   },
   {
     href: "/dashboard/analytics",

@@ -1029,6 +1029,89 @@ Reviewed Phase 1 from HEARTBEAT.md roadmap. **Findings:**
 
 ---
 
+### Build #40: Advanced Booking Reports Dashboard ✅
+- **Commit:** e5d1e4e
+- **Feature:** Beyond-MVP - Comprehensive booking analytics and reports
+- API endpoint: `GET /api/reports/bookings`
+  - Query parameters: startDate, endDate, status, vesselId, tripTypeId
+  - Returns metrics, breakdowns, charts, and raw booking data
+  - Aggregate calculations for all metrics
+- Reports dashboard at `/dashboard/reports-advanced`
+- Comprehensive filter system:
+  - Date range (start/end dates)
+  - Booking status dropdown
+  - Vessel selector
+  - Trip type selector
+  - "Clear All Filters" button
+- Six key metrics cards:
+  - **Total Bookings** - Count of all bookings
+  - **Total Revenue** - Sum of fully paid bookings
+  - **Total Guests** - Sum of party sizes
+  - **Deposits Collected** - Sum of all deposits
+  - **Average Booking Value** - Mean booking price
+  - **Average Party Size** - Mean guests per booking
+- Visual breakdowns:
+  - **Revenue by Month** - Bar chart with gradient bars
+  - **Status Breakdown** - Percentage distribution
+  - **Bookings by Vessel** - Sorted by volume
+  - **Bookings by Trip Type** - Sorted by popularity
+- Beautiful CSS-based visualizations:
+  - Gradient progress bars
+  - Responsive layouts
+  - Maritime color schemes
+  - Clean percentage displays
+- Real-time updates on filter changes
+- Loading states with spinners
+- Added "Analytics Reports" to navigation sidebar
+
+**Code Added:**
+- `/app/api/reports/bookings/route.ts` - Reports API (180 lines)
+- `/app/dashboard/reports-advanced/page.tsx` - Server component (60 lines)
+- `/app/dashboard/reports-advanced/ReportsClient.tsx` - Client UI (490 lines)
+- Updated `/app/dashboard/components/nav-links.tsx` - Navigation link
+
+**Metrics Calculated:**
+- Total bookings (count)
+- Total revenue (fully_paid only)
+- Deposits collected (deposit_paid + fully_paid)
+- Total guests (sum of party_size)
+- Average booking value (mean total_price)
+- Average party size (mean party_size)
+
+**Breakdowns:**
+- By status (confirmed, completed, cancelled, etc.)
+- By payment status (unpaid, deposit_paid, fully_paid, etc.)
+- By vessel (all bookings per vessel)
+- By trip type (all bookings per trip type)
+
+**Use Cases:**
+- Monthly performance review
+- Revenue trend analysis
+- Vessel utilization comparison
+- Trip type popularity tracking
+- Seasonal pattern identification
+- Status distribution monitoring
+- Custom date range reports
+- Filter by specific vessel/trip performance
+
+**Technical Highlights:**
+- Efficient aggregate queries
+- Client-side filtering with URL params
+- CSS-only visualizations (no chart library)
+- Percentage calculations with visual bars
+- Responsive grid layouts
+- Real-time data refresh
+- TypeScript type safety
+- Error handling and loading states
+
+**Status:** Advanced reports dashboard deployed! ✅
+
+---
+
+*Last updated: 2026-01-31 11:45 UTC*
+
+---
+
 ### Build #33: Message Templates System ✅
 - **Commit:** 30b2757
 - **Feature:** Beyond-MVP - Reusable message templates for guest communications
