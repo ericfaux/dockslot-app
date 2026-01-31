@@ -29,6 +29,7 @@ import {
   clearWeatherHold,
   createRescheduleOffers,
 } from '@/app/actions/bookings';
+import BookingNotesEditor from '../components/BookingNotesEditor';
 
 interface BookingDetailPanelProps {
   booking: CalendarBooking | null;
@@ -299,6 +300,14 @@ export function BookingDetailPanel({
               </span>
             </div>
           </div>
+
+          {/* Captain's Notes & Tags */}
+          <BookingNotesEditor
+            bookingId={booking.id}
+            initialNotes={booking.captain_notes || null}
+            initialTags={booking.tags || []}
+            onUpdate={onUpdated}
+          />
 
           {/* Reschedule Offers (for weather hold) */}
           {booking.status === 'weather_hold' && (

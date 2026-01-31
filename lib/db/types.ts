@@ -101,6 +101,8 @@ export interface Booking {
   weather_hold_reason: string | null;
   original_date_if_rescheduled: string | null;
   internal_notes: string | null;
+  captain_notes: string | null;
+  tags: string[];
   created_at: string;
   balance_due_cents: number;
   deposit_paid_cents: number;

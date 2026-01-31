@@ -25,6 +25,7 @@ const BOOKING_COLUMNS = `
   payment_status, total_price_cents, deposit_paid_cents, balance_due_cents,
   weather_hold_reason, original_date_if_rescheduled, internal_notes,
   special_requests, captain_instructions, guest_count_confirmed,
+  captain_notes, tags,
   created_at, updated_at
 ` as const;
 
@@ -55,6 +56,8 @@ interface RawBookingData {
   weather_hold_reason: string | null;
   original_date_if_rescheduled: string | null;
   internal_notes: string | null;
+  captain_notes: string | null;
+  tags: string[];
   special_requests: string | null;
   captain_instructions: string | null;
   guest_count_confirmed: number | null;
