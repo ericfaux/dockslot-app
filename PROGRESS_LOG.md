@@ -1693,6 +1693,43 @@ Reviewed Phase 1 from HEARTBEAT.md roadmap. **Findings:**
 
 ---
 
+### Build #48: Waiver System - Phase 3 (In Progress) 🔄
+- **Commit:** 32505ca  
+- **Feature:** Starting Phase 3 - Liability waiver system for charter bookings
+- **Status:** Backend started, UI next
+- Database schema complete:
+  - `waiver_templates` - Reusable liability waiver templates
+  - `waiver_signatures` - Signed waivers with signature data
+  - `passenger_waivers` - Per-passenger waiver tracking
+- PostgreSQL function: `check_booking_waivers_complete()`
+  - Verifies all passengers have signed waivers
+- API endpoints (partial):
+  - `GET/POST /api/waiver-templates` - List/create templates
+  - `PATCH/DELETE /api/waiver-templates/[id]` - Update/delete templates
+- Features implemented:
+  - Create waiver templates
+  - Set default template
+  - Update/delete templates
+  - Captain ownership verification
+  - Signature data storage (base64)
+  - IP address and user agent tracking
+  - Immutable waiver content snapshot
+  - Minor/guardian support
+
+**Next Steps:**
+- Guest waiver signing page
+- Signature pad integration
+- Per-passenger waiver UI
+- Captain waiver management dashboard
+
+**Status:** Phase 3 in progress! 🔄
+
+---
+
+*Last updated: 2026-01-31 17:00 UTC*
+
+---
+
 ### Build #33: Message Templates System ✅
 - **Commit:** 30b2757
 - **Feature:** Beyond-MVP - Reusable message templates for guest communications
