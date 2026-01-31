@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { addDays, addHours, format, parseISO, isBefore, isAfter, startOfDay } from 'date-fns';
+import { sendWeatherHoldNotification } from '@/lib/email/resend';
 
 interface WeatherHoldRequest {
   reason?: string;
@@ -179,7 +180,41 @@ export async function POST(
       }
     }
 
-    // TODO: Send email/SMS to guest with reschedule link
+    // Send weather hold notification email to guest
+    if (process.env.RESEND_API_KEY) {
+      // Fetch guest token for reschedule link
+      const { data: guestToken } = await supabase
+        .from('guest_tokens')
+        .select('token')
+        .eq('booking_id', bookingId)
+        .single();
+
+      if (guestToken) {
+        const rescheduleUrl = `${request.nextUrl.origin}/reschedule/${guestToken.token}`;
+        
+        // Fetch captain profile for name
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('business_name, full_name')
+          .eq('id', user.id)
+          .single();
+
+        const tripType = booking.trip_type?.title || 'Charter Trip';
+        
+        sendWeatherHoldNotification({
+          to: booking.guest_email,
+          guestName: booking.guest_name,
+          tripType,
+          originalDate: format(parseISO(booking.scheduled_start), 'EEEE, MMMM d, yyyy'),
+          reason: reason || 'Weather conditions require rescheduling for your safety',
+          rescheduleUrl,
+          captainName: profile?.business_name || profile?.full_name || 'Your Captain',
+        }).catch(err => {
+          console.error('Failed to send weather hold email:', err);
+          // Don't fail the operation if email fails
+        });
+      }
+    }
 
     return NextResponse.json({
       success: true,

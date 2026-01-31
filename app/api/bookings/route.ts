@@ -3,8 +3,9 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { createSupabaseServiceClient } from '@/utils/supabase/service';
 import { getBookingsWithFilters, BookingListFilters } from '@/lib/data/bookings';
 import { BookingStatus, BOOKING_STATUSES } from '@/lib/db/types';
-import { addMonths } from 'date-fns';
+import { addMonths, format } from 'date-fns';
 import crypto from 'crypto';
+import { sendBookingConfirmation } from '@/lib/email/resend';
 
 const VALID_SORT_FIELDS = ['scheduled_start', 'guest_name', 'status', 'created_at'] as const;
 type SortField = (typeof VALID_SORT_FIELDS)[number];
@@ -249,6 +250,44 @@ export async function POST(request: NextRequest) {
         actor_type: 'guest',
         new_value: { status: 'pending_deposit' },
       });
+
+    // Send booking confirmation email (async, don't block response)
+    if (process.env.RESEND_API_KEY) {
+      // Fetch trip type and vessel details for email
+      const { data: tripDetails } = await supabase
+        .from('trip_types')
+        .select('title, duration_hours')
+        .eq('id', trip_type_id)
+        .single();
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('business_name, full_name, meeting_spot_name')
+        .eq('id', captain_id)
+        .single();
+
+      if (tripDetails && profile) {
+        const managementUrl = `${request.nextUrl.origin}/manage/${token}`;
+        
+        sendBookingConfirmation({
+          to: guest_email,
+          guestName: guest_name,
+          tripType: tripDetails.title,
+          date: format(new Date(scheduled_start), 'EEEE, MMMM d, yyyy'),
+          time: format(new Date(scheduled_start), 'h:mm a'),
+          vessel: 'Your charter vessel', // TODO: Add vessel name when available
+          meetingSpot: profile.meeting_spot_name || 'Meeting spot details in booking',
+          captainName: profile.business_name || profile.full_name || 'Your Captain',
+          totalPrice: `$${((total_price_cents || 0) / 100).toFixed(2)}`,
+          depositPaid: `$${((deposit_paid_cents || 0) / 100).toFixed(2)}`,
+          balanceDue: `$${((balance_due_cents || 0) / 100).toFixed(2)}`,
+          managementUrl,
+        }).catch(err => {
+          console.error('Failed to send booking confirmation email:', err);
+          // Don't fail the booking if email fails
+        });
+      }
+    }
 
     return NextResponse.json({
       booking,

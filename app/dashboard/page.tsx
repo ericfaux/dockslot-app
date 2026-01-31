@@ -257,48 +257,60 @@ function HorizonWidget({ captainName = "Captain", timezone = "America/New_York",
 
       {/* Weather Data Overlay - Top Right */}
       <div className="absolute right-4 top-4 flex flex-col gap-3 sm:flex-row sm:gap-6">
-        {weatherData.waterTemp !== null && (
-          <div className="flex items-center gap-2">
-            <ThermometerSun className="h-4 w-4 text-cyan-400" />
-            <div className="text-right sm:text-left">
-              <span className="font-mono text-lg font-bold text-cyan-400">
-                {weatherData.waterTemp}°
-              </span>
-              <span className="ml-1 text-[10px] uppercase tracking-wider text-slate-500">
-                Water
-              </span>
-            </div>
-          </div>
-        )}
-        {weatherData.windSpeed !== null && (
-          <div className="flex items-center gap-2">
-            <Wind className="h-4 w-4 text-cyan-400" />
-            <div className="text-right sm:text-left">
-              <span className="font-mono text-lg font-bold text-cyan-400">
-                {weatherData.windSpeed}
-              </span>
-              {weatherData.windDirection && (
-                <span className="ml-1 font-mono text-sm text-cyan-400">
-                  {weatherData.windDirection}
-                </span>
-              )}
-              <span className="ml-1 text-[10px] uppercase tracking-wider text-slate-500">
-                kts
-              </span>
-            </div>
-          </div>
-        )}
-        {weatherData.sunset && (
-          <div className="flex items-center gap-2">
-            <Sun className="h-4 w-4 text-amber-400" />
-            <div className="text-right sm:text-left">
-              <span className="font-mono text-lg font-bold text-amber-400">
-                {weatherData.sunset}
-              </span>
-              <span className="ml-1 text-[10px] uppercase tracking-wider text-slate-500">
-                Sunset
-              </span>
-            </div>
+        {/* Show weather data if available */}
+        {(weatherData.waterTemp !== null || weatherData.windSpeed !== null || weatherData.sunset) ? (
+          <>
+            {weatherData.waterTemp !== null && (
+              <div className="flex items-center gap-2">
+                <ThermometerSun className="h-4 w-4 text-cyan-400" />
+                <div className="text-right sm:text-left">
+                  <span className="font-mono text-lg font-bold text-cyan-400">
+                    {weatherData.waterTemp}°
+                  </span>
+                  <span className="ml-1 text-[10px] uppercase tracking-wider text-slate-500">
+                    Water
+                  </span>
+                </div>
+              </div>
+            )}
+            {weatherData.windSpeed !== null && (
+              <div className="flex items-center gap-2">
+                <Wind className="h-4 w-4 text-cyan-400" />
+                <div className="text-right sm:text-left">
+                  <span className="font-mono text-lg font-bold text-cyan-400">
+                    {weatherData.windSpeed}
+                  </span>
+                  {weatherData.windDirection && (
+                    <span className="ml-1 font-mono text-sm text-cyan-400">
+                      {weatherData.windDirection}
+                    </span>
+                  )}
+                  <span className="ml-1 text-[10px] uppercase tracking-wider text-slate-500">
+                    kts
+                  </span>
+                </div>
+              </div>
+            )}
+            {weatherData.sunset && (
+              <div className="flex items-center gap-2">
+                <Sun className="h-4 w-4 text-amber-400" />
+                <div className="text-right sm:text-left">
+                  <span className="font-mono text-lg font-bold text-amber-400">
+                    {weatherData.sunset}
+                  </span>
+                  <span className="ml-1 text-[10px] uppercase tracking-wider text-slate-500">
+                    Sunset
+                  </span>
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          /* Show helpful message if no weather data */
+          <div className="rounded-lg bg-slate-800/80 px-4 py-2 backdrop-blur-sm">
+            <p className="text-xs text-slate-400">
+              Set meeting spot in Settings to see weather
+            </p>
           </div>
         )}
       </div>

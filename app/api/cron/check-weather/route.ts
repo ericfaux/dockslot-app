@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
         guest_name,
         guest_email,
         trip_type:trip_types(title),
-        profile:profiles!captain_id(business_name, full_name, meeting_spot_latitude, meeting_spot_longitude)
+        profile:profiles!captain_id(business_name, full_name, email, meeting_spot_latitude, meeting_spot_longitude)
       `)
       .in('status', ['confirmed', 'pending_deposit'])
       .gte('scheduled_start', tomorrow.toISOString())
@@ -73,8 +73,10 @@ export async function GET(request: NextRequest) {
           const weatherReason = generateWeatherHoldReason(conditions);
 
           // Send email to captain
+          const captainEmail = profile.email || `captain-${booking.captain_id}@dockslot.app`;
+          
           const emailResult = await sendEmail({
-            to: `${booking.captain_id}@example.com`, // TODO: Get actual captain email
+            to: captainEmail,
             subject: `⚠️ Weather Alert: ${tripType.title} in ${hoursUntil}h`,
             html: weatherAlertEmailTemplate({
               captainName: profile.business_name || profile.full_name,
