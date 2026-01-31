@@ -33,6 +33,7 @@ import {
 import BookingNotesEditor from '../components/BookingNotesEditor';
 import BookingTimeline from '../components/BookingTimeline';
 import DuplicateBookingModal from '../components/DuplicateBookingModal';
+import BookingQuickActions from '../components/BookingQuickActions';
 
 interface BookingDetailPanelProps {
   booking: CalendarBooking | null;
@@ -245,6 +246,20 @@ export function BookingDetailPanel({
               </span>
             </div>
           </div>
+
+          {/* Quick Actions */}
+          <BookingQuickActions
+            bookingId={booking.id}
+            bookingStatus={booking.status}
+            guestEmail={booking.guest_email}
+            guestName={booking.guest_name}
+            onAction={(action) => {
+              if (action === 'complete') handleAction('complete')
+              if (action === 'weather') setShowWeatherModal(true)
+              if (action === 'balance') handleRequestBalancePayment()
+              if (action === 'duplicate') setShowDuplicateModal(true)
+            }}
+          />
 
           {/* Trip Details */}
           <div className="space-y-3">
