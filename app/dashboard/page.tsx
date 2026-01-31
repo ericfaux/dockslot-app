@@ -7,6 +7,7 @@ export const dynamic = 'force-dynamic';
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { getBookingsWithFilters } from "@/lib/data/bookings";
 import { format, parseISO } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 import {
   Anchor,
   Wind,
@@ -22,17 +23,14 @@ import {
 import { FloatPlanCard } from "./components/FloatPlanCard";
 import { BookingLinkCard } from "@/components/BookingLinkCard";
 import { BookingStatus, ACTIVE_BOOKING_STATUSES } from "@/lib/db/types";
+import { checkMarineConditions } from "@/lib/weather/noaa";
 
-// ═══════════════════════════════════════════════════════════════════════════
-// MOCK DATA - Weather would come from external API in production
-// ═══════════════════════════════════════════════════════════════════════════
-
-const WEATHER_DATA = {
-  waterTemp: 72,
-  windSpeed: 8,
-  windDirection: "NE",
-  sunset: "7:42 PM",
-};
+interface WeatherData {
+  waterTemp: number | null;
+  windSpeed: number | null;
+  windDirection: string | null;
+  sunset: string | null;
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // FUEL GAUGE COMPONENT - Circular instrument gauge
@@ -181,12 +179,16 @@ function RockerSwitch({ icon, label, onClick }: RockerSwitchProps) {
 
 interface HorizonWidgetProps {
   captainName?: string;
+  timezone?: string;
+  weatherData: WeatherData;
 }
 
-function HorizonWidget({ captainName = "Captain" }: HorizonWidgetProps) {
-  // Calculate NOW cursor position (hours since midnight / 24)
+function HorizonWidget({ captainName = "Captain", timezone = "America/New_York", weatherData }: HorizonWidgetProps) {
+  // Calculate NOW cursor position in captain's timezone
   const now = new Date();
-  const hoursElapsed = now.getHours() + now.getMinutes() / 60;
+  const tzNow = formatInTimeZone(now, timezone, "yyyy-MM-dd'T'HH:mm:ss");
+  const tzDate = new Date(tzNow);
+  const hoursElapsed = tzDate.getHours() + tzDate.getMinutes() / 60;
   const nowPosition = (hoursElapsed / 24) * 100;
 
   return (
@@ -253,42 +255,50 @@ function HorizonWidget({ captainName = "Captain" }: HorizonWidgetProps) {
 
       {/* Weather Data Overlay - Top Right */}
       <div className="absolute right-4 top-4 flex flex-col gap-3 sm:flex-row sm:gap-6">
-        <div className="flex items-center gap-2">
-          <ThermometerSun className="h-4 w-4 text-cyan-400" />
-          <div className="text-right sm:text-left">
-            <span className="font-mono text-lg font-bold text-cyan-400">
-              {WEATHER_DATA.waterTemp}°
-            </span>
-            <span className="ml-1 text-[10px] uppercase tracking-wider text-slate-500">
-              Water
-            </span>
+        {weatherData.waterTemp !== null && (
+          <div className="flex items-center gap-2">
+            <ThermometerSun className="h-4 w-4 text-cyan-400" />
+            <div className="text-right sm:text-left">
+              <span className="font-mono text-lg font-bold text-cyan-400">
+                {weatherData.waterTemp}°
+              </span>
+              <span className="ml-1 text-[10px] uppercase tracking-wider text-slate-500">
+                Water
+              </span>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Wind className="h-4 w-4 text-cyan-400" />
-          <div className="text-right sm:text-left">
-            <span className="font-mono text-lg font-bold text-cyan-400">
-              {WEATHER_DATA.windSpeed}
-            </span>
-            <span className="ml-1 font-mono text-sm text-cyan-400">
-              {WEATHER_DATA.windDirection}
-            </span>
-            <span className="ml-1 text-[10px] uppercase tracking-wider text-slate-500">
-              kts
-            </span>
+        )}
+        {weatherData.windSpeed !== null && (
+          <div className="flex items-center gap-2">
+            <Wind className="h-4 w-4 text-cyan-400" />
+            <div className="text-right sm:text-left">
+              <span className="font-mono text-lg font-bold text-cyan-400">
+                {weatherData.windSpeed}
+              </span>
+              {weatherData.windDirection && (
+                <span className="ml-1 font-mono text-sm text-cyan-400">
+                  {weatherData.windDirection}
+                </span>
+              )}
+              <span className="ml-1 text-[10px] uppercase tracking-wider text-slate-500">
+                kts
+              </span>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Sun className="h-4 w-4 text-amber-400" />
-          <div className="text-right sm:text-left">
-            <span className="font-mono text-lg font-bold text-amber-400">
-              {WEATHER_DATA.sunset}
-            </span>
-            <span className="ml-1 text-[10px] uppercase tracking-wider text-slate-500">
-              Sunset
-            </span>
+        )}
+        {weatherData.sunset && (
+          <div className="flex items-center gap-2">
+            <Sun className="h-4 w-4 text-amber-400" />
+            <div className="text-right sm:text-left">
+              <span className="font-mono text-lg font-bold text-amber-400">
+                {weatherData.sunset}
+              </span>
+              <span className="ml-1 text-[10px] uppercase tracking-wider text-slate-500">
+                Sunset
+              </span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Tide Wave SVG */}
@@ -391,6 +401,60 @@ export default async function DashboardPage() {
   const displayName =
     user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Captain";
 
+  // Fetch captain's profile for weather data
+  let captainProfile = null;
+  let captainTimezone = "America/New_York";
+  let weatherData: WeatherData = {
+    waterTemp: null,
+    windSpeed: null,
+    windDirection: null,
+    sunset: null,
+  };
+
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('meeting_spot_latitude, meeting_spot_longitude, timezone, business_name, full_name')
+      .eq('id', user.id)
+      .single();
+
+    if (profile) {
+      captainProfile = profile;
+      captainTimezone = profile.timezone || "America/New_York";
+
+      // Fetch real weather data if coordinates available
+      if (profile.meeting_spot_latitude && profile.meeting_spot_longitude) {
+        try {
+          const conditions = await checkMarineConditions(
+            profile.meeting_spot_latitude,
+            profile.meeting_spot_longitude,
+            new Date()
+          );
+
+          // Parse wind data from forecast
+          if (conditions.forecast?.periods[0]) {
+            const period = conditions.forecast.periods[0];
+            
+            // Parse wind speed (e.g., "10 to 15 mph" -> take max)
+            const windMatch = period.windSpeed.match(/(\d+)\s*(?:to\s*(\d+))?\s*mph/);
+            if (windMatch) {
+              const maxWind = parseInt(windMatch[2] || windMatch[1]);
+              weatherData.windSpeed = Math.round(maxWind * 0.868976); // Convert mph to knots
+              weatherData.windDirection = period.windDirection;
+            }
+          }
+
+          // Note: NOAA land forecast doesn't provide water temp or sunset
+          // Would need marine buoy data or astronomical calculation
+          // For now, gracefully degrade to showing only wind data
+        } catch (error) {
+          console.error('Failed to fetch weather data:', error);
+          // Gracefully degrade - leave weatherData as nulls
+        }
+      }
+    }
+  }
+
   // Fetch today's bookings for the Float Plan
   const today = format(new Date(), "yyyy-MM-dd");
   let nextTrip = null;
@@ -458,7 +522,11 @@ export default async function DashboardPage() {
     <div className="space-y-6">
       {/* ═══ SECTION 1: THE HORIZON WIDGET ═══ */}
       <section aria-label="Day Overview">
-        <HorizonWidget captainName={displayName} />
+        <HorizonWidget 
+          captainName={displayName} 
+          timezone={captainTimezone}
+          weatherData={weatherData}
+        />
       </section>
 
       {/* ═══ SECTION 2: FUEL GAUGES ═══ */}
