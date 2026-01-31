@@ -5,9 +5,10 @@
 import { createSupabaseServiceClient } from "@/utils/supabase/service";
 import { notFound, redirect } from "next/navigation";
 import { format, parseISO } from "date-fns";
-import { Calendar, Clock, Users, MapPin, Mail, Phone, CheckCircle, CreditCard } from "lucide-react";
+import { Calendar, Clock, Users, MapPin, Mail, Phone, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { ManagementLinkCard } from "@/components/booking/ManagementLinkCard";
+import { StripeCheckoutButton } from "@/components/booking/StripeCheckoutButton";
 
 interface ConfirmPageProps {
   params: Promise<{
@@ -224,27 +225,19 @@ export default async function ConfirmPage({ params, searchParams }: ConfirmPageP
         {/* Payment Section */}
         {needsDeposit ? (
           <div className="mb-6 rounded-lg border border-cyan-500/50 bg-cyan-500/10 p-6">
-            <div className="mb-4 flex items-center gap-3">
-              <CreditCard className="h-6 w-6 text-cyan-400" />
-              <h2 className="text-lg font-semibold text-slate-100">
-                Secure Payment
-              </h2>
-            </div>
+            <h2 className="mb-4 text-lg font-semibold text-slate-100">
+              Secure Payment
+            </h2>
 
             <p className="mb-4 text-sm text-slate-300">
               Complete your booking by paying the deposit. You'll receive a confirmation email
               with all trip details and your booking management link.
             </p>
 
-            <button
-              className="w-full rounded-lg bg-cyan-500 px-6 py-4 font-semibold text-slate-900 transition-all hover:bg-cyan-400"
-            >
-              Pay ${((booking.trip_type?.deposit_amount || 0) / 100).toFixed(2)} Deposit
-            </button>
-
-            <div className="mt-3 text-center text-xs text-slate-500">
-              Powered by Stripe • Secure payment processing
-            </div>
+            <StripeCheckoutButton
+              bookingId={bookingId}
+              depositAmount={Math.round(booking.total_price_cents * 0.5)}
+            />
           </div>
         ) : (
           <div className="mb-6 rounded-lg border border-green-500/50 bg-green-500/10 p-6 text-center">
