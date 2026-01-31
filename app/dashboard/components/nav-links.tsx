@@ -10,6 +10,7 @@ import {
   BarChart3,
   FileText,
   CreditCard,
+  List,
   type LucideIcon,
 } from "lucide-react";
 
@@ -34,6 +35,11 @@ export const navLinks: NavLink[] = [
     href: "/dashboard/schedule",
     label: "Schedule",
     icon: CalendarDays,
+  },
+  {
+    href: "/dashboard/bookings",
+    label: "All Bookings",
+    icon: List,
   },
   {
     href: "/dashboard/manifest",

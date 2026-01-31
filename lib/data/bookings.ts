@@ -115,6 +115,8 @@ export interface BookingListFilters {
   startDate?: string;
   endDate?: string;
   status?: BookingStatus[];
+  paymentStatus?: string[];
+  tags?: string[];
   vesselId?: string;
   search?: string;
   includeHistorical?: boolean;
@@ -166,9 +168,19 @@ export async function getBookingsWithFilters(filters: BookingListFilters): Promi
     query = query.eq('vessel_id', filters.vesselId);
   }
 
-  // Apply guest name search
+  // Apply payment status filter
+  if (filters.paymentStatus && filters.paymentStatus.length > 0) {
+    query = query.in('payment_status', filters.paymentStatus);
+  }
+
+  // Apply tags filter (any tag match)
+  if (filters.tags && filters.tags.length > 0) {
+    query = query.overlaps('tags', filters.tags);
+  }
+
+  // Apply guest search (name, email, or phone)
   if (filters.search) {
-    query = query.ilike('guest_name', `%${filters.search}%`);
+    query = query.or(`guest_name.ilike.%${filters.search}%,guest_email.ilike.%${filters.search}%,guest_phone.ilike.%${filters.search}%`);
   }
 
   // Apply cursor-based pagination

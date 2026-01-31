@@ -82,6 +82,26 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Parse payment status filter
+    let paymentStatus: string[] | undefined;
+    const paymentStatusParam = searchParams.get('paymentStatus');
+    if (paymentStatusParam) {
+      const paymentValues = paymentStatusParam.split(',').filter(Boolean);
+      if (paymentValues.length > 0) {
+        paymentStatus = paymentValues;
+      }
+    }
+
+    // Parse tags filter
+    let tags: string[] | undefined;
+    const tagsParam = searchParams.get('tags');
+    if (tagsParam) {
+      const tagValues = tagsParam.split(',').filter(Boolean);
+      if (tagValues.length > 0) {
+        tags = tagValues;
+      }
+    }
+
     // Parse and validate sort field (prevent injection)
     let sortField: SortField = 'scheduled_start';
     const sortFieldParam = searchParams.get('sortField');
@@ -109,6 +129,8 @@ export async function GET(request: NextRequest) {
       startDate,
       endDate,
       status,
+      paymentStatus,
+      tags,
       vesselId,
       search,
       includeHistorical,
