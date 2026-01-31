@@ -690,3 +690,63 @@ Reviewed Phase 1 from HEARTBEAT.md roadmap. **Findings:**
 ---
 
 *Last updated: 2026-01-31 08:50 UTC*
+
+---
+
+### Build #31: Bulk Booking Actions System ✅
+- **Commit:** ed2897f
+- **Feature:** Beyond-MVP - Batch operations for efficiency
+- Complete bulk actions system for bookings list
+- API endpoint: `POST /api/bookings/bulk-action`
+- Supported actions:
+  - **Bulk Cancel:** Cancel multiple bookings at once with confirmation
+  - **Add Tag:** Apply tag to all selected bookings
+  - **Remove Tag:** Remove tag from all selected bookings
+- BulkActionsBar component:
+  - Fixed bottom bar (appears when bookings selected)
+  - Selection count display
+  - Tag menu with available tags + custom input
+  - Success/error feedback
+  - Auto-refresh after action
+- Selection UI:
+  - Checkbox on each booking card
+  - "Select All" checkbox at top
+  - Visual highlight for selected bookings (cyan border/background)
+  - Selected count badge
+  - Clear selection button
+- Safety features:
+  - Ownership verification (only captain's bookings)
+  - Confirmation dialog for destructive actions
+  - Detailed success/failure reporting
+  - Audit logging for all bulk actions
+- Smart UX:
+  - Bottom padding when bar visible
+  - Prevents accidental navigation clicks
+  - Smooth animations
+  - Real-time feedback
+
+**Code Added:**
+- `/app/api/bookings/bulk-action/route.ts` - Bulk API (200 lines)
+- `/app/dashboard/components/BulkActionsBar.tsx` - Action bar UI (250 lines)
+- Updated `/app/dashboard/bookings/BookingsListClient.tsx` - Selection logic
+
+**Use Cases:**
+- Cancel multiple weather-held bookings after storm passes
+- Tag all VIP guests for special treatment
+- Clean up old pending bookings in batch
+- Apply tags to filtered results (e.g., all "Last Month")
+- Remove outdated tags from multiple bookings
+- Seasonal operations (bulk cancel/tag for off-season)
+
+**Technical Highlights:**
+- Set-based selection tracking for performance
+- API validates ownership of all bookings
+- Partial success handling (some succeed, some fail)
+- Custom tag creation in bulk context
+- Zero data loss (confirmation before destructive actions)
+
+**Status:** Bulk actions deployed! ✅
+
+---
+
+*Last updated: 2026-01-31 09:00 UTC*
