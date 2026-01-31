@@ -624,3 +624,69 @@ Reviewed Phase 1 from HEARTBEAT.md roadmap. **Findings:**
 ---
 
 *Last updated: 2026-01-31 08:40 UTC*
+
+---
+
+### Build #30: Saved Filter Presets System ✅
+- **Commit:** 6e8578f
+- **Feature:** Beyond-MVP - Save time with recurring filter patterns
+- Complete filter preset management system
+- API endpoints:
+  - `GET /api/filter-presets` - List all presets
+  - `POST /api/filter-presets` - Create preset
+  - `PATCH /api/filter-presets/[id]` - Update preset
+  - `DELETE /api/filter-presets/[id]` - Delete preset
+- FilterPresetsMenu component:
+  - Save current filters as named preset
+  - Load preset with one click
+  - Set default preset (auto-loads on page load)
+  - Delete unwanted presets
+  - Beautiful dropdown UI
+  - Preset count badge
+- Database: New `filter_presets` table
+  - Stores complete filter state as JSONB
+  - Owner-scoped (captain_id)
+  - Unique default constraint (one per captain)
+  - Timestamped (created_at, updated_at)
+- What gets saved in presets:
+  - Search query
+  - Selected tags
+  - Booking statuses
+  - Payment statuses
+  - Date range
+- Integration: Added to bookings list page
+- UI features:
+  - "Save Current Filters" button (only shows when filters active)
+  - Inline save form with validation
+  - Preset list with actions (apply, set default, delete)
+  - Default badge indicator
+  - Clean, intuitive UX
+
+**Code Added:**
+- `/app/api/filter-presets/route.ts` - List & create (135 lines)
+- `/app/api/filter-presets/[id]/route.ts` - Update & delete (180 lines)
+- `/app/dashboard/components/FilterPresetsMenu.tsx` - UI component (345 lines)
+- `/supabase/migrations/20260131_filter_presets.sql` - DB schema (28 lines)
+- Updated `/app/dashboard/bookings/BookingsListClient.tsx` - Integration
+
+**Use Cases:**
+- Monthly accounting review preset ("Last Month + Fully Paid")
+- VIP tracking preset ("VIP tag + All statuses")
+- Pending payments preset ("Deposit Paid + Confirmed")
+- Problem bookings preset ("Weather Hold + Cancelled")
+- Date range reports preset (specific date ranges)
+- Recurring filter patterns for routine tasks
+
+**Technical Highlights:**
+- JSONB storage for flexible filter structure
+- Unique constraint on default presets
+- Automatic default clearing when setting new default
+- Real-time preset list updates
+- Validation and error handling
+- Type-safe filter state
+
+**Status:** Filter presets deployed! ✅
+
+---
+
+*Last updated: 2026-01-31 08:50 UTC*
