@@ -986,3 +986,62 @@ Reviewed Phase 1 from HEARTBEAT.md roadmap. **Findings:**
 ---
 
 *Last updated: 2026-01-31 09:50 UTC*
+
+---
+
+### Build #36: Reusable Status Badge Components ✅
+- **Commit:** b5f4ebb
+- **Feature:** Beyond-MVP - Consistent visual language for status indicators
+- StatusBadge component for booking statuses
+- PaymentBadge component for payment statuses
+- Features:
+  - **7 booking status variants:** pending_deposit, confirmed, weather_hold, rescheduled, completed, cancelled, no_show
+  - **5 payment status variants:** unpaid, deposit_paid, fully_paid, partially_refunded, fully_refunded
+  - **Size options:** sm, md, lg
+  - **Icon support:** Each status has appropriate Lucide icon
+  - **Consistent colors:** Emerald (success), Amber (warning), Rose (error), Blue (info), Slate (neutral), Purple (refund)
+- Beautiful badge styling:
+  - Rounded full borders
+  - Semi-transparent backgrounds
+  - Border colors matching text
+  - Icon + label layout
+- Ready for use across entire app
+- Maritime color scheme
+
+**Code Added:**
+- `/app/dashboard/components/StatusBadge.tsx` - Badge components (200 lines)
+
+**Status Badges:**
+- Pending Deposit: Amber with Clock icon
+- Confirmed: Emerald with CheckCircle icon
+- Weather Hold: Amber with CloudRain icon
+- Rescheduled: Blue with Calendar icon
+- Completed: Slate with CheckCircle icon
+- Cancelled: Rose with XCircle icon
+- No Show: Rose with AlertCircle icon
+
+**Payment Badges:**
+- Unpaid: Slate
+- Deposit Paid: Amber
+- Fully Paid: Emerald
+- Partially Refunded: Purple
+- Fully Refunded: Purple
+
+**Use Cases:**
+- Consistent status display everywhere
+- Easy-to-spot booking states
+- Visual hierarchy
+- Reusable component for all lists
+
+**Technical Highlights:**
+- TypeScript type safety
+- Size prop for flexibility
+- Optional icon display
+- Color configuration object
+- Accessible markup
+
+**Status:** Status badges deployed! ✅
+
+---
+
+*Last updated: 2026-01-31 10:00 UTC*
