@@ -16,6 +16,17 @@ export default async function AnalyticsPage() {
     redirect('/login');
   }
 
+  // Get captain profile
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('user_id', user.id)
+    .single();
+
+  if (!profile) {
+    redirect('/login');
+  }
+
   // Date ranges
   const now = new Date();
   const thisMonthStart = startOfMonth(now);
@@ -27,7 +38,7 @@ export default async function AnalyticsPage() {
   const { data: bookings } = await supabase
     .from('bookings')
     .select('*')
-    .eq('captain_id', user.id)
+    .eq('captain_id', profile.id)
     .order('scheduled_start', { ascending: false });
 
   const allBookings = bookings || [];
@@ -85,7 +96,7 @@ export default async function AnalyticsPage() {
             Revenue insights and booking performance
           </p>
         </div>
-        <ExportBookingsButton />
+        <ExportBookingsButton captainId={profile.id} />
       </div>
 
       {/* Key Metrics */}

@@ -21,6 +21,17 @@ export default async function SchedulePage() {
     redirect('/login');
   }
 
+  // Get captain profile
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('user_id', user.id)
+    .single();
+
+  if (!profile) {
+    redirect('/login');
+  }
+
   return (
     <div className="flex h-[calc(100vh-4rem)] flex-col md:h-screen">
       {/* Page Header */}
@@ -31,7 +42,7 @@ export default async function SchedulePage() {
           </span>
           <div className="h-px flex-1 bg-slate-800 sm:w-32" />
         </div>
-        <ExportBookingsButton />
+        <ExportBookingsButton captainId={profile.id} />
       </div>
 
       {/* Calendar */}

@@ -460,8 +460,14 @@ export async function getBookingsForExport(
   if (filters.vesselId) {
     query = query.eq('vessel_id', filters.vesselId);
   }
+  if (filters.paymentStatus && filters.paymentStatus.length > 0) {
+    query = query.in('payment_status', filters.paymentStatus);
+  }
+  if (filters.tags && filters.tags.length > 0) {
+    query = query.overlaps('tags', filters.tags);
+  }
   if (filters.search) {
-    query = query.ilike('guest_name', `%${filters.search}%`);
+    query = query.or(`guest_name.ilike.%${filters.search}%,guest_email.ilike.%${filters.search}%,guest_phone.ilike.%${filters.search}%`);
   }
 
   query = query.order(sortField, { ascending: sortDir === 'asc' });

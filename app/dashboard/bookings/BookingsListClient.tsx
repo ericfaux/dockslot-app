@@ -14,6 +14,7 @@ import {
 import BookingFilters, { BookingFilterState } from '../schedule/BookingFilters'
 import { BookingWithDetails } from '@/lib/db/types'
 import { STATUS_COLORS, STATUS_LABELS } from '@/components/calendar/types'
+import { ExportButton } from './ExportButton'
 import Link from 'next/link'
 
 interface BookingsListClientProps {
@@ -105,7 +106,7 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
         availableTags={availableTags}
       />
 
-      {/* Results Count */}
+      {/* Results Count & Export */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-slate-400">
           {isLoading ? (
@@ -117,6 +118,11 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
             </>
           )}
         </p>
+        <ExportButton
+          captainId={captainId}
+          filters={filters}
+          totalCount={bookings.length}
+        />
       </div>
 
       {/* Bookings List */}

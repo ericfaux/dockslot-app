@@ -4,7 +4,11 @@ import { useState } from 'react';
 import { Download, FileSpreadsheet, Calendar } from 'lucide-react';
 import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
 
-export function ExportBookingsButton() {
+interface ExportBookingsButtonProps {
+  captainId: string
+}
+
+export function ExportBookingsButton({ captainId }: ExportBookingsButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [exportStatus, setExportStatus] = useState<string | null>(null);
@@ -14,30 +18,33 @@ export function ExportBookingsButton() {
     setExportStatus('Generating CSV...');
 
     try {
-      let url = '/api/bookings/export?format=csv';
+      const params = new URLSearchParams({ captainId })
+      let url = '/api/bookings/export';
 
       // Apply preset filters
       if (preset === 'this-month') {
         const now = new Date();
         const start = format(startOfMonth(now), 'yyyy-MM-dd');
         const end = format(endOfMonth(now), 'yyyy-MM-dd');
-        url += `&startDate=${start}&endDate=${end}`;
+        params.append('startDate', start)
+        params.append('endDate', end)
       } else if (preset === 'last-month') {
         const lastMonth = subMonths(new Date(), 1);
         const start = format(startOfMonth(lastMonth), 'yyyy-MM-dd');
         const end = format(endOfMonth(lastMonth), 'yyyy-MM-dd');
-        url += `&startDate=${start}&endDate=${end}`;
+        params.append('startDate', start)
+        params.append('endDate', end)
       } else if (preset === 'year') {
         const yearStart = format(new Date(new Date().getFullYear(), 0, 1), 'yyyy-MM-dd');
-        url += `&startDate=${yearStart}`;
+        params.append('startDate', yearStart)
       } else if (preset === 'confirmed') {
-        url += `&status=confirmed,completed`;
+        params.append('status', 'confirmed,completed')
       }
 
       setExportStatus('Downloading file...');
       
       // Trigger download
-      const response = await fetch(url);
+      const response = await fetch(`${url}?${params.toString()}`);
 
       if (!response.ok) {
         throw new Error('Export failed');

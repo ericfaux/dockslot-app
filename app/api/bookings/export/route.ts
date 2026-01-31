@@ -1,180 +1,201 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createSupabaseServerClient } from '@/utils/supabase/server';
-import { format, parseISO } from 'date-fns';
+import { NextRequest, NextResponse } from 'next/server'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { getBookingsForExport } from '@/lib/data/bookings'
+import { BookingStatus, BOOKING_STATUSES } from '@/lib/db/types'
+import { format, parseISO } from 'date-fns'
 
 /**
- * Export bookings as CSV
- * Supports filtering by date range and status
+ * GET /api/bookings/export
  * 
- * Query params:
- * - startDate: YYYY-MM-DD (optional)
- * - endDate: YYYY-MM-DD (optional)
- * - status: comma-separated list (optional)
- * - format: csv (default)
+ * Exports bookings as CSV with same filters as the bookings list
+ * Returns CSV file download
  */
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = await createSupabaseServerClient()
 
+    // Authenticate
     const {
       data: { user },
-    } = await supabase.auth.getUser();
+      error: authError,
+    } = await supabase.auth.getUser()
 
-    if (!user) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { searchParams } = new URL(request.url);
-    const startDate = searchParams.get('startDate');
-    const endDate = searchParams.get('endDate');
-    const statusFilter = searchParams.get('status')?.split(',');
-    const exportFormat = searchParams.get('format') || 'csv';
+    // Get captain profile
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id, business_name')
+      .eq('user_id', user.id)
+      .single()
 
-    // Build query
-    let query = supabase
-      .from('bookings')
-      .select(`
-        id,
-        created_at,
-        scheduled_start,
-        scheduled_end,
-        guest_name,
-        guest_email,
-        guest_phone,
-        party_size,
-        status,
-        payment_status,
-        total_price_cents,
-        deposit_paid_cents,
-        balance_due_cents,
-        special_requests,
-        meeting_spot,
-        trip_type:trip_types(title, duration_hours),
-        vessel:vessels(name)
-      `)
-      .eq('captain_id', user.id)
-      .order('scheduled_start', { ascending: false });
-
-    // Apply filters
-    if (startDate) {
-      query = query.gte('scheduled_start', `${startDate}T00:00:00`);
-    }
-    if (endDate) {
-      query = query.lte('scheduled_start', `${endDate}T23:59:59`);
-    }
-    if (statusFilter && statusFilter.length > 0) {
-      query = query.in('status', statusFilter);
+    if (!profile) {
+      return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
     }
 
-    const { data: bookings, error } = await query;
+    // Parse query parameters (same as bookings list)
+    const searchParams = request.nextUrl.searchParams
+    const startDate = searchParams.get('startDate') || undefined
+    const endDate = searchParams.get('endDate') || undefined
+    const search = searchParams.get('search') || undefined
 
-    if (error) {
-      console.error('Failed to fetch bookings:', error);
-      return NextResponse.json({ error: 'Failed to fetch bookings' }, { status: 500 });
+    // Parse status filter
+    let status: BookingStatus[] | undefined
+    const statusParam = searchParams.get('status')
+    if (statusParam) {
+      const statusValues = statusParam.split(',')
+      const validStatuses = statusValues.filter(
+        (s): s is BookingStatus => BOOKING_STATUSES.includes(s as BookingStatus)
+      )
+      if (validStatuses.length > 0) {
+        status = validStatuses
+      }
     }
 
-    if (!bookings || bookings.length === 0) {
-      return new NextResponse('No bookings found', { status: 404 });
+    // Parse payment status filter
+    let paymentStatus: string[] | undefined
+    const paymentStatusParam = searchParams.get('paymentStatus')
+    if (paymentStatusParam) {
+      const paymentValues = paymentStatusParam.split(',').filter(Boolean)
+      if (paymentValues.length > 0) {
+        paymentStatus = paymentValues
+      }
     }
+
+    // Parse tags filter
+    let tags: string[] | undefined
+    const tagsParam = searchParams.get('tags')
+    if (tagsParam) {
+      const tagValues = tagsParam.split(',').filter(Boolean)
+      if (tagValues.length > 0) {
+        tags = tagValues
+      }
+    }
+
+    // Fetch bookings for export
+    const bookings = await getBookingsForExport({
+      captainId: profile.id,
+      startDate,
+      endDate,
+      status,
+      paymentStatus,
+      tags,
+      search,
+    })
 
     // Generate CSV
-    const csv = generateCSV(bookings);
+    const csv = generateCSV(bookings)
 
-    // Generate filename
-    const dateRange = startDate && endDate
-      ? `${startDate}_to_${endDate}`
-      : startDate
-        ? `from_${startDate}`
-        : endDate
-          ? `until_${endDate}`
-          : 'all';
-    const filename = `dockslot_bookings_${dateRange}.csv`;
+    // Generate filename with date range or current date
+    const filename = startDate && endDate
+      ? `bookings_${startDate}_to_${endDate}.csv`
+      : `bookings_export_${format(new Date(), 'yyyy-MM-dd')}.csv`
 
+    // Return CSV file
     return new NextResponse(csv, {
       status: 200,
       headers: {
-        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Type': 'text/csv',
         'Content-Disposition': `attachment; filename="${filename}"`,
       },
-    });
+    })
   } catch (error) {
-    console.error('Export error:', error);
-    return NextResponse.json({ error: 'Failed to export bookings' }, { status: 500 });
+    console.error('Error exporting bookings:', error)
+    return NextResponse.json(
+      { error: 'Failed to export bookings' },
+      { status: 500 }
+    )
   }
 }
 
-function generateCSV(bookings: any[]): string {
+interface ExportBooking {
+  id: string
+  guest_name: string
+  guest_email: string
+  guest_phone: string | null
+  party_size: number
+  scheduled_start: string
+  scheduled_end: string
+  status: string
+  payment_status: string
+  total_price_cents: number
+  deposit_paid_cents: number
+  balance_due_cents: number
+  captain_notes: string | null
+  tags: string[]
+  created_at: string
+  vessel?: { name: string } | null
+  trip_type?: { title: string } | null
+}
+
+function generateCSV(bookings: ExportBooking[]): string {
   // CSV Headers
   const headers = [
     'Booking ID',
-    'Created Date',
-    'Trip Date',
-    'Trip Time',
-    'Duration (hours)',
-    'Trip Type',
-    'Vessel',
     'Guest Name',
-    'Guest Email',
-    'Guest Phone',
+    'Email',
+    'Phone',
     'Party Size',
+    'Date',
+    'Start Time',
+    'End Time',
+    'Duration (hours)',
+    'Vessel',
+    'Trip Type',
     'Status',
     'Payment Status',
-    'Total Price',
-    'Deposit Paid',
-    'Balance Due',
-    'Meeting Spot',
-    'Special Requests',
-  ];
+    'Total ($)',
+    'Deposit Paid ($)',
+    'Balance Due ($)',
+    'Tags',
+    'Captain Notes',
+    'Created Date',
+  ]
 
   // Build CSV rows
   const rows = bookings.map((booking) => {
-    const tripType = Array.isArray(booking.trip_type)
-      ? booking.trip_type[0]
-      : booking.trip_type;
-    const vessel = Array.isArray(booking.vessel) ? booking.vessel[0] : booking.vessel;
-
-    const scheduledStart = parseISO(booking.scheduled_start);
-    const tripDate = format(scheduledStart, 'yyyy-MM-dd');
-    const tripTime = format(scheduledStart, 'h:mm a');
+    const start = parseISO(booking.scheduled_start)
+    const end = parseISO(booking.scheduled_end)
+    const durationHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60)
 
     return [
       booking.id,
-      format(parseISO(booking.created_at), 'yyyy-MM-dd'),
-      tripDate,
-      tripTime,
-      tripType?.duration_hours || '',
-      tripType?.title || '',
-      vessel?.name || '',
-      booking.guest_name,
-      booking.guest_email,
-      booking.guest_phone || '',
-      booking.party_size,
+      escapeCSV(booking.guest_name),
+      escapeCSV(booking.guest_email),
+      escapeCSV(booking.guest_phone || ''),
+      booking.party_size.toString(),
+      format(start, 'yyyy-MM-dd'),
+      format(start, 'HH:mm'),
+      format(end, 'HH:mm'),
+      durationHours.toFixed(1),
+      escapeCSV(booking.vessel?.name || ''),
+      escapeCSV(booking.trip_type?.title || ''),
       booking.status,
       booking.payment_status,
-      `$${(booking.total_price_cents / 100).toFixed(2)}`,
-      `$${(booking.deposit_paid_cents / 100).toFixed(2)}`,
-      `$${(booking.balance_due_cents / 100).toFixed(2)}`,
-      booking.meeting_spot || '',
-      booking.special_requests || '',
-    ];
-  });
+      (booking.total_price_cents / 100).toFixed(2),
+      (booking.deposit_paid_cents / 100).toFixed(2),
+      (booking.balance_due_cents / 100).toFixed(2),
+      escapeCSV(booking.tags?.join(', ') || ''),
+      escapeCSV(booking.captain_notes || ''),
+      format(parseISO(booking.created_at), 'yyyy-MM-dd HH:mm'),
+    ]
+  })
 
-  // Escape CSV values
-  const escapeCSV = (value: any): string => {
-    if (value === null || value === undefined) return '';
-    const str = String(value);
-    // Escape quotes and wrap in quotes if contains comma, newline, or quote
-    if (str.includes(',') || str.includes('\n') || str.includes('"')) {
-      return `"${str.replace(/"/g, '""')}"`;
-    }
-    return str;
-  };
+  // Combine headers and rows
+  const csvLines = [headers, ...rows]
 
-  // Build CSV string
-  const csvRows = [
-    headers.map(escapeCSV).join(','),
-    ...rows.map((row) => row.map(escapeCSV).join(',')),
-  ];
+  // Convert to CSV string
+  return csvLines.map((row) => row.join(',')).join('\n')
+}
 
-  return csvRows.join('\n');
+function escapeCSV(value: string): string {
+  // Escape quotes and wrap in quotes if contains comma, quote, or newline
+  if (!value) return ''
+  
+  const needsQuotes = /[",\n\r]/.test(value)
+  const escaped = value.replace(/"/g, '""')
+  
+  return needsQuotes ? `"${escaped}"` : escaped
 }
