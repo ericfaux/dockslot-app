@@ -1,114 +1,94 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { getBookingsForExport, getCaptainProfile } from '@/lib/data/bookings';
-import { BookingStatus, BOOKING_STATUSES, BookingWithDetails } from '@/lib/db/types';
+import { createSupabaseServerClient } from '@/utils/supabase/server';
 import { format, parseISO } from 'date-fns';
-import { toZonedTime } from 'date-fns-tz';
-
-const VALID_SORT_FIELDS = ['scheduled_start', 'guest_name', 'status', 'created_at'] as const;
-type SortField = (typeof VALID_SORT_FIELDS)[number];
 
 /**
- * GET /api/bookings/export
- *
- * Exports bookings as CSV. This endpoint exports PII, must be protected.
- *
- * Query Parameters:
- * - captainId (required): UUID of the captain
- * - startDate: Filter by scheduled_start >= date (YYYY-MM-DD)
- * - endDate: Filter by scheduled_start <= date (YYYY-MM-DD)
- * - status: Comma-separated list of statuses to filter
- * - vesselId: Filter by vessel UUID
- * - search: Search by guest name
- * - includeHistorical: Include completed/cancelled/no-show (boolean)
- * - sortField: Field to sort by
- * - sortDir: Sort direction (asc, desc)
+ * Export bookings as CSV
+ * Supports filtering by date range and status
+ * 
+ * Query params:
+ * - startDate: YYYY-MM-DD (optional)
+ * - endDate: YYYY-MM-DD (optional)
+ * - status: comma-separated list (optional)
+ * - format: csv (default)
  */
 export async function GET(request: NextRequest) {
   try {
-    // Authenticate
     const supabase = await createSupabaseServerClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    // Parse query parameters
-    const searchParams = request.nextUrl.searchParams;
-    const captainId = searchParams.get('captainId');
+    const { searchParams } = new URL(request.url);
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
+    const statusFilter = searchParams.get('status')?.split(',');
+    const exportFormat = searchParams.get('format') || 'csv';
 
-    if (!captainId) {
-      return NextResponse.json(
-        { error: 'captainId is required' },
-        { status: 400 }
-      );
+    // Build query
+    let query = supabase
+      .from('bookings')
+      .select(`
+        id,
+        created_at,
+        scheduled_start,
+        scheduled_end,
+        guest_name,
+        guest_email,
+        guest_phone,
+        party_size,
+        status,
+        payment_status,
+        total_price_cents,
+        deposit_paid_cents,
+        balance_due_cents,
+        special_requests,
+        meeting_spot,
+        trip_type:trip_types(title, duration_hours),
+        vessel:vessels(name)
+      `)
+      .eq('captain_id', user.id)
+      .order('scheduled_start', { ascending: false });
+
+    // Apply filters
+    if (startDate) {
+      query = query.gte('scheduled_start', `${startDate}T00:00:00`);
+    }
+    if (endDate) {
+      query = query.lte('scheduled_start', `${endDate}T23:59:59`);
+    }
+    if (statusFilter && statusFilter.length > 0) {
+      query = query.in('status', statusFilter);
     }
 
-    // Verify user is the captain
-    if (user.id !== captainId) {
-      return NextResponse.json(
-        { error: 'Access denied' },
-        { status: 403 }
-      );
+    const { data: bookings, error } = await query;
+
+    if (error) {
+      console.error('Failed to fetch bookings:', error);
+      return NextResponse.json({ error: 'Failed to fetch bookings' }, { status: 500 });
     }
 
-    // Get captain's timezone
-    const profile = await getCaptainProfile(captainId);
-    const timezone = profile?.timezone || 'UTC';
-
-    // Parse optional filters
-    const startDate = searchParams.get('startDate') || undefined;
-    const endDate = searchParams.get('endDate') || undefined;
-    const vesselId = searchParams.get('vesselId') || undefined;
-    const search = searchParams.get('search') || undefined;
-    const includeHistorical = searchParams.get('includeHistorical') === 'true';
-
-    // Parse and validate status filter
-    let status: BookingStatus[] | undefined;
-    const statusParam = searchParams.get('status');
-    if (statusParam) {
-      const statusValues = statusParam.split(',');
-      const validStatuses = statusValues.filter(
-        (s): s is BookingStatus => BOOKING_STATUSES.includes(s as BookingStatus)
-      );
-      if (validStatuses.length > 0) {
-        status = validStatuses;
-      }
+    if (!bookings || bookings.length === 0) {
+      return new NextResponse('No bookings found', { status: 404 });
     }
-
-    // Parse and validate sort field
-    let sortField: SortField = 'scheduled_start';
-    const sortFieldParam = searchParams.get('sortField');
-    if (sortFieldParam && VALID_SORT_FIELDS.includes(sortFieldParam as SortField)) {
-      sortField = sortFieldParam as SortField;
-    }
-
-    const sortDirParam = searchParams.get('sortDir');
-    const sortDir: 'asc' | 'desc' = sortDirParam === 'desc' ? 'desc' : 'asc';
-
-    // Fetch bookings for export (no pagination)
-    const bookings = await getBookingsForExport({
-      captainId,
-      startDate,
-      endDate,
-      status,
-      vesselId,
-      search,
-      includeHistorical,
-      sortField,
-      sortDir,
-    });
 
     // Generate CSV
-    const csv = generateCSV(bookings, timezone);
+    const csv = generateCSV(bookings);
 
-    // Generate filename with current date
-    const dateStr = format(new Date(), 'yyyy-MM-dd');
-    const filename = `bookings-export-${dateStr}.csv`;
+    // Generate filename
+    const dateRange = startDate && endDate
+      ? `${startDate}_to_${endDate}`
+      : startDate
+        ? `from_${startDate}`
+        : endDate
+          ? `until_${endDate}`
+          : 'all';
+    const filename = `dockslot_bookings_${dateRange}.csv`;
 
     return new NextResponse(csv, {
       status: 200,
@@ -118,122 +98,83 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error in GET /api/bookings/export:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    console.error('Export error:', error);
+    return NextResponse.json({ error: 'Failed to export bookings' }, { status: 500 });
   }
 }
 
-function generateCSV(bookings: BookingWithDetails[], timezone: string): string {
+function generateCSV(bookings: any[]): string {
+  // CSV Headers
   const headers = [
-    'Date',
-    'Start Time',
-    'End Time',
+    'Booking ID',
+    'Created Date',
+    'Trip Date',
+    'Trip Time',
+    'Duration (hours)',
+    'Trip Type',
+    'Vessel',
     'Guest Name',
     'Guest Email',
     'Guest Phone',
     'Party Size',
-    'Vessel',
-    'Trip Type',
     'Status',
     'Payment Status',
     'Total Price',
+    'Deposit Paid',
     'Balance Due',
+    'Meeting Spot',
     'Special Requests',
-    'Internal Notes',
-    'Created At',
   ];
 
-  const rows = bookings.map((booking) => [
-    formatDateInTimezone(booking.scheduled_start, timezone),
-    formatTimeInTimezone(booking.scheduled_start, timezone),
-    formatTimeInTimezone(booking.scheduled_end, timezone),
-    booking.guest_name,
-    booking.guest_email,
-    booking.guest_phone || '',
-    booking.party_size.toString(),
-    booking.vessel?.name || '',
-    booking.trip_type?.title || '',
-    formatStatus(booking.status),
-    formatPaymentStatus(booking.payment_status),
-    formatCurrency(booking.total_price_cents),
-    formatCurrency(booking.balance_due_cents),
-    booking.special_requests || '',
-    booking.internal_notes || '',
-    formatDateTimeInTimezone(booking.created_at, timezone),
-  ]);
+  // Build CSV rows
+  const rows = bookings.map((booking) => {
+    const tripType = Array.isArray(booking.trip_type)
+      ? booking.trip_type[0]
+      : booking.trip_type;
+    const vessel = Array.isArray(booking.vessel) ? booking.vessel[0] : booking.vessel;
 
+    const scheduledStart = parseISO(booking.scheduled_start);
+    const tripDate = format(scheduledStart, 'yyyy-MM-dd');
+    const tripTime = format(scheduledStart, 'h:mm a');
+
+    return [
+      booking.id,
+      format(parseISO(booking.created_at), 'yyyy-MM-dd'),
+      tripDate,
+      tripTime,
+      tripType?.duration_hours || '',
+      tripType?.title || '',
+      vessel?.name || '',
+      booking.guest_name,
+      booking.guest_email,
+      booking.guest_phone || '',
+      booking.party_size,
+      booking.status,
+      booking.payment_status,
+      `$${(booking.total_price_cents / 100).toFixed(2)}`,
+      `$${(booking.deposit_paid_cents / 100).toFixed(2)}`,
+      `$${(booking.balance_due_cents / 100).toFixed(2)}`,
+      booking.meeting_spot || '',
+      booking.special_requests || '',
+    ];
+  });
+
+  // Escape CSV values
+  const escapeCSV = (value: any): string => {
+    if (value === null || value === undefined) return '';
+    const str = String(value);
+    // Escape quotes and wrap in quotes if contains comma, newline, or quote
+    if (str.includes(',') || str.includes('\n') || str.includes('"')) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+  };
+
+  // Build CSV string
   const csvRows = [
     headers.map(escapeCSV).join(','),
     ...rows.map((row) => row.map(escapeCSV).join(',')),
   ];
 
-  return csvRows.join('\r\n');
-}
-
-function escapeCSV(value: string): string {
-  if (value.includes(',') || value.includes('"') || value.includes('\n') || value.includes('\r')) {
-    return `"${value.replace(/"/g, '""')}"`;
-  }
-  return value;
-}
-
-function formatDateInTimezone(isoString: string, timezone: string): string {
-  try {
-    const date = parseISO(isoString);
-    const zonedDate = toZonedTime(date, timezone);
-    return format(zonedDate, 'yyyy-MM-dd');
-  } catch {
-    return isoString;
-  }
-}
-
-function formatTimeInTimezone(isoString: string, timezone: string): string {
-  try {
-    const date = parseISO(isoString);
-    const zonedDate = toZonedTime(date, timezone);
-    return format(zonedDate, 'h:mm a'); // 12-hour format with AM/PM
-  } catch {
-    return isoString;
-  }
-}
-
-function formatDateTimeInTimezone(isoString: string, timezone: string): string {
-  try {
-    const date = parseISO(isoString);
-    const zonedDate = toZonedTime(date, timezone);
-    return format(zonedDate, 'yyyy-MM-dd h:mm a');
-  } catch {
-    return isoString;
-  }
-}
-
-function formatStatus(status: string): string {
-  const statusLabels: Record<string, string> = {
-    pending_deposit: 'Pending Deposit',
-    confirmed: 'Confirmed',
-    weather_hold: 'Weather Hold',
-    rescheduled: 'Rescheduled',
-    completed: 'Completed',
-    cancelled: 'Cancelled',
-    no_show: 'No Show',
-  };
-  return statusLabels[status] || status;
-}
-
-function formatPaymentStatus(status: string): string {
-  const statusLabels: Record<string, string> = {
-    unpaid: 'Unpaid',
-    deposit_paid: 'Deposit Paid',
-    fully_paid: 'Fully Paid',
-    partially_refunded: 'Partially Refunded',
-    fully_refunded: 'Fully Refunded',
-  };
-  return statusLabels[status] || status;
-}
-
-function formatCurrency(cents: number): string {
-  return `$${(cents / 100).toFixed(2)}`;
+  return csvRows.join('\n');
 }

@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 import { createSupabaseServerClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import { ScheduleClient } from './ScheduleClient';
+import { ExportBookingsButton } from './components/ExportBookingsButton';
 
 /**
  * Schedule Page - Server Component
@@ -23,11 +24,14 @@ export default async function SchedulePage() {
   return (
     <div className="flex h-[calc(100vh-4rem)] flex-col md:h-screen">
       {/* Page Header */}
-      <div className="mb-4 flex items-center gap-2">
-        <span className="font-mono text-xs uppercase tracking-widest text-slate-500">
-          Schedule
-        </span>
-        <div className="h-px flex-1 bg-slate-800" />
+      <div className="mb-4 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-xs uppercase tracking-widest text-slate-500">
+            Schedule
+          </span>
+          <div className="h-px flex-1 bg-slate-800 sm:w-32" />
+        </div>
+        <ExportBookingsButton />
       </div>
 
       {/* Calendar */}

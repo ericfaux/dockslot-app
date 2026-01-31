@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from '@/utils/supabase/server';
 import { startOfMonth, endOfMonth, subMonths, format, parseISO } from 'date-fns';
 import { AnalyticsCharts } from './components/AnalyticsCharts';
 import { TrendingUp, DollarSign, Calendar, Users, CheckCircle, XCircle } from 'lucide-react';
+import { ExportBookingsButton } from '../schedule/components/ExportBookingsButton';
 
 export default async function AnalyticsPage() {
   const supabase = await createSupabaseServerClient();
@@ -77,11 +78,14 @@ export default async function AnalyticsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-white">Analytics</h1>
-        <p className="mt-1 text-sm text-slate-400">
-          Revenue insights and booking performance
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Analytics</h1>
+          <p className="mt-1 text-sm text-slate-400">
+            Revenue insights and booking performance
+          </p>
+        </div>
+        <ExportBookingsButton />
       </div>
 
       {/* Key Metrics */}
