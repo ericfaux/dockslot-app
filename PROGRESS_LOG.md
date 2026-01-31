@@ -150,6 +150,28 @@
 
 ---
 
+### Build #19: Stripe Connect Onboarding Page ✅
+- **Commit:** 351e2d5
+- **Feature:** Phase 2 - Payment Integration (Stripe Connect setup)
+- Dashboard page at `/dashboard/payments`
+- Stripe Connect Express account creation
+- Onboarding flow with redirect to Stripe
+- Express dashboard access for connected accounts
+- Beautiful UI showing connection status & pricing
+- Graceful handling when Stripe keys not configured
+- Added "Payments" to dashboard navigation
+
+**Code Added:**
+- `/app/dashboard/payments/page.tsx` - Server component
+- `/app/dashboard/payments/PaymentsClient.tsx` - Client component with UI
+- `/app/api/stripe/connect/onboard/route.ts` - Account creation & onboarding
+- `/app/api/stripe/connect/dashboard/route.ts` - Dashboard access
+- Updated navigation links
+
+**Testing Status:** Needs Stripe keys in Vercel env to fully test
+
+---
+
 ## Heartbeat Investigation: 2026-01-31 06:00 UTC
 
 ### Investigation: Guest Booking Flow Status

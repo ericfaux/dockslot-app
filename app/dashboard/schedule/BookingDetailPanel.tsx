@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import Link from 'next/link';
 import { format, parseISO } from 'date-fns';
 import {
   X,
@@ -17,6 +18,7 @@ import {
   AlertCircle,
   CalendarClock,
   DollarSign,
+  RotateCcw,
 } from 'lucide-react';
 import { CalendarBooking, STATUS_COLORS, STATUS_LABELS, WeatherHoldModal, RescheduleOffers } from '@/components/calendar';
 import {
@@ -184,6 +186,7 @@ export function BookingDetailPanel({
   const canSetWeatherHold = ['confirmed', 'rescheduled'].includes(booking.status);
   const canClearWeatherHold = booking.status === 'weather_hold';
   const canRequestBalance = (booking.payment_status === 'deposit_paid') && ['confirmed', 'rescheduled'].includes(booking.status);
+  const canRefund = ['deposit_paid', 'fully_paid'].includes(booking.payment_status || '') && !['completed', 'cancelled'].includes(booking.status);
   const isTerminal = ['completed', 'cancelled', 'no_show'].includes(booking.status);
 
   return (
@@ -400,6 +403,16 @@ export function BookingDetailPanel({
                     <CheckCircle className="h-4 w-4" />
                     Clear Hold
                   </button>
+                )}
+
+                {canRefund && (
+                  <Link
+                    href={`/dashboard/bookings/${booking.id}/refund`}
+                    className="flex items-center justify-center gap-2 rounded-lg bg-purple-500/10 px-4 py-3 font-mono text-sm font-medium text-purple-400 transition-colors hover:bg-purple-500/20"
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                    Refund
+                  </Link>
                 )}
 
                 {canMarkNoShow && (
