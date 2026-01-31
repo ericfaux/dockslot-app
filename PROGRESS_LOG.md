@@ -937,3 +937,52 @@ Reviewed Phase 1 from HEARTBEAT.md roadmap. **Findings:**
 ---
 
 *Last updated: 2026-01-31 09:40 UTC*
+
+---
+
+### Build #35: Enhanced Contact Quick Actions ✅
+- **Commit:** af0cc3e
+- **Feature:** Beyond-MVP - Fast contact access for captain communication
+- ContactQuickActions component with one-click contact methods
+- Features:
+  - **Copy to clipboard:** Email and phone with visual confirmation (✓)
+  - **Email:** Direct mailto: link with pre-filled subject
+  - **Call:** tel: link for one-tap calling (mobile)
+  - **SMS:** sms: link for text messaging
+  - **Phone formatting:** Auto-formats as (XXX) XXX-XXXX
+- Beautiful contact cards UI:
+  - Email card with copy, email action buttons
+  - Phone card with copy, call, SMS action buttons
+  - Icons for each action (Mail, Phone, MessageSquare, Copy)
+  - Visual feedback on copy (check mark for 2 seconds)
+- Integrated into booking detail panel
+- Professional contact display
+
+**Code Added:**
+- `/app/dashboard/components/ContactQuickActions.tsx` - Contact component (130 lines)
+- Updated `/app/dashboard/schedule/BookingDetailPanel.tsx` - Integration
+
+**Actions Available:**
+- **Email:** Copy email, send email (with subject pre-filled)
+- **Phone:** Copy phone, call phone, send SMS
+
+**Use Cases:**
+- Quick copy email for external use
+- One-click email from booking
+- Tap to call on mobile
+- Send SMS reminder quickly
+- Professional contact management
+
+**Technical Highlights:**
+- Clipboard API with visual feedback
+- Phone number formatting function
+- mailto: with subject parameter
+- tel: and sms: URI schemes
+- Conditional rendering (phone optional)
+- Check mark animation on copy
+
+**Status:** Contact quick actions deployed! ✅
+
+---
+
+*Last updated: 2026-01-31 09:50 UTC*
