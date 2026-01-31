@@ -13,6 +13,7 @@ import {
   Loader2,
   Mail,
   Trash2,
+  Waves,
 } from 'lucide-react';
 import {
   format,
@@ -74,6 +75,8 @@ export function WeatherHoldModal({
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [activeSlotIndex, setActiveSlotIndex] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isCheckingWeather, setIsCheckingWeather] = useState(false);
+  const [weatherInfo, setWeatherInfo] = useState<string | null>(null);
 
   // Calculate original booking duration
   const bookingDurationMinutes = useMemo(() => {
@@ -178,6 +181,43 @@ export function WeatherHoldModal({
     }
   };
 
+  const handleCheckWeather = async () => {
+    setIsCheckingWeather(true);
+    setError(null);
+    setWeatherInfo(null);
+
+    try {
+      // For demo: using approximate coordinates for US coastal waters
+      // In production, captain's meeting_spot should have lat/lon stored
+      const lat = 28.0; // Example: Florida coast
+      const lon = -80.0;
+      const tripDate = booking.scheduled_start;
+
+      const response = await fetch(
+        `/api/weather/check?lat=${lat}&lon=${lon}&date=${tripDate}`
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to check weather');
+      }
+
+      const data = await response.json();
+
+      if (data.conditions.recommendation !== 'safe') {
+        // Auto-fill reason with NOAA data
+        setReason(data.suggestedReason);
+        setWeatherInfo(`⚠️ ${data.conditions.recommendation.toUpperCase()}: ${data.conditions.alerts.length} active alerts`);
+      } else {
+        setWeatherInfo('✅ No marine weather alerts currently active');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to check weather');
+    } finally {
+      setIsCheckingWeather(false);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!reason.trim()) {
       setError('Please enter a weather reason');
@@ -255,9 +295,29 @@ export function WeatherHoldModal({
 
             {/* Weather Reason */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-slate-300">
-                Weather Reason <span className="text-rose-400">*</span>
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-medium text-slate-300">
+                  Weather Reason <span className="text-rose-400">*</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={handleCheckWeather}
+                  disabled={isCheckingWeather}
+                  className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-cyan-400 hover:bg-cyan-500/10 transition-colors disabled:opacity-50"
+                >
+                  {isCheckingWeather ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      Checking...
+                    </>
+                  ) : (
+                    <>
+                      <Waves className="h-3.5 w-3.5" />
+                      Check NOAA Weather
+                    </>
+                  )}
+                </button>
+              </div>
               <textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
@@ -265,6 +325,11 @@ export function WeatherHoldModal({
                 className="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 resize-none"
                 rows={3}
               />
+              {weatherInfo && (
+                <div className="flex items-start gap-2 rounded-md bg-slate-800/50 px-3 py-2 text-xs">
+                  <span className="text-slate-300">{weatherInfo}</span>
+                </div>
+              )}
               <p className="text-xs text-slate-500">
                 This message will be shown to the guest when they view reschedule options.
               </p>
