@@ -254,6 +254,38 @@
 
 ---
 
+### Build #23: Captain Action Items Dashboard Widget ✅
+- **Commit:** 3ffab9c
+- **Feature:** Beyond-MVP - Captain productivity enhancement
+- Smart action items widget on dashboard home page
+- Automatically detects and prioritizes tasks needing attention:
+  - **Payment items:** Balance payments needed, pending deposits (>24hrs old)
+  - **Waiver items:** Incomplete waivers for upcoming trips (today/tomorrow)
+  - **Report items:** Missing trip reports for completed trips (last 7 days)
+  - **Alert items:** Old weather holds needing resolution (>7 days)
+- Priority system:
+  - **High:** Trips within 3 days, trips today, old reports
+  - **Medium:** Trips 4-7 days, pending deposits, tomorrow's waivers
+  - **Low:** Everything else
+- Beautiful UI features:
+  - Bell icon with high-priority badge count
+  - Color-coded priority indicators (red/amber/cyan)
+  - Dismissible items (local state, session-persistent)
+  - Direct action buttons linking to relevant pages
+  - Empty state "All Clear" message when no items
+  - Maritime chart-plotter aesthetic
+- Smart detection logic queries database for real issues
+- Integrated seamlessly into existing dashboard
+
+**Code Added:**
+- `/app/actions/action-items.ts` - Smart detection logic (210 lines)
+- `/app/dashboard/components/ActionItemsWidget.tsx` - Widget UI (180 lines)
+- Updated `/app/dashboard/page.tsx` - Integration
+
+**Status:** Captain productivity tools expanding! ✅
+
+---
+
 ## Heartbeat Investigation: 2026-01-31 06:00 UTC
 
 ### Investigation: Guest Booking Flow Status
