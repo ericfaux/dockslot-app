@@ -16,6 +16,7 @@ import {
   Navigation,
   AlertCircle,
   CalendarClock,
+  DollarSign,
 } from 'lucide-react';
 import { CalendarBooking, STATUS_COLORS, STATUS_LABELS, WeatherHoldModal, RescheduleOffers } from '@/components/calendar';
 import {
@@ -56,6 +57,8 @@ export function BookingDetailPanel({
   const [actionError, setActionError] = useState<string | null>(null);
   const [showWeatherModal, setShowWeatherModal] = useState(false);
   const [isWeatherPending, setIsWeatherPending] = useState(false);
+  const [isRequestingBalance, setIsRequestingBalance] = useState(false);
+  const [balanceSuccess, setBalanceSuccess] = useState(false);
 
   if (!booking) return null;
 
@@ -148,12 +151,39 @@ export function BookingDetailPanel({
     }
   };
 
+  const handleRequestBalancePayment = async () => {
+    setIsRequestingBalance(true);
+    setActionError(null);
+    setBalanceSuccess(false);
+
+    try {
+      const response = await fetch(`/api/bookings/${booking.id}/request-balance`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to send balance payment request');
+      }
+
+      setBalanceSuccess(true);
+      setTimeout(() => setBalanceSuccess(false), 3000);
+      onUpdated();
+    } catch (error) {
+      console.error('Balance request error:', error);
+      setActionError(error instanceof Error ? error.message : 'Failed to request balance payment');
+    } finally {
+      setIsRequestingBalance(false);
+    }
+  };
+
   // Determine available actions based on status
   const canComplete = ['confirmed', 'rescheduled'].includes(booking.status);
   const canCancel = ['pending_deposit', 'confirmed', 'weather_hold', 'rescheduled'].includes(booking.status);
   const canMarkNoShow = ['confirmed', 'rescheduled'].includes(booking.status);
   const canSetWeatherHold = ['confirmed', 'rescheduled'].includes(booking.status);
   const canClearWeatherHold = booking.status === 'weather_hold';
+  const canRequestBalance = (booking.payment_status === 'deposit_paid') && ['confirmed', 'rescheduled'].includes(booking.status);
   const isTerminal = ['completed', 'cancelled', 'no_show'].includes(booking.status);
 
   return (
@@ -320,6 +350,32 @@ export function BookingDetailPanel({
                   <CheckCircle className="h-5 w-5" />
                   {isPending ? 'Processing...' : 'COMPLETE TRIP'}
                 </button>
+              )}
+
+              {/* Balance Payment Request (if deposit paid but balance due) */}
+              {canRequestBalance && (
+                <div className="col-span-full">
+                  <button
+                    onClick={handleRequestBalancePayment}
+                    disabled={isRequestingBalance || balanceSuccess}
+                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-cyan-500/20 px-6 py-4 font-mono text-lg font-bold uppercase tracking-wide text-cyan-400 transition-all duration-75 ease-out hover:bg-cyan-500/30 active:translate-y-0.5 disabled:opacity-50"
+                    style={{
+                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
+                    }}
+                  >
+                    <DollarSign className="h-5 w-5" />
+                    {isRequestingBalance 
+                      ? 'Sending...' 
+                      : balanceSuccess 
+                      ? 'Email Sent! ✓'
+                      : 'REQUEST BALANCE PAYMENT'}
+                  </button>
+                  {balanceSuccess && (
+                    <p className="mt-2 text-center text-xs text-emerald-400">
+                      Payment request email sent to guest
+                    </p>
+                  )}
+                </div>
               )}
 
               {/* Secondary Actions */}
