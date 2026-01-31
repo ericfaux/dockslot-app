@@ -14,6 +14,7 @@ import {
   Star,
   RefreshCw,
   Gift,
+  Clock,
   type LucideIcon,
 } from "lucide-react";
 
@@ -48,6 +49,11 @@ export const navLinks: NavLink[] = [
     href: "/dashboard/modifications",
     label: "Modifications",
     icon: RefreshCw,
+  },
+  {
+    href: "/dashboard/waitlist",
+    label: "Waitlist",
+    icon: Clock,
   },
   {
     href: "/dashboard/manifest",

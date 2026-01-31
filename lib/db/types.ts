@@ -296,6 +296,43 @@ export interface ReferralStats {
 }
 
 // ============================================================================
+// Waitlist Types
+// ============================================================================
+
+export type WaitlistStatus = 'active' | 'notified' | 'converted' | 'cancelled' | 'expired';
+
+export interface WaitlistEntry {
+  id: string;
+  captain_id: string;
+  trip_type_id: string;
+  guest_name: string;
+  guest_email: string;
+  guest_phone: string | null;
+  party_size: number;
+  preferred_date: string; // YYYY-MM-DD
+  preferred_time_start: string | null; // HH:MM:SS
+  preferred_time_end: string | null; // HH:MM:SS
+  flexible_dates: boolean;
+  special_requests: string | null;
+  status: WaitlistStatus;
+  notified_at: string | null;
+  notified_for_booking_id: string | null;
+  converted_to_booking_id: string | null;
+  expires_at: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WaitlistStats {
+  total_active: number;
+  total_notified: number;
+  total_converted: number;
+  total_expired: number;
+  conversion_rate: number;
+  avg_wait_time_hours: number;
+}
+
+// ============================================================================
 // State Machine
 // ============================================================================
 

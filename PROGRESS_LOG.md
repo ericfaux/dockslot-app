@@ -1,9 +1,84 @@
 # DockSlot Development Progress
 
+## Latest Session: 2026-01-31 (Part 7 - Waitlist System)
+
+### Build #51: Waitlist System for Fully Booked Slots ✅
+- **Commit:** (pending)
+- **Feature:** Highest-value beyond-MVP feature — capture demand when slots are full
+- Database schema:
+  - `waitlist_entries` table with guest info, preferences, status tracking
+  - Flexible date/time preferences (exact date or ±3 days)
+  - Party size tracking (1-6 guests)
+  - Status workflow: active → notified → converted/expired/cancelled
+  - 30-day auto-expiration
+- PostgreSQL functions:
+  - `find_matching_waitlist_entries()` - Smart matching for available slots
+  - `get_waitlist_stats()` - Analytics (conversion rate, wait times)
+  - `expire_old_waitlist_entries()` - Auto-cleanup for cron
+- API endpoints:
+  - `GET/POST /api/waitlist` - List entries (captain) / join waitlist (guest)
+  - `PATCH/DELETE /api/waitlist/[id]` - Update status / remove entry
+  - `GET /api/waitlist/stats` - Captain statistics
+- Captain dashboard: `/dashboard/waitlist`
+  - Waitlist statistics (active, notified, converted, conversion rate)
+  - Filter by status (active, notified, converted, all)
+  - Entry cards with guest info, trip details, preferences
+  - Quick actions: notify, convert, delete
+  - Auto-refresh after actions
+- Features:
+  - Guest joins waitlist when slots are booked
+  - Captain notified when slots open up
+  - Smart matching (date flexibility, time windows)
+  - Conversion tracking (waitlist → booking)
+  - First-come-first-served ordering
+  - Email/phone contact info
+  - Special requests field
+- Navigation: Added "Waitlist" to sidebar (Clock icon)
+
+**Code Added:**
+- `/supabase/migrations/20260131_waitlist.sql` - Schema + functions (220 lines)
+- `/app/api/waitlist/route.ts` - List & create (140 lines)
+- `/app/api/waitlist/[id]/route.ts` - Update & delete (155 lines)
+- `/app/api/waitlist/stats/route.ts` - Statistics (40 lines)
+- `/app/dashboard/waitlist/page.tsx` - Server component (20 lines)
+- `/app/dashboard/waitlist/WaitlistClient.tsx` - UI (450 lines)
+- Updated `/lib/db/types.ts` - Added waitlist types (45 lines)
+- Updated `/app/dashboard/components/nav-links.tsx` - Navigation
+
+**Use Cases:**
+- Capture demand when peak dates are fully booked
+- Automatic notifications when slots open (cancellations, weather holds)
+- Guest flexibility (can do nearby dates/times)
+- Revenue protection (don't lose guests to competitors)
+- Demand forecasting (see popular dates/times)
+- Priority booking for waitlist guests
+
+**Next Phase (Future Builds):**
+- Guest-facing waitlist join form (public page)
+- Email notifications when slot opens
+- Auto-booking for waitlist entries
+- SMS notifications (Twilio integration)
+
+**Technical Highlights:**
+- Smart date/time matching with flexibility
+- Status lifecycle management
+- Conversion tracking & analytics
+- Auto-expiration (30 days)
+- First-come-first-served ordering
+- Captain-only management interface
+
+**Status:** Waitlist system backend & captain dashboard deployed! ✅
+
+---
+
+*Last updated: 2026-01-31 22:20 UTC*
+
+---
+
 ## Latest Session: 2026-01-31 (Part 6 - Guest Referral Program)
 
 ### Build #50: Guest Referral Code Application in Booking Flow ✅
-- **Commit:** (pending)
+- **Commit:** 9bb1e68
 - **Feature:** Beyond-MVP - Complete guest-facing referral system
 - Updated GuestForm component:
   - Added referral_code field to GuestFormData interface
