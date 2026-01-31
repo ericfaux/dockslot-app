@@ -881,6 +881,76 @@ Reviewed Phase 1 from HEARTBEAT.md roadmap. **Findings:**
 
 ---
 
+### Build #38: SMS Integration via Twilio ✅
+- **Commit:** df9b401
+- **Feature:** Beyond-MVP - SMS text messaging for guest communication
+- Complete Twilio SMS integration
+- Library: `/lib/sms/twilio.ts`
+  - `sendSMS()` - Send text messages via Twilio API
+  - `formatPhoneNumber()` - US phone number formatting
+  - `isValidPhoneNumber()` - Validation for 10/11 digit US numbers
+  - Auto-formatting to E.164 format (+1XXXXXXXXXX)
+- API endpoint: `POST /api/bookings/[id]/send-sms`
+  - Phone number validation
+  - Template support with use count tracking
+  - Booking timeline logging
+  - Audit trail tracking
+  - Twilio error handling
+- Enhanced SendMessageModal:
+  - Email/SMS toggle tabs
+  - Conditional subject field (email only)
+  - SMS character counter with segment warnings
+  - Shows segment count when >160 characters
+  - Disabled SMS tab when no phone number
+  - Different placeholders and UX for each method
+- SMS-specific features:
+  - 160 character standard SMS limit
+  - Multi-segment detection and warnings
+  - Character countdown to next segment
+  - Message preview truncation
+- Documentation:
+  - SMS_SETUP.md with complete Twilio setup guide
+  - Pricing information (~$2-5/month typical usage)
+  - Troubleshooting section
+  - Security notes
+
+**Code Added:**
+- `/lib/sms/twilio.ts` - Twilio SMS library (95 lines)
+- `/app/api/bookings/[id]/send-sms/route.ts` - SMS API endpoint (120 lines)
+- `SMS_SETUP.md` - Setup documentation (120 lines)
+- Updated `/app/dashboard/components/SendMessageModal.tsx` - Email/SMS toggle (~80 lines modified)
+
+**Use Cases:**
+- Quick SMS reminders without email
+- Time-sensitive communications (weather, delays)
+- Guests who prefer text over email
+- Confirmation codes and instructions
+- Last-minute trip updates
+- Guest preference for SMS
+
+**Pricing (Twilio):**
+- SMS: $0.0079 per message
+- Phone number: $1/month
+- Free trial: $15 credit (~1,900 free SMS)
+- Typical usage: $2-5/month
+
+**Technical Highlights:**
+- Method toggle with context-aware UI
+- SMS segment calculation and warnings
+- Phone number normalization (multiple formats accepted)
+- Twilio Basic Auth with Base64 encoding
+- Template reuse across email/SMS
+- Complete audit trail for both methods
+- Error handling with user-friendly messages
+
+**Status:** SMS integration deployed! ✅
+
+---
+
+*Last updated: 2026-01-31 11:00 UTC*
+
+---
+
 ### Build #33: Message Templates System ✅
 - **Commit:** 30b2757
 - **Feature:** Beyond-MVP - Reusable message templates for guest communications

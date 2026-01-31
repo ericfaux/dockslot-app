@@ -36,6 +36,7 @@ import DuplicateBookingModal from '../components/DuplicateBookingModal';
 import BookingQuickActions from '../components/BookingQuickActions';
 import ContactQuickActions from '../components/ContactQuickActions';
 import SendMessageModal from '../components/SendMessageModal';
+import CancellationPolicyDisplay from '../components/CancellationPolicyDisplay';
 
 interface BookingDetailPanelProps {
   booking: CalendarBooking | null;
@@ -340,6 +341,11 @@ export function BookingDetailPanel({
 
           {/* Booking Timeline */}
           <BookingTimeline bookingId={booking.id} />
+
+          {/* Cancellation Policy */}
+          {!isTerminal && (
+            <CancellationPolicyDisplay bookingId={booking.id} />
+          )}
 
           {/* Reschedule Offers (for weather hold) */}
           {booking.status === 'weather_hold' && (
