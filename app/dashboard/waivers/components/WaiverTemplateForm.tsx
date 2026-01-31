@@ -23,7 +23,6 @@ export function WaiverTemplateForm({ template }: Props) {
   const [formData, setFormData] = useState({
     title: template?.title || '',
     content: template?.content || '',
-    requires_initials: template?.requires_initials ?? true,
     is_active: template?.is_active ?? true,
   });
 
@@ -85,18 +84,6 @@ export function WaiverTemplateForm({ template }: Props) {
 
         {/* Options */}
         <div className="space-y-4">
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={formData.requires_initials}
-              onChange={(e) => setFormData({ ...formData, requires_initials: e.target.checked })}
-              className="h-4 w-4 rounded border-slate-700 bg-slate-900 text-cyan-500 focus:ring-cyan-500"
-            />
-            <span className="text-sm font-medium text-slate-300">
-              Require passengers to initial each section
-            </span>
-          </label>
-
           <label className="flex items-center gap-3 cursor-pointer">
             <input
               type="checkbox"

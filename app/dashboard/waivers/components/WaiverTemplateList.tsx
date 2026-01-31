@@ -21,7 +21,6 @@ interface WaiverTemplate {
   title: string;
   content: string;
   is_active: boolean;
-  requires_initials: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -134,12 +133,6 @@ export function WaiverTemplateList({ templates: initialTemplates }: Props) {
                   <span>
                     Created {format(parseISO(template.created_at), 'MMM d, yyyy')}
                   </span>
-                  {template.requires_initials && (
-                    <span className="flex items-center gap-1">
-                      <FileSignature className="h-3.5 w-3.5" />
-                      Requires initials
-                    </span>
-                  )}
                   <span className="line-clamp-1">
                     {template.content.substring(0, 100)}...
                   </span>

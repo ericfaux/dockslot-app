@@ -611,11 +611,10 @@ export async function createWaiverTemplate(
   data: {
     title: string;
     content: string;
-    requires_initials: boolean;
     is_active: boolean;
   }
 ): Promise<WaiverActionResult<{ id: string }>> {
-  const { title, content, requires_initials, is_active } = data;
+  const { title, content, is_active } = data;
 
   if (!title || title.trim().length < 3) {
     return { success: false, error: 'Title must be at least 3 characters', code: 'VALIDATION' };
@@ -638,7 +637,6 @@ export async function createWaiverTemplate(
       owner_id: user.id,
       title: title.trim(),
       content: content.trim(),
-      requires_initials,
       is_active,
       version: 1,
     })
@@ -661,7 +659,6 @@ export async function updateWaiverTemplate(
   data: {
     title: string;
     content: string;
-    requires_initials: boolean;
     is_active: boolean;
   }
 ): Promise<WaiverActionResult<null>> {
@@ -669,7 +666,7 @@ export async function updateWaiverTemplate(
     return { success: false, error: 'Invalid template ID', code: 'VALIDATION' };
   }
 
-  const { title, content, requires_initials, is_active } = data;
+  const { title, content, is_active } = data;
 
   if (!title || title.trim().length < 3) {
     return { success: false, error: 'Title must be at least 3 characters', code: 'VALIDATION' };
@@ -707,7 +704,6 @@ export async function updateWaiverTemplate(
     .update({
       title: title.trim(),
       content: content.trim(),
-      requires_initials,
       is_active,
     })
     .eq('id', templateId);
