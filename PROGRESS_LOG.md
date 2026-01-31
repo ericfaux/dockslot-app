@@ -227,6 +227,33 @@
 
 ---
 
+### Build #22: Automated Trip Reminder Emails ✅
+- **Commit:** 1fff626
+- **Feature:** Beyond-MVP - Automated guest communication
+- 24-hour trip reminder system with beautiful email template
+- Automated cron job runs daily at 10 AM UTC
+- Sends reminders for all trips happening tomorrow
+- Email includes:
+  - Complete trip details (date, time, vessel, captain)
+  - Meeting location with address
+  - "What to Bring" checklist
+  - Important arrival instructions
+  - Link to manage booking
+- Database tracking with `reminder_sent_at` column
+- Prevents duplicate reminders
+- Audit logging for all sent reminders
+- Database migration for new column + index
+
+**Code Added:**
+- `/app/api/cron/send-reminders/route.ts` - Cron job (140 lines)
+- `/lib/email/trip-reminders.ts` - Beautiful HTML email template (95 lines)
+- `/supabase/migrations/20260131_trip_reminders.sql` - DB schema
+- Updated `vercel.json` with new cron schedule (10 AM daily)
+
+**Status:** First beyond-MVP feature complete! Guest automation started ✅
+
+---
+
 ## Heartbeat Investigation: 2026-01-31 06:00 UTC
 
 ### Investigation: Guest Booking Flow Status
