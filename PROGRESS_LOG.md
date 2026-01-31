@@ -1309,6 +1309,122 @@ Reviewed Phase 1 from HEARTBEAT.md roadmap. **Findings:**
 
 ---
 
+### Build #43: Guest Self-Service Booking Modifications ✅
+- **Commit:** bd7f0ed
+- **Feature:** Beyond-MVP - Guest modification request system with captain approval
+- Database schema: `booking_modification_requests` table
+  - Modification type (date_time, party_size, both)
+  - New/original values for comparison
+  - Status workflow (pending, approved, rejected, cancelled)
+  - Captain response field
+  - Request metadata (reason, timestamps)
+- PostgreSQL function: `apply_booking_modification()`
+  - Applies approved changes to booking
+  - Updates scheduled times and/or party size
+  - Logs changes in booking timeline
+  - Transaction-safe updates
+- API endpoints:
+  - `POST /api/booking-modifications` - Submit request (guest/captain)
+  - `GET /api/booking-modifications` - List requests (captain, with filtering)
+  - `PATCH /api/booking-modifications/[id]` - Approve/reject (captain)
+- Guest modification page: `/modify/[token]`
+  - Token-based access (no login required)
+  - Current booking details display
+  - Three modification types:
+    - Date & Time only
+    - Party Size only
+    - Both
+  - Date/time picker for new slot
+  - +/- buttons for party size
+  - Optional reason field
+  - Pending approval messaging
+- Captain dashboard: `/dashboard/modifications`
+  - Pending/all requests filtering
+  - Request cards with before/after comparison
+  - Approve/reject actions
+  - Optional response to guest
+  - Real-time status updates
+  - Visual change indicators (arrows)
+- Workflow:
+  1. Guest submits modification request
+  2. Captain receives notification (dashboard)
+  3. Captain reviews changes
+  4. Captain approves or rejects with optional message
+  5. Approved changes auto-apply to booking
+  6. Booking logs updated
+- Integration:
+  - Added "Modifications" to navigation sidebar
+  - Booking log entries for all requests
+  - Audit log tracking
+  - Auto-approval for captain-initiated changes
+
+**Code Added:**
+- `/supabase/migrations/20260131_booking_modifications.sql` - Schema + function (135 lines)
+- `/app/api/booking-modifications/route.ts` - Submit & list API (205 lines)
+- `/app/api/booking-modifications/[id]/route.ts` - Approve/reject API (130 lines)
+- `/app/modify/[token]/page.tsx` - Guest request page (125 lines)
+- `/app/modify/[token]/ModificationRequestForm.tsx` - Form UI (365 lines)
+- `/app/dashboard/modifications/page.tsx` - Captain dashboard (45 lines)
+- `/app/dashboard/modifications/ModificationsClient.tsx` - Management UI (365 lines)
+- Updated `/app/dashboard/components/nav-links.tsx` - Navigation
+
+**Modification Types:**
+1. **Date & Time:** Change trip date/time (preserves duration)
+2. **Party Size:** Adjust number of guests (respects vessel capacity)
+3. **Both:** Change date/time and party size together
+
+**Use Cases:**
+- Guest schedule conflict (date change)
+- More/fewer people joining (party size)
+- Combined changes (reschedule + size adjustment)
+- Captain-initiated changes (auto-approved)
+- Emergency rescheduling
+- Flexibility for guests
+
+**Captain Features:**
+- Pending requests count badge
+- Filter by status (pending/all)
+- Before/after comparison
+- Approve with one click
+- Reject with explanation
+- Optional response message
+- Auto-apply approved changes
+
+**Guest Features:**
+- No login required (token-based)
+- Simple modification type selection
+- Visual date/time picker
+- Intuitive party size adjuster
+- Reason field for context
+- Pending approval confirmation
+- Email notification on decision (future)
+
+**Technical Highlights:**
+- Token-based guest access
+- PostgreSQL function for atomic updates
+- Auto-approval for captain requests
+- Booking timeline integration
+- Status workflow (pending → approved/rejected)
+- Before/after value tracking
+- Real-time UI updates
+- Type-safe API responses
+- Validation (dates, party size limits)
+
+**Validation:**
+- Date/time changes require both new date and time
+- Party size must differ from current
+- Party size respects vessel max_passengers
+- Only modifiable statuses can be changed
+- Token verification for guest access
+
+**Status:** Guest self-service modifications deployed! ✅
+
+---
+
+*Last updated: 2026-01-31 13:00 UTC*
+
+---
+
 ### Build #33: Message Templates System ✅
 - **Commit:** 30b2757
 - **Feature:** Beyond-MVP - Reusable message templates for guest communications
