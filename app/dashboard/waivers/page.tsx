@@ -1,19 +1,11 @@
 import { redirect } from 'next/navigation';
-import { createSupabaseServerClient } from '@/utils/supabase/server';
+import { requireAuth } from '@/lib/auth/server';
 import { WaiverTemplateList } from './components/WaiverTemplateList';
 import { FileSignature, Plus } from 'lucide-react';
 import Link from 'next/link';
 
 export default async function WaiversPage() {
-  const supabase = await createSupabaseServerClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/login');
-  }
+  const { user, supabase } = await requireAuth()
 
   // Fetch captain's waiver templates
   const { data: templates } = await supabase

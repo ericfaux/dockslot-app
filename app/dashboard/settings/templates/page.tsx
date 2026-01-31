@@ -1,19 +1,11 @@
 export const dynamic = 'force-dynamic'
 
 import { redirect } from 'next/navigation'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { requireAuth } from '@/lib/auth/server';
 import { TemplatesClient } from './TemplatesClient'
 
 export default async function MessageTemplatesPage() {
-  const supabase = await createSupabaseServerClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login')
-  }
+  const { user, supabase } = await requireAuth()
 
   return (
     <div className="space-y-6">

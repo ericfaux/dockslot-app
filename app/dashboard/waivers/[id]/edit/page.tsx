@@ -1,5 +1,5 @@
 import { redirect, notFound } from 'next/navigation';
-import { createSupabaseServerClient } from '@/utils/supabase/server';
+import { requireAuth } from '@/lib/auth/server';
 import { WaiverTemplateForm } from '../../components/WaiverTemplateForm';
 
 interface Props {
@@ -10,15 +10,7 @@ interface Props {
 
 export default async function EditWaiverPage({ params }: Props) {
   const { id } = await params;
-  const supabase = await createSupabaseServerClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/login');
-  }
+  const { user, supabase } = await requireAuth()
 
   const { data: template, error } = await supabase
     .from('waiver_templates')

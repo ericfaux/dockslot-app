@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { createSupabaseServerClient } from '@/utils/supabase/server';
+import { requireAuth } from '@/lib/auth/server';
 import { TripReportForm } from '../components/TripReportForm';
 
 export default async function NewTripReportPage({
@@ -7,16 +7,8 @@ export default async function NewTripReportPage({
 }: {
   searchParams: Promise<{ bookingId?: string }>;
 }) {
-  const supabase = await createSupabaseServerClient();
+  const { user, supabase } = await requireAuth();
   const params = await searchParams;
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/login');
-  }
 
   // Fetch vessels for dropdown
   const { data: vessels } = await supabase

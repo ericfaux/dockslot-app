@@ -1,4 +1,4 @@
-import { createClient } from '@/utils/supabase/server'
+import { requireAuth } from '@/lib/auth/server'
 import { redirect } from 'next/navigation'
 import ModificationsClient from './ModificationsClient'
 
@@ -8,15 +8,7 @@ export const metadata = {
 }
 
 export default async function ModificationsPage() {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login')
-  }
+  const { user, supabase } = await requireAuth()
 
   // Get captain profile
   const { data: profile } = await supabase

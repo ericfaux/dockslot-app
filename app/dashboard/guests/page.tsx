@@ -1,18 +1,10 @@
 import { redirect } from 'next/navigation';
-import { createSupabaseServerClient } from '@/utils/supabase/server';
+import { requireAuth } from '@/lib/auth/server';
 import { GuestsList } from './components/GuestsList';
 import { Users, TrendingUp } from 'lucide-react';
 
 export default async function GuestsPage() {
-  const supabase = await createSupabaseServerClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/login');
-  }
+  const { user, supabase } = await requireAuth()
 
   // Fetch all bookings to build guest analytics
   const { data: bookings } = await supabase

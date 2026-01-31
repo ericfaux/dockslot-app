@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-import { createSupabaseServerClient } from '@/utils/supabase/server';
+import { requireAuth } from '@/lib/auth/server';
 import { redirect } from 'next/navigation';
 import { ScheduleClient } from './ScheduleClient';
 import { ExportBookingsButton } from './components/ExportBookingsButton';
@@ -11,15 +11,7 @@ import { ExportBookingsButton } from './components/ExportBookingsButton';
  */
 
 export default async function SchedulePage() {
-  const supabase = await createSupabaseServerClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/login');
-  }
+  const { user, supabase } = await requireAuth();
 
   // Get captain profile
   const { data: profile } = await supabase

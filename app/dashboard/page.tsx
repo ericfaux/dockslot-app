@@ -4,7 +4,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { requireAuth } from '@/lib/auth/server';
 import { getBookingsWithFilters } from "@/lib/data/bookings";
 import { format, parseISO } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
@@ -411,10 +411,7 @@ function HorizonWidget({ captainName = "Captain", timezone = "America/New_York",
 // ═══════════════════════════════════════════════════════════════════════════
 
 export default async function DashboardPage() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user, supabase } = await requireAuth()
 
   const displayName =
     user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Captain";

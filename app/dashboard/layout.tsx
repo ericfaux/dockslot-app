@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { requireAuth } from "@/lib/auth/server";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { SideNav } from "./components/side-nav";
 import { MobileHeader } from "./components/mobile-header";
@@ -8,40 +9,10 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // 1. Initialize Supabase Client
-  const supabase = await createSupabaseServerClient();
+  // Auth with automatic retry and redirect
+  const { user } = await requireAuth();
 
-  // 2. Check for a valid user session with retry logic
-  // getUser() is safer than getSession() for server-side route protection
-  let user = null;
-  let authError = null;
-
-  try {
-    const { data, error } = await supabase.auth.getUser();
-    user = data.user;
-    authError = error;
-
-    // If getUser fails, try once more (handles transient failures)
-    if (!user && error) {
-      console.warn('[Dashboard Auth] First auth check failed, retrying...', error.message);
-      const retryResult = await supabase.auth.getUser();
-      user = retryResult.data.user;
-      authError = retryResult.error;
-    }
-  } catch (err) {
-    console.error('[Dashboard Auth] Exception during auth check:', err);
-  }
-
-  // 3. The "Bouncer": Redirect if not logged in
-  // Only redirect if we're certain there's no valid session
-  if (!user) {
-    if (authError) {
-      console.error('[Dashboard Auth] Redirecting to login:', authError.message);
-    }
-    redirect("/login");
-  }
-
-  // 4. Extract user details for the UI
+  // Extract user details for the UI
   const userEmail = user.email ?? "Unknown";
 
   // 5. Define the Sign Out Server Action

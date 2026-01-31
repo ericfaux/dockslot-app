@@ -4,19 +4,12 @@
 
 export const dynamic = 'force-dynamic';
 
-import { createSupabaseServerClient } from '@/utils/supabase/server';
+import { requireAuth } from '@/lib/auth/server';
 import { redirect } from 'next/navigation';
 import { PaymentsClient } from './PaymentsClient';
 
 export default async function PaymentsPage() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/login');
-  }
+  const { user, supabase } = await requireAuth()
 
   // Fetch profile with Stripe account info
   const { data: profile } = await supabase

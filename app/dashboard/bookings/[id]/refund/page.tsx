@@ -4,7 +4,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import { createSupabaseServerClient } from '@/utils/supabase/server';
+import { requireAuth } from '@/lib/auth/server';
 import { redirect, notFound } from 'next/navigation';
 import { RefundClient } from './RefundClient';
 
@@ -16,15 +16,7 @@ interface RefundPageProps {
 
 export default async function RefundPage({ params }: RefundPageProps) {
   const { id } = await params;
-  const supabase = await createSupabaseServerClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/login');
-  }
+  const { user, supabase } = await requireAuth()
 
   // Fetch booking with payment info
   const { data: booking, error } = await supabase

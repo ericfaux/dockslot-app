@@ -1,19 +1,11 @@
 import { redirect } from 'next/navigation';
-import { createSupabaseServerClient } from '@/utils/supabase/server';
+import { requireAuth } from '@/lib/auth/server';
 import { TripReportsList } from './components/TripReportsList';
 import { FileText, Plus } from 'lucide-react';
 import Link from 'next/link';
 
 export default async function TripReportsPage() {
-  const supabase = await createSupabaseServerClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/login');
-  }
+  const { user, supabase } = await requireAuth()
 
   // Fetch trip reports with booking details
   const { data: reports } = await supabase

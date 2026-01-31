@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { requireAuth } from '@/lib/auth/server'
 import { redirect } from 'next/navigation'
 import { BookingsListClient } from './BookingsListClient'
 
@@ -10,15 +10,7 @@ import { BookingsListClient } from './BookingsListClient'
  */
 
 export default async function BookingsListPage() {
-  const supabase = await createSupabaseServerClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login')
-  }
+  const { user, supabase } = await requireAuth()
 
   // Get captain profile
   const { data: profile } = await supabase

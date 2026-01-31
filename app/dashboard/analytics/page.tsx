@@ -1,20 +1,12 @@
 import { redirect } from 'next/navigation';
-import { createSupabaseServerClient } from '@/utils/supabase/server';
+import { requireAuth } from '@/lib/auth/server';
 import { startOfMonth, endOfMonth, subMonths, format, parseISO } from 'date-fns';
 import { AnalyticsCharts } from './components/AnalyticsCharts';
 import { TrendingUp, DollarSign, Calendar, Users, CheckCircle, XCircle } from 'lucide-react';
 import { ExportBookingsButton } from '../schedule/components/ExportBookingsButton';
 
 export default async function AnalyticsPage() {
-  const supabase = await createSupabaseServerClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/login');
-  }
+  const { user, supabase } = await requireAuth()
 
   // Get captain profile
   const { data: profile } = await supabase

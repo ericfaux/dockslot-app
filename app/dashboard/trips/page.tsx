@@ -4,20 +4,13 @@
 
 export const dynamic = 'force-dynamic';
 
-import { createSupabaseServerClient } from '@/utils/supabase/server';
+import { requireAuth } from '@/lib/auth/server';
 import { redirect } from 'next/navigation';
 import { getTripTypes } from '@/app/actions/trips';
 import { TripsClient } from './TripsClient';
 
 export default async function TripsPage() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/login');
-  }
+  const { user, supabase } = await requireAuth()
 
   // Fetch trip types
   const result = await getTripTypes();

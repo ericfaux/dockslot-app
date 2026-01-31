@@ -4,21 +4,14 @@
 
 export const dynamic = 'force-dynamic';
 
-import { createSupabaseServerClient } from '@/utils/supabase/server';
+import { requireAuth } from '@/lib/auth/server';
 import { redirect } from 'next/navigation';
 import { getProfile } from '@/app/actions/profile';
 import { getAvailabilityWindows, ensureAvailabilityExists } from '@/app/actions/availability';
 import { SettingsClient } from './SettingsClient';
 
 export default async function SettingsPage() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/login');
-  }
+  const { user, supabase } = await requireAuth()
 
   // Ensure user has availability windows (creates defaults if missing)
   // This is a fallback for users who signed up before the database trigger was added
