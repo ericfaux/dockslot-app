@@ -8,6 +8,7 @@ import {
   Settings,
   FileSignature,
   BarChart3,
+  FileText,
   type LucideIcon,
 } from "lucide-react";
 
@@ -47,6 +48,11 @@ export const navLinks: NavLink[] = [
     href: "/dashboard/waivers",
     label: "Waivers",
     icon: FileSignature,
+  },
+  {
+    href: "/dashboard/reports",
+    label: "Trip Reports",
+    icon: FileText,
   },
   {
     href: "/dashboard/analytics",
