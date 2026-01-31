@@ -12,6 +12,7 @@ import {
   CreditCard,
   List,
   Star,
+  RefreshCw,
   type LucideIcon,
 } from "lucide-react";
 
@@ -41,6 +42,11 @@ export const navLinks: NavLink[] = [
     href: "/dashboard/bookings",
     label: "All Bookings",
     icon: List,
+  },
+  {
+    href: "/dashboard/modifications",
+    label: "Modifications",
+    icon: RefreshCw,
   },
   {
     href: "/dashboard/manifest",

@@ -1216,6 +1216,99 @@ Reviewed Phase 1 from HEARTBEAT.md roadmap. **Findings:**
 
 ---
 
+### Build #42: Automated Review Request Emails ✅
+- **Commit:** 94ac25e
+- **Feature:** Beyond-MVP - Automated post-trip review request system
+- Vercel cron job: Runs daily at 11:00 AM UTC
+- Email template: `sendReviewRequest()` in `/lib/email/review-requests.ts`
+  - Beautiful maritime-themed HTML design
+  - Gradient header with star emoji
+  - Trip details recap card
+  - Large CTA button with review link
+  - Personalized greeting
+  - Mobile-responsive layout
+- Cron endpoint: `GET /api/cron/send-review-requests`
+  - Finds completed trips from yesterday
+  - Filters out trips with existing reviews
+  - Filters out bookings without email
+  - Sends personalized review request
+  - Logs each email in booking timeline
+  - Returns summary (sent, failed, total)
+- Timing logic:
+  - Targets trips completed 1 day ago (24 hours)
+  - Gives guests time to return home
+  - Experience still fresh for feedback
+  - Optimal response rate window
+- Integration:
+  - Uses existing Resend email infrastructure
+  - Leverages review system from Build #41
+  - Uses booking management tokens for secure access
+  - Logs in booking_logs table
+- Configuration:
+  - Added to `vercel.json` cron schedule
+  - Optional CRON_SECRET for security
+  - Uses NEXT_PUBLIC_APP_URL for review links
+- Documentation: `REVIEW_REQUESTS_SETUP.md`
+  - Setup instructions
+  - Timing and filtering logic
+  - Manual trigger instructions
+  - Monitoring and troubleshooting
+  - Best practices and metrics to track
+
+**Code Added:**
+- `/lib/email/review-requests.ts` - Email template (125 lines)
+- `/app/api/cron/send-review-requests/route.ts` - Cron job (160 lines)
+- `REVIEW_REQUESTS_SETUP.md` - Documentation (180 lines)
+- Updated `vercel.json` - Added cron schedule
+
+**Email Content:**
+- Subject: "⭐ How was your [Trip Type]?"
+- Personalized with guest name
+- Trip recap: type, vessel, date
+- Direct review link button
+- Maritime gradient design
+- Professional footer
+
+**Filtering Criteria:**
+- ✅ Status = completed
+- ✅ Trip date = yesterday (1 day ago)
+- ✅ Has guest email address
+- ✅ No review submitted yet
+- ✅ Resend API configured
+
+**Use Cases:**
+- Automatic review collection
+- Increase review submission rate
+- Timely feedback requests (24h after trip)
+- Build social proof automatically
+- Reduce manual follow-up work
+- Consistent guest communication
+
+**Technical Highlights:**
+- Daily cron automation via Vercel
+- Date range calculation (yesterday only)
+- Batch email processing
+- Review existence check (prevents duplicates)
+- Success/failure tracking
+- Booking log integration
+- Error handling and logging
+- Beautiful HTML email template
+- Secure token-based review links
+
+**Metrics Tracked:**
+- Total emails sent
+- Success vs failure count
+- Trips processed
+- Email delivery logs
+
+**Status:** Automated review requests deployed! ✅
+
+---
+
+*Last updated: 2026-01-31 12:30 UTC*
+
+---
+
 ### Build #33: Message Templates System ✅
 - **Commit:** 30b2757
 - **Feature:** Beyond-MVP - Reusable message templates for guest communications
