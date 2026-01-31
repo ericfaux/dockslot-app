@@ -495,3 +495,227 @@ export async function getWaiverTemplates(
 
   return { success: true, data: (data || []) as WaiverTemplate[] };
 }
+
+/**
+ * Toggle waiver template active status
+ */
+export async function toggleWaiverTemplate(
+  templateId: string
+): Promise<WaiverActionResult<{ is_active: boolean }>> {
+  if (!templateId || !isValidUUID(templateId)) {
+    return { success: false, error: 'Invalid template ID', code: 'VALIDATION' };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { success: false, error: 'Not authenticated', code: 'VALIDATION' };
+  }
+
+  // Get current status
+  const { data: template, error: fetchError } = await supabase
+    .from('waiver_templates')
+    .select('is_active, owner_id')
+    .eq('id', templateId)
+    .single();
+
+  if (fetchError || !template) {
+    return { success: false, error: 'Template not found', code: 'NOT_FOUND' };
+  }
+
+  // Verify ownership
+  if (template.owner_id !== user.id) {
+    return { success: false, error: 'Not authorized', code: 'VALIDATION' };
+  }
+
+  // Toggle
+  const { data, error } = await supabase
+    .from('waiver_templates')
+    .update({ is_active: !template.is_active })
+    .eq('id', templateId)
+    .select('is_active')
+    .single();
+
+  if (error) {
+    return { success: false, error: 'Failed to update template', code: 'DATABASE' };
+  }
+
+  return { success: true, data: { is_active: data.is_active } };
+}
+
+/**
+ * Delete a waiver template
+ */
+export async function deleteWaiverTemplate(
+  templateId: string
+): Promise<WaiverActionResult<null>> {
+  if (!templateId || !isValidUUID(templateId)) {
+    return { success: false, error: 'Invalid template ID', code: 'VALIDATION' };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { success: false, error: 'Not authenticated', code: 'VALIDATION' };
+  }
+
+  // Verify ownership
+  const { data: template, error: fetchError } = await supabase
+    .from('waiver_templates')
+    .select('owner_id')
+    .eq('id', templateId)
+    .single();
+
+  if (fetchError || !template) {
+    return { success: false, error: 'Template not found', code: 'NOT_FOUND' };
+  }
+
+  if (template.owner_id !== user.id) {
+    return { success: false, error: 'Not authorized', code: 'VALIDATION' };
+  }
+
+  // Check if any signatures exist for this template
+  const { data: signatures } = await supabase
+    .from('waiver_signatures')
+    .select('id')
+    .eq('waiver_template_id', templateId)
+    .limit(1);
+
+  if (signatures && signatures.length > 0) {
+    return { 
+      success: false, 
+      error: 'Cannot delete template that has been signed. Deactivate it instead.', 
+      code: 'VALIDATION' 
+    };
+  }
+
+  // Delete
+  const { error } = await supabase
+    .from('waiver_templates')
+    .delete()
+    .eq('id', templateId);
+
+  if (error) {
+    return { success: false, error: 'Failed to delete template', code: 'DATABASE' };
+  }
+
+  return { success: true, data: null };
+}
+
+/**
+ * Create a new waiver template
+ */
+export async function createWaiverTemplate(
+  data: {
+    title: string;
+    content: string;
+    requires_initials: boolean;
+    is_active: boolean;
+  }
+): Promise<WaiverActionResult<{ id: string }>> {
+  const { title, content, requires_initials, is_active } = data;
+
+  if (!title || title.trim().length < 3) {
+    return { success: false, error: 'Title must be at least 3 characters', code: 'VALIDATION' };
+  }
+
+  if (!content || content.trim().length < 50) {
+    return { success: false, error: 'Content must be at least 50 characters', code: 'VALIDATION' };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { success: false, error: 'Not authenticated', code: 'VALIDATION' };
+  }
+
+  const { data: template, error } = await supabase
+    .from('waiver_templates')
+    .insert({
+      owner_id: user.id,
+      title: title.trim(),
+      content: content.trim(),
+      requires_initials,
+      is_active,
+      version: 1,
+    })
+    .select('id')
+    .single();
+
+  if (error) {
+    console.error('Failed to create waiver template:', error);
+    return { success: false, error: 'Failed to create template', code: 'DATABASE' };
+  }
+
+  return { success: true, data: { id: template.id } };
+}
+
+/**
+ * Update an existing waiver template
+ */
+export async function updateWaiverTemplate(
+  templateId: string,
+  data: {
+    title: string;
+    content: string;
+    requires_initials: boolean;
+    is_active: boolean;
+  }
+): Promise<WaiverActionResult<null>> {
+  if (!templateId || !isValidUUID(templateId)) {
+    return { success: false, error: 'Invalid template ID', code: 'VALIDATION' };
+  }
+
+  const { title, content, requires_initials, is_active } = data;
+
+  if (!title || title.trim().length < 3) {
+    return { success: false, error: 'Title must be at least 3 characters', code: 'VALIDATION' };
+  }
+
+  if (!content || content.trim().length < 50) {
+    return { success: false, error: 'Content must be at least 50 characters', code: 'VALIDATION' };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { success: false, error: 'Not authenticated', code: 'VALIDATION' };
+  }
+
+  // Verify ownership
+  const { data: template, error: fetchError } = await supabase
+    .from('waiver_templates')
+    .select('owner_id')
+    .eq('id', templateId)
+    .single();
+
+  if (fetchError || !template) {
+    return { success: false, error: 'Template not found', code: 'NOT_FOUND' };
+  }
+
+  if (template.owner_id !== user.id) {
+    return { success: false, error: 'Not authorized', code: 'VALIDATION' };
+  }
+
+  // Update
+  const { error } = await supabase
+    .from('waiver_templates')
+    .update({
+      title: title.trim(),
+      content: content.trim(),
+      requires_initials,
+      is_active,
+    })
+    .eq('id', templateId);
+
+  if (error) {
+    console.error('Failed to update waiver template:', error);
+    return { success: false, error: 'Failed to update template', code: 'DATABASE' };
+  }
+
+  return { success: true, data: null };
+}
