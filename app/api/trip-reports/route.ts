@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
 
     // If linked to booking, update booking status to completed
     if (bookingId) {
-      await supabase
+      const { error: updateError } = await supabase
         .from('bookings')
         .update({
           status: 'completed',
@@ -88,18 +88,31 @@ export async function POST(request: NextRequest) {
         .eq('id', bookingId)
         .eq('captain_id', user.id);
 
-      // Add booking log entry
-      await supabase.from('booking_logs').insert({
-        booking_id: bookingId,
-        actor: 'captain',
-        entry_type: 'trip_completed',
-        entry_text: 'Trip completed and report filed',
-        metadata: {
-          report_id: report.id,
-          conditions: conditionsSummary,
-          has_incidents: !!incidents,
-        },
-      });
+      if (updateError) {
+        console.error('Failed to update booking status:', updateError);
+        // Don't fail the trip report creation, just log it
+      } else {
+        // Add booking log entry only if update succeeded
+        const { error: logError } = await supabase.from('booking_logs').insert({
+          booking_id: bookingId,
+          actor_type: 'captain',
+          actor_id: user.id,
+          entry_type: 'trip_completed',
+          description: 'Trip completed and report filed',
+          old_value: { status: 'confirmed' },
+          new_value: { 
+            status: 'completed',
+            report_id: report.id,
+            conditions: conditionsSummary,
+            has_incidents: !!incidents,
+          },
+        });
+
+        if (logError) {
+          console.error('Failed to create booking log:', logError);
+          // Don't fail the trip report, just log it
+        }
+      }
     }
 
     return NextResponse.json({ success: true, report });
