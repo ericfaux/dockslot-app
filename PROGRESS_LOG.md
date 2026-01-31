@@ -569,3 +569,58 @@ Reviewed Phase 1 from HEARTBEAT.md roadmap. **Findings:**
 ---
 
 *Last updated: 2026-01-31 08:30 UTC*
+
+---
+
+### Build #29: Booking Duplication System ✅
+- **Commit:** 228032c
+- **Feature:** Beyond-MVP - Quick duplication for repeat customers & recurring charters
+- Complete booking duplication with smart defaults
+- API endpoint: `/api/bookings/[id]/duplicate` (POST)
+- DuplicateBookingModal component:
+  - Pre-filled with original booking data
+  - Default date: +7 days from original
+  - Editable fields: guest name, email, phone, party size, date/time
+  - Duration auto-calculated from original
+  - Info panel showing what gets copied vs. fresh start
+- What gets copied:
+  - Vessel & trip type
+  - Pricing (total, deposit amount)
+  - Special requests & captain instructions
+- What doesn't get copied (fresh start):
+  - Payment status (starts as "pending_deposit")
+  - Captain notes & tags
+  - Weather hold info
+  - Waivers & passenger details
+  - Management token (new one generated)
+- Duplicate button always available in booking detail panel
+- Audit logging: Creates entries tracking the duplication
+- Booking log: Notes which booking it was duplicated from
+- Type safety: Added guest_email & guest_phone to CalendarBooking
+
+**Code Added:**
+- `/app/api/bookings/[id]/duplicate/route.ts` - Duplication API (140 lines)
+- `/app/dashboard/components/DuplicateBookingModal.tsx` - Modal UI (350 lines)
+- Updated `/app/dashboard/schedule/BookingDetailPanel.tsx` - Duplicate button
+- Updated `/components/calendar/types.ts` - Added email/phone fields
+
+**Use Cases:**
+- Weekly recurring charters (same guest, different dates)
+- Repeat customers (adjust guest info slightly)
+- Template bookings for common trip configurations
+- Corporate clients with regular bookings
+- Birthday/anniversary trips that happen yearly
+- Quick booking creation without re-entering vessel/trip details
+
+**Technical Highlights:**
+- Smart date defaulting (+7 days)
+- Duration preservation regardless of new start time
+- Crypto-secure management token generation
+- Full audit trail
+- Type-safe across all components
+
+**Status:** Booking duplication deployed! ✅
+
+---
+
+*Last updated: 2026-01-31 08:40 UTC*
