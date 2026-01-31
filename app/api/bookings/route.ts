@@ -319,12 +319,20 @@ export async function POST(request: NextRequest) {
 
     // Send booking confirmation email (async, don't block response)
     if (process.env.RESEND_API_KEY) {
-      // Fetch trip type and vessel details for email
+      // Fetch trip type, vessel, and profile details for email
       const { data: tripDetails } = await supabase
         .from('trip_types')
         .select('title, duration_hours')
         .eq('id', trip_type_id)
         .single();
+
+      const { data: vesselDetails } = booking.vessel_id
+        ? await supabase
+            .from('vessels')
+            .select('name')
+            .eq('id', booking.vessel_id)
+            .single()
+        : { data: null };
 
       const { data: profile } = await supabase
         .from('profiles')
@@ -341,7 +349,7 @@ export async function POST(request: NextRequest) {
           tripType: tripDetails.title,
           date: format(new Date(scheduled_start), 'EEEE, MMMM d, yyyy'),
           time: format(new Date(scheduled_start), 'h:mm a'),
-          vessel: 'Your charter vessel', // TODO: Add vessel name when available
+          vessel: vesselDetails?.name || 'Your charter vessel',
           meetingSpot: profile.meeting_spot_name || 'Meeting spot details in booking',
           captainName: profile.business_name || profile.full_name || 'Your Captain',
           totalPrice: `$${((total_price_cents || 0) / 100).toFixed(2)}`,
