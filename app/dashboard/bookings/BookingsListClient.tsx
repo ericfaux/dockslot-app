@@ -16,6 +16,7 @@ import { BookingWithDetails } from '@/lib/db/types'
 import { STATUS_COLORS, STATUS_LABELS } from '@/components/calendar/types'
 import { ExportButton } from './ExportButton'
 import FilterPresetsMenu from '../components/FilterPresetsMenu'
+import BulkActionsBar from '../components/BulkActionsBar'
 import Link from 'next/link'
 
 interface BookingsListClientProps {
@@ -26,6 +27,7 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
   const [bookings, setBookings] = useState<BookingWithDetails[]>([])
   const [availableTags, setAvailableTags] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [selectedBookings, setSelectedBookings] = useState<Set<string>>(new Set())
   const [filters, setFilters] = useState<BookingFilterState>({
     search: '',
     tags: [],
@@ -33,6 +35,28 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
     paymentStatus: [],
     dateRange: { start: null, end: null },
   })
+
+  const handleSelectAll = () => {
+    if (selectedBookings.size === bookings.length) {
+      setSelectedBookings(new Set())
+    } else {
+      setSelectedBookings(new Set(bookings.map((b) => b.id)))
+    }
+  }
+
+  const handleSelectBooking = (id: string) => {
+    const newSelected = new Set(selectedBookings)
+    if (newSelected.has(id)) {
+      newSelected.delete(id)
+    } else {
+      newSelected.add(id)
+    }
+    setSelectedBookings(newSelected)
+  }
+
+  const handleClearSelection = () => {
+    setSelectedBookings(new Set())
+  }
 
   // Fetch available tags
   useEffect(() => {
@@ -100,7 +124,7 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className={`space-y-6 ${selectedBookings.size > 0 ? 'pb-24' : ''}`}>
       {/* Filters & Presets */}
       <div className="space-y-3">
         <div className="flex items-center justify-end">
@@ -148,17 +172,50 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
         </div>
       ) : (
         <div className="space-y-3">
+          {/* Select All */}
+          {bookings.length > 0 && (
+            <div className="flex items-center gap-3 rounded border border-slate-700 bg-slate-800/30 px-4 py-2">
+              <input
+                type="checkbox"
+                checked={selectedBookings.size === bookings.length && bookings.length > 0}
+                onChange={handleSelectAll}
+                className="h-4 w-4 rounded border-slate-600 bg-slate-700 text-cyan-500 focus:ring-2 focus:ring-cyan-500 focus:ring-offset-0"
+              />
+              <span className="text-sm text-slate-400">
+                Select all ({bookings.length})
+              </span>
+            </div>
+          )}
+
           {bookings.map((booking) => {
             const colors = STATUS_COLORS[booking.status]
             const statusLabel = STATUS_LABELS[booking.status]
+            const isSelected = selectedBookings.has(booking.id)
 
             return (
-              <Link
+              <div
                 key={booking.id}
-                href={`/dashboard/schedule?booking=${booking.id}`}
-                className="block rounded-lg border border-slate-700 bg-slate-800/50 p-4 transition-all hover:border-cyan-500/50 hover:bg-slate-800/70"
+                className={`flex items-start gap-3 rounded-lg border p-4 transition-all ${
+                  isSelected
+                    ? 'border-cyan-500 bg-cyan-500/10'
+                    : 'border-slate-700 bg-slate-800/50 hover:border-cyan-500/50 hover:bg-slate-800/70'
+                }`}
               >
-                <div className="flex items-start justify-between gap-4">
+                {/* Checkbox */}
+                <input
+                  type="checkbox"
+                  name="booking-select"
+                  value={booking.id}
+                  checked={isSelected}
+                  onChange={() => handleSelectBooking(booking.id)}
+                  onClick={(e) => e.stopPropagation()}
+                  className="mt-1 h-4 w-4 rounded border-slate-600 bg-slate-700 text-cyan-500 focus:ring-2 focus:ring-cyan-500 focus:ring-offset-0"
+                />
+
+                <Link
+                  href={`/dashboard/schedule?booking=${booking.id}`}
+                  className="flex flex-1 items-start justify-between gap-4"
+                >
                   {/* Left: Booking Info */}
                   <div className="flex-1 space-y-3">
                     {/* Guest Name & Status */}
@@ -265,11 +322,21 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
                   <div className="flex items-center">
                     <ChevronRight className="h-5 w-5 text-slate-500" />
                   </div>
-                </div>
-              </Link>
+                </Link>
+              </div>
             )
           })}
         </div>
+      )}
+
+      {/* Bulk Actions Bar */}
+      {selectedBookings.size > 0 && (
+        <BulkActionsBar
+          selectedCount={selectedBookings.size}
+          onCancel={() => {}}
+          onClearSelection={handleClearSelection}
+          availableTags={availableTags}
+        />
       )}
     </div>
   )
