@@ -24,6 +24,8 @@ import { FloatPlanCard } from "./components/FloatPlanCard";
 import { BookingLinkCard } from "@/components/BookingLinkCard";
 import { BookingStatus, ACTIVE_BOOKING_STATUSES } from "@/lib/db/types";
 import { checkMarineConditions } from "@/lib/weather/noaa";
+import { getBuoyData } from "@/lib/weather/buoy";
+import SunCalc from "suncalc";
 
 interface WeatherData {
   waterTemp: number | null;
@@ -425,6 +427,7 @@ export default async function DashboardPage() {
       // Fetch real weather data if coordinates available
       if (profile.meeting_spot_latitude && profile.meeting_spot_longitude) {
         try {
+          // Fetch NOAA marine forecast for wind
           const conditions = await checkMarineConditions(
             profile.meeting_spot_latitude,
             profile.meeting_spot_longitude,
@@ -444,9 +447,28 @@ export default async function DashboardPage() {
             }
           }
 
-          // Note: NOAA land forecast doesn't provide water temp or sunset
-          // Would need marine buoy data or astronomical calculation
-          // For now, gracefully degrade to showing only wind data
+          // Fetch NOAA buoy data for water temperature
+          const buoyData = await getBuoyData(
+            profile.meeting_spot_latitude,
+            profile.meeting_spot_longitude
+          );
+          
+          if (buoyData?.waterTemperature) {
+            weatherData.waterTemp = Math.round(buoyData.waterTemperature);
+          }
+
+          // Calculate sunset time using suncalc (no API needed!)
+          const sunTimes = SunCalc.getTimes(
+            new Date(),
+            profile.meeting_spot_latitude,
+            profile.meeting_spot_longitude
+          );
+          
+          weatherData.sunset = formatInTimeZone(
+            sunTimes.sunset,
+            captainTimezone,
+            'h:mm a'
+          );
         } catch (error) {
           console.error('Failed to fetch weather data:', error);
           // Gracefully degrade - leave weatherData as nulls
