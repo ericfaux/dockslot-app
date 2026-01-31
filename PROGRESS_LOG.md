@@ -750,3 +750,67 @@ Reviewed Phase 1 from HEARTBEAT.md roadmap. **Findings:**
 ---
 
 *Last updated: 2026-01-31 09:00 UTC*
+
+---
+
+### Build #32: Dashboard Quick Stats Widgets ✅
+- **Commit:** 784dbbf
+- **Feature:** Beyond-MVP - At-a-glance metrics for decision-making
+- Real-time statistics dashboard widgets
+- API endpoint: `GET /api/dashboard/quick-stats`
+- 6 stat widgets:
+  1. **Today's Bookings:** Count of bookings scheduled today
+  2. **This Week:** Total bookings for current week
+  3. **Month Revenue:** Revenue this month with % change vs last month
+  4. **Pending Deposits:** Count of bookings needing deposit
+  5. **Upcoming Trips:** Confirmed trips in next 7 days
+  6. **Average Booking:** Estimated average booking value
+- QuickStatsWidgets component features:
+  - Auto-refresh every 5 minutes
+  - Loading skeletons for smooth UX
+  - Clickable widgets (link to relevant pages)
+  - Beautiful card design with icons
+  - Color-coded by metric type
+  - Responsive grid layout
+- API features:
+  - Date-range calculations with date-fns
+  - Revenue comparison (this month vs last)
+  - Smart counting (confirmed, rescheduled statuses)
+  - Future-focused (only upcoming pending deposits)
+  - Authorization check
+- Integrated into dashboard home page
+- Maritime color scheme (matches existing design)
+
+**Code Added:**
+- `/app/api/dashboard/quick-stats/route.ts` - Stats API (170 lines)
+- `/app/dashboard/components/QuickStatsWidgets.tsx` - Widget UI (185 lines)
+- Updated `/app/dashboard/page.tsx` - Dashboard integration
+
+**Metrics Details:**
+- **Today:** Confirmed + rescheduled for today
+- **Week:** All active bookings this week
+- **Revenue:** Deposits + full payments, excludes unpaid
+- **Change %:** Month-over-month revenue growth
+- **Pending:** Unpaid deposits for future trips
+- **Upcoming:** Next 7 days, confirmed only
+
+**Use Cases:**
+- Quick morning check: "What's happening today?"
+- Revenue tracking: "How's this month vs last?"
+- Action items: "How many deposits need follow-up?"
+- Planning: "How busy is next week?"
+- Performance: "Are we growing?"
+
+**Technical Highlights:**
+- Efficient counting queries (head: true)
+- Timezone-aware date calculations
+- Auto-refresh without page reload
+- Loading states for all widgets
+- Proper access control
+- Optimized queries (counts, not full data)
+
+**Status:** Quick stats deployed! ✅
+
+---
+
+*Last updated: 2026-01-31 09:10 UTC*
