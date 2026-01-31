@@ -501,3 +501,71 @@ Reviewed Phase 1 from HEARTBEAT.md roadmap. **Findings:**
 ---
 
 *Last updated: 2026-01-31 08:20 UTC*
+
+---
+
+### Build #28: Booking Export System (CSV Download) ✅
+- **Commit:** 6a9d027
+- **Feature:** Beyond-MVP - Export for accounting, tax records, insurance
+- Complete CSV export system for bookings
+- API endpoint: `/api/bookings/export` (GET with filter params)
+- 19-column CSV format:
+  - Booking ID, Guest Name, Email, Phone
+  - Party Size, Date, Start Time, End Time, Duration
+  - Vessel, Trip Type
+  - Status, Payment Status
+  - Total, Deposit Paid, Balance Due
+  - Tags, Captain Notes, Created Date
+- ExportButton component:
+  - Applies current filters from bookings list
+  - Download with smart filename (includes date range)
+  - Loading state, error handling
+  - Disabled when no results
+- Updated ExportBookingsButton with presets:
+  - This Month
+  - Last Month
+  - This Year (YTD)
+  - Confirmed Only
+  - All Bookings
+- CSV features:
+  - Proper escaping (commas, quotes, newlines)
+  - Duration calculated in hours
+  - Formatted dates and times
+  - All pricing in dollars (converted from cents)
+- Extended getBookingsForExport:
+  - Support for tags filter
+  - Support for payment status filter
+  - Multi-field search (name, email, phone)
+- Integrated on 3 pages:
+  - Bookings list (filtered export)
+  - Schedule (preset export)
+  - Analytics (preset export)
+
+**Code Added:**
+- `/app/api/bookings/export/route.ts` - CSV export API (210 lines)
+- `/app/dashboard/bookings/ExportButton.tsx` - Export button (110 lines)
+- Updated `/app/dashboard/schedule/components/ExportBookingsButton.tsx` - Preset filters
+- Updated `/lib/data/bookings.ts` - Extended export query
+- Updated analytics + schedule pages - Added captainId prop
+
+**Use Cases:**
+- Export filtered bookings for monthly accounting
+- Download year-end reports for taxes
+- Share booking data with insurance providers
+- Analyze trends in Excel/Google Sheets
+- Create custom reports with filtered data
+- Archive records for compliance
+
+**Technical Highlights:**
+- Streaming CSV generation (no memory bloat)
+- Proper Content-Disposition headers
+- CSV RFC 4180 compliant escaping
+- Filter persistence from UI to export
+- Smart filename with dates
+- Client-side download trigger
+
+**Status:** Professional export tools deployed! ✅
+
+---
+
+*Last updated: 2026-01-31 08:30 UTC*
