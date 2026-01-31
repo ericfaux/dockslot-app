@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createSupabaseServiceClient } from '@/utils/supabase/service';
+import { sendBookingConfirmation, sendBalancePaymentConfirmation } from '@/lib/email/resend';
+import { format, parseISO } from 'date-fns';
 
 function getStripeClient() {
   const key = process.env.STRIPE_SECRET_KEY;
@@ -97,10 +99,110 @@ export async function POST(request: NextRequest) {
         console.error('Failed to log payment:', logError);
       }
 
-      // TODO: Send confirmation email to guest
-      // TODO: Send notification to captain
+      // Fetch booking details with related data for email
+      const { data: booking } = await supabase
+        .from('bookings')
+        .select(`
+          *,
+          trip_type:trip_types(title),
+          vessel:vessels(name),
+          profile:profiles(full_name, business_name, meeting_spot_name)
+        `)
+        .eq('id', bookingId)
+        .single();
+
+      // Send confirmation email to guest
+      if (booking) {
+        const managementUrl = `${process.env.NEXT_PUBLIC_APP_URL}/manage/${booking.management_token}`;
+        const formattedDate = format(parseISO(booking.scheduled_start), 'EEEE, MMMM d, yyyy');
+        const formattedTime = format(parseISO(booking.scheduled_start), 'h:mm a');
+        
+        await sendBookingConfirmation({
+          to: booking.guest_email,
+          guestName: booking.guest_name,
+          tripType: booking.trip_type?.title || 'Charter Trip',
+          date: formattedDate,
+          time: formattedTime,
+          vessel: booking.vessel?.name || 'Charter Vessel',
+          meetingSpot: booking.profile?.meeting_spot_name || 'TBD',
+          captainName: booking.profile?.full_name || booking.profile?.business_name || 'Your Captain',
+          totalPrice: `$${(booking.total_price_cents / 100).toFixed(2)}`,
+          depositPaid: `$${(booking.deposit_paid_cents / 100).toFixed(2)}`,
+          balanceDue: `$${(booking.balance_due_cents / 100).toFixed(2)}`,
+          managementUrl,
+        });
+      }
+
+      // Note: Captain email notifications would require email field in profiles table
 
       console.log(`✅ Payment processed for booking ${bookingId}`);
+    }
+
+    // Handle balance payment confirmation
+    if (event.type === 'payment_intent.succeeded') {
+      const paymentIntent = event.data.object as Stripe.PaymentIntent;
+      const { bookingId, paymentType } = paymentIntent.metadata || {};
+
+      if (paymentType === 'balance' && bookingId) {
+        const supabase = createSupabaseServiceClient();
+
+        // Update booking with balance payment
+        const { error: updateError } = await supabase
+          .from('bookings')
+          .update({
+            balance_due_cents: 0,
+            payment_status: 'fully_paid',
+            balance_paid_at: new Date().toISOString(),
+          })
+          .eq('id', bookingId);
+
+        if (updateError) {
+          console.error('Failed to update booking with balance payment:', updateError);
+          return NextResponse.json(
+            { error: 'Failed to update booking' },
+            { status: 500 }
+          );
+        }
+
+        // Log the payment
+        await supabase.from('booking_logs').insert({
+          booking_id: bookingId,
+          actor: 'system',
+          entry_type: 'payment_received',
+          entry_text: `Balance payment received via Stripe: $${(paymentIntent.amount / 100).toFixed(2)}`,
+          metadata: {
+            payment_intent: paymentIntent.id,
+            amount_cents: paymentIntent.amount,
+          },
+        });
+
+        // Fetch booking details for email
+        const { data: booking } = await supabase
+          .from('bookings')
+          .select(`
+            *,
+            trip_type:trip_types(title)
+          `)
+          .eq('id', bookingId)
+          .single();
+
+        // Send balance payment confirmation email
+        if (booking) {
+          const managementUrl = `${process.env.NEXT_PUBLIC_APP_URL}/manage/${booking.management_token}`;
+          const formattedDate = format(parseISO(booking.scheduled_start), 'EEEE, MMMM d, yyyy');
+          
+          await sendBalancePaymentConfirmation({
+            to: booking.guest_email,
+            guestName: booking.guest_name,
+            tripType: booking.trip_type?.title || 'Charter Trip',
+            date: formattedDate,
+            amountPaid: `$${(paymentIntent.amount / 100).toFixed(2)}`,
+            managementUrl,
+          });
+        }
+
+        console.log(`✅ Balance payment processed for booking ${bookingId}`);
+      }
     }
 
     return NextResponse.json({ received: true });

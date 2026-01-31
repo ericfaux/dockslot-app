@@ -4,6 +4,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServiceClient } from '@/utils/supabase/service';
+import { sendRescheduleConfirmation } from '@/lib/email/resend';
+import { format, parseISO } from 'date-fns';
 
 interface RescheduleRequest {
   offer_id: string;
@@ -33,10 +35,14 @@ export async function POST(
 
     const supabase = createSupabaseServiceClient();
 
-    // Fetch booking
+    // Fetch booking with related data
     const { data: booking, error: bookingError } = await supabase
       .from('bookings')
-      .select('*')
+      .select(`
+        *,
+        trip_type:trip_types(title),
+        vessel:vessels(name)
+      `)
       .eq('id', bookingId)
       .single();
 
@@ -131,8 +137,24 @@ export async function POST(
         },
       });
 
-    // TODO: Send confirmation email to guest
-    // TODO: Send notification to captain
+    // Send confirmation email to guest
+    const managementUrl = `${process.env.NEXT_PUBLIC_APP_URL}/manage/${booking.management_token}`;
+    const oldDate = format(parseISO(booking.scheduled_start), 'EEEE, MMMM d, yyyy');
+    const newDate = format(parseISO(offer.proposed_start), 'EEEE, MMMM d, yyyy');
+    const newTime = format(parseISO(offer.proposed_start), 'h:mm a');
+    
+    await sendRescheduleConfirmation({
+      to: booking.guest_email,
+      guestName: booking.guest_name,
+      tripType: booking.trip_type?.title || 'Charter Trip',
+      oldDate,
+      newDate,
+      newTime,
+      vessel: booking.vessel?.name || 'Charter Vessel',
+      managementUrl,
+    });
+    
+    // Note: Captain notifications would require email addresses in profiles table
 
     return NextResponse.json({
       success: true,

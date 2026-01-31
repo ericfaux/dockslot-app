@@ -198,3 +198,226 @@ export async function sendWeatherHoldNotification(params: {
     html,
   });
 }
+
+/**
+ * Send refund notification email
+ */
+export async function sendRefundNotification(params: {
+  to: string;
+  guestName: string;
+  tripType: string;
+  date: string;
+  refundAmount: string;
+  reason: string;
+  managementUrl: string;
+}): Promise<{ success: boolean; error?: string }> {
+  const html = `
+<!DOCTYPE html>
+<html>
+<body style="margin: 0; padding: 0; background-color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto; background-color: #1e293b;">
+    <tr>
+      <td style="padding: 40px 20px; text-align: center; background: linear-gradient(to bottom, #581c87, #0f172a);">
+        <h1 style="margin: 0; color: #c084fc; font-size: 28px;">💰 Refund Processed</h1>
+        <p style="margin: 10px 0 0; color: #94a3b8;">Payment Refund Notification</p>
+      </td>
+    </tr>
+    
+    <tr>
+      <td style="padding: 30px 20px;">
+        <h2 style="margin: 0 0 20px; color: #f1f5f9; font-size: 24px;">Hi ${params.guestName},</h2>
+        <p style="margin: 0 0 20px; color: #cbd5e1; line-height: 1.6;">
+          A refund has been processed for your booking.
+        </p>
+        
+        <div style="background-color: #581c87; border-left: 4px solid: #c084fc; padding: 20px; margin: 20px 0; border-radius: 6px;">
+          <h3 style="margin: 0 0 15px; color: #e9d5ff;">Refund Details</h3>
+          <p style="margin: 5px 0; color: #f3e8ff;"><strong>Trip:</strong> ${params.tripType}</p>
+          <p style="margin: 5px 0; color: #f3e8ff;"><strong>Date:</strong> ${params.date}</p>
+          <p style="margin: 15px 0 5px; color: #c084fc; font-size: 24px;"><strong>${params.refundAmount}</strong></p>
+          <p style="margin: 0; color: #e9d5ff; font-size: 12px;">Refund amount</p>
+        </div>
+
+        <div style="background-color: #0f172a; border-left: 4px solid #64748b; padding: 20px; margin: 20px 0;">
+          <h4 style="margin: 0 0 10px; color: #94a3b8;">Reason</h4>
+          <p style="margin: 0; color: #cbd5e1; font-style: italic;">${params.reason}</p>
+        </div>
+
+        <p style="margin: 20px 0; color: #cbd5e1; line-height: 1.6;">
+          The refund will appear in your original payment method within 5-10 business days.
+        </p>
+
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${params.managementUrl}" style="display: inline-block; background-color: #c084fc; color: #0f172a; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600;">
+            View Booking Details
+          </a>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td style="padding: 20px; text-align: center; background-color: #0f172a; border-top: 1px solid #334155;">
+        <p style="margin: 0; color: #64748b; font-size: 12px;">
+          Powered by <span style="color: #06b6d4;">DockSlot</span>
+        </p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `;
+
+  return sendEmail({
+    to: params.to,
+    subject: `💰 Refund Processed: ${params.tripType}`,
+    html,
+  });
+}
+
+/**
+ * Send reschedule confirmation email
+ */
+export async function sendRescheduleConfirmation(params: {
+  to: string;
+  guestName: string;
+  tripType: string;
+  oldDate: string;
+  newDate: string;
+  newTime: string;
+  vessel: string;
+  managementUrl: string;
+}): Promise<{ success: boolean; error?: string }> {
+  const html = `
+<!DOCTYPE html>
+<html>
+<body style="margin: 0; padding: 0; background-color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto; background-color: #1e293b;">
+    <tr>
+      <td style="padding: 40px 20px; text-align: center; background: linear-gradient(to bottom, #10b981, #0f172a);">
+        <h1 style="margin: 0; color: #34d399; font-size: 28px;">✓ Trip Rescheduled</h1>
+        <p style="margin: 10px 0 0; color: #94a3b8;">New Date Confirmed</p>
+      </td>
+    </tr>
+    
+    <tr>
+      <td style="padding: 30px 20px;">
+        <h2 style="margin: 0 0 20px; color: #f1f5f9; font-size: 24px;">Hi ${params.guestName}!</h2>
+        <p style="margin: 0 0 20px; color: #cbd5e1; line-height: 1.6;">
+          Your trip has been successfully rescheduled. We're excited to have you aboard on the new date!
+        </p>
+        
+        <div style="background-color: #0f172a; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0;">
+          <p style="margin: 0; color: #fca5a5; font-size: 14px;"><strong>Original Date:</strong></p>
+          <p style="margin: 5px 0 0; color: #f87171; text-decoration: line-through;">${params.oldDate}</p>
+        </div>
+
+        <div style="background-color: #064e3b; border-left: 4px solid #34d399; padding: 20px; margin: 20px 0;">
+          <h3 style="margin: 0 0 15px; color: #34d399;">New Trip Details</h3>
+          <p style="margin: 5px 0; color: #d1fae5;"><strong>Trip:</strong> ${params.tripType}</p>
+          <p style="margin: 5px 0; color: #d1fae5;"><strong>Date & Time:</strong> ${params.newDate} at ${params.newTime}</p>
+          <p style="margin: 5px 0; color: #d1fae5;"><strong>Vessel:</strong> ${params.vessel}</p>
+        </div>
+
+        <p style="margin: 20px 0; color: #cbd5e1; line-height: 1.6;">
+          Your payment and all other booking details remain the same.
+        </p>
+
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${params.managementUrl}" style="display: inline-block; background-color: #34d399; color: #0f172a; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600;">
+            View Updated Booking
+          </a>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td style="padding: 20px; text-align: center; background-color: #0f172a; border-top: 1px solid #334155;">
+        <p style="margin: 0; color: #64748b; font-size: 12px;">
+          Powered by <span style="color: #06b6d4;">DockSlot</span>
+        </p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `;
+
+  return sendEmail({
+    to: params.to,
+    subject: `✓ Trip Rescheduled: ${params.tripType} - New Date ${params.newDate}`,
+    html,
+  });
+}
+
+/**
+ * Send balance payment confirmation email  
+ */
+export async function sendBalancePaymentConfirmation(params: {
+  to: string;
+  guestName: string;
+  tripType: string;
+  date: string;
+  amountPaid: string;
+  managementUrl: string;
+}): Promise<{ success: boolean; error?: string }> {
+  const html = `
+<!DOCTYPE html>
+<html>
+<body style="margin: 0; padding: 0; background-color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto; background-color: #1e293b;">
+    <tr>
+      <td style="padding: 40px 20px; text-align: center; background: linear-gradient(to bottom, #10b981, #0f172a);">
+        <h1 style="margin: 0; color: #34d399; font-size: 28px;">✓ Payment Received</h1>
+        <p style="margin: 10px 0 0; color: #94a3b8;">Balance Payment Confirmed</p>
+      </td>
+    </tr>
+    
+    <tr>
+      <td style="padding: 30px 20px;">
+        <h2 style="margin: 0 0 20px; color: #f1f5f9; font-size: 24px;">Hi ${params.guestName}!</h2>
+        <p style="margin: 0 0 20px; color: #cbd5e1; line-height: 1.6;">
+          Thank you! We've received your balance payment. You're all set for your trip!
+        </p>
+        
+        <div style="background-color: #064e3b; border-left: 4px solid #34d399; padding: 20px; margin: 20px 0;">
+          <h3 style="margin: 0 0 15px; color: #34d399;">Payment Details</h3>
+          <p style="margin: 5px 0; color: #d1fae5;"><strong>Trip:</strong> ${params.tripType}</p>
+          <p style="margin: 5px 0; color: #d1fae5;"><strong>Date:</strong> ${params.date}</p>
+          <p style="margin: 15px 0 5px; color: #34d399; font-size: 24px;"><strong>${params.amountPaid}</strong></p>
+          <p style="margin: 0; color: #6ee7b7; font-size: 12px;">Balance payment received</p>
+        </div>
+
+        <div style="background-color: #10b981; padding: 15px; margin: 20px 0; border-radius: 6px; text-align: center;">
+          <p style="margin: 0; color: #064e3b; font-weight: 600; font-size: 16px;">✓ FULLY PAID</p>
+        </div>
+
+        <p style="margin: 20px 0; color: #cbd5e1; line-height: 1.6;">
+          We can't wait to see you on the water. See you soon!
+        </p>
+
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${params.managementUrl}" style="display: inline-block; background-color: #34d399; color: #0f172a; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600;">
+            View Booking Details
+          </a>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td style="padding: 20px; text-align: center; background-color: #0f172a; border-top: 1px solid #334155;">
+        <p style="margin: 0; color: #64748b; font-size: 12px;">
+          Powered by <span style="color: #06b6d4;">DockSlot</span>
+        </p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `;
+
+  return sendEmail({
+    to: params.to,
+    subject: `✓ Payment Received: ${params.tripType} - Fully Paid!`,
+    html,
+  });
+}

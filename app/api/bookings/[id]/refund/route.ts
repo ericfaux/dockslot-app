@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 import Stripe from 'stripe';
+import { sendRefundNotification } from '@/lib/email/resend';
+import { format, parseISO } from 'date-fns';
 
 // Initialize Stripe (will fail gracefully if no API key)
 const stripe = process.env.STRIPE_SECRET_KEY
@@ -132,8 +134,19 @@ export async function POST(
       created_by: user.id,
     });
 
-    // TODO: Send refund notification email to guest
-    // This would use the email service (Resend) to notify the guest
+    // Send refund notification email to guest
+    const formattedDate = format(parseISO(booking.scheduled_start), 'EEEE, MMMM d, yyyy');
+    const managementUrl = `${process.env.NEXT_PUBLIC_APP_URL}/manage/${booking.management_token}`;
+    
+    await sendRefundNotification({
+      to: booking.guest_email,
+      guestName: booking.guest_name,
+      tripType: booking.trip_type?.title || 'Charter Trip',
+      date: formattedDate,
+      refundAmount: `$${(refund_amount_cents / 100).toFixed(2)}`,
+      reason: reason.trim(),
+      managementUrl,
+    });
 
     return NextResponse.json({
       success: true,
