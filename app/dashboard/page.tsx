@@ -29,6 +29,7 @@ import { checkMarineConditions } from "@/lib/weather/noaa";
 import { getBuoyData } from "@/lib/weather/buoy";
 import SunCalc from "suncalc";
 import { weatherCache } from "@/lib/cache";
+import QuickStatsWidgets from "./components/QuickStatsWidgets";
 
 interface WeatherData {
   waterTemp: number | null;
@@ -580,6 +581,11 @@ export default async function DashboardPage() {
           timezone={captainTimezone}
           weatherData={weatherData}
         />
+      </section>
+
+      {/* ═══ SECTION 1.5: QUICK STATS ═══ */}
+      <section aria-label="Quick Statistics">
+        <QuickStatsWidgets captainId={user?.id || ''} />
       </section>
 
       {/* ═══ SECTION 2: FUEL GAUGES ═══ */}
