@@ -817,6 +817,70 @@ Reviewed Phase 1 from HEARTBEAT.md roadmap. **Findings:**
 
 ---
 
+### Build #37: Guest Communication Center ✅
+- **Commit:** c37433b
+- **Feature:** Beyond-MVP - In-dashboard guest messaging with template support
+- Complete guest messaging system from booking detail panel
+- API endpoint: `POST /api/bookings/[id]/send-message`
+- SendMessageModal component features:
+  - Template picker (loads saved message templates)
+  - Placeholder replacement system
+  - Subject and message editor
+  - Real-time character count
+  - Loading states and error handling
+- Template placeholder support:
+  - `{guest_name}` - Guest's name
+  - `{date}` - Trip date
+  - `{time}` - Trip start time
+  - `{vessel}` - Vessel name
+  - `{meeting_spot}` - Meeting location (TBD for now)
+- Integration features:
+  - "Send Message" button always available in booking panel
+  - Email sent via Resend with beautiful HTML template
+  - Booking timeline logs all sent messages
+  - Audit log tracking for compliance
+  - Template use count increments when template used
+- Beautiful email template:
+  - Maritime theme matching DockSlot brand
+  - Message displayed in highlighted quote box
+  - Captain branding ("Message from Your Captain")
+  - Reply-to functionality
+  - Responsive design
+- Database migration for RPC function `increment_template_use_count`
+
+**Code Added:**
+- `/app/api/bookings/[id]/send-message/route.ts` - Send message API (110 lines)
+- `/app/dashboard/components/SendMessageModal.tsx` - Modal UI (280 lines)
+- `/lib/email/resend.ts` - Added `sendCustomGuestMessage` function (70 lines)
+- `/supabase/migrations/20260131_message_template_use_count.sql` - RPC function
+- Updated `/app/dashboard/schedule/BookingDetailPanel.tsx` - Send Message button + modal
+
+**Use Cases:**
+- Quick guest communication without leaving dashboard
+- Reuse saved templates for common messages
+- Trip reminders beyond automated system
+- Weather updates and changes
+- Meeting instruction clarifications
+- Custom trip preparation instructions
+- Post-trip follow-ups
+- All messages logged in booking timeline
+
+**Technical Highlights:**
+- Placeholder system with find/replace
+- Template dropdown with live preview
+- Proper error handling and validation
+- Audit trail integration
+- Usage analytics via use_count tracking
+- Maritime-themed email design
+
+**Status:** Guest communication center deployed! ✅
+
+---
+
+*Last updated: 2026-01-31 10:40 UTC*
+
+---
+
 ### Build #33: Message Templates System ✅
 - **Commit:** 30b2757
 - **Feature:** Beyond-MVP - Reusable message templates for guest communications

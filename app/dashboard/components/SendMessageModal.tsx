@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Send, Mail, FileText, Loader2 } from 'lucide-react'
+import { X, Send, Mail, FileText, Loader2, MessageSquare } from 'lucide-react'
 import type { CalendarBooking } from '@/components/calendar/types'
 
 interface MessageTemplate {
@@ -19,18 +19,23 @@ interface SendMessageModalProps {
   onSuccess: () => void
 }
 
+type MessageMethod = 'email' | 'sms'
+
 export default function SendMessageModal({
   booking,
   isOpen,
   onClose,
   onSuccess,
 }: SendMessageModalProps) {
+  const [method, setMethod] = useState<MessageMethod>('email')
   const [subject, setSubject] = useState('')
   const [message, setMessage] = useState('')
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
   const [templates, setTemplates] = useState<MessageTemplate[]>([])
   const [isSending, setIsSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  
+  const hasPhone = !!booking.guest_phone
 
   // Load templates on mount
   useEffect(() => {
@@ -74,8 +79,17 @@ export default function SendMessageModal({
   }
 
   async function handleSend() {
-    if (!subject.trim() || !message.trim()) {
-      setError('Subject and message are required')
+    // Validation
+    if (method === 'email' && !subject.trim()) {
+      setError('Subject is required for email')
+      return
+    }
+    if (!message.trim()) {
+      setError('Message is required')
+      return
+    }
+    if (method === 'sms' && !hasPhone) {
+      setError('Guest phone number not available')
       return
     }
 
@@ -83,19 +97,23 @@ export default function SendMessageModal({
     setError(null)
 
     try {
-      const res = await fetch(`/api/bookings/${booking.id}/send-message`, {
+      const endpoint = method === 'email' 
+        ? `/api/bookings/${booking.id}/send-message`
+        : `/api/bookings/${booking.id}/send-sms`
+      
+      const payload = method === 'email'
+        ? { subject, message, templateId: selectedTemplate }
+        : { message, templateId: selectedTemplate }
+
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          subject,
-          message,
-          templateId: selectedTemplate,
-        }),
+        body: JSON.stringify(payload),
       })
 
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || 'Failed to send message')
+        throw new Error(data.error || `Failed to send ${method}`)
       }
 
       onSuccess()
@@ -105,8 +123,9 @@ export default function SendMessageModal({
       setSubject('')
       setMessage('')
       setSelectedTemplate(null)
+      setMethod('email')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to send message')
+      setError(err instanceof Error ? err.message : `Failed to send ${method}`)
     } finally {
       setIsSending(false)
     }
@@ -142,6 +161,35 @@ export default function SendMessageModal({
 
         {/* Content */}
         <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+          {/* Method Selector (Email/SMS) */}
+          <div className="flex gap-2 p-1 bg-slate-900 rounded-lg">
+            <button
+              onClick={() => setMethod('email')}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-medium transition-colors ${
+                method === 'email'
+                  ? 'bg-cyan-600 text-white'
+                  : 'text-slate-400 hover:text-slate-300'
+              }`}
+            >
+              <Mail className="w-4 h-4" />
+              Email
+            </button>
+            <button
+              onClick={() => setMethod('sms')}
+              disabled={!hasPhone}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-medium transition-colors ${
+                method === 'sms'
+                  ? 'bg-cyan-600 text-white'
+                  : hasPhone 
+                    ? 'text-slate-400 hover:text-slate-300'
+                    : 'text-slate-600 cursor-not-allowed'
+              }`}
+            >
+              <MessageSquare className="w-4 h-4" />
+              SMS {!hasPhone && '(No phone)'}
+            </button>
+          </div>
+
           {/* Template Selector */}
           {templates.length > 0 && (
             <div>
@@ -167,19 +215,21 @@ export default function SendMessageModal({
             </div>
           )}
 
-          {/* Subject */}
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Subject <span className="text-rose-400">*</span>
-            </label>
-            <input
-              type="text"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              placeholder="Email subject line"
-              className="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
-            />
-          </div>
+          {/* Subject (Email only) */}
+          {method === 'email' && (
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Subject <span className="text-rose-400">*</span>
+              </label>
+              <input
+                type="text"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                placeholder="Email subject line"
+                className="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+              />
+            </div>
+          )}
 
           {/* Message */}
           <div>
@@ -189,13 +239,36 @@ export default function SendMessageModal({
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Type your message to the guest..."
-              rows={10}
+              placeholder={method === 'email' 
+                ? "Type your message to the guest..." 
+                : "Type your SMS message..."}
+              rows={method === 'sms' ? 6 : 10}
               className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 resize-none font-mono text-sm"
             />
-            <p className="mt-2 text-xs text-slate-500">
-              {message.length} characters
-            </p>
+            <div className="mt-2 flex items-center justify-between text-xs">
+              <span className={
+                method === 'sms' && message.length > 160
+                  ? 'text-amber-400'
+                  : 'text-slate-500'
+              }>
+                {message.length} characters
+                {method === 'sms' && message.length > 160 && (
+                  <span className="ml-2">
+                    ({Math.ceil(message.length / 160)} SMS segments)
+                  </span>
+                )}
+              </span>
+              {method === 'sms' && (
+                <span className="text-slate-500">
+                  {160 - (message.length % 160 || 160)} chars to next segment
+                </span>
+              )}
+            </div>
+            {method === 'sms' && message.length > 160 && (
+              <p className="mt-1 text-xs text-amber-400">
+                ⚠ Messages over 160 chars may be split into multiple SMS
+              </p>
+            )}
           </div>
 
           {/* Error */}
@@ -217,7 +290,12 @@ export default function SendMessageModal({
           </button>
           <button
             onClick={handleSend}
-            disabled={isSending || !subject.trim() || !message.trim()}
+            disabled={
+              isSending || 
+              !message.trim() || 
+              (method === 'email' && !subject.trim()) ||
+              (method === 'sms' && !hasPhone)
+            }
             className="px-6 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {isSending ? (
@@ -227,8 +305,8 @@ export default function SendMessageModal({
               </>
             ) : (
               <>
-                <Send className="w-4 h-4" />
-                Send Message
+                {method === 'email' ? <Mail className="w-4 h-4" /> : <MessageSquare className="w-4 h-4" />}
+                Send {method === 'email' ? 'Email' : 'SMS'}
               </>
             )}
           </button>
