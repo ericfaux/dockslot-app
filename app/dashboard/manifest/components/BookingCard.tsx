@@ -11,6 +11,7 @@ import {
   Phone,
   ChevronDown,
   ChevronUp,
+  Printer,
 } from 'lucide-react';
 import { BookingWithPassengers, BookingStatus, PaymentStatus } from '@/lib/db/types';
 import { PassengerList } from './PassengerList';
@@ -90,6 +91,11 @@ export function BookingCard({ booking }: BookingCardProps) {
 
   const hasPassengers = booking.passengers && booking.passengers.length > 0;
 
+  const handlePrintManifest = () => {
+    const printUrl = `/api/manifest/print/${booking.id}`;
+    window.open(printUrl, '_blank');
+  };
+
   return (
     <div
       className="group relative flex flex-col rounded-lg border border-slate-700 bg-slate-900 transition-all hover:border-cyan-500/50"
@@ -117,8 +123,8 @@ export function BookingCard({ booking }: BookingCardProps) {
           </div>
         </div>
 
-        {/* Status Badges */}
-        <div className="flex flex-col gap-1.5">
+        {/* Status Badges & Actions */}
+        <div className="flex flex-col items-end gap-1.5">
           <span
             className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${statusConfig.className}`}
           >
@@ -129,6 +135,14 @@ export function BookingCard({ booking }: BookingCardProps) {
           >
             {paymentConfig.label}
           </span>
+          <button
+            onClick={handlePrintManifest}
+            className="mt-2 flex items-center gap-1.5 rounded-lg border border-slate-600 bg-slate-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-slate-600"
+            title="Print passenger manifest"
+          >
+            <Printer className="h-3.5 w-3.5" />
+            Print Manifest
+          </button>
         </div>
       </div>
 
