@@ -1,5 +1,24 @@
 # DockSlot Development Progress
 
+## Latest Session: 2026-01-31 (Part 5 - Database Schema Fix)
+
+### Build #25: Profile Lookup Query Fix 🚨 CRITICAL FIX  
+- **Commit:** 1193bb1
+- **Issue:** Dashboard tabs redirecting to login on navigation
+- **Root Cause:** Database schema mismatch
+  - All dashboard pages querying `profiles.user_id` (column doesn't exist!)
+  - Should query `profiles.id` which matches `auth.users.id` directly
+- **Solution:**
+  - Changed `.eq('user_id', user.id)` → `.eq('id', user.id)` across 8 pages
+  - Fixed pages: schedule, analytics, bookings, modifications, reports-advanced, reviews, settings/cancellation, settings/availability-templates
+- **Full Navigation Test:** ✅ All 15 tabs tested and working
+  - Dashboard, Trips, Schedule, All Bookings, Modifications
+  - Manifest, Vessels, Waivers, Trip Reports, Analytics Reports
+  - Guests, Reviews, Analytics, Payments, Settings
+- **Status:** DEPLOYED ✅ - Navigation fully functional
+
+---
+
 ## Latest Session: 2026-01-31 (Part 4 - Auth Cookie Persistence Fix)
 
 ### Build #24: Supabase Cookie Handling Fix 🚨 CRITICAL FIX
