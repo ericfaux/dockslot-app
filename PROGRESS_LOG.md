@@ -1425,6 +1425,111 @@ Reviewed Phase 1 from HEARTBEAT.md roadmap. **Findings:**
 
 ---
 
+### Build #44: Captain Public Profile & SEO Landing Page ✅
+- **Commit:** c91b775
+- **Feature:** Beyond-MVP - Public-facing captain profile for SEO and marketing
+- Public profile page: `/captain/[slug]`
+- SEO-optimized metadata:
+  - Dynamic title with business name
+  - Meta description from captain bio
+  - Proper Open Graph tags (future enhancement)
+- Hero section:
+  - Business name and tagline
+  - Star rating display with average
+  - Total reviews count
+  - Meeting location with pin icon
+  - Prominent "Book Now" CTA button
+- About section:
+  - Full captain bio display
+  - Whitespace-preserved formatting
+- Fleet showcase:
+  - Grid layout of all vessels
+  - Vessel descriptions
+  - Max passenger capacity
+  - Hover effects
+- Trip types catalog:
+  - Trip descriptions
+  - Duration and pricing
+  - Grid layout
+- Featured reviews section:
+  - Up to 3 featured reviews
+  - Special styling with amber gradient
+  - Star ratings
+  - Review titles and text
+  - Guest names
+- All reviews display:
+  - Chronological list
+  - Star ratings
+  - Review dates
+  - Captain responses (when present)
+  - Response highlighting with border
+- Design features:
+  - Maritime gradient backgrounds
+  - Responsive grid layouts
+  - Mobile-friendly design
+  - Professional color scheme
+  - Clear CTAs throughout
+  - Smooth hover transitions
+
+**Code Added:**
+- `/app/captain/[slug]/page.tsx` - Public profile page (425 lines)
+- SEO metadata generation
+- Reviews integration
+- Ratings display
+
+**Use Cases:**
+- SEO landing pages for captains
+- Share profile link on social media
+- Google search visibility
+- Professional online presence
+- Showcase reviews to potential guests
+- Display fleet and services
+- Drive bookings from external traffic
+
+**SEO Benefits:**
+- Unique URL per captain (/captain/[business-slug])
+- Dynamic meta titles and descriptions
+- Review content for search engines
+- Clear service descriptions
+- Location information
+- Social proof (ratings, reviews)
+
+**Features:**
+- Dynamic slug-based routing
+- Ratings aggregation display
+- Featured vs regular reviews
+- Captain response highlighting
+- Direct booking integration
+- Professional presentation
+- Mobile-responsive
+- Fast loading (server-side rendered)
+
+**Technical Highlights:**
+- Server component (SSR)
+- Dynamic metadata generation
+- Supabase joins for related data
+- Review filtering (public + approved)
+- Featured review prioritization
+- Type-safe data fetching
+- notFound() handling
+
+**Visual Elements:**
+- Gradient hero background
+- Star rating visualizations
+- Featured review cards with amber theme
+- Vessel cards with ship icons
+- Trip type pricing cards
+- CTA buttons with gradients
+- Border animations on hover
+
+**Status:** Captain public profile deployed! ✅
+
+---
+
+*Last updated: 2026-01-31 13:15 UTC*
+
+---
+
 ### Build #33: Message Templates System ✅
 - **Commit:** 30b2757
 - **Feature:** Beyond-MVP - Reusable message templates for guest communications
