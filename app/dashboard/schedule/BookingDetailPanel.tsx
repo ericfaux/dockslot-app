@@ -35,6 +35,7 @@ import BookingTimeline from '../components/BookingTimeline';
 import DuplicateBookingModal from '../components/DuplicateBookingModal';
 import BookingQuickActions from '../components/BookingQuickActions';
 import ContactQuickActions from '../components/ContactQuickActions';
+import SendMessageModal from '../components/SendMessageModal';
 
 interface BookingDetailPanelProps {
   booking: CalendarBooking | null;
@@ -68,6 +69,7 @@ export function BookingDetailPanel({
   const [isRequestingBalance, setIsRequestingBalance] = useState(false);
   const [balanceSuccess, setBalanceSuccess] = useState(false);
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [showSendMessageModal, setShowSendMessageModal] = useState(false);
 
   if (!booking) return null;
 
@@ -422,6 +424,15 @@ export function BookingDetailPanel({
 
               {/* Secondary Actions */}
               <div className="grid grid-cols-2 gap-2">
+                {/* Send Message (always available) */}
+                <button
+                  onClick={() => setShowSendMessageModal(true)}
+                  className="flex items-center justify-center gap-2 rounded-lg bg-cyan-500/10 px-4 py-3 font-mono text-sm font-medium text-cyan-400 transition-colors hover:bg-cyan-500/20"
+                >
+                  <Mail className="h-4 w-4" />
+                  Send Message
+                </button>
+
                 {canSetWeatherHold && (
                   <button
                     onClick={() => setShowWeatherModal(true)}
@@ -508,6 +519,17 @@ export function BookingDetailPanel({
               }}
             />
           )}
+
+          {/* Send Message Modal */}
+          <SendMessageModal
+            booking={booking}
+            isOpen={showSendMessageModal}
+            onClose={() => setShowSendMessageModal(false)}
+            onSuccess={() => {
+              setShowSendMessageModal(false)
+              onUpdated()
+            }}
+          />
 
           {/* Terminal State Message */}
           {isTerminal && (

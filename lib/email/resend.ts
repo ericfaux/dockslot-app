@@ -421,3 +421,84 @@ export async function sendBalancePaymentConfirmation(params: {
     html,
   });
 }
+
+/**
+ * Send custom message to guest
+ */
+export async function sendCustomGuestMessage(params: {
+  to: string;
+  guestName: string;
+  subject: string;
+  message: string;
+  bookingId: string;
+}) {
+  const messageHtml = params.message.replace(/\n/g, '<br>');
+  
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #0f172a;">
+  <table role="presentation" style="width: 100%; border-collapse: collapse;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table role="presentation" style="max-width: 600px; width: 100%; border-collapse: collapse; background-color: #1e293b; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);">
+          
+          <!-- Header -->
+          <tr>
+            <td style="padding: 32px 32px 24px; background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);">
+              <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 600;">
+                ⚓ Message from Your Captain
+              </h1>
+            </td>
+          </tr>
+
+          <!-- Content -->
+          <tr>
+            <td style="padding: 32px;">
+              <p style="margin: 0 0 16px; color: #e2e8f0; font-size: 16px; line-height: 1.6;">
+                Hi ${params.guestName},
+              </p>
+              
+              <div style="margin: 24px 0; padding: 20px; background-color: #0f172a; border-left: 4px solid #06b6d4; border-radius: 6px;">
+                <p style="margin: 0; color: #e2e8f0; font-size: 15px; line-height: 1.7; white-space: pre-wrap;">
+${messageHtml}
+                </p>
+              </div>
+
+              <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #334155;">
+                <p style="margin: 0 0 8px; color: #94a3b8; font-size: 13px;">
+                  Questions or need to reach us?
+                </p>
+                <p style="margin: 0; color: #94a3b8; font-size: 13px;">
+                  Simply reply to this email.
+                </p>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 20px; text-align: center; background-color: #0f172a; border-top: 1px solid #334155;">
+              <p style="margin: 0; color: #64748b; font-size: 12px;">
+                Powered by <span style="color: #06b6d4;">DockSlot</span>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `;
+
+  return sendEmail({
+    to: params.to,
+    subject: params.subject,
+    html,
+  });
+}
