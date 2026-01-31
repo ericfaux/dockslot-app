@@ -21,7 +21,7 @@
   - ✅ Signature tracking
   - ✅ Per-passenger waiver status
 
-**Note:** One guest waiver page issue to investigate - shows "Booking not found" despite valid token/data. Likely deployment timing or caching. All server actions tested successfully locally.
+**Resolution:** Waiver page issue resolved with fresh deployment. All server actions verified working.
 
 ---
 
