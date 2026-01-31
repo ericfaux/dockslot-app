@@ -141,21 +141,35 @@ export async function getBuoyData(lat: number, lon: number): Promise<BuoyData | 
     
     // Skip header lines (first 2 lines)
     if (lines.length < 3) {
+      console.log('Buoy data too short, no data available');
       return null;
     }
 
     // Parse latest data line (line 2, index 2)
-    const dataLine = lines[2].trim().split(/\s+/);
+    let dataLine: string[];
+    try {
+      dataLine = lines[2].trim().split(/\s+/);
+    } catch (parseError) {
+      console.error('Failed to parse buoy data line:', parseError);
+      return null;
+    }
     
     // NOAA format: YY MM DD hh mm WDIR WSPD GST WVHT DPD APD MWD PRES ATMP WTMP DEWP VIS TIDE
     // Indexes:     0  1  2  3  4  5    6    7   8    9   10  11  12   13   14   15   16  17
     
-    const waterTemp = parseFloat(dataLine[14]); // WTMP in Celsius
-    const waveHeight = parseFloat(dataLine[8]); // WVHT in meters
-    const windSpeed = parseFloat(dataLine[6]); // WSPD in m/s
-    const windDir = parseInt(dataLine[5]); // WDIR in degrees
+    let waterTemp: number, waveHeight: number, windSpeed: number, windDir: number;
     
-    // Convert to imperial units
+    try {
+      waterTemp = parseFloat(dataLine[14]); // WTMP in Celsius
+      waveHeight = parseFloat(dataLine[8]); // WVHT in meters
+      windSpeed = parseFloat(dataLine[6]); // WSPD in m/s
+      windDir = parseInt(dataLine[5]); // WDIR in degrees
+    } catch (error) {
+      console.error('Failed to parse buoy measurements:', error);
+      return null;
+    }
+    
+    // Convert to imperial units (999/99 are NOAA's "missing data" codes)
     const waterTempF = waterTemp !== 999 && !isNaN(waterTemp) ? waterTemp * 9/5 + 32 : undefined;
     const waveHeightFt = waveHeight !== 99 && !isNaN(waveHeight) ? waveHeight * 3.28084 : undefined;
     const windSpeedKts = windSpeed !== 99 && !isNaN(windSpeed) ? windSpeed * 1.94384 : undefined;
