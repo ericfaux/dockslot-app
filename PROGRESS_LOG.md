@@ -172,6 +172,27 @@
 
 ---
 
+### Build #20: Refund Handling UI ✅
+- **Commit:** 27d7a9b
+- **Feature:** Phase 2 - Payment Integration (Refund handling) - **PHASE 2 COMPLETE**
+- Full refund management UI at `/dashboard/bookings/[id]/refund`
+- Three refund types: Full, Deposit Only, Partial (custom amount)
+- Stripe refund API integration with error handling
+- Refund reason tracking & audit logging
+- "Refund" button added to booking detail panel
+- Beautiful UI with payment summary, warnings, and validation
+- Automatic booking status updates after refund
+
+**Code Added:**
+- `/app/dashboard/bookings/[id]/refund/page.tsx` - Server component
+- `/app/dashboard/bookings/[id]/refund/RefundClient.tsx` - Full UI with forms
+- `/app/api/bookings/[id]/refund/route.ts` - Stripe refund processing
+- Updated `BookingDetailPanel.tsx` with refund button
+
+**Phase 2 Status:** ✅ COMPLETE (Stripe Connect, Deposits, Balance Requests, Refunds)
+
+---
+
 ## Heartbeat Investigation: 2026-01-31 06:00 UTC
 
 ### Investigation: Guest Booking Flow Status
