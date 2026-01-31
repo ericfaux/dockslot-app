@@ -29,6 +29,9 @@ interface ManageBookingProps {
 export default async function ManageBookingPage({ params }: ManageBookingProps) {
   const { token } = await params;
   const supabase = createSupabaseServiceClient();
+  
+  // Store token for reschedule link
+  const rescheduleToken = token;
 
   // Find booking by guest token
   const { data: guestToken } = await supabase
@@ -160,9 +163,15 @@ export default async function ManageBookingPage({ params }: ManageBookingProps) 
               </h2>
             </div>
             <p className="mb-4 text-sm text-slate-300">
-              {booking.weather_hold_reason || 'Due to weather conditions, your trip has been placed on hold. The captain will contact you about rescheduling options.'}
+              {booking.weather_hold_reason || 'Due to weather conditions, your trip has been placed on hold. The captain has provided alternative dates for you to choose from.'}
             </p>
-            {/* Phase 4 will add reschedule self-serve here */}
+            <Link
+              href={`/reschedule/${rescheduleToken}`}
+              className="inline-flex items-center gap-2 rounded-lg bg-cyan-500 px-6 py-3 font-semibold text-slate-900 transition-all hover:bg-cyan-400"
+            >
+              <Calendar className="h-5 w-5" />
+              Choose a New Date
+            </Link>
           </div>
         )}
 

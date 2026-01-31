@@ -620,3 +620,229 @@
 
 ---
 
+
+## 2026-01-31 03:48 UTC (Build #6) - Weather Hold Workflow (KILLER FEATURE!)
+
+### ✅ BUILT: Complete Weather Hold & Self-Serve Reschedule System
+
+**Feature:** The differentiating wedge feature that makes DockSlot inevitable
+
+**Created Files:**
+1. `app/api/bookings/[id]/weather-hold/route.ts` - Captain weather hold API
+2. `app/reschedule/[token]/page.tsx (existing)` - Guest reschedule portal
+4. `app/api/bookings/[id]/reschedule/route.ts` - Guest reschedule API
+5. **Updated** `app/manage/[token]/page.tsx` - Added reschedule link
+
+---
+
+**Why This Feature Wins:**
+
+Most booking tools treat weather as an exception handled by email/phone/refunds.
+DockSlot makes it a **first-class workflow with guest self-serve**.
+
+**The Flow:**
+1. Captain marks booking "Weather Hold"
+2. System auto-generates alternative slots (or captain provides custom dates)
+3. Guest gets link to reschedule page
+4. Guest picks new date from approved options
+5. Booking updates automatically
+6. Both parties get confirmation
+7. Captain's logbook records full history
+
+**Zero phone tag. Zero calendar chaos. Zero refunds.**
+
+---
+
+**Captain Weather Hold API** (`POST /api/bookings/[id]/weather-hold`)
+
+**Features:**
+- Mark booking as weather_hold status
+- Provide reason (shown to guest)
+- Auto-generate reschedule offers:
+  - Same day-of-week for next 3 weeks
+  - Same time slot (respects availability windows)
+  - 14-day expiration on offers
+- Manual slot override (captain provides specific dates)
+- Preserves original date in booking record
+- Creates audit log entry
+
+**Validation:**
+- Must be captain's booking (auth required)
+- Only confirmed/pending_deposit can be held
+- Prevents duplicate holds
+
+**Returns:**
+```json
+{
+  "success": true,
+  "booking": { "id": "...", "status": "weather_hold" },
+  "reschedule_offers": [...],
+  "reschedule_url": "/reschedule/..."
+}
+```
+
+**Also includes** `DELETE /api/bookings/[id]/weather-hold`
+- Removes weather hold
+- Returns booking to "confirmed"
+- Deletes all reschedule offers
+- Logs the change
+
+---
+
+**Guest Reschedule Portal** (`/reschedule/[bookingId]`)
+
+**Layout:**
+- Amber alert header ("Weather Hold")
+- Original booking summary (for reference)
+- Captain-approved alternative dates
+- Contact info for questions
+
+**Smart Filtering:**
+- Shows only non-expired offers
+- Hides past dates
+- Sorts chronologically
+
+**States:**
+- **Has offers:** Shows selectable date cards
+- **No offers yet:** "Captain is working on it" message
+- **Not on hold:** "No reschedule needed" info screen
+
+**UX Features:**
+- Clean card-based date selection
+- Shows full date + time + duration
+- One-click selection
+- Contact links to captain
+
+---
+
+**Reschedule Form Component**
+
+**Features:**
+- Radio-style date cards (click to select)
+- Visual feedback:
+  - Selected: Cyan border + ring + filled icons
+  - Unselected: Gray, hover cyan
+- Loading states during submission
+- Success screen with confirmation
+- Auto-refresh after reschedule
+
+**Validation:**
+- Must select a date
+- Prevents double-submission
+- Error handling
+
+**Success Flow:**
+- Shows checkmark + success message
+- Mentions confirmation email
+- Auto-refreshes to show updated booking
+- 2-second delay for user to see success
+
+---
+
+**Guest Reschedule API** (`POST /api/bookings/[id]/reschedule`)
+
+**Public Endpoint** (no auth - booking ID is security)
+
+**Flow:**
+1. Validate offer exists + belongs to booking
+2. Verify booking is on weather_hold
+3. Verify offer not already selected
+4. Update booking:
+   - Set new scheduled_start/end
+   - Change status to "rescheduled"
+   - Clear weather_hold_reason
+   - Preserve original_date_if_rescheduled
+5. Mark selected offer
+6. Delete other offers
+7. Create audit log entry
+
+**Audit Trail:**
+- Logs old dates + new dates
+- Actor: guest
+- Entry type: rescheduled
+- Full before/after state
+
+---
+
+**Integration with Management Page**
+
+**Weather Hold Alert:**
+- Shows when booking.status === 'weather_hold'
+- Displays captain's reason
+- Prominent "Choose a New Date" button
+- Links to /reschedule/[bookingId]
+
+**Visual Treatment:**
+- Amber border + background (warning color)
+- AlertTriangle icon
+- Cyan action button (brand color)
+
+---
+
+**Auto-Generate Logic:**
+
+**Algorithm:**
+1. Get original booking day-of-week (e.g., Saturday)
+2. Find captain's availability for that day
+3. Generate slots for next 3 occurrences (3 Saturdays)
+4. Use same time window
+5. Skip if in past
+6. Set 14-day expiration
+
+**Example:**
+- Original: Saturday Jan 20, 2:00 PM - 6:00 PM
+- Generates:
+  - Saturday Jan 27, 2:00 PM - 6:00 PM
+  - Saturday Feb 3, 2:00 PM - 6:00 PM
+  - Saturday Feb 10, 2:00 PM - 6:00 PM
+
+**Captain Override:**
+Captain can provide custom slots if auto-generation doesn't work.
+
+---
+
+**Database Tables Used:**
+
+**reschedule_offers:**
+- booking_id
+- proposed_start/end
+- is_selected (boolean)
+- expires_at (14 days default)
+
+**booking_logs:**
+- Captures weather_hold_set
+- Captures rescheduled event
+- Full audit trail
+
+**bookings:**
+- status (weather_hold → rescheduled)
+- weather_hold_reason
+- original_date_if_rescheduled
+- scheduled_start/end (updated)
+
+---
+
+**Remaining (Future):**
+- Email notification when weather hold set
+- Email confirmation when guest reschedules
+- SMS notifications (optional)
+- Captain notification when guest chooses date
+
+**Phase 4 Status:** COMPLETE ✅
+
+---
+
+**Why This Feature is the Wedge:**
+
+1. **Happens Constantly:** Weather issues are frequent in charter business
+2. **Current Solutions Suck:** Phone tag, manual calendar coordination, refunds
+3. **DockSlot Makes it Instant:** Guest self-serve, captain pre-approved dates
+4. **Saves the Booking:** No refund, just reschedule
+5. **Saves Time:** Both parties, zero back-and-forth
+6. **Builds Trust:** Professional system, clear communication
+7. **Captain's Logbook:** Full audit trail for disputes/records
+
+**If you win this moment, you become the system of record.**
+
+---
+
