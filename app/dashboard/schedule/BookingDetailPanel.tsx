@@ -19,6 +19,7 @@ import {
   CalendarClock,
   DollarSign,
   RotateCcw,
+  Copy,
 } from 'lucide-react';
 import { CalendarBooking, STATUS_COLORS, STATUS_LABELS, WeatherHoldModal, RescheduleOffers } from '@/components/calendar';
 import {
@@ -31,6 +32,7 @@ import {
 } from '@/app/actions/bookings';
 import BookingNotesEditor from '../components/BookingNotesEditor';
 import BookingTimeline from '../components/BookingTimeline';
+import DuplicateBookingModal from '../components/DuplicateBookingModal';
 
 interface BookingDetailPanelProps {
   booking: CalendarBooking | null;
@@ -63,6 +65,7 @@ export function BookingDetailPanel({
   const [isWeatherPending, setIsWeatherPending] = useState(false);
   const [isRequestingBalance, setIsRequestingBalance] = useState(false);
   const [balanceSuccess, setBalanceSuccess] = useState(false);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
 
   if (!booking) return null;
 
@@ -450,7 +453,37 @@ export function BookingDetailPanel({
                   </button>
                 )}
               </div>
+
+              {/* Duplicate Button (always available) */}
+              <button
+                onClick={() => setShowDuplicateModal(true)}
+                className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-600 px-4 py-3 font-mono text-sm font-medium text-slate-300 transition-colors hover:bg-slate-700/50"
+              >
+                <Copy className="h-4 w-4" />
+                Duplicate Booking
+              </button>
             </div>
+          )}
+
+          {/* Duplicate Modal */}
+          {showDuplicateModal && (
+            <DuplicateBookingModal
+              bookingId={booking.id}
+              originalBooking={{
+                guest_name: booking.guest_name,
+                guest_email: booking.guest_email,
+                guest_phone: booking.guest_phone || null,
+                party_size: booking.party_size,
+                scheduled_start: booking.scheduled_start,
+                scheduled_end: booking.scheduled_end,
+              }}
+              isOpen={showDuplicateModal}
+              onClose={() => setShowDuplicateModal(false)}
+              onSuccess={(newId) => {
+                setShowDuplicateModal(false)
+                onUpdated()
+              }}
+            />
           )}
 
           {/* Terminal State Message */}

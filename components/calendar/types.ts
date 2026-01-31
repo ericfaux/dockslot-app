@@ -17,6 +17,8 @@ export interface BlackoutDate {
 export interface CalendarBooking {
   id: string;
   guest_name: string;
+  guest_email: string;
+  guest_phone: string | null;
   party_size: number;
   scheduled_start: string;
   scheduled_end: string;
