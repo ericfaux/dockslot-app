@@ -6,6 +6,7 @@ import { BookingStatus, BOOKING_STATUSES } from '@/lib/db/types';
 import { addMonths, format } from 'date-fns';
 import crypto from 'crypto';
 import { sendBookingConfirmation } from '@/lib/email/resend';
+import { checkAllConflicts } from '@/lib/booking-conflicts';
 
 const VALID_SORT_FIELDS = ['scheduled_start', 'guest_name', 'status', 'created_at'] as const;
 type SortField = (typeof VALID_SORT_FIELDS)[number];
@@ -176,6 +177,49 @@ export async function POST(request: NextRequest) {
 
     // Use service client (public endpoint)
     const supabase = createSupabaseServiceClient();
+
+    // Fetch trip type and vessel details for conflict checking
+    const { data: tripType, error: tripError } = await supabase
+      .from('trip_types')
+      .select('vessel_id')
+      .eq('id', trip_type_id)
+      .single();
+
+    if (tripError || !tripType) {
+      return NextResponse.json(
+        { error: 'Trip type not found' },
+        { status: 404 }
+      );
+    }
+
+    // Fetch captain's booking buffer setting
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('booking_buffer_minutes')
+      .eq('id', captain_id)
+      .single();
+
+    const bufferMinutes = profile?.booking_buffer_minutes || 30;
+
+    // Check for booking conflicts
+    const conflictCheck = await checkAllConflicts({
+      profileId: captain_id,
+      vesselId: tripType.vessel_id,
+      scheduledStart: new Date(scheduled_start),
+      scheduledEnd: new Date(scheduled_end),
+      bufferMinutes,
+    });
+
+    if (conflictCheck.hasConflict) {
+      return NextResponse.json(
+        {
+          error: 'Booking conflict detected',
+          reason: conflictCheck.reason,
+          conflictingBookings: conflictCheck.conflictingBookings,
+        },
+        { status: 409 } // HTTP 409 Conflict
+      );
+    }
 
     // Create booking
     const { data: booking, error: bookingError } = await supabase
