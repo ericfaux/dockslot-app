@@ -1,5 +1,25 @@
 # DockSlot Development Progress
 
+## Latest Session: 2026-01-31 (Part 3 - Critical Bug Fixes)
+
+### Build #23: Dashboard Authentication Sign-Out Bug 🚨 CRITICAL FIX
+- **Commit:** 1d728f4
+- **Issue:** Users were being immediately signed out when navigating between dashboard tabs
+- **Root Cause:** 
+  - Outdated `@supabase/ssr` package (v0.1.0 had known issues with Next.js 15)
+  - Too aggressive auth checking without retry logic
+  - Transient failures (network, timing, cookie sync) caused immediate redirects
+- **Solution:**
+  - ✅ Upgraded `@supabase/ssr` from 0.1.0 → 0.8.0 (major bug fixes)
+  - ✅ Added retry logic for transient auth failures
+  - ✅ Improved error logging to track auth issues
+  - ✅ More defensive error handling
+- **Impact:** Critical user experience bug resolved - users can now navigate freely
+- **Testing:** Build passes, all routes working
+- **Status:** DEPLOYED ✅
+
+---
+
 ## Latest Session: 2026-01-31 (Part 2 - Waiver System)
 
 ### Build #22: Waiver System Schema Finalization ✅
