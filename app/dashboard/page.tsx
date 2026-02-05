@@ -428,16 +428,19 @@ export default async function DashboardPage() {
     sunset: null,
   };
 
+  let dockModeEnabled = false;
+
   if (user) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('meeting_spot_latitude, meeting_spot_longitude, timezone, business_name, full_name')
+      .select('meeting_spot_latitude, meeting_spot_longitude, timezone, business_name, full_name, dock_mode_enabled')
       .eq('id', user.id)
       .single();
 
     if (profile) {
       captainProfile = profile;
       captainTimezone = profile.timezone || "America/New_York";
+      dockModeEnabled = profile.dock_mode_enabled || false;
 
       // Fetch real weather data if coordinates available
       if (profile.meeting_spot_latitude && profile.meeting_spot_longitude) {
@@ -712,6 +715,27 @@ export default async function DashboardPage() {
           weatherData={weatherData}
         />
       </section>
+
+      {/* ═══ DOCK MODE BUTTON ═══ */}
+      {dockModeEnabled && (
+        <section aria-label="Dock Mode">
+          <a
+            href="/dock"
+            className="group flex w-full items-center justify-between gap-4 rounded-xl border-2 border-cyan-500/50 bg-gradient-to-r from-slate-900 via-cyan-950/30 to-slate-900 px-6 py-4 transition-all hover:border-cyan-400 hover:shadow-[0_0_20px_rgba(34,211,238,0.3)]"
+          >
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500/20">
+                <Anchor className="h-6 w-6 text-cyan-400" />
+              </div>
+              <div>
+                <span className="text-lg font-bold text-white">Enter Dock Mode</span>
+                <p className="text-sm text-slate-400">Simplified view for on-water use</p>
+              </div>
+            </div>
+            <Navigation className="h-6 w-6 text-cyan-400 transition-transform group-hover:translate-x-1" />
+          </a>
+        </section>
+      )}
 
       {/* ═══ SECTION 1.25: WEATHER ALERT ═══ */}
       <section aria-label="Weather Alert">

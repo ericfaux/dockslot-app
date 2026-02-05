@@ -62,6 +62,7 @@ export interface Profile {
   advance_booking_days: number;
   cancellation_policy: string | null;
   calendar_token: string | null;
+  dock_mode_enabled: boolean;
   updated_at: string;
 }
 

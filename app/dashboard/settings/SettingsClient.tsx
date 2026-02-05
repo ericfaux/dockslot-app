@@ -11,7 +11,9 @@ import {
   Calendar as CalendarIcon,
   Moon,
   FileText,
-  ChevronDown
+  ChevronDown,
+  Anchor,
+  ExternalLink,
 } from 'lucide-react';
 import { Profile, AvailabilityWindow } from '@/lib/db/types';
 import { updateProfile } from '@/app/actions/profile';
@@ -59,6 +61,7 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
   const [isHibernating, setIsHibernating] = useState(initialProfile?.is_hibernating ?? false);
   const [hibernationMessage, setHibernationMessage] = useState(initialProfile?.hibernation_message || '');
   const [cancellationPolicy, setCancellationPolicy] = useState(initialProfile?.cancellation_policy || '');
+  const [dockModeEnabled, setDockModeEnabled] = useState(initialProfile?.dock_mode_enabled ?? false);
 
   const handleSave = () => {
     startTransition(async () => {
@@ -79,6 +82,7 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
         is_hibernating: isHibernating,
         hibernation_message: hibernationMessage || null,
         cancellation_policy: cancellationPolicy || null,
+        dock_mode_enabled: dockModeEnabled,
       });
 
       if (result.success) {
@@ -323,6 +327,67 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
               How far in advance guests can book trips.
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* Dock Mode */}
+      <section className={sectionClassName}>
+        <div className="mb-4 flex items-center gap-2">
+          <Anchor className="h-5 w-5 text-cyan-400" />
+          <h2 className="text-lg font-semibold text-white">Dock Mode</h2>
+        </div>
+        <p className="mb-4 text-sm text-slate-400">
+          A simplified, high-contrast interface for use while on the water. Large text, big buttons, and only essential trip info.
+        </p>
+        <div className="space-y-4">
+          <label className="flex cursor-pointer items-center gap-3">
+            <div className="relative">
+              <input
+                type="checkbox"
+                checked={dockModeEnabled}
+                onChange={(e) => setDockModeEnabled(e.target.checked)}
+                className="sr-only"
+              />
+              <div
+                className={`h-6 w-11 rounded-full transition-colors ${
+                  dockModeEnabled ? 'bg-cyan-500' : 'bg-slate-700'
+                }`}
+              >
+                <div
+                  className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
+                    dockModeEnabled ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </div>
+            </div>
+            <span className="text-sm text-slate-300">
+              {dockModeEnabled ? 'Dock Mode is available' : 'Dock Mode is disabled'}
+            </span>
+          </label>
+          {dockModeEnabled && (
+            <div className="rounded-lg border border-cyan-500/30 bg-cyan-500/10 p-4">
+              <p className="text-sm text-cyan-300 mb-3">
+                When enabled, a &quot;Dock Mode&quot; button will appear on your dashboard. You can also access it directly at:
+              </p>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 rounded bg-slate-800 px-3 py-2 text-sm text-slate-300 font-mono">
+                  /dock
+                </code>
+                <a
+                  href="/dock"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-500"
+                >
+                  <span>Open</span>
+                  <ExternalLink className="h-4 w-4" />
+                </a>
+              </div>
+              <p className="mt-3 text-xs text-slate-500">
+                Designed for sun glare, wet hands, and quick reference. Perfect for dockside use.
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
