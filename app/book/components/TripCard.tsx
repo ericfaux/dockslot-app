@@ -44,7 +44,7 @@ export function TripCard({
   return (
     <Link
       href={`/book/${captainId}/${id}`}
-      className="group relative flex flex-col rounded-lg border border-slate-700 bg-slate-900 transition-all hover:border-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/10"
+      className="group relative flex flex-col rounded-xl border border-slate-700 bg-slate-900 transition-all hover:border-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/10 active:scale-[0.98] min-h-[160px]"
       style={{
         boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03), 0 4px 20px rgba(0,0,0,0.3)',
       }}
@@ -52,8 +52,8 @@ export function TripCard({
       {/* Card Header */}
       <div className="flex items-start justify-between border-b border-slate-800 p-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-500/10">
-            <Anchor className="h-5 w-5 text-cyan-400" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500/10">
+            <Anchor className="h-6 w-6 text-cyan-400" />
           </div>
           <div>
             <h3 className="text-lg font-semibold text-white group-hover:text-cyan-400 transition-colors">
@@ -61,7 +61,9 @@ export function TripCard({
             </h3>
           </div>
         </div>
-        <ChevronRight className="h-5 w-5 text-slate-500 group-hover:text-cyan-400 transition-colors" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-800 group-hover:bg-cyan-500/20 transition-colors">
+          <ChevronRight className="h-5 w-5 text-slate-500 group-hover:text-cyan-400 transition-colors" />
+        </div>
       </div>
 
       {/* Card Body */}
@@ -77,7 +79,7 @@ export function TripCard({
         <div className="flex flex-wrap gap-4 mt-auto">
           {/* Duration */}
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-800">
               <Clock className="h-4 w-4 text-cyan-400" />
             </div>
             <div>
@@ -88,7 +90,7 @@ export function TripCard({
 
           {/* Price */}
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-800">
               <DollarSign className="h-4 w-4 text-emerald-400" />
             </div>
             <div>
@@ -100,16 +102,16 @@ export function TripCard({
 
         {/* Deposit Info */}
         {deposit_amount > 0 && (
-          <div className="rounded-md bg-amber-500/10 border border-amber-500/20 px-3 py-2">
-            <p className="text-xs text-amber-400">
-              {formatPrice(deposit_amount)} deposit required to confirm
+          <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 px-3 py-2.5">
+            <p className="text-xs text-amber-400 font-medium">
+              {formatPrice(deposit_amount)} deposit to book
             </p>
           </div>
         )}
       </div>
 
       {/* Hover Effect Overlay */}
-      <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500/0 via-cyan-500/0 to-cyan-500/0 group-hover:from-cyan-500/5 group-hover:via-transparent group-hover:to-transparent transition-all pointer-events-none" />
+      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-500/0 via-cyan-500/0 to-cyan-500/0 group-hover:from-cyan-500/5 group-hover:via-transparent group-hover:to-transparent transition-all pointer-events-none" />
     </Link>
   );
 }

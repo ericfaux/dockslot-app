@@ -137,6 +137,8 @@ export default async function BookingPage({ params }: BookingPageProps) {
           depositAmount={tripType.deposit_amount}
           totalPrice={tripType.price_total}
           maxCapacity={vessel?.capacity || 6}
+          captainTimezone={profile.timezone || undefined}
+          cancellationPolicy={profile.cancellation_policy || undefined}
         />
       </div>
     </div>
