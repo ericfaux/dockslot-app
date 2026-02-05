@@ -1,7 +1,6 @@
 export const dynamic = 'force-dynamic'
 
 import { requireAuth } from '@/lib/auth/server'
-import { redirect } from 'next/navigation'
 import { BookingsListClient } from './BookingsListClient'
 
 /**
@@ -13,15 +12,18 @@ export default async function BookingsListPage() {
   const { user, supabase } = await requireAuth()
 
   // Get captain profile
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('id')
     .eq('id', user.id)
     .single()
 
-  if (!profile) {
-    redirect('/login')
+  if (profileError) {
+    console.error('[Bookings] Profile query failed for user:', user.id, profileError)
   }
+
+  // Use fallback value if profile query fails - user is still authenticated
+  const captainId = profile?.id ?? user.id
 
   return (
     <div className="flex flex-col">
@@ -38,7 +40,7 @@ export default async function BookingsListPage() {
       </div>
 
       {/* Bookings List with Filters */}
-      <BookingsListClient captainId={profile.id} />
+      <BookingsListClient captainId={captainId} />
     </div>
   )
 }

@@ -1,7 +1,6 @@
 export const dynamic = 'force-dynamic';
 
 import { requireAuth } from '@/lib/auth/server';
-import { redirect } from 'next/navigation';
 import { format, parseISO } from 'date-fns';
 import { Moon, Calendar } from 'lucide-react';
 import Link from 'next/link';
@@ -17,18 +16,21 @@ export default async function SchedulePage() {
   const { user, supabase } = await requireAuth();
 
   // Get captain profile with hibernation info
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('id, is_hibernating, hibernation_end_date, hibernation_resume_time')
     .eq('id', user.id)
     .single();
 
-  if (!profile) {
-    redirect('/login');
+  if (profileError) {
+    console.error('[Schedule] Profile query failed for user:', user.id, profileError);
   }
 
-  const isHibernating = profile.is_hibernating ?? false;
-  const hibernationEndDate = profile.hibernation_end_date;
+  // Use fallback values if profile query fails - user is still authenticated
+  const captainId = profile?.id ?? user.id;
+  const isHibernating = profile?.is_hibernating ?? false;
+  const hibernationEndDate = profile?.hibernation_end_date ?? null;
+  const hibernationResumeTime = profile?.hibernation_resume_time ?? null;
 
   return (
     <div className="flex h-[calc(100vh-4rem)] flex-col md:h-screen">
@@ -49,8 +51,8 @@ export default async function SchedulePage() {
                     <span className="font-medium text-amber-200">
                       {format(parseISO(hibernationEndDate), 'MMMM d, yyyy')}
                     </span>
-                    {profile.hibernation_resume_time && (
-                      <> at {profile.hibernation_resume_time}</>
+                    {hibernationResumeTime && (
+                      <> at {hibernationResumeTime}</>
                     )}
                     .
                   </>
@@ -76,7 +78,7 @@ export default async function SchedulePage() {
           </span>
           <div className="h-px flex-1 bg-slate-800 sm:w-32" />
         </div>
-        <ExportBookingsButton captainId={profile.id} />
+        <ExportBookingsButton captainId={captainId} />
       </div>
 
       {/* Calendar */}
