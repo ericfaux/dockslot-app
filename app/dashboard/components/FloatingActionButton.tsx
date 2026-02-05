@@ -161,27 +161,36 @@ export function FloatingActionButton({
       </div>
 
       {/* Main FAB button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={`group relative flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-all duration-200 active:scale-95 ${
-          isOpen
-            ? 'bg-slate-700 border border-slate-600 rotate-45'
-            : 'bg-gradient-to-br from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 shadow-cyan-500/25 hover:shadow-cyan-500/40'
-        }`}
-        aria-label={isOpen ? 'Close quick actions' : 'Open quick actions'}
-        aria-expanded={isOpen}
-      >
-        {isOpen ? (
-          <X className="h-6 w-6 text-slate-300 -rotate-45" />
-        ) : (
-          <Plus className="h-7 w-7 text-white" />
-        )}
-
-        {/* Pulse animation when closed */}
+      <div className="relative flex items-center gap-3">
+        {/* Tooltip label - visible on hover when closed */}
         {!isOpen && (
-          <span className="absolute inset-0 rounded-full bg-cyan-400 opacity-0 group-hover:animate-ping" />
+          <div className="pointer-events-none absolute right-full mr-3 hidden whitespace-nowrap rounded-lg bg-slate-800 px-3 py-1.5 text-sm font-medium text-slate-200 opacity-0 shadow-lg transition-opacity group-hover/fab:opacity-100 md:block">
+            Quick Actions
+          </div>
         )}
-      </button>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className={`group/fab relative flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-all duration-200 active:scale-95 ${
+            isOpen
+              ? 'bg-slate-700 border border-slate-600 rotate-45'
+              : 'bg-gradient-to-br from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 shadow-cyan-500/25 hover:shadow-cyan-500/40'
+          }`}
+          aria-label={isOpen ? 'Close quick actions' : 'Open quick actions'}
+          aria-expanded={isOpen}
+          title={isOpen ? 'Close' : 'Quick Actions'}
+        >
+          {isOpen ? (
+            <X className="h-6 w-6 text-slate-300 -rotate-45" />
+          ) : (
+            <Plus className="h-7 w-7 text-white" />
+          )}
+
+          {/* Pulse animation when closed */}
+          {!isOpen && (
+            <span className="absolute inset-0 rounded-full bg-cyan-400 opacity-0 group-hover/fab:animate-ping" />
+          )}
+        </button>
+      </div>
     </div>
   )
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Check, Copy, ExternalLink, Link2 } from 'lucide-react';
+import { Check, Copy, ExternalLink, Link2, Share2 } from 'lucide-react';
 
 interface BookingLinkCardProps {
   captainId: string;
@@ -11,11 +11,22 @@ interface BookingLinkCardProps {
 export function BookingLinkCard({ captainId, compact = false }: BookingLinkCardProps) {
   const [copied, setCopied] = useState(false);
   const [bookingUrl, setBookingUrl] = useState(`/book/${captainId}`);
+  const [isDismissed, setIsDismissed] = useState(false);
 
   // Build the full URL on the client side
   useEffect(() => {
     setBookingUrl(`${window.location.origin}/book/${captainId}`);
   }, [captainId]);
+
+  // Check localStorage for dismissed state (only in compact/dashboard mode)
+  useEffect(() => {
+    if (compact) {
+      const dismissed = localStorage.getItem('bookingLinkDismissed');
+      if (dismissed === 'true') {
+        setIsDismissed(true);
+      }
+    }
+  }, [compact]);
 
   const copyToClipboard = async () => {
     try {
@@ -35,8 +46,31 @@ export function BookingLinkCard({ captainId, compact = false }: BookingLinkCardP
     }
   };
 
+  const handleDismiss = () => {
+    setIsDismissed(true);
+    localStorage.setItem('bookingLinkDismissed', 'true');
+  };
+
+  const handleExpand = () => {
+    setIsDismissed(false);
+    localStorage.removeItem('bookingLinkDismissed');
+  };
+
   if (compact) {
-    // Compact version for dashboard
+    // Collapsed state: just a small "Share Link" button
+    if (isDismissed) {
+      return (
+        <button
+          onClick={handleExpand}
+          className="inline-flex items-center gap-2 rounded-lg bg-slate-800 px-4 py-2.5 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-700 hover:text-white"
+        >
+          <Share2 className="h-4 w-4 text-cyan-400" />
+          Share Booking Link
+        </button>
+      );
+    }
+
+    // Expanded compact version for dashboard
     return (
       <div
         className="rounded-lg bg-slate-800 p-4"
@@ -44,11 +78,19 @@ export function BookingLinkCard({ captainId, compact = false }: BookingLinkCardP
           boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
         }}
       >
-        <div className="mb-3 flex items-center gap-2">
-          <Link2 className="h-4 w-4 text-cyan-400" />
-          <span className="text-xs font-medium uppercase tracking-wider text-slate-500">
-            Your Booking Link
-          </span>
+        <div className="mb-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Link2 className="h-4 w-4 text-cyan-400" />
+            <span className="text-xs font-medium uppercase tracking-wider text-slate-500">
+              Your Booking Link
+            </span>
+          </div>
+          <button
+            onClick={handleDismiss}
+            className="text-xs text-slate-500 transition-colors hover:text-slate-300"
+          >
+            Minimize
+          </button>
         </div>
 
         <div className="flex items-center gap-2 rounded bg-slate-900 px-3 py-2">

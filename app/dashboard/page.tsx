@@ -13,12 +13,7 @@ import {
   Wind,
   ThermometerSun,
   Sun,
-  Fish,
-  Receipt,
-  CalendarX,
-  MessageSquare,
   Navigation,
-  Users,
 } from "lucide-react";
 import { FloatPlanWidget, FloatPlanTrip, WeatherSummary } from "./components/FloatPlanWidget";
 import { BookingLinkCard } from "@/components/BookingLinkCard";
@@ -32,6 +27,7 @@ import { getBuoyData } from "@/lib/weather/buoy";
 import SunCalc from "suncalc";
 import { weatherCache } from "@/lib/cache";
 import QuickStatsWidgets from "./components/QuickStatsWidgets";
+import { OnboardingChecklist } from "./components/OnboardingChecklist";
 
 interface WeatherData {
   waterTemp: number | null;
@@ -143,40 +139,6 @@ function FuelGauge({ value, maxValue, label, unit, color }: FuelGaugeProps) {
         {label}
       </span>
     </div>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// ROCKER SWITCH COMPONENT - Tactile marine control button
-// ═══════════════════════════════════════════════════════════════════════════
-
-interface RockerSwitchProps {
-  icon: React.ReactNode;
-  label: string;
-  onClick?: () => void;
-}
-
-function RockerSwitch({ icon, label, onClick }: RockerSwitchProps) {
-  return (
-    <button
-      onClick={onClick}
-      className="group relative flex flex-col items-center justify-center gap-2 rounded-lg bg-slate-800 px-4 py-5 transition-all duration-75 ease-out hover:bg-slate-700 active:translate-y-1 active:border-b-0"
-      style={{
-        borderBottom: "4px solid #0f172a",
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
-      }}
-    >
-      {/* LED Indicator */}
-      <div className="absolute right-3 top-3 h-1.5 w-1.5 rounded-full bg-slate-600 transition-all group-hover:bg-cyan-400 group-hover:shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
-      {/* Icon */}
-      <div className="text-slate-400 transition-colors group-hover:text-cyan-300">
-        {icon}
-      </div>
-      {/* Label */}
-      <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-        {label}
-      </span>
-    </button>
   );
 }
 
@@ -696,6 +658,27 @@ export default async function DashboardPage() {
   // Fetch action items
   const actionItems = user ? await getActionItems() : [];
 
+  // Onboarding checklist: check setup completion
+  let hasVessel = false;
+  let hasTripType = false;
+  let hasAnyBooking = false;
+  const hasMeetingSpot = !!(captainProfile?.meeting_spot_latitude && captainProfile?.meeting_spot_longitude);
+
+  if (user) {
+    try {
+      const [vesselResult, tripTypeResult, bookingResult] = await Promise.all([
+        supabase.from('vessels').select('id', { count: 'exact', head: true }).eq('captain_id', user.id),
+        supabase.from('trip_types').select('id', { count: 'exact', head: true }).eq('captain_id', user.id),
+        supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('captain_id', user.id).limit(1),
+      ]);
+      hasVessel = (vesselResult.count || 0) > 0;
+      hasTripType = (tripTypeResult.count || 0) > 0;
+      hasAnyBooking = (bookingResult.count || 0) > 0;
+    } catch (err) {
+      console.error('Error checking onboarding status:', err);
+    }
+  }
+
   // Calculate real metrics from Supabase data
   let seasonRevenueCents = 0;
   let seasonRevenueGoalCents = captainProfile?.season_revenue_goal_cents || 0;
@@ -740,8 +723,11 @@ export default async function DashboardPage() {
     seasonDaysTotal = 365;
   }
 
+  const hasRevenueGoal = seasonRevenueGoalCents > 0;
+
   const METRICS = {
     revenuePercent,
+    hasRevenueGoal,
     seasonDaysRemaining,
     seasonDaysTotal,
     pendingItems: pendingCount,
@@ -749,7 +735,7 @@ export default async function DashboardPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* ═══ SECTION 1: THE HORIZON WIDGET ═══ */}
       <section aria-label="Day Overview">
         <HorizonWidget
@@ -789,41 +775,60 @@ export default async function DashboardPage() {
         />
       </section>
 
+      {/* ═══ ONBOARDING CHECKLIST (for new captains) ═══ */}
+      {user && (
+        <section aria-label="Getting Started">
+          <OnboardingChecklist
+            hasMeetingSpot={hasMeetingSpot}
+            hasVessel={hasVessel}
+            hasTripType={hasTripType}
+            hasBooking={hasAnyBooking}
+            bookingPageUrl={`/book/${user.id}`}
+          />
+        </section>
+      )}
+
       {/* ═══ SECTION 1.5: QUICK STATS ═══ */}
       <section aria-label="Quick Statistics">
         <QuickStatsWidgets captainId={user?.id || ''} />
       </section>
 
       {/* ═══ SECTION 2: FUEL GAUGES ═══ */}
-      <section aria-label="Key Metrics" className="py-2">
-        <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12">
-          <FuelGauge
-            value={METRICS.revenuePercent}
-            maxValue={100}
-            label="Revenue"
-            unit="% goal"
-            color="emerald"
-          />
-          <FuelGauge
-            value={METRICS.seasonDaysRemaining}
-            maxValue={METRICS.seasonDaysTotal}
-            label="Season"
-            unit="days"
-            color="blue"
-          />
-          <FuelGauge
-            value={METRICS.pendingItems}
-            maxValue={METRICS.maxPending}
-            label="Pending"
-            unit="items"
-            color="amber"
-          />
-        </div>
-      </section>
+      {(METRICS.hasRevenueGoal || METRICS.pendingItems > 0) && (
+        <section aria-label="Key Metrics" className="py-2">
+          <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12">
+            {METRICS.hasRevenueGoal && (
+              <FuelGauge
+                value={METRICS.revenuePercent}
+                maxValue={100}
+                label="Revenue"
+                unit="% goal"
+                color="emerald"
+              />
+            )}
+            <FuelGauge
+              value={METRICS.seasonDaysRemaining}
+              maxValue={METRICS.seasonDaysTotal}
+              label="Season"
+              unit="days"
+              color="blue"
+            />
+            {METRICS.pendingItems > 0 && (
+              <FuelGauge
+                value={METRICS.pendingItems}
+                maxValue={METRICS.maxPending}
+                label="Pending"
+                unit="items"
+                color="amber"
+              />
+            )}
+          </div>
+        </section>
+      )}
 
       {/* ═══ SECTION 3: FLOAT PLAN / MISSION CONTROL ═══ */}
       <section aria-label="Float Plan - Today's Trips">
-        <div className="mb-3 flex items-center gap-2">
+        <div className="mb-4 flex items-center gap-2">
           <span className="font-mono text-xs uppercase tracking-widest text-slate-500">
             Float Plan
           </span>
@@ -840,7 +845,7 @@ export default async function DashboardPage() {
 
       {/* ═══ SECTION 3.3: ACTION ITEMS ═══ */}
       <section aria-label="Action Items">
-        <div className="mb-3 flex items-center gap-2">
+        <div className="mb-4 flex items-center gap-2">
           <span className="font-mono text-xs uppercase tracking-widest text-slate-500">
             Attention
           </span>
@@ -852,7 +857,7 @@ export default async function DashboardPage() {
       {/* ═══ SECTION 3.5: BOOKING LINK ═══ */}
       {user && (
         <section aria-label="Booking Link">
-          <div className="mb-3 flex items-center gap-2">
+          <div className="mb-4 flex items-center gap-2">
             <span className="font-mono text-xs uppercase tracking-widest text-slate-500">
               Share
             </span>
@@ -861,34 +866,6 @@ export default async function DashboardPage() {
           <BookingLinkCard captainId={user.id} compact />
         </section>
       )}
-
-      {/* ═══ SECTION 4: ROCKER SWITCHES / QUICK ACTIONS ═══ */}
-      <section aria-label="Quick Actions">
-        <div className="mb-3 flex items-center gap-2">
-          <span className="font-mono text-xs uppercase tracking-widest text-slate-500">
-            Controls
-          </span>
-          <div className="h-px flex-1 bg-slate-800" />
-        </div>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <RockerSwitch
-            icon={<Fish className="h-6 w-6" />}
-            label="Log Catch"
-          />
-          <RockerSwitch
-            icon={<Receipt className="h-6 w-6" />}
-            label="Expense"
-          />
-          <RockerSwitch
-            icon={<CalendarX className="h-6 w-6" />}
-            label="Quick Block"
-          />
-          <RockerSwitch
-            icon={<MessageSquare className="h-6 w-6" />}
-            label="Message"
-          />
-        </div>
-      </section>
 
       {/* ═══ BOTTOM ACCENT BAR ═══ */}
       <div

@@ -83,7 +83,7 @@ export function ActionItemsWidget({ items }: ActionItemsWidgetProps) {
         <div className="flex flex-col items-center justify-center py-4">
           <CheckCircle className="mb-3 h-12 w-12 text-emerald-400" />
           <h3 className="mb-1 text-lg font-semibold text-slate-100">
-            All Clear! ✨
+            All Clear
           </h3>
           <p className="text-sm text-slate-400">
             No pending action items. Smooth sailing ahead.
