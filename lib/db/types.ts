@@ -206,6 +206,26 @@ export interface WaiverSignature {
   ip_address: string | null;
   signature_data: string | null;
   template_version: number;
+  device_info: WaiverDeviceInfo | null;
+}
+
+export interface WaiverDeviceInfo {
+  user_agent: string;
+  platform: string;
+  language: string;
+  screen_width: number;
+  screen_height: number;
+  timezone: string;
+}
+
+export interface WaiverReminder {
+  id: string;
+  booking_id: string;
+  passenger_id: string;
+  sent_at: string;
+  sent_by: string | null;
+  email_sent_to: string | null;
+  created_at: string;
 }
 
 // ============================================================================

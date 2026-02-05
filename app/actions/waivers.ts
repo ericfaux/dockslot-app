@@ -57,12 +57,22 @@ export interface WaiverForSigning {
   alreadySigned: boolean;
 }
 
+export interface WaiverDeviceInfo {
+  user_agent: string;
+  platform: string;
+  language: string;
+  screen_width: number;
+  screen_height: number;
+  timezone: string;
+}
+
 export interface SubmitSignatureParams {
   token: string;
   passengerId: string;
   waiverTemplateId: string;
   signatureData: string; // base64 image
   agreedToTerms: boolean;
+  deviceInfo?: WaiverDeviceInfo | null;
 }
 
 // ============================================================================
@@ -327,7 +337,7 @@ export async function getWaiverForSigning(
 export async function submitWaiverSignature(
   params: SubmitSignatureParams
 ): Promise<WaiverActionResult<{ remainingWaivers: number }>> {
-  const { token, passengerId, waiverTemplateId, signatureData, agreedToTerms } = params;
+  const { token, passengerId, waiverTemplateId, signatureData, agreedToTerms, deviceInfo } = params;
 
   // Validate inputs
   if (!token || token.length < 10) {
@@ -428,6 +438,7 @@ export async function submitWaiverSignature(
     ip_address: ipAddress,
     signature_data: signatureData,
     template_version: waiver.version,
+    device_info: deviceInfo || null,
   });
 
   if (insertError) {
@@ -683,10 +694,10 @@ export async function updateWaiverTemplate(
     return { success: false, error: 'Not authenticated', code: 'VALIDATION' };
   }
 
-  // Verify ownership
+  // Verify ownership and get current version
   const { data: template, error: fetchError } = await supabase
     .from('waiver_templates')
-    .select('owner_id')
+    .select('owner_id, version')
     .eq('id', templateId)
     .single();
 
@@ -698,13 +709,14 @@ export async function updateWaiverTemplate(
     return { success: false, error: 'Not authorized', code: 'VALIDATION' };
   }
 
-  // Update
+  // Update with version increment
   const { error } = await supabase
     .from('waiver_templates')
     .update({
       title: title.trim(),
       content: content.trim(),
       is_active,
+      version: (template.version || 1) + 1,
     })
     .eq('id', templateId);
 

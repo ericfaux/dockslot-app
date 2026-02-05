@@ -10,6 +10,7 @@ interface RouteParams {
 /**
  * POST /api/bookings/[id]/send-waiver-reminders
  * Send waiver reminder emails to passengers who haven't signed
+ * Includes 24-hour throttling per passenger
  */
 export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
@@ -57,6 +58,19 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Failed to fetch signatures' }, { status: 500 });
     }
 
+    // Get recent reminders for throttle checking (within last 24 hours)
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { data: recentReminders } = await supabase
+      .from('waiver_reminders')
+      .select('passenger_id, sent_at')
+      .eq('booking_id', id)
+      .gt('sent_at', twentyFourHoursAgo);
+
+    // Build set of passengers who received a reminder in the last 24 hours
+    const recentlyRemindedPassengerIds = new Set(
+      (recentReminders || []).map(r => r.passenger_id)
+    );
+
     // Find passengers who haven't signed and have an email
     const signedPassengerIds = new Set(signatures?.map((s) => s.passenger_id) || []);
     const signedEmails = new Set(
@@ -67,30 +81,76 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       if (!p.email) return false;
       if (signedPassengerIds.has(p.id)) return false;
       if (signedEmails.has(p.email.toLowerCase())) return false;
+      // Skip if already reminded within 24 hours (throttle)
+      if (recentlyRemindedPassengerIds.has(p.id)) return false;
       return true;
     });
 
     if (passengersNeedingReminder.length === 0) {
+      // Determine why
+      const allPassengers = passengers || [];
+      const withoutEmail = allPassengers.filter(p => !p.email);
+      const alreadySigned = allPassengers.filter(p =>
+        signedPassengerIds.has(p.id) || (p.email && signedEmails.has(p.email.toLowerCase()))
+      );
+      const throttled = allPassengers.filter(p =>
+        p.email &&
+        !signedPassengerIds.has(p.id) &&
+        !(p.email && signedEmails.has(p.email.toLowerCase())) &&
+        recentlyRemindedPassengerIds.has(p.id)
+      );
+
+      let message = 'No passengers to remind.';
+      if (alreadySigned.length === allPassengers.length) {
+        message = 'All passengers have already signed their waivers.';
+      } else if (throttled.length > 0 && withoutEmail.length > 0) {
+        message = `${throttled.length} passenger(s) already reminded within 24 hours, ${withoutEmail.length} without email.`;
+      } else if (throttled.length > 0) {
+        message = `${throttled.length} passenger(s) already reminded within the last 24 hours.`;
+      } else if (withoutEmail.length > 0) {
+        message = `${withoutEmail.length} passenger(s) without email addresses.`;
+      }
+
       return NextResponse.json({
         success: true,
-        message: 'All passengers have signed or no passengers have email addresses',
+        message,
         sent: 0,
       });
     }
 
     // Get the guest token for the waiver link
-    const { data: guestToken, error: tokenError } = await supabase
+    let guestToken: { token: string } | null = null;
+    const { data: existingToken, error: tokenError } = await supabase
       .from('guest_tokens')
       .select('token')
       .eq('booking_id', id)
       .gt('expires_at', new Date().toISOString())
       .single();
 
-    if (tokenError || !guestToken) {
-      return NextResponse.json(
-        { error: 'No valid guest token found for this booking' },
-        { status: 400 }
-      );
+    if (tokenError || !existingToken) {
+      // Create a new token
+      const newToken = crypto.randomUUID();
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 30); // 30 days
+
+      const { error: insertError } = await supabase
+        .from('guest_tokens')
+        .upsert({
+          booking_id: id,
+          token: newToken,
+          expires_at: expiresAt.toISOString(),
+        });
+
+      if (insertError) {
+        console.error('Failed to create guest token:', insertError);
+        return NextResponse.json(
+          { error: 'Failed to create waiver link' },
+          { status: 500 }
+        );
+      }
+      guestToken = { token: newToken };
+    } else {
+      guestToken = existingToken;
     }
 
     // Get captain profile for email
@@ -104,8 +164,23 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Captain profile not found' }, { status: 400 });
     }
 
-    // In a real implementation, you would send emails here via Resend
-    // For now, we'll simulate success and log the action
+    // Record reminders for throttling
+    const reminderInserts = passengersNeedingReminder.map(p => ({
+      booking_id: id,
+      passenger_id: p.id,
+      sent_by: user.id,
+      email_sent_to: p.email,
+    }));
+
+    const { error: reminderInsertError } = await supabase
+      .from('waiver_reminders')
+      .insert(reminderInserts);
+
+    if (reminderInsertError) {
+      console.error('Failed to record reminders:', reminderInsertError);
+      // Don't fail the request, just log the error
+    }
+
     const waiverUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://dockslot.com'}/waivers/${guestToken.token}`;
 
     // Log the reminder
