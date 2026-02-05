@@ -325,6 +325,60 @@ export interface ReferralStats {
 }
 
 // ============================================================================
+// Promo Code Types
+// ============================================================================
+
+export type PromoDiscountType = 'percentage' | 'fixed';
+
+export interface PromoCode {
+  id: string;
+  captain_id: string;
+  code: string;
+  discount_type: PromoDiscountType;
+  discount_value: number; // percentage (1-100) or cents
+  valid_from: string | null; // YYYY-MM-DD
+  valid_to: string | null; // YYYY-MM-DD
+  max_uses: number | null; // null = unlimited
+  current_uses: number;
+  trip_type_ids: string[]; // empty = all trip types
+  is_active: boolean;
+  total_discount_cents: number;
+  total_booking_revenue_cents: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PromoCodeStats {
+  total_codes: number;
+  active_codes: number;
+  total_uses: number;
+  total_discount_given_cents: number;
+  total_revenue_from_promos_cents: number;
+  top_codes: Array<{
+    id: string;
+    code: string;
+    discount_type: PromoDiscountType;
+    discount_value: number;
+    current_uses: number;
+    max_uses: number | null;
+    total_discount_cents: number;
+    total_booking_revenue_cents: number;
+    is_active: boolean;
+    valid_from: string | null;
+    valid_to: string | null;
+  }>;
+}
+
+export interface PromoValidationResult {
+  is_valid: boolean;
+  promo_code_id: string | null;
+  discount_type: PromoDiscountType | null;
+  discount_value: number | null;
+  discount_cents: number;
+  error_message: string | null;
+}
+
+// ============================================================================
 // Waitlist Types
 // ============================================================================
 

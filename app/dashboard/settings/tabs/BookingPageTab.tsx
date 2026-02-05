@@ -8,13 +8,14 @@ import {
   Moon,
   FileText,
   Gift,
+  Tag,
   ChevronDown,
   Users,
   Download,
   Trash2,
   AlertCircle,
 } from 'lucide-react';
-import { Profile, HibernationSubscriber } from '@/lib/db/types';
+import { Profile, HibernationSubscriber, TripType } from '@/lib/db/types';
 import { updateProfile } from '@/app/actions/profile';
 import {
   getHibernationSubscribers,
@@ -23,12 +24,14 @@ import {
 } from '@/app/actions/hibernation-subscribers';
 import { BookingLinkCard } from '@/components/BookingLinkCard';
 import ReferralProgramClient from '../referrals/ReferralProgramClient';
+import PromoCodesClient from '../promo-codes/PromoCodesClient';
 
 interface BookingPageTabProps {
   initialProfile: Profile | null;
+  tripTypes?: TripType[];
 }
 
-export function BookingPageTab({ initialProfile }: BookingPageTabProps) {
+export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTabProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -395,6 +398,17 @@ export function BookingPageTab({ initialProfile }: BookingPageTabProps) {
           {isPending ? 'Saving...' : 'Save Booking Page Settings'}
         </button>
       </div>
+
+      {/* Promo Codes Section */}
+      <section className="rounded-xl border border-slate-800 bg-slate-900/50 p-6">
+        <div className="mb-4 flex items-center gap-2">
+          <Tag className="h-5 w-5 text-cyan-400" />
+          <h2 className="text-lg font-semibold text-white">Promo Codes</h2>
+        </div>
+        <PromoCodesClient
+          tripTypes={tripTypes.map(tt => ({ id: tt.id, title: tt.title }))}
+        />
+      </section>
 
       {/* Referral Program Section */}
       <section className="rounded-xl border border-slate-800 bg-slate-900/50 p-6">

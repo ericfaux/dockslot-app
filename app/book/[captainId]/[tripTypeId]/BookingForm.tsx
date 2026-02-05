@@ -8,7 +8,7 @@ import { PhoneInput } from '@/components/booking/PhoneInput';
 import { PartySizeSelector } from '@/components/booking/PartySizeSelector';
 import { CancellationPolicy, SecurePaymentBadge } from '@/components/booking/TrustSignals';
 import { WeatherForecast } from '@/components/booking/WeatherForecast';
-import { Calendar, Users, Mail, User, MessageSquare, ChevronRight, AlertCircle, FileWarning } from 'lucide-react';
+import { Calendar, Users, Mail, User, MessageSquare, ChevronRight, AlertCircle, FileWarning, Tag, Loader2, CheckCircle, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 
@@ -64,6 +64,17 @@ export function BookingForm({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
+
+  // Promo code state
+  const [promoCode, setPromoCode] = useState('');
+  const [promoExpanded, setPromoExpanded] = useState(false);
+  const [promoValidating, setPromoValidating] = useState(false);
+  const [promoValid, setPromoValid] = useState<boolean | null>(null);
+  const [promoError, setPromoError] = useState<string | null>(null);
+  const [promoDiscountCents, setPromoDiscountCents] = useState(0);
+  const [promoDiscountType, setPromoDiscountType] = useState<string | null>(null);
+  const [promoDiscountValue, setPromoDiscountValue] = useState<number | null>(null);
+  const [promoCodeId, setPromoCodeId] = useState<string | null>(null);
 
   // Persist form data to sessionStorage + localStorage for offline recovery
   useEffect(() => {
@@ -136,6 +147,73 @@ export function BookingForm({
     return true;
   };
 
+  const validatePromoCode = async () => {
+    const code = promoCode.trim().toUpperCase();
+    if (!code) {
+      setPromoValid(null);
+      setPromoError(null);
+      setPromoDiscountCents(0);
+      setPromoCodeId(null);
+      return;
+    }
+
+    setPromoValidating(true);
+    setPromoError(null);
+
+    try {
+      const res = await fetch('/api/promo/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          captain_id: captainId,
+          code,
+          trip_type_id: tripTypeId,
+          total_price_cents: totalPrice,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.is_valid) {
+        setPromoValid(true);
+        setPromoDiscountCents(data.discount_cents);
+        setPromoDiscountType(data.discount_type);
+        setPromoDiscountValue(data.discount_value);
+        setPromoCodeId(data.promo_code_id);
+        setPromoError(null);
+      } else {
+        setPromoValid(false);
+        setPromoDiscountCents(0);
+        setPromoCodeId(null);
+        setPromoError(data.error_message || 'Invalid promo code');
+      }
+    } catch {
+      setPromoValid(false);
+      setPromoDiscountCents(0);
+      setPromoCodeId(null);
+      setPromoError('Unable to validate promo code');
+    } finally {
+      setPromoValidating(false);
+    }
+  };
+
+  const clearPromoCode = () => {
+    setPromoCode('');
+    setPromoValid(null);
+    setPromoError(null);
+    setPromoDiscountCents(0);
+    setPromoDiscountType(null);
+    setPromoDiscountValue(null);
+    setPromoCodeId(null);
+  };
+
+  // Effective prices after promo discount
+  const effectiveTotalPrice = Math.max(0, totalPrice - promoDiscountCents);
+  const depositRatio = totalPrice > 0 ? depositAmount / totalPrice : 0;
+  const effectiveDeposit = promoDiscountCents > 0
+    ? Math.round(effectiveTotalPrice * depositRatio)
+    : depositAmount;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -172,6 +250,9 @@ export function BookingForm({
           total_price_cents: totalPrice,
           deposit_paid_cents: 0,
           balance_due_cents: totalPrice,
+          promo_code: promoValid ? promoCode.trim().toUpperCase() : undefined,
+          promo_code_id: promoCodeId || undefined,
+          promo_discount_cents: promoDiscountCents || undefined,
         }),
       });
 
@@ -387,6 +468,115 @@ export function BookingForm({
             </div>
           </div>
 
+          {/* Promo Code Section */}
+          <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
+            <button
+              type="button"
+              onClick={() => setPromoExpanded(!promoExpanded)}
+              className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors w-full"
+            >
+              <Tag className="h-4 w-4 text-cyan-600" />
+              Have a promo code?
+              <ChevronRight className={`h-4 w-4 ml-auto transition-transform ${promoExpanded ? 'rotate-90' : ''}`} />
+            </button>
+
+            {promoExpanded && (
+              <div className="mt-4 space-y-3">
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <input
+                      type="text"
+                      value={promoCode}
+                      onChange={(e) => {
+                        setPromoCode(e.target.value.toUpperCase());
+                        if (promoValid !== null) {
+                          setPromoValid(null);
+                          setPromoError(null);
+                          setPromoDiscountCents(0);
+                          setPromoCodeId(null);
+                        }
+                      }}
+                      placeholder="Enter promo code"
+                      maxLength={30}
+                      className={`w-full rounded-xl border bg-white px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 min-h-[48px] font-mono uppercase ${
+                        promoValid === true
+                          ? 'border-emerald-300 focus:border-emerald-500 focus:ring-emerald-200'
+                          : promoValid === false
+                          ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
+                          : 'border-slate-200 focus:border-cyan-500 focus:ring-cyan-200'
+                      }`}
+                    />
+                    {promoValid === true && (
+                      <button
+                        type="button"
+                        onClick={clearPromoCode}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={validatePromoCode}
+                    disabled={!promoCode.trim() || promoValidating || promoValid === true}
+                    className="rounded-xl bg-cyan-600 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px]"
+                  >
+                    {promoValidating ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      'Apply'
+                    )}
+                  </button>
+                </div>
+
+                {promoValid === true && (
+                  <div className="flex items-center gap-2 rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-2">
+                    <CheckCircle className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+                    <span className="text-sm text-emerald-700">
+                      {promoDiscountType === 'percentage'
+                        ? `${promoDiscountValue}% discount applied`
+                        : `$${(promoDiscountCents / 100).toFixed(2)} discount applied`}
+                      {' '}&mdash; you save ${(promoDiscountCents / 100).toFixed(2)}!
+                    </span>
+                  </div>
+                )}
+
+                {promoError && (
+                  <div className="flex items-center gap-2 rounded-lg bg-red-50 border border-red-200 px-3 py-2">
+                    <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0" />
+                    <span className="text-sm text-red-700">{promoError}</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Price Summary (when promo applied) */}
+          {promoValid === true && promoDiscountCents > 0 && (
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+              <h4 className="text-sm font-semibold text-slate-900 mb-2">Updated Price</h4>
+              <div className="space-y-1.5 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Original Total</span>
+                  <span className="text-slate-400 line-through">${(totalPrice / 100).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-emerald-700">
+                  <span>Promo Discount ({promoCode})</span>
+                  <span>-${(promoDiscountCents / 100).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between border-t border-emerald-200 pt-1.5">
+                  <span className="font-semibold text-slate-900">New Total</span>
+                  <span className="font-bold text-slate-900">${(effectiveTotalPrice / 100).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-xs text-slate-500">
+                  <span>Deposit Due Now</span>
+                  <span>${(effectiveDeposit / 100).toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Waiver Requirement Notice */}
           <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
             <div className="flex items-start gap-3">
@@ -432,7 +622,14 @@ export function BookingForm({
               <div className="flex items-center justify-between text-sm">
                 <span className="text-slate-500">Deposit:</span>
                 <span className="text-cyan-700 font-semibold">
-                  ${(depositAmount / 100).toFixed(2)}
+                  {promoDiscountCents > 0 && promoValid ? (
+                    <>
+                      <span className="text-slate-400 line-through mr-1.5">${(depositAmount / 100).toFixed(2)}</span>
+                      ${(effectiveDeposit / 100).toFixed(2)}
+                    </>
+                  ) : (
+                    `$${(depositAmount / 100).toFixed(2)}`
+                  )}
                 </span>
               </div>
             }

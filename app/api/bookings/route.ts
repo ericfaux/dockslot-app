@@ -180,6 +180,9 @@ export async function POST(request: NextRequest) {
       deposit_paid_cents,
       balance_due_cents,
       referral_code,
+      promo_code,
+      promo_code_id,
+      promo_discount_cents: clientPromoDiscountCents,
     } = body;
 
     // Validate required fields
@@ -289,8 +292,62 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Apply referral discount to balance due
-    const finalBalanceDue = Math.max(0, (balance_due_cents || total_price_cents || 0) - referralDiscountCents);
+    // Handle promo code (if provided, and no referral code applied)
+    let promoCodeData: { id: string; code: string; current_uses: number; total_discount_cents: number; total_booking_revenue_cents: number } | null = null;
+    let promoDiscountCents = 0;
+
+    if (promo_code && promo_code.trim() && referralDiscountCents === 0) {
+      const promoUpper = promo_code.trim().toUpperCase();
+
+      // Server-side validation of promo code
+      const { data: rpcResult } = await supabase.rpc('validate_promo_code', {
+        p_captain_id: captain_id,
+        p_code: promoUpper,
+        p_trip_type_id: trip_type_id,
+        p_booking_value_cents: total_price_cents,
+      });
+
+      if (rpcResult && rpcResult.length > 0 && rpcResult[0].is_valid) {
+        promoDiscountCents = rpcResult[0].discount_cents;
+        // Fetch full promo code data for tracking
+        const { data: pCode } = await supabase
+          .from('promo_codes')
+          .select('id, code, current_uses, total_discount_cents, total_booking_revenue_cents')
+          .eq('id', rpcResult[0].promo_code_id)
+          .single();
+        if (pCode) promoCodeData = pCode;
+      } else if (promo_code_id && clientPromoDiscountCents) {
+        // Fallback: trust client-validated data if RPC is unavailable, but re-verify the code exists
+        const { data: pCode } = await supabase
+          .from('promo_codes')
+          .select('id, code, current_uses, total_discount_cents, total_booking_revenue_cents, discount_type, discount_value, is_active, max_uses, valid_from, valid_to, trip_type_ids')
+          .eq('id', promo_code_id)
+          .eq('captain_id', captain_id)
+          .eq('is_active', true)
+          .single();
+
+        if (pCode) {
+          // Re-validate server-side
+          const today = new Date().toISOString().split('T')[0];
+          const dateOk = (!pCode.valid_from || today >= pCode.valid_from) && (!pCode.valid_to || today <= pCode.valid_to);
+          const usageOk = pCode.max_uses === null || pCode.current_uses < pCode.max_uses;
+          const tripOk = !pCode.trip_type_ids || pCode.trip_type_ids.length === 0 || pCode.trip_type_ids.includes(trip_type_id);
+
+          if (dateOk && usageOk && tripOk) {
+            if (pCode.discount_type === 'percentage') {
+              promoDiscountCents = Math.floor(total_price_cents * pCode.discount_value / 100);
+            } else {
+              promoDiscountCents = Math.min(pCode.discount_value, total_price_cents);
+            }
+            promoCodeData = pCode;
+          }
+        }
+      }
+    }
+
+    // Apply referral + promo discount to balance due
+    const totalDiscount = referralDiscountCents + promoDiscountCents;
+    const finalBalanceDue = Math.max(0, (balance_due_cents || total_price_cents || 0) - totalDiscount);
 
     // Create booking using safe insert function (optimistic locking via advisory lock)
     // This prevents double-booking race conditions at the database level
@@ -346,6 +403,8 @@ export async function POST(request: NextRequest) {
             balance_due_cents: finalBalanceDue,
             referral_code: referralCodeData?.code || null,
             referral_discount_cents: referralDiscountCents,
+            promo_code_id: promoCodeData?.id || null,
+            promo_discount_cents: promoDiscountCents,
           })
           .select()
           .single();
@@ -483,13 +542,36 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Update promo code tracking (if promo code was used)
+    if (promoCodeData && promoDiscountCents > 0) {
+      // Update booking with promo fields (in case RPC path was used and didn't include promo columns)
+      await supabase
+        .from('bookings')
+        .update({
+          promo_code_id: promoCodeData.id,
+          promo_discount_cents: promoDiscountCents,
+        })
+        .eq('id', booking.id);
+
+      // Update promo code usage stats
+      await supabase
+        .from('promo_codes')
+        .update({
+          current_uses: promoCodeData.current_uses + 1,
+          total_discount_cents: (promoCodeData.total_discount_cents || 0) + promoDiscountCents,
+          total_booking_revenue_cents: (promoCodeData.total_booking_revenue_cents || 0) + total_price_cents,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', promoCodeData.id);
+    }
+
     // Create booking log entry
     await supabase
       .from('booking_logs')
       .insert({
         booking_id: booking.id,
         entry_type: 'booking_created',
-        description: `Booking created by ${guest_name}`,
+        description: `Booking created by ${guest_name}${promoCodeData ? ` with promo code ${promoCodeData.code}` : ''}`,
         actor_type: 'guest',
         new_value: { status: 'pending_deposit' },
       });

@@ -340,6 +340,14 @@ export default async function ConfirmPage({ params, searchParams }: ConfirmPageP
                     ${(booking.total_price_cents / 100).toFixed(2)}
                   </span>
                 </div>
+                {booking.promo_discount_cents > 0 && (
+                  <div className="flex justify-between text-emerald-600">
+                    <span>Promo Discount</span>
+                    <span className="font-medium">
+                      -${(booking.promo_discount_cents / 100).toFixed(2)}
+                    </span>
+                  </div>
+                )}
                 {tripType && tripType.deposit_amount > 0 && (
                   <div className="flex justify-between">
                     <span className="text-slate-500">Deposit {depositPaid ? '(Paid)' : '(Due Now)'}</span>
@@ -351,7 +359,7 @@ export default async function ConfirmPage({ params, searchParams }: ConfirmPageP
                 <div className="border-t border-slate-200 pt-3 flex justify-between text-base">
                   <span className="font-semibold text-slate-900">Balance Due at Trip</span>
                   <span className="font-bold text-slate-900">
-                    ${((booking.total_price_cents - (tripType?.deposit_amount || 0)) / 100).toFixed(2)}
+                    ${(booking.balance_due_cents / 100).toFixed(2)}
                   </span>
                 </div>
               </div>

@@ -155,7 +155,7 @@ export function SettingsTabs(props: SettingsTabsProps) {
           <NotificationsTab />
         )}
         {activeTab === 'booking-page' && (
-          <BookingPageTab initialProfile={props.profile} />
+          <BookingPageTab initialProfile={props.profile} tripTypes={props.tripTypes} />
         )}
         {activeTab === 'advanced' && (
           <AdvancedTab

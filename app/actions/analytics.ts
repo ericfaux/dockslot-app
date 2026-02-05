@@ -2,6 +2,7 @@
 
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { weatherCache } from '@/lib/cache';
+import type { PromoCodeStats } from '@/lib/db/types';
 
 // Re-export the analytics cache using the same SimpleCache pattern
 const analyticsCache = weatherCache; // Share cache singleton, keys are namespaced
@@ -534,6 +535,121 @@ export async function getSeasonPerformance(): Promise<SeasonPerformanceData> {
       cancelled: cancelledFromWeather.length,
       revenueSaved,
     },
+  };
+
+  analyticsCache.set(cacheKey, result, 300000);
+  return result;
+}
+
+// ============================================================================
+// Promo Code Analytics
+// ============================================================================
+
+export interface PromoCodeAnalyticsData {
+  totalCodes: number;
+  activeCodes: number;
+  totalUses: number;
+  totalDiscountGiven: number; // dollars
+  totalRevenueFromPromos: number; // dollars
+  codePerformance: Array<{
+    id: string;
+    code: string;
+    discountType: string;
+    discountValue: number;
+    uses: number;
+    maxUses: number | null;
+    discountGiven: number; // dollars
+    revenueGenerated: number; // dollars
+    isActive: boolean;
+    validFrom: string | null;
+    validTo: string | null;
+  }>;
+  usageByMonth: Array<{
+    month: string;
+    label: string;
+    uses: number;
+    discountGiven: number;
+    revenue: number;
+  }>;
+}
+
+export async function getPromoCodeAnalytics(): Promise<PromoCodeAnalyticsData> {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
+
+  const cacheKey = `analytics:promos:${user.id}`;
+  const cached = analyticsCache.get<PromoCodeAnalyticsData>(cacheKey);
+  if (cached) return cached;
+
+  // Fetch all promo codes
+  const { data: promoCodes } = await supabase
+    .from('promo_codes')
+    .select('*')
+    .eq('captain_id', user.id)
+    .order('current_uses', { ascending: false });
+
+  const allCodes = promoCodes || [];
+
+  // Fetch bookings with promo codes for monthly breakdown
+  const { data: promoBookings } = await supabase
+    .from('bookings')
+    .select('id, scheduled_start, total_price_cents, promo_discount_cents, promo_code_id')
+    .eq('captain_id', user.id)
+    .not('promo_code_id', 'is', null)
+    .not('status', 'eq', 'cancelled');
+
+  const allPromoBookings = promoBookings || [];
+
+  const totalCodes = allCodes.length;
+  const activeCodes = allCodes.filter(c => c.is_active).length;
+  const totalUses = allCodes.reduce((sum, c) => sum + c.current_uses, 0);
+  const totalDiscountGiven = centsToDollars(allCodes.reduce((sum, c) => sum + (c.total_discount_cents || 0), 0));
+  const totalRevenueFromPromos = centsToDollars(allCodes.reduce((sum, c) => sum + (c.total_booking_revenue_cents || 0), 0));
+
+  const codePerformance = allCodes.map(c => ({
+    id: c.id,
+    code: c.code,
+    discountType: c.discount_type,
+    discountValue: c.discount_value,
+    uses: c.current_uses,
+    maxUses: c.max_uses,
+    discountGiven: centsToDollars(c.total_discount_cents || 0),
+    revenueGenerated: centsToDollars(c.total_booking_revenue_cents || 0),
+    isActive: c.is_active,
+    validFrom: c.valid_from,
+    validTo: c.valid_to,
+  }));
+
+  // Usage by month (last 6 months)
+  const now = new Date();
+  const usageByMonth: PromoCodeAnalyticsData['usageByMonth'] = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const monthStart = d.toISOString();
+    const monthEnd = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59).toISOString();
+
+    const monthBookings = allPromoBookings.filter(b =>
+      b.scheduled_start >= monthStart && b.scheduled_start <= monthEnd
+    );
+
+    usageByMonth.push({
+      month: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`,
+      label: d.toLocaleDateString('en-US', { month: 'short' }),
+      uses: monthBookings.length,
+      discountGiven: centsToDollars(monthBookings.reduce((sum, b) => sum + (b.promo_discount_cents || 0), 0)),
+      revenue: centsToDollars(monthBookings.reduce((sum, b) => sum + b.total_price_cents, 0)),
+    });
+  }
+
+  const result: PromoCodeAnalyticsData = {
+    totalCodes,
+    activeCodes,
+    totalUses,
+    totalDiscountGiven,
+    totalRevenueFromPromos,
+    codePerformance,
+    usageByMonth,
   };
 
   analyticsCache.set(cacheKey, result, 300000);
