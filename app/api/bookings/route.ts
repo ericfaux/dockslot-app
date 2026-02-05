@@ -292,36 +292,103 @@ export async function POST(request: NextRequest) {
     // Apply referral discount to balance due
     const finalBalanceDue = Math.max(0, (balance_due_cents || total_price_cents || 0) - referralDiscountCents);
 
-    // Create booking
-    const { data: booking, error: bookingError } = await supabase
-      .from('bookings')
-      .insert({
-        captain_id,
-        trip_type_id,
-        guest_name,
-        guest_email,
-        guest_phone: guest_phone || null,
-        party_size,
-        scheduled_start,
-        scheduled_end,
-        special_requests: special_requests || null,
-        status: 'pending_deposit' as BookingStatus,
-        payment_status: 'unpaid',
-        total_price_cents: total_price_cents || 0,
-        deposit_paid_cents: deposit_paid_cents || 0,
-        balance_due_cents: finalBalanceDue,
-        referral_code: referralCodeData?.code || null,
-        referral_discount_cents: referralDiscountCents,
-      })
-      .select()
-      .single();
+    // Create booking using safe insert function (optimistic locking via advisory lock)
+    // This prevents double-booking race conditions at the database level
+    let booking;
+    const { data: safeResult, error: rpcError } = await supabase.rpc('insert_booking_safely', {
+      p_captain_id: captain_id,
+      p_trip_type_id: trip_type_id,
+      p_vessel_id: tripType.vessel_id || null,
+      p_guest_name: guest_name,
+      p_guest_email: guest_email,
+      p_guest_phone: guest_phone || null,
+      p_party_size: party_size,
+      p_scheduled_start: scheduled_start,
+      p_scheduled_end: scheduled_end,
+      p_special_requests: special_requests || null,
+      p_status: 'pending_deposit',
+      p_total_price_cents: total_price_cents || 0,
+      p_deposit_paid_cents: deposit_paid_cents || 0,
+      p_balance_due_cents: finalBalanceDue,
+      p_internal_notes: null,
+      p_tags: [],
+      p_referral_code: referralCodeData?.code || null,
+      p_referral_discount_cents: referralDiscountCents,
+    });
 
-    if (bookingError || !booking) {
-      console.error('Error creating booking:', bookingError);
-      return NextResponse.json(
-        { error: 'Failed to create booking' },
-        { status: 500 }
-      );
+    if (rpcError) {
+      // Check if error is a slot conflict from the RPC function
+      if (rpcError.message?.includes('SLOT_UNAVAILABLE')) {
+        return NextResponse.json(
+          { error: 'This time slot is no longer available', code: 'SLOT_UNAVAILABLE' },
+          { status: 409 }
+        );
+      }
+
+      // If RPC doesn't exist yet (migration not run), fall back to regular insert
+      if (rpcError.message?.includes('function') || rpcError.code === '42883') {
+        const { data: fallbackBooking, error: fallbackError } = await supabase
+          .from('bookings')
+          .insert({
+            captain_id,
+            trip_type_id,
+            guest_name,
+            guest_email,
+            guest_phone: guest_phone || null,
+            party_size,
+            scheduled_start,
+            scheduled_end,
+            special_requests: special_requests || null,
+            status: 'pending_deposit' as BookingStatus,
+            payment_status: 'unpaid',
+            total_price_cents: total_price_cents || 0,
+            deposit_paid_cents: deposit_paid_cents || 0,
+            balance_due_cents: finalBalanceDue,
+            referral_code: referralCodeData?.code || null,
+            referral_discount_cents: referralDiscountCents,
+          })
+          .select()
+          .single();
+
+        if (fallbackError || !fallbackBooking) {
+          // Check for exclusion constraint violation (overlap)
+          if (fallbackError?.code === '23P01') {
+            return NextResponse.json(
+              { error: 'This time slot is no longer available', code: 'SLOT_UNAVAILABLE' },
+              { status: 409 }
+            );
+          }
+          console.error('Error creating booking:', fallbackError);
+          return NextResponse.json(
+            { error: 'Failed to create booking' },
+            { status: 500 }
+          );
+        }
+        booking = fallbackBooking;
+      } else {
+        console.error('Error creating booking via RPC:', rpcError);
+        return NextResponse.json(
+          { error: 'Failed to create booking' },
+          { status: 500 }
+        );
+      }
+    } else {
+      // RPC returns the booking ID — fetch the full booking
+      const bookingId = safeResult;
+      const { data: fetchedBooking, error: fetchError } = await supabase
+        .from('bookings')
+        .select()
+        .eq('id', bookingId)
+        .single();
+
+      if (fetchError || !fetchedBooking) {
+        console.error('Error fetching created booking:', fetchError);
+        return NextResponse.json(
+          { error: 'Booking created but failed to retrieve details' },
+          { status: 500 }
+        );
+      }
+      booking = fetchedBooking;
     }
 
     // Generate secure guest token (for booking management)

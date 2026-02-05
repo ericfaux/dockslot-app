@@ -13,7 +13,8 @@ import {
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, CalendarX } from 'lucide-react';
 import { DayColumn } from './DayColumn';
 import { TimeColumn } from './TimeColumn';
-import { CalendarBooking, CalendarView, BlackoutDate } from './types';
+import { CalendarBooking, CalendarView, BlackoutDate, STATUS_COLORS, STATUS_LABELS } from './types';
+import { BookingStatus } from '@/lib/db/types';
 
 interface CalendarWeekViewProps {
   date: Date;
@@ -164,6 +165,24 @@ export function CalendarWeekView({
               {view.toUpperCase()}
             </button>
           ))}
+        </div>
+      </div>
+
+      {/* Status Legend */}
+      <div className="flex items-center gap-4 border-b border-slate-700/50 px-4 py-2 overflow-x-auto">
+        {(['confirmed', 'pending_deposit', 'weather_hold', 'rescheduled'] as BookingStatus[]).map((status) => (
+          <div key={status} className="flex items-center gap-1.5 whitespace-nowrap">
+            <div className={`h-2.5 w-2.5 rounded-full ${STATUS_COLORS[status].dot}`} />
+            <span className="font-mono text-[10px] text-slate-400">{STATUS_LABELS[status]}</span>
+          </div>
+        ))}
+        <div className="flex items-center gap-1.5 whitespace-nowrap">
+          <div className="h-2.5 w-2.5 rounded-full bg-slate-500" />
+          <span className="font-mono text-[10px] text-slate-400">Completed</span>
+        </div>
+        <div className="flex items-center gap-1.5 whitespace-nowrap">
+          <div className="h-2.5 w-2.5 rounded-full bg-rose-500" />
+          <span className="font-mono text-[10px] text-slate-400">Cancelled / No Show</span>
         </div>
       </div>
 

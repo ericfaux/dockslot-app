@@ -22,10 +22,14 @@ interface TimeSlot {
   start: string; // HH:MM
   end: string;   // HH:MM
   available: boolean;
+  booked_count: number;
+  total_capacity: number;
+  remaining_capacity: number;
 }
 
 interface AvailabilityResponse {
   availability: Record<string, TimeSlot[]>;
+  captain_timezone: string;
 }
 
 export async function GET(
@@ -68,15 +72,24 @@ export async function GET(
       );
     }
 
-    // Fetch captain's profile for buffer settings
+    // Fetch captain's profile for buffer settings and timezone
     const { data: profile } = await supabase
       .from('profiles')
-      .select('booking_buffer_minutes, advance_booking_days')
+      .select('booking_buffer_minutes, advance_booking_days, timezone')
       .eq('id', captainId)
       .single();
 
     const bufferMinutes = profile?.booking_buffer_minutes || 60;
     const maxAdvanceDays = profile?.advance_booking_days || 90;
+    const captainTimezone = profile?.timezone || 'America/New_York';
+
+    // Fetch all vessels for this captain to calculate aggregate capacity
+    const { data: vessels } = await supabase
+      .from('vessels')
+      .select('id, capacity')
+      .eq('owner_id', captainId);
+
+    const totalCapacity = vessels?.reduce((sum, v) => sum + v.capacity, 0) || 6;
 
     // Fetch availability windows (weekly schedule)
     const { data: availabilityWindows } = await supabase
@@ -100,14 +113,14 @@ export async function GET(
       blackoutDates?.map(b => b.blackout_date) || []
     );
 
-    // Fetch existing bookings for the month (to block out booked slots)
+    // Fetch existing bookings for the month (to block out booked slots and track capacity)
     const { data: existingBookings } = await supabase
       .from('bookings')
-      .select('scheduled_start, scheduled_end, status')
+      .select('scheduled_start, scheduled_end, status, party_size')
       .eq('captain_id', captainId)
       .gte('scheduled_start', monthStart.toISOString())
       .lte('scheduled_start', monthEnd.toISOString())
-      .in('status', ['confirmed', 'pending_deposit', 'weather_hold']);
+      .in('status', ['confirmed', 'pending_deposit', 'weather_hold', 'rescheduled']);
 
     // Build availability map
     const availability: Record<string, TimeSlot[]> = {};
@@ -156,16 +169,16 @@ export async function GET(
         while (isBefore(addHours(slotStart, tripType.duration_hours), windowEnd)) {
           const slotEnd = addHours(slotStart, tripType.duration_hours);
 
-          // Check if this slot overlaps with any existing bookings
-          const isBooked = existingBookings?.some(booking => {
+          // Count overlapping bookings for this slot (for capacity tracking)
+          const overlappingBookings = existingBookings?.filter(booking => {
             const bookingStart = parseISO(booking.scheduled_start);
             const bookingEnd = parseISO(booking.scheduled_end);
+            return isBefore(slotStart, bookingEnd) && isAfter(slotEnd, bookingStart);
+          }) || [];
 
-            // Check for overlap
-            return (
-              (isBefore(slotStart, bookingEnd) && isAfter(slotEnd, bookingStart))
-            );
-          });
+          const bookedCount = overlappingBookings.length;
+          const remainingCapacity = Math.max(0, totalCapacity - overlappingBookings.reduce((sum, b) => sum + (b.party_size || 1), 0));
+          const isBooked = bookedCount > 0;
 
           // Check if slot is within buffer time from now
           const isWithinBuffer = isBefore(slotStart, addHours(now, bufferMinutes / 60));
@@ -174,6 +187,9 @@ export async function GET(
             start: format(slotStart, 'HH:mm'),
             end: format(slotEnd, 'HH:mm'),
             available: !isBooked && !isWithinBuffer,
+            booked_count: bookedCount,
+            total_capacity: totalCapacity,
+            remaining_capacity: isWithinBuffer ? 0 : remainingCapacity,
           });
 
           // Move to next slot (30-minute intervals)
@@ -186,7 +202,7 @@ export async function GET(
       }
     }
 
-    return NextResponse.json({ availability } as AvailabilityResponse);
+    return NextResponse.json({ availability, captain_timezone: captainTimezone } as AvailabilityResponse);
 
   } catch (error) {
     console.error('Error fetching availability:', error);

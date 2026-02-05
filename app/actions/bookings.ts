@@ -1153,3 +1153,117 @@ export async function guestRequestDifferentDates(
 
   return { success: true };
 }
+
+// ============================================================================
+// Quick Create Booking (Captain-initiated for walk-ups & phone bookings)
+// ============================================================================
+
+export interface QuickCreateBookingParams {
+  captain_id: string;
+  guest_name: string;
+  guest_phone?: string;
+  party_size: number;
+  scheduled_start: string;
+  scheduled_end: string;
+  source: 'walk_up' | 'phone' | 'other';
+}
+
+export async function quickCreateBooking(
+  params: QuickCreateBookingParams
+): Promise<ActionResult<BookingWithDetails>> {
+  // Authenticate captain
+  const supabase = await createSupabaseServerClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { success: false, error: 'Not authenticated', code: 'UNAUTHORIZED' };
+  }
+
+  if (user.id !== params.captain_id) {
+    return { success: false, error: 'Not authorized', code: 'UNAUTHORIZED' };
+  }
+
+  if (!params.guest_name || sanitizeName(params.guest_name).length === 0) {
+    return { success: false, error: 'Guest name is required', code: 'VALIDATION' };
+  }
+
+  if (!isValidPartySize(params.party_size, MAX_PARTY_SIZE)) {
+    return {
+      success: false,
+      error: `Party size cannot exceed ${MAX_PARTY_SIZE} passengers`,
+      code: 'CAPACITY',
+    };
+  }
+
+  if (!params.scheduled_start || !isValidTimestamp(params.scheduled_start)) {
+    return { success: false, error: 'Invalid start time', code: 'VALIDATION' };
+  }
+
+  if (!params.scheduled_end || !isValidTimestamp(params.scheduled_end)) {
+    return { success: false, error: 'Invalid end time', code: 'VALIDATION' };
+  }
+
+  // Check for conflicts using optimistic locking pattern
+  const { data: conflicting } = await supabase
+    .from('bookings')
+    .select('id')
+    .eq('captain_id', params.captain_id)
+    .in('status', ['confirmed', 'pending_deposit', 'weather_hold', 'rescheduled'])
+    .lt('scheduled_start', params.scheduled_end)
+    .gt('scheduled_end', params.scheduled_start)
+    .limit(1);
+
+  if (conflicting && conflicting.length > 0) {
+    return {
+      success: false,
+      error: 'This time slot conflicts with an existing booking',
+      code: 'CONFLICT',
+    };
+  }
+
+  // Create the booking — captain-initiated bookings are confirmed immediately
+  const guestName = sanitizeName(params.guest_name);
+  const sourceLabel = params.source === 'walk_up' ? 'Walk-up' : params.source === 'phone' ? 'Phone' : 'Other';
+
+  const { data: booking, error: insertError } = await supabase
+    .from('bookings')
+    .insert({
+      captain_id: params.captain_id,
+      guest_name: guestName,
+      guest_email: `${params.source}@placeholder.dockslot`,
+      guest_phone: params.guest_phone || null,
+      party_size: params.party_size,
+      scheduled_start: params.scheduled_start,
+      scheduled_end: params.scheduled_end,
+      status: 'confirmed',
+      payment_status: 'unpaid',
+      total_price_cents: 0,
+      deposit_paid_cents: 0,
+      balance_due_cents: 0,
+      internal_notes: `${sourceLabel} booking created by captain`,
+      tags: [params.source],
+    })
+    .select(`
+      *,
+      vessel:vessels(id, name, capacity),
+      trip_type:trip_types(id, title, duration_hours, price_total, deposit_amount)
+    `)
+    .single();
+
+  if (insertError || !booking) {
+    console.error('Error creating quick booking:', insertError);
+    return { success: false, error: 'Failed to create booking', code: 'UNKNOWN' };
+  }
+
+  // Log the booking creation
+  await logBookingChange({
+    bookingId: booking.id,
+    entryType: 'booking_created',
+    description: `${sourceLabel} booking created by captain for ${guestName}`,
+    newValue: { status: 'confirmed', source: params.source },
+    actorType: 'captain',
+    actorId: user.id,
+  });
+
+  return { success: true, data: booking as BookingWithDetails };
+}
