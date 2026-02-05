@@ -46,6 +46,7 @@ export interface PublicCaptainProfile {
   id: string;
   business_name: string | null;
   full_name: string | null;
+  avatar_url: string | null;
   timezone: string;
   meeting_spot_name: string | null;
   meeting_spot_address: string | null;
@@ -156,6 +157,7 @@ export async function getPublicCaptainProfile(
       id,
       business_name,
       full_name,
+      avatar_url,
       timezone,
       meeting_spot_name,
       meeting_spot_address,
