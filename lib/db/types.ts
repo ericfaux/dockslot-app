@@ -70,6 +70,7 @@ export interface Profile {
   cancellation_policy: string | null;
   calendar_token: string | null;
   dock_mode_enabled: boolean;
+  season_revenue_goal_cents: number;
   updated_at: string;
 }
 

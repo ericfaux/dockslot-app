@@ -1,6 +1,6 @@
 'use server';
 
-import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { createSupabaseServiceClient } from '@/utils/supabase/service';
 import {
   Profile,
   TripType,
@@ -163,7 +163,7 @@ export async function getPublicCaptainProfile(
     return { success: false, error: 'Invalid captain ID', code: 'VALIDATION' };
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceClient();
 
   const { data, error } = await supabase
     .from('profiles')
@@ -209,7 +209,7 @@ export async function getHibernationInfo(
     return { success: false, error: 'Invalid captain ID', code: 'VALIDATION' };
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceClient();
 
   const { data, error } = await supabase
     .from('profiles')
@@ -267,7 +267,7 @@ export async function getPublicTripTypes(
     return { success: false, error: 'Invalid captain ID', code: 'VALIDATION' };
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceClient();
 
   // First check if captain exists and is not hibernating
   const { data: profile, error: profileError } = await supabase
@@ -323,7 +323,7 @@ export async function getPublicTripType(
     return { success: false, error: 'Invalid trip type ID', code: 'VALIDATION' };
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceClient();
 
   const { data, error } = await supabase
     .from('trip_types')
@@ -364,7 +364,7 @@ export async function getAvailability(
     return { success: false, error: 'Invalid date format', code: 'VALIDATION' };
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceClient();
 
   // Get captain profile for timezone and booking settings
   const { data: profile, error: profileError } = await supabase
@@ -573,7 +573,7 @@ export async function getAvailableDates(
     return { success: false, error: 'Invalid captain ID', code: 'VALIDATION' };
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceClient();
 
   // Get captain profile
   const { data: profile, error: profileError } = await supabase
@@ -669,7 +669,7 @@ export async function createPublicBooking(
     };
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceClient();
 
   // Get captain profile
   const { data: profile, error: profileError } = await supabase

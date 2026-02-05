@@ -47,6 +47,7 @@ export interface UpdateProfileParams {
   hibernation_show_contact_info?: boolean;
   cancellation_policy?: string | null;
   dock_mode_enabled?: boolean;
+  season_revenue_goal_cents?: number;
 }
 
 // ============================================================================
@@ -307,6 +308,14 @@ export async function updateProfile(
   // Dock mode
   if (params.dock_mode_enabled !== undefined) {
     updateData.dock_mode_enabled = Boolean(params.dock_mode_enabled);
+  }
+
+  // Season revenue goal
+  if (params.season_revenue_goal_cents !== undefined) {
+    if (typeof params.season_revenue_goal_cents !== 'number' || params.season_revenue_goal_cents < 0) {
+      return { success: false, error: 'Revenue goal must be a non-negative number', code: 'VALIDATION' };
+    }
+    updateData.season_revenue_goal_cents = Math.floor(params.season_revenue_goal_cents);
   }
 
   if (Object.keys(updateData).length === 0) {
