@@ -1,5 +1,5 @@
 // components/booking/ProgressIndicator.tsx
-// Mobile-friendly booking progress indicator
+// Mobile-friendly booking progress indicator (light theme)
 // Shows current step with labels and visual progress bar
 
 'use client';
@@ -8,7 +8,7 @@ import { Check } from 'lucide-react';
 
 export interface Step {
   label: string;
-  shortLabel?: string; // For mobile
+  shortLabel?: string;
 }
 
 interface ProgressIndicatorProps {
@@ -23,17 +23,17 @@ export function ProgressIndicator({ steps, currentStep, className = '' }: Progre
       {/* Mobile: Simple text indicator */}
       <div className="sm:hidden">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-slate-100">
+          <span className="text-sm font-medium text-slate-900">
             Step {currentStep} of {steps.length}
           </span>
-          <span className="text-sm text-cyan-400">
+          <span className="text-sm text-cyan-700 font-medium">
             {steps[currentStep - 1]?.shortLabel || steps[currentStep - 1]?.label}
           </span>
         </div>
         {/* Progress bar */}
-        <div className="h-1 bg-slate-700 rounded-full overflow-hidden">
+        <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
           <div
-            className="h-full bg-cyan-500 transition-all duration-300 ease-out"
+            className="h-full bg-cyan-600 transition-all duration-300 ease-out rounded-full"
             style={{ width: `${(currentStep / steps.length) * 100}%` }}
           />
         </div>
@@ -49,15 +49,14 @@ export function ProgressIndicator({ steps, currentStep, className = '' }: Progre
 
           return (
             <div key={index} className="flex items-center">
-              {/* Step circle */}
               <div className="flex flex-col items-center">
                 <div
                   className={`
                     flex h-10 w-10 items-center justify-center rounded-full
                     text-sm font-semibold transition-all
-                    ${isCompleted ? 'bg-cyan-500 text-slate-900' : ''}
-                    ${isCurrent ? 'bg-cyan-500 text-slate-900 ring-4 ring-cyan-500/30' : ''}
-                    ${isUpcoming ? 'bg-slate-700 text-slate-400' : ''}
+                    ${isCompleted ? 'bg-cyan-600 text-white' : ''}
+                    ${isCurrent ? 'bg-cyan-600 text-white ring-4 ring-cyan-100' : ''}
+                    ${isUpcoming ? 'bg-slate-200 text-slate-400' : ''}
                   `}
                 >
                   {isCompleted ? (
@@ -69,7 +68,9 @@ export function ProgressIndicator({ steps, currentStep, className = '' }: Progre
                 <span
                   className={`
                     mt-2 text-xs font-medium whitespace-nowrap
-                    ${isCurrent ? 'text-cyan-400' : 'text-slate-500'}
+                    ${isCurrent ? 'text-cyan-700' : ''}
+                    ${isCompleted ? 'text-slate-600' : ''}
+                    ${isUpcoming ? 'text-slate-400' : ''}
                   `}
                 >
                   {step.label}
@@ -81,7 +82,7 @@ export function ProgressIndicator({ steps, currentStep, className = '' }: Progre
                 <div
                   className={`
                     h-0.5 w-12 mx-3 transition-colors
-                    ${stepNum < currentStep ? 'bg-cyan-500' : 'bg-slate-700'}
+                    ${stepNum < currentStep ? 'bg-cyan-600' : 'bg-slate-200'}
                   `}
                 />
               )}

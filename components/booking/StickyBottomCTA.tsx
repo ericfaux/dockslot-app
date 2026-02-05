@@ -1,5 +1,5 @@
 // components/booking/StickyBottomCTA.tsx
-// Sticky bottom CTA container for mobile booking flow
+// Sticky bottom CTA container for mobile booking flow (light theme)
 // Ensures primary action is always accessible without scrolling
 
 'use client';
@@ -28,8 +28,8 @@ export function StickyBottomCTA({
       <div
         className={`
           fixed bottom-0 left-0 right-0 z-50
-          border-t border-slate-700 bg-slate-900/95 backdrop-blur-lg
-          sm:relative sm:border-t-0 sm:bg-transparent sm:backdrop-blur-none
+          border-t border-slate-200 bg-white/95 backdrop-blur-lg shadow-[0_-4px_16px_rgba(0,0,0,0.06)]
+          sm:relative sm:border-t-0 sm:bg-transparent sm:backdrop-blur-none sm:shadow-none
           ${className}
         `}
       >
@@ -48,7 +48,7 @@ export function StickyBottomCTA({
         </div>
 
         {/* Safe area padding for devices with home indicator */}
-        <div className="h-[env(safe-area-inset-bottom)] bg-slate-900/95 sm:hidden" />
+        <div className="h-[env(safe-area-inset-bottom)] bg-white/95 sm:hidden" />
       </div>
     </>
   );
@@ -84,14 +84,14 @@ export function CTAButton({
 
   const variantStyles = {
     primary: `
-      bg-cyan-500 text-slate-900
-      hover:bg-cyan-400
+      bg-cyan-600 text-white
+      hover:bg-cyan-700
       active:scale-[0.98]
-      disabled:hover:bg-cyan-500
+      disabled:hover:bg-cyan-600
     `,
     secondary: `
-      border border-slate-600 bg-slate-800 text-slate-100
-      hover:bg-slate-700
+      border border-slate-300 bg-white text-slate-700
+      hover:bg-slate-50
       active:scale-[0.98]
     `,
   };

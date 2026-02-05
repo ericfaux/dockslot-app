@@ -7,7 +7,8 @@ import { StickyBottomCTA, CTAButton } from '@/components/booking/StickyBottomCTA
 import { PhoneInput } from '@/components/booking/PhoneInput';
 import { PartySizeSelector } from '@/components/booking/PartySizeSelector';
 import { CancellationPolicy, SecurePaymentBadge } from '@/components/booking/TrustSignals';
-import { Calendar, Users, Mail, User, MessageSquare, ChevronRight, AlertCircle } from 'lucide-react';
+import { WeatherForecast } from '@/components/booking/WeatherForecast';
+import { Calendar, Users, Mail, User, MessageSquare, ChevronRight, AlertCircle, FileWarning } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 
@@ -20,6 +21,8 @@ interface BookingFormProps {
   maxCapacity: number;
   captainTimezone?: string;
   cancellationPolicy?: string;
+  meetingSpotLatitude?: number;
+  meetingSpotLongitude?: number;
 }
 
 // Booking steps for progress indicator
@@ -39,6 +42,8 @@ export function BookingForm({
   maxCapacity,
   captainTimezone,
   cancellationPolicy,
+  meetingSpotLatitude,
+  meetingSpotLongitude,
 }: BookingFormProps) {
   const router = useRouter();
   const [step, setStep] = useState<'date' | 'details'>('date');
@@ -52,7 +57,7 @@ export function BookingForm({
   const [guestName, setGuestName] = useState('');
   const [guestEmail, setGuestEmail] = useState('');
   const [guestPhone, setGuestPhone] = useState('');
-  const [partySize, setPartySize] = useState(2); // Smart default
+  const [partySize, setPartySize] = useState(2);
   const [specialRequests, setSpecialRequests] = useState('');
 
   // Form state
@@ -60,10 +65,10 @@ export function BookingForm({
   const [error, setError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
 
-  // Persist form data to sessionStorage for recovery
+  // Persist form data to sessionStorage + localStorage for offline recovery
   useEffect(() => {
     if (step === 'details') {
-      sessionStorage.setItem('bookingFormData', JSON.stringify({
+      const data = JSON.stringify({
         captainId,
         tripTypeId,
         selectedDate: selectedDate?.toISOString(),
@@ -74,13 +79,15 @@ export function BookingForm({
         guestPhone,
         partySize,
         specialRequests,
-      }));
+      });
+      sessionStorage.setItem('bookingFormData', data);
+      try { localStorage.setItem('bookingFormData', data); } catch {}
     }
   }, [captainId, tripTypeId, selectedDate, selectedTime, selectedEndTime, guestName, guestEmail, guestPhone, partySize, specialRequests, step]);
 
-  // Restore form data on mount (for payment failure recovery)
+  // Restore form data on mount (for payment failure recovery or connection drop)
   useEffect(() => {
-    const savedData = sessionStorage.getItem('bookingFormData');
+    const savedData = sessionStorage.getItem('bookingFormData') || localStorage.getItem('bookingFormData');
     if (savedData) {
       try {
         const data = JSON.parse(savedData);
@@ -111,7 +118,6 @@ export function BookingForm({
     }
     setError(null);
     setStep('details');
-    // Scroll to top on step change
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -133,7 +139,6 @@ export function BookingForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate email before submission
     if (!validateEmail(guestEmail)) {
       return;
     }
@@ -147,7 +152,6 @@ export function BookingForm({
     setError(null);
 
     try {
-      // Build scheduled_start and scheduled_end timestamps
       const dateStr = selectedDate!.toISOString().split('T')[0];
       const scheduledStart = `${dateStr}T${selectedTime}:00+00:00`;
       const scheduledEnd = `${dateStr}T${selectedEndTime}:00+00:00`;
@@ -174,7 +178,6 @@ export function BookingForm({
       if (!response.ok) {
         const data = await response.json();
 
-        // Handle specific error cases
         if (data.code === 'SLOT_UNAVAILABLE') {
           setError('This time slot is no longer available. Please select a different time.');
           setStep('date');
@@ -190,6 +193,7 @@ export function BookingForm({
 
       // Clear saved form data on success
       sessionStorage.removeItem('bookingFormData');
+      try { localStorage.removeItem('bookingFormData'); } catch {}
 
       // Redirect to confirmation/payment page
       router.push(`/book/${captainId}/${tripTypeId}/confirm?bookingId=${booking.id}&token=${managementUrl?.split('/')[2] || ''}`);
@@ -205,8 +209,8 @@ export function BookingForm({
   // Format selected slot for summary
   const selectedSlotSummary = selectedDate && selectedTime ? (
     <div className="flex items-center justify-between text-sm">
-      <span className="text-slate-400">Selected:</span>
-      <span className="text-slate-100 font-medium">
+      <span className="text-slate-500">Selected:</span>
+      <span className="text-slate-900 font-medium">
         {format(selectedDate, 'MMM d')} at {selectedTime}
       </span>
     </div>
@@ -224,9 +228,9 @@ export function BookingForm({
       {/* Step 1: Date & Time Selection */}
       {step === 'date' && (
         <div className="space-y-6">
-          <div className="rounded-xl border border-slate-700 bg-slate-800 p-4 sm:p-6">
-            <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-slate-100">
-              <Calendar className="h-5 w-5 text-cyan-400" />
+          <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
+            <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-slate-900">
+              <Calendar className="h-5 w-5 text-cyan-600" />
               Select Date & Time
             </h3>
 
@@ -241,10 +245,19 @@ export function BookingForm({
             />
           </div>
 
+          {/* Weather Forecast */}
+          {selectedDate && meetingSpotLatitude && meetingSpotLongitude && (
+            <WeatherForecast
+              latitude={meetingSpotLatitude}
+              longitude={meetingSpotLongitude}
+              selectedDate={selectedDate}
+            />
+          )}
+
           {/* Error message */}
           {error && (
-            <div className="rounded-xl border border-red-500/50 bg-red-500/10 p-4">
-              <div className="flex items-center gap-2 text-sm text-red-400">
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+              <div className="flex items-center gap-2 text-sm text-red-700">
                 <AlertCircle className="h-4 w-4 flex-shrink-0" />
                 <span>{error}</span>
               </div>
@@ -268,7 +281,7 @@ export function BookingForm({
       {step === 'details' && (
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Party Size Section */}
-          <div className="rounded-xl border border-slate-700 bg-slate-800 p-4 sm:p-6">
+          <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
             <PartySizeSelector
               value={partySize}
               onChange={setPartySize}
@@ -277,16 +290,16 @@ export function BookingForm({
           </div>
 
           {/* Guest Information */}
-          <div className="rounded-xl border border-slate-700 bg-slate-800 p-4 sm:p-6">
-            <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-slate-100">
-              <Users className="h-5 w-5 text-cyan-400" />
+          <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
+            <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-slate-900">
+              <Users className="h-5 w-5 text-cyan-600" />
               Contact Information
             </h3>
 
             <div className="space-y-4">
               {/* Guest Name */}
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-300">
+                <label className="mb-2 block text-sm font-medium text-slate-700">
                   <div className="flex items-center gap-2">
                     <User className="h-4 w-4" />
                     Your Name
@@ -298,14 +311,14 @@ export function BookingForm({
                   onChange={(e) => setGuestName(e.target.value)}
                   placeholder="John Doe"
                   autoComplete="name"
-                  className="w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-3 text-slate-100 placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 min-h-[48px]"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-200 min-h-[48px]"
                   required
                 />
               </div>
 
               {/* Email */}
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-300">
+                <label className="mb-2 block text-sm font-medium text-slate-700">
                   <div className="flex items-center gap-2">
                     <Mail className="h-4 w-4" />
                     Email Address
@@ -321,17 +334,17 @@ export function BookingForm({
                   onBlur={(e) => validateEmail(e.target.value)}
                   placeholder="john@example.com"
                   autoComplete="email"
-                  className={`w-full rounded-xl border bg-slate-900 px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 min-h-[48px] ${
+                  className={`w-full rounded-xl border bg-white px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 min-h-[48px] ${
                     emailError
-                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500/50'
-                      : 'border-slate-600 focus:border-cyan-500 focus:ring-cyan-500/50'
+                      ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
+                      : 'border-slate-200 focus:border-cyan-500 focus:ring-cyan-200'
                   }`}
                   required
                 />
                 {emailError ? (
-                  <p className="mt-1.5 text-sm text-red-400">{emailError}</p>
+                  <p className="mt-1.5 text-sm text-red-600">{emailError}</p>
                 ) : (
-                  <p className="mt-1.5 text-xs text-slate-500">
+                  <p className="mt-1.5 text-xs text-slate-400">
                     We'll send your booking confirmation and trip details here
                   </p>
                 )}
@@ -339,9 +352,9 @@ export function BookingForm({
 
               {/* Phone */}
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-300">
+                <label className="mb-2 block text-sm font-medium text-slate-700">
                   Phone Number
-                  <span className="text-slate-500 font-normal ml-1">(optional)</span>
+                  <span className="text-slate-400 font-normal ml-1">(optional)</span>
                 </label>
                 <PhoneInput
                   value={guestPhone}
@@ -352,11 +365,11 @@ export function BookingForm({
 
               {/* Special Requests */}
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-300">
+                <label className="mb-2 block text-sm font-medium text-slate-700">
                   <div className="flex items-center gap-2">
                     <MessageSquare className="h-4 w-4" />
                     Special Requests
-                    <span className="text-slate-500 font-normal">(optional)</span>
+                    <span className="text-slate-400 font-normal">(optional)</span>
                   </div>
                 </label>
                 <textarea
@@ -365,10 +378,25 @@ export function BookingForm({
                   placeholder="Anything we should know? Dietary restrictions, special occasions, questions..."
                   rows={3}
                   maxLength={500}
-                  className="w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-3 text-slate-100 placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 resize-none"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-200 resize-none"
                 />
-                <p className="mt-1 text-xs text-slate-500 text-right">
+                <p className="mt-1 text-xs text-slate-400 text-right">
                   {specialRequests.length}/500
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Waiver Requirement Notice */}
+          <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+            <div className="flex items-start gap-3">
+              <FileWarning className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-sm font-medium text-blue-900 mb-1">
+                  Liability Waiver Required
+                </h4>
+                <p className="text-sm text-blue-700">
+                  All passengers must sign a liability waiver before the trip. Waiver links will be sent to your email after booking.
                 </p>
               </div>
             </div>
@@ -384,12 +412,12 @@ export function BookingForm({
 
           {/* Error message */}
           {error && (
-            <div className="rounded-xl border border-red-500/50 bg-red-500/10 p-4">
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4">
               <div className="flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
+                <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium text-red-400">{error}</p>
-                  <p className="text-xs text-red-400/70 mt-1">
+                  <p className="text-sm font-medium text-red-700">{error}</p>
+                  <p className="text-xs text-red-500 mt-1">
                     Please try again or contact support if the problem persists.
                   </p>
                 </div>
@@ -402,8 +430,8 @@ export function BookingForm({
             showSummary
             summaryContent={
               <div className="flex items-center justify-between text-sm">
-                <span className="text-slate-400">Deposit:</span>
-                <span className="text-cyan-400 font-semibold">
+                <span className="text-slate-500">Deposit:</span>
+                <span className="text-cyan-700 font-semibold">
                   ${(depositAmount / 100).toFixed(2)}
                 </span>
               </div>

@@ -1,5 +1,5 @@
 // components/booking/PhoneInput.tsx
-// Phone number input with automatic US formatting
+// Phone number input with automatic US formatting (light theme)
 // Formats as (XXX) XXX-XXXX as user types
 
 'use client';
@@ -20,13 +20,9 @@ interface PhoneInputProps {
 
 // Format phone number as user types
 function formatPhoneNumber(input: string): string {
-  // Strip all non-numeric characters
   const cleaned = input.replace(/\D/g, '');
-
-  // Limit to 10 digits
   const limited = cleaned.slice(0, 10);
 
-  // Format based on length
   if (limited.length === 0) {
     return '';
   } else if (limited.length <= 3) {
@@ -38,7 +34,6 @@ function formatPhoneNumber(input: string): string {
   }
 }
 
-// Extract raw digits from formatted number
 function getDigits(formatted: string): string {
   return formatted.replace(/\D/g, '');
 }
@@ -65,7 +60,6 @@ export function PhoneInput({
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
-      // Allow backspace to work naturally
       if (e.key === 'Backspace') {
         const digits = getDigits(value);
         if (digits.length > 0) {
@@ -89,12 +83,12 @@ export function PhoneInput({
           <Phone
             className={`h-4 w-4 transition-colors ${
               error
-                ? 'text-rose-400'
+                ? 'text-red-400'
                 : showSuccess
-                ? 'text-green-400'
+                ? 'text-emerald-500'
                 : focused
-                ? 'text-cyan-400'
-                : 'text-slate-500'
+                ? 'text-cyan-600'
+                : 'text-slate-400'
             }`}
           />
         </div>
@@ -111,16 +105,16 @@ export function PhoneInput({
           autoComplete="tel"
           inputMode="tel"
           className={`
-            w-full rounded-lg border bg-slate-900 pl-11 pr-4 py-3
-            text-slate-100 placeholder-slate-500
-            transition-colors
+            w-full rounded-xl border bg-white pl-11 pr-4 py-3
+            text-slate-900 placeholder-slate-400
+            transition-colors min-h-[48px]
             focus:outline-none focus:ring-2
             ${
               error
-                ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/50'
+                ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
                 : showSuccess
-                ? 'border-green-500/50 focus:border-green-500 focus:ring-green-500/50'
-                : 'border-slate-600 focus:border-cyan-500 focus:ring-cyan-500/50'
+                ? 'border-emerald-300 focus:border-emerald-500 focus:ring-emerald-200'
+                : 'border-slate-200 focus:border-cyan-500 focus:ring-cyan-200'
             }
             ${className}
           `}
@@ -128,7 +122,7 @@ export function PhoneInput({
         {showSuccess && (
           <div className="absolute right-4 top-1/2 -translate-y-1/2">
             <svg
-              className="h-4 w-4 text-green-400"
+              className="h-4 w-4 text-emerald-500"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -144,9 +138,9 @@ export function PhoneInput({
         )}
       </div>
 
-      {error && <p className="text-sm text-rose-400">{error}</p>}
+      {error && <p className="text-sm text-red-600">{error}</p>}
       {helperText && !error && (
-        <p className="text-xs text-slate-500">{helperText}</p>
+        <p className="text-xs text-slate-400">{helperText}</p>
       )}
     </div>
   );

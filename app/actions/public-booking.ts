@@ -51,10 +51,29 @@ export interface PublicCaptainProfile {
   meeting_spot_name: string | null;
   meeting_spot_address: string | null;
   meeting_spot_instructions: string | null;
+  meeting_spot_latitude: number | null;
+  meeting_spot_longitude: number | null;
   cancellation_policy: string | null;
   is_hibernating: boolean;
   hibernation_message: string | null;
   advance_booking_days: number;
+}
+
+export interface CaptainReviewStats {
+  total_reviews: number;
+  average_overall: number;
+  featured_reviews: {
+    guest_name: string;
+    overall_rating: number;
+    review_title: string | null;
+    review_text: string | null;
+    created_at: string;
+  }[];
+}
+
+export interface CaptainSocialProof {
+  completed_trips: number;
+  review_stats: CaptainReviewStats | null;
 }
 
 export interface HibernationInfo {
@@ -176,6 +195,8 @@ export async function getPublicCaptainProfile(
       meeting_spot_name,
       meeting_spot_address,
       meeting_spot_instructions,
+      meeting_spot_latitude,
+      meeting_spot_longitude,
       cancellation_policy,
       is_hibernating,
       hibernation_message,
@@ -846,6 +867,66 @@ export async function createPublicBooking(
       scheduled_end: scheduledEnd,
       total_price_cents: totalPriceCents,
       deposit_amount_cents: depositAmountCents,
+    },
+  };
+}
+
+/**
+ * Get social proof data for a captain (reviews + trip count, no auth required)
+ */
+export async function getCaptainSocialProof(
+  captainId: string
+): Promise<ActionResult<CaptainSocialProof>> {
+  if (!captainId || !isValidUUID(captainId)) {
+    return { success: false, error: 'Invalid captain ID', code: 'VALIDATION' };
+  }
+
+  const supabase = createSupabaseServiceClient();
+
+  // Fetch completed trip count and review stats in parallel
+  const [tripsResult, reviewsResult, featuredResult] = await Promise.all([
+    supabase
+      .from('bookings')
+      .select('id', { count: 'exact', head: true })
+      .eq('captain_id', captainId)
+      .eq('status', 'completed'),
+    supabase
+      .from('reviews')
+      .select('overall_rating')
+      .eq('captain_id', captainId)
+      .eq('is_public', true)
+      .eq('is_approved', true),
+    supabase
+      .from('reviews')
+      .select('guest_name, overall_rating, review_title, review_text, created_at')
+      .eq('captain_id', captainId)
+      .eq('is_public', true)
+      .eq('is_approved', true)
+      .order('overall_rating', { ascending: false })
+      .order('created_at', { ascending: false })
+      .limit(3),
+  ]);
+
+  const completedTrips = tripsResult.count || 0;
+  const reviews = reviewsResult.data || [];
+  const featuredReviews = featuredResult.data || [];
+
+  let reviewStats: CaptainReviewStats | null = null;
+
+  if (reviews.length > 0) {
+    const totalRating = reviews.reduce((sum, r) => sum + r.overall_rating, 0);
+    reviewStats = {
+      total_reviews: reviews.length,
+      average_overall: Math.round((totalRating / reviews.length) * 10) / 10,
+      featured_reviews: featuredReviews,
+    };
+  }
+
+  return {
+    success: true,
+    data: {
+      completed_trips: completedTrips,
+      review_stats: reviewStats,
     },
   };
 }

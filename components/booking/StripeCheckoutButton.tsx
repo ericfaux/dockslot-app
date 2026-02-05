@@ -17,7 +17,6 @@ export function StripeCheckoutButton({ bookingId, depositAmount }: StripeCheckou
       setIsLoading(true);
       setError(null);
 
-      // Create Stripe Checkout session
       const response = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: {
@@ -32,7 +31,6 @@ export function StripeCheckoutButton({ bookingId, depositAmount }: StripeCheckou
 
       const { url } = await response.json();
 
-      // Redirect to Stripe Checkout
       if (url) {
         window.location.href = url;
       } else {
@@ -52,20 +50,20 @@ export function StripeCheckoutButton({ bookingId, depositAmount }: StripeCheckou
   return (
     <div>
       {error && (
-        <div className="mb-4 rounded-lg border border-red-500/50 bg-red-500/10 p-4">
-          <p className="text-sm text-red-400">{error}</p>
+        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4">
+          <p className="text-sm text-red-700">{error}</p>
         </div>
       )}
 
       <button
         onClick={handleCheckout}
         disabled={isLoading}
-        className="w-full rounded-lg bg-cyan-500 px-6 py-4 font-semibold text-slate-900 transition-all hover:bg-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        className="w-full rounded-xl bg-cyan-600 px-6 py-4 font-semibold text-white transition-all hover:bg-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[52px]"
       >
         {isLoading ? (
           <>
             <svg
-              className="animate-spin h-5 w-5 text-slate-900"
+              className="animate-spin h-5 w-5 text-white"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
@@ -94,8 +92,8 @@ export function StripeCheckoutButton({ bookingId, depositAmount }: StripeCheckou
         )}
       </button>
 
-      <div className="mt-3 text-center text-xs text-slate-500">
-        Powered by Stripe • Secure payment processing
+      <div className="mt-3 text-center text-xs text-slate-400">
+        Powered by Stripe - Secure payment processing
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 // components/booking/PartySizeSelector.tsx
-// Mobile-friendly party size selector with large tap targets
+// Mobile-friendly party size selector with large tap targets (light theme)
 // Visual grid of options instead of dropdown
 
 'use client';
@@ -29,8 +29,8 @@ export function PartySizeSelector({
   return (
     <div className={className}>
       <div className="flex items-center gap-2 mb-3">
-        <Users className="h-5 w-5 text-cyan-400" />
-        <span className="text-sm font-medium text-slate-300">
+        <Users className="h-5 w-5 text-cyan-600" />
+        <span className="text-sm font-medium text-slate-700">
           How many guests?
         </span>
       </div>
@@ -51,8 +51,8 @@ export function PartySizeSelector({
                 min-h-[72px]
                 ${
                   isSelected
-                    ? 'border-cyan-500 bg-cyan-500/20 text-cyan-100'
-                    : 'border-slate-700 bg-slate-800 text-slate-300 hover:border-slate-600 hover:bg-slate-700'
+                    ? 'border-cyan-600 bg-cyan-50 text-cyan-800'
+                    : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50'
                 }
               `}
               aria-pressed={isSelected}
@@ -64,9 +64,9 @@ export function PartySizeSelector({
 
               {/* Selected indicator */}
               {isSelected && (
-                <div className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-cyan-500 flex items-center justify-center">
+                <div className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-cyan-600 flex items-center justify-center">
                   <svg
-                    className="h-2.5 w-2.5 text-slate-900"
+                    className="h-2.5 w-2.5 text-white"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
