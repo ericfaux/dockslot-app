@@ -1,7 +1,8 @@
 import { Anchor, AlertTriangle } from 'lucide-react';
-import { getPublicCaptainProfile, getPublicTripTypes } from '@/app/actions/public-booking';
+import { getPublicCaptainProfile, getPublicTripTypes, getHibernationInfo } from '@/app/actions/public-booking';
 import { TripCard } from '../components/TripCard';
 import { CaptainInfoCard } from '@/components/booking/TrustSignals';
+import { HibernationPage } from '../components/HibernationPage';
 
 interface Props {
   params: Promise<{
@@ -26,7 +27,15 @@ export default async function SelectTripPage({ params }: Props) {
     getPublicTripTypes(captainId),
   ]);
 
-  // Handle errors
+  // Handle hibernating captain with enhanced page
+  if (!profileResult.success && profileResult.code === 'HIBERNATING') {
+    const hibernationResult = await getHibernationInfo(captainId);
+    if (hibernationResult.success && hibernationResult.data) {
+      return <HibernationPage info={hibernationResult.data} />;
+    }
+  }
+
+  // Handle other errors
   if (!profileResult.success) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
@@ -38,7 +47,7 @@ export default async function SelectTripPage({ params }: Props) {
               </div>
             </div>
             <h1 className="text-xl font-semibold text-white mb-2">
-              {profileResult.code === 'HIBERNATING' ? 'Not Accepting Bookings' : 'Captain Not Found'}
+              Captain Not Found
             </h1>
             <p className="text-slate-400">
               {profileResult.error}

@@ -38,6 +38,11 @@ export interface UpdateProfileParams {
   advance_booking_days?: number;
   is_hibernating?: boolean;
   hibernation_message?: string | null;
+  hibernation_end_date?: string | null;
+  hibernation_resume_time?: string | null;
+  hibernation_show_return_date?: boolean;
+  hibernation_allow_notifications?: boolean;
+  hibernation_show_contact_info?: boolean;
   cancellation_policy?: string | null;
   dock_mode_enabled?: boolean;
 }
@@ -221,6 +226,50 @@ export async function updateProfile(
 
   if (params.hibernation_message !== undefined) {
     updateData.hibernation_message = sanitizeText(params.hibernation_message, 500);
+  }
+
+  // Hibernation end date validation (YYYY-MM-DD format)
+  if (params.hibernation_end_date !== undefined) {
+    if (params.hibernation_end_date) {
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (!dateRegex.test(params.hibernation_end_date)) {
+        return { success: false, error: 'Invalid hibernation end date format', code: 'VALIDATION' };
+      }
+      // Validate it's a real date
+      const date = new Date(params.hibernation_end_date);
+      if (isNaN(date.getTime())) {
+        return { success: false, error: 'Invalid hibernation end date', code: 'VALIDATION' };
+      }
+      updateData.hibernation_end_date = params.hibernation_end_date;
+    } else {
+      updateData.hibernation_end_date = null;
+    }
+  }
+
+  // Hibernation resume time validation (HH:MM format)
+  if (params.hibernation_resume_time !== undefined) {
+    if (params.hibernation_resume_time) {
+      const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+      if (!timeRegex.test(params.hibernation_resume_time)) {
+        return { success: false, error: 'Invalid hibernation resume time format', code: 'VALIDATION' };
+      }
+      updateData.hibernation_resume_time = params.hibernation_resume_time;
+    } else {
+      updateData.hibernation_resume_time = null;
+    }
+  }
+
+  // Hibernation display preferences
+  if (params.hibernation_show_return_date !== undefined) {
+    updateData.hibernation_show_return_date = Boolean(params.hibernation_show_return_date);
+  }
+
+  if (params.hibernation_allow_notifications !== undefined) {
+    updateData.hibernation_allow_notifications = Boolean(params.hibernation_allow_notifications);
+  }
+
+  if (params.hibernation_show_contact_info !== undefined) {
+    updateData.hibernation_show_contact_info = Boolean(params.hibernation_show_contact_info);
   }
 
   // Cancellation policy

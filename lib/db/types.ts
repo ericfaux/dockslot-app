@@ -58,6 +58,11 @@ export interface Profile {
   email: string | null;
   is_hibernating: boolean;
   hibernation_message: string | null;
+  hibernation_end_date: string | null; // YYYY-MM-DD format
+  hibernation_resume_time: string | null; // HH:MM format (24-hour)
+  hibernation_show_return_date: boolean;
+  hibernation_allow_notifications: boolean;
+  hibernation_show_contact_info: boolean;
   booking_buffer_minutes: number;
   advance_booking_days: number;
   cancellation_policy: string | null;
@@ -351,6 +356,20 @@ export interface WaitlistStats {
   total_expired: number;
   conversion_rate: number;
   avg_wait_time_hours: number;
+}
+
+// ============================================================================
+// Hibernation Subscriber Types
+// ============================================================================
+
+export interface HibernationSubscriber {
+  id: string;
+  captain_id: string;
+  email: string;
+  name: string | null;
+  subscribed_at: string;
+  notified_at: string | null;
+  unsubscribed_at: string | null;
 }
 
 // ============================================================================

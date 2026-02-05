@@ -57,6 +57,20 @@ export interface PublicCaptainProfile {
   advance_booking_days: number;
 }
 
+export interface HibernationInfo {
+  id: string;
+  business_name: string | null;
+  full_name: string | null;
+  email: string | null;
+  phone: string | null;
+  timezone: string;
+  hibernation_message: string | null;
+  hibernation_end_date: string | null;
+  hibernation_show_return_date: boolean;
+  hibernation_allow_notifications: boolean;
+  hibernation_show_contact_info: boolean;
+}
+
 export interface PublicTripType {
   id: string;
   title: string;
@@ -183,6 +197,64 @@ export async function getPublicCaptainProfile(
   }
 
   return { success: true, data: data as PublicCaptainProfile };
+}
+
+/**
+ * Get hibernation info for displaying the hibernation page (no auth required)
+ */
+export async function getHibernationInfo(
+  captainId: string
+): Promise<ActionResult<HibernationInfo>> {
+  if (!captainId || !isValidUUID(captainId)) {
+    return { success: false, error: 'Invalid captain ID', code: 'VALIDATION' };
+  }
+
+  const supabase = await createSupabaseServerClient();
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select(`
+      id,
+      business_name,
+      full_name,
+      email,
+      phone,
+      timezone,
+      is_hibernating,
+      hibernation_message,
+      hibernation_end_date,
+      hibernation_show_return_date,
+      hibernation_allow_notifications,
+      hibernation_show_contact_info
+    `)
+    .eq('id', captainId)
+    .single();
+
+  if (error || !data) {
+    return { success: false, error: 'Captain not found', code: 'NOT_FOUND' };
+  }
+
+  // Only return if hibernating
+  if (!data.is_hibernating) {
+    return { success: false, error: 'Captain is accepting bookings', code: 'VALIDATION' };
+  }
+
+  // Filter contact info based on settings
+  const result: HibernationInfo = {
+    id: data.id,
+    business_name: data.business_name,
+    full_name: data.full_name,
+    email: data.hibernation_show_contact_info ? data.email : null,
+    phone: data.hibernation_show_contact_info ? data.phone : null,
+    timezone: data.timezone,
+    hibernation_message: data.hibernation_message,
+    hibernation_end_date: data.hibernation_show_return_date ? data.hibernation_end_date : null,
+    hibernation_show_return_date: data.hibernation_show_return_date ?? false,
+    hibernation_allow_notifications: data.hibernation_allow_notifications ?? false,
+    hibernation_show_contact_info: data.hibernation_show_contact_info ?? false,
+  };
+
+  return { success: true, data: result };
 }
 
 /**
