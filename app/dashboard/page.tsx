@@ -86,14 +86,14 @@ function FuelGauge({ value, maxValue, label, unit, color }: FuelGaugeProps) {
     <div className="flex flex-col items-center">
       {/* Gauge Container */}
       <div
-        className="relative h-28 w-28 rounded-full bg-slate-800"
+        className="relative h-24 w-24 sm:h-28 sm:w-28 rounded-full bg-slate-800"
         style={{
           boxShadow:
             "inset 0 2px 4px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.05)",
         }}
       >
         <svg
-          className="h-28 w-28"
+          className="h-24 w-24 sm:h-28 sm:w-28"
           viewBox="0 0 100 100"
           style={{ transform: "rotate(-225deg)" }}
         >
@@ -163,7 +163,7 @@ function HorizonWidget({ captainName = "Captain", timezone = "America/New_York",
 
   return (
     <div
-      className="relative h-72 w-full overflow-hidden rounded-lg bg-slate-900 sm:h-80"
+      className="relative h-48 w-full overflow-hidden rounded-lg bg-slate-900 sm:h-72 md:h-80"
       style={{
         boxShadow:
           "inset 0 2px 4px rgba(0,0,0,0.3), 0 4px 20px rgba(0,0,0,0.4)",
@@ -208,8 +208,8 @@ function HorizonWidget({ captainName = "Captain", timezone = "America/New_York",
         }}
       />
 
-      {/* Branding - Top Left */}
-      <div className="absolute left-4 top-4 flex items-center gap-2">
+      {/* Branding - Top Left (hidden on small mobile) */}
+      <div className="absolute left-4 top-4 hidden sm:flex items-center gap-2">
         <Anchor className="h-4 w-4 text-slate-600" />
         <span className="font-mono text-sm tracking-widest text-slate-600">
           DOCKSLOT HELM
@@ -224,7 +224,7 @@ function HorizonWidget({ captainName = "Captain", timezone = "America/New_York",
       </div>
 
       {/* Weather Data Overlay - Top Right */}
-      <div className="absolute right-4 top-4 flex flex-col gap-3 sm:flex-row sm:gap-6">
+      <div className="absolute right-3 top-3 sm:right-4 sm:top-4 flex flex-col gap-2 sm:flex-row sm:gap-6">
         {/* Show weather data if available */}
         {(weatherData.waterTemp !== null || weatherData.windSpeed !== null || weatherData.sunset) ? (
           <>
@@ -285,7 +285,7 @@ function HorizonWidget({ captainName = "Captain", timezone = "America/New_York",
 
       {/* Tide Wave SVG */}
       <svg
-        className="absolute bottom-12 left-0 h-32 w-full"
+        className="absolute bottom-4 sm:bottom-12 left-0 h-20 sm:h-32 w-full"
         viewBox="0 0 1200 128"
         preserveAspectRatio="none"
       >
@@ -331,7 +331,7 @@ function HorizonWidget({ captainName = "Captain", timezone = "America/New_York",
 
       {/* NOW Cursor */}
       <div
-        className="absolute bottom-12 top-20 flex flex-col items-center"
+        className="absolute bottom-4 sm:bottom-12 top-10 sm:top-20 flex flex-col items-center"
         style={{ left: `${Math.max(5, Math.min(95, nowPosition))}%` }}
       >
         {/* NOW Label */}
@@ -357,8 +357,8 @@ function HorizonWidget({ captainName = "Captain", timezone = "America/New_York",
         </div>
       </div>
 
-      {/* Time Scale - Bottom */}
-      <div className="absolute bottom-3 left-4 right-4 flex justify-between">
+      {/* Time Scale - Bottom (hidden on small mobile) */}
+      <div className="absolute bottom-3 left-4 right-4 hidden sm:flex justify-between">
         {["6AM", "9AM", "12PM", "3PM", "6PM", "9PM"].map((time) => (
           <span key={time} className="font-mono text-[10px] text-slate-600">
             {time}
@@ -735,7 +735,7 @@ export default async function DashboardPage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* ═══ SECTION 1: THE HORIZON WIDGET ═══ */}
       <section aria-label="Day Overview">
         <HorizonWidget
@@ -796,7 +796,7 @@ export default async function DashboardPage() {
       {/* ═══ SECTION 2: FUEL GAUGES ═══ */}
       {(METRICS.hasRevenueGoal || METRICS.pendingItems > 0) && (
         <section aria-label="Key Metrics" className="py-2">
-          <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12">
+          <div className="grid grid-cols-2 gap-6 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-12">
             {METRICS.hasRevenueGoal && (
               <FuelGauge
                 value={METRICS.revenuePercent}

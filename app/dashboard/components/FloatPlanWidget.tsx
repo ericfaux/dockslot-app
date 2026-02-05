@@ -246,11 +246,11 @@ function TripCard({ trip, timelineStatus, showTimeline = true }: TripCardProps) 
           </div>
         </div>
 
-        {/* Phone Number - Tap to Call */}
+        {/* Phone Number - Tap to Call (min 44px touch target) */}
         {trip.guestPhone && (
           <a
             href={`tel:${trip.guestPhone}`}
-            className="mb-3 flex items-center gap-2 rounded-lg bg-slate-700/30 px-3 py-2 text-sm text-cyan-300 hover:bg-slate-700/50 transition-colors active:scale-[0.98]"
+            className="mb-3 flex items-center gap-2 rounded-lg bg-slate-700/30 px-3 py-3 min-h-[44px] text-sm text-cyan-300 hover:bg-slate-700/50 transition-colors active:scale-[0.98]"
           >
             <Phone className="h-4 w-4" />
             <span className="font-mono">{trip.guestPhone}</span>
@@ -263,12 +263,12 @@ function TripCard({ trip, timelineStatus, showTimeline = true }: TripCardProps) 
           <WaiverBadge signed={trip.waiversSigned} total={trip.waiversTotal} />
         </div>
 
-        {/* Quick Actions */}
+        {/* Quick Actions - touch-friendly 44px min targets */}
         {!isPastTrip && (
           <div className="flex flex-wrap gap-2">
             <Link
               href={`/dashboard/schedule?bookingId=${trip.id}`}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-slate-700 px-3 py-2 text-sm font-medium text-slate-200 hover:bg-slate-600 transition-colors active:scale-[0.98]"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-slate-700 px-3 py-2.5 min-h-[44px] text-sm font-medium text-slate-200 hover:bg-slate-600 transition-colors active:scale-[0.98]"
             >
               <Eye className="h-4 w-4" />
               View Details
@@ -276,7 +276,7 @@ function TripCard({ trip, timelineStatus, showTimeline = true }: TripCardProps) 
 
             <Link
               href={`/dashboard/schedule?bookingId=${trip.id}&action=message`}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-slate-700 px-3 py-2 text-sm font-medium text-slate-200 hover:bg-slate-600 transition-colors active:scale-[0.98]"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-slate-700 px-3 py-2.5 min-h-[44px] text-sm font-medium text-slate-200 hover:bg-slate-600 transition-colors active:scale-[0.98]"
             >
               <Send className="h-4 w-4" />
               Send Reminder
@@ -285,7 +285,7 @@ function TripCard({ trip, timelineStatus, showTimeline = true }: TripCardProps) 
             {['confirmed', 'rescheduled'].includes(trip.status) && (
               <button
                 onClick={() => setShowWeatherModal(true)}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500/20 px-3 py-2 text-sm font-medium text-amber-300 hover:bg-amber-500/30 transition-colors active:scale-[0.98]"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500/20 px-3 py-2.5 min-h-[44px] text-sm font-medium text-amber-300 hover:bg-amber-500/30 transition-colors active:scale-[0.98]"
               >
                 <CloudRain className="h-4 w-4" />
                 Weather Hold
