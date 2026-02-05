@@ -86,7 +86,7 @@ export async function subscribeToHibernationNotifications(
   // Check if already subscribed (and not unsubscribed)
   const { data: existing } = await supabase
     .from('hibernation_subscribers')
-    .select('id, unsubscribed_at')
+    .select('id, unsubscribed_at, name')
     .eq('captain_id', captainId)
     .eq('email', sanitizedEmail)
     .single();
