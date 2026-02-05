@@ -1,21 +1,23 @@
 'use client';
 
 import { useState } from 'react';
-import { DollarSign, CalendarDays, Users, TrendingUp, Download, ChevronDown, FileText, Plus } from 'lucide-react';
+import { DollarSign, CalendarDays, Users, TrendingUp, Download, ChevronDown, FileText, Plus, Tag } from 'lucide-react';
 import { RevenueTab } from './RevenueTab';
 import { BookingInsightsTab } from './BookingInsightsTab';
 import { GuestAnalyticsTab } from './GuestAnalyticsTab';
 import { SeasonPerformanceTab } from './SeasonPerformanceTab';
-import type { RevenueOverviewData, BookingInsightsData, GuestAnalyticsData, SeasonPerformanceData } from '@/app/actions/analytics';
+import { PromoCodesTab } from './PromoCodesTab';
+import type { RevenueOverviewData, BookingInsightsData, GuestAnalyticsData, SeasonPerformanceData, PromoCodeAnalyticsData } from '@/app/actions/analytics';
 import Link from 'next/link';
 
-type TabId = 'revenue' | 'bookings' | 'guests' | 'season';
+type TabId = 'revenue' | 'bookings' | 'guests' | 'season' | 'promos';
 
 const tabs = [
   { id: 'revenue' as const, label: 'Revenue', shortLabel: 'Revenue', icon: DollarSign },
   { id: 'bookings' as const, label: 'Booking Insights', shortLabel: 'Bookings', icon: CalendarDays },
   { id: 'guests' as const, label: 'Guest Analytics', shortLabel: 'Guests', icon: Users },
   { id: 'season' as const, label: 'Season Performance', shortLabel: 'Season', icon: TrendingUp },
+  { id: 'promos' as const, label: 'Promo Codes', shortLabel: 'Promos', icon: Tag },
 ];
 
 interface Props {
@@ -23,6 +25,7 @@ interface Props {
   bookingData: BookingInsightsData;
   guestData: GuestAnalyticsData;
   seasonData: SeasonPerformanceData;
+  promoData: PromoCodeAnalyticsData;
   captainId: string;
   pendingReportCount: number;
 }
@@ -32,6 +35,7 @@ export function ReportsPageClient({
   bookingData,
   guestData,
   seasonData,
+  promoData,
   captainId,
   pendingReportCount,
 }: Props) {
@@ -98,6 +102,7 @@ export function ReportsPageClient({
         {activeTab === 'bookings' && <BookingInsightsTab data={bookingData} />}
         {activeTab === 'guests' && <GuestAnalyticsTab data={guestData} />}
         {activeTab === 'season' && <SeasonPerformanceTab data={seasonData} />}
+        {activeTab === 'promos' && <PromoCodesTab data={promoData} />}
       </div>
     </div>
   );

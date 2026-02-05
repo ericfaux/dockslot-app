@@ -4,6 +4,7 @@ import {
   getBookingInsights,
   getGuestAnalytics,
   getSeasonPerformance,
+  getPromoCodeAnalytics,
 } from '@/app/actions/analytics';
 import { ReportsPageClient } from './components/ReportsPageClient';
 
@@ -18,11 +19,12 @@ export default async function ReportsPage() {
   const { user, supabase } = await requireAuth();
 
   // Fetch all analytics data in parallel
-  const [revenueData, bookingData, guestData, seasonData] = await Promise.all([
+  const [revenueData, bookingData, guestData, seasonData, promoData] = await Promise.all([
     getRevenueOverview(),
     getBookingInsights(),
     getGuestAnalytics(),
     getSeasonPerformance(),
+    getPromoCodeAnalytics(),
   ]);
 
   // Count completed bookings without trip reports (for "Trips Needing Reports" badge)
@@ -44,6 +46,7 @@ export default async function ReportsPage() {
       bookingData={bookingData}
       guestData={guestData}
       seasonData={seasonData}
+      promoData={promoData}
       captainId={user.id}
       pendingReportCount={pendingReportCount}
     />
