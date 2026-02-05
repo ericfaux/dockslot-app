@@ -11,6 +11,8 @@ import {
   Loader2,
   User,
   FileSignature,
+  Shield,
+  ScrollText,
 } from 'lucide-react';
 import { WaiverDocument } from '../../../components/WaiverDocument';
 import { SignaturePad } from '../../../components/SignaturePad';
@@ -19,12 +21,27 @@ import {
   submitWaiverSignature,
   type WaiverForSigning,
 } from '@/app/actions/waivers';
+import type { WaiverVariableContext } from '@/lib/utils/waiver-variables';
 
 interface Props {
   params: Promise<{
     token: string;
     passengerId: string;
   }>;
+}
+
+// Collect device info for audit trail
+function getDeviceInfo() {
+  if (typeof window === 'undefined') return null;
+
+  return {
+    user_agent: navigator.userAgent,
+    platform: navigator.platform,
+    language: navigator.language,
+    screen_width: window.screen.width,
+    screen_height: window.screen.height,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  };
 }
 
 export default function SignWaiverPage({ params }: Props) {
@@ -35,8 +52,11 @@ export default function SignWaiverPage({ params }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [waiverData, setWaiverData] = useState<WaiverForSigning | null>(null);
 
-  const [hasAgreed, setHasAgreed] = useState(false);
+  // Multi-step agreement states
   const [hasReadDocument, setHasReadDocument] = useState(false);
+  const [hasConfirmedRead, setHasConfirmedRead] = useState(false);
+  const [hasAgreedToTerms, setHasAgreedToTerms] = useState(false);
+  const [hasConsentedToEsign, setHasConsentedToEsign] = useState(false);
   const [signatureData, setSignatureData] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -80,17 +100,20 @@ export default function SignWaiverPage({ params }: Props) {
   }, [token, passengerId, router]);
 
   const handleSubmit = async () => {
-    if (!waiverData || !signatureData || !hasAgreed) return;
+    if (!waiverData || !signatureData || !hasAgreedToTerms || !hasConsentedToEsign) return;
 
     setIsSubmitting(true);
     setSubmitError(null);
+
+    const deviceInfo = getDeviceInfo();
 
     const result = await submitWaiverSignature({
       token,
       passengerId,
       waiverTemplateId: waiverData.template.id,
       signatureData,
-      agreedToTerms: hasAgreed,
+      agreedToTerms: hasAgreedToTerms,
+      deviceInfo,
     });
 
     if (!result.success) {
@@ -114,7 +137,9 @@ export default function SignWaiverPage({ params }: Props) {
     }
   };
 
-  const canSubmit = hasAgreed && signatureData && !isSubmitting;
+  // Can only sign after completing all steps
+  const canSign = hasConfirmedRead && hasAgreedToTerms && hasConsentedToEsign;
+  const canSubmit = canSign && signatureData && !isSubmitting;
 
   if (isLoading) {
     return (
@@ -153,7 +178,17 @@ export default function SignWaiverPage({ params }: Props) {
     return null;
   }
 
-  const { template, passenger } = waiverData;
+  const { template, passenger, booking } = waiverData;
+
+  // Build variable context for substitution
+  const variableContext: WaiverVariableContext = {
+    guestName: booking.guest_name,
+    passengerName: passenger.full_name,
+    tripDate: booking.scheduled_start,
+    vesselName: booking.vessel?.name,
+    tripType: booking.trip_type?.title,
+    partySize: booking.party_size,
+  };
 
   // Success state
   if (isSuccess) {
@@ -260,79 +295,189 @@ export default function SignWaiverPage({ params }: Props) {
           </div>
         </div>
 
-        {/* Waiver Document */}
-        <WaiverDocument
-          title={template.title}
-          content={template.content}
-          version={template.version}
-          onScrollToEnd={() => setHasReadDocument(true)}
-        />
+        {/* Step 1: Read the Waiver Document */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <div className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${hasReadDocument ? 'bg-emerald-500 text-white' : 'bg-slate-700 text-slate-400'}`}>
+              1
+            </div>
+            <h2 className="text-sm font-medium text-slate-300">Read the Waiver Document</h2>
+            {hasReadDocument && <CheckCircle className="h-4 w-4 text-emerald-400" />}
+          </div>
+          <WaiverDocument
+            title={template.title}
+            content={template.content}
+            version={template.version}
+            onScrollToEnd={() => setHasReadDocument(true)}
+            variableContext={variableContext}
+          />
+        </div>
 
-        {/* Agreement Section */}
-        <div className="rounded-lg border border-slate-700 bg-slate-900 p-4 space-y-4">
-          {/* Agreement Checkbox */}
-          <label className="flex items-start gap-3 cursor-pointer group">
-            <div className="relative flex items-center justify-center pt-0.5">
-              <input
-                type="checkbox"
-                checked={hasAgreed}
-                onChange={(e) => setHasAgreed(e.target.checked)}
-                className="peer sr-only"
-              />
-              <div className="h-5 w-5 rounded border-2 border-slate-600 bg-slate-800 peer-checked:border-cyan-500 peer-checked:bg-cyan-500 transition-colors">
-                {hasAgreed && (
-                  <CheckCircle className="h-full w-full text-white p-0.5" />
-                )}
+        {/* Step 2: Confirm Reading */}
+        <div className={`space-y-3 transition-opacity ${hasReadDocument ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
+          <div className="flex items-center gap-2">
+            <div className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${hasConfirmedRead ? 'bg-emerald-500 text-white' : 'bg-slate-700 text-slate-400'}`}>
+              2
+            </div>
+            <h2 className="text-sm font-medium text-slate-300">Confirm You&apos;ve Read the Document</h2>
+            {hasConfirmedRead && <CheckCircle className="h-4 w-4 text-emerald-400" />}
+          </div>
+          <div className="rounded-lg border border-slate-700 bg-slate-900 p-4">
+            <label className="flex items-start gap-3 cursor-pointer group">
+              <div className="relative flex items-center justify-center pt-0.5">
+                <input
+                  type="checkbox"
+                  checked={hasConfirmedRead}
+                  onChange={(e) => setHasConfirmedRead(e.target.checked)}
+                  disabled={!hasReadDocument}
+                  className="peer sr-only"
+                />
+                <div className="h-5 w-5 rounded border-2 border-slate-600 bg-slate-800 peer-checked:border-cyan-500 peer-checked:bg-cyan-500 peer-disabled:opacity-50 transition-colors">
+                  {hasConfirmedRead && (
+                    <ScrollText className="h-full w-full text-white p-0.5" />
+                  )}
+                </div>
+              </div>
+              <span className="text-sm text-slate-300 group-hover:text-white transition-colors">
+                I have scrolled through and <strong className="text-white">read the entire waiver document</strong> above.
+              </span>
+            </label>
+          </div>
+        </div>
+
+        {/* Step 3: Agree to Terms */}
+        <div className={`space-y-3 transition-opacity ${hasConfirmedRead ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
+          <div className="flex items-center gap-2">
+            <div className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${hasAgreedToTerms ? 'bg-emerald-500 text-white' : 'bg-slate-700 text-slate-400'}`}>
+              3
+            </div>
+            <h2 className="text-sm font-medium text-slate-300">Agree to Terms</h2>
+            {hasAgreedToTerms && <CheckCircle className="h-4 w-4 text-emerald-400" />}
+          </div>
+          <div className="rounded-lg border border-slate-700 bg-slate-900 p-4">
+            <label className="flex items-start gap-3 cursor-pointer group">
+              <div className="relative flex items-center justify-center pt-0.5">
+                <input
+                  type="checkbox"
+                  checked={hasAgreedToTerms}
+                  onChange={(e) => setHasAgreedToTerms(e.target.checked)}
+                  disabled={!hasConfirmedRead}
+                  className="peer sr-only"
+                />
+                <div className="h-5 w-5 rounded border-2 border-slate-600 bg-slate-800 peer-checked:border-cyan-500 peer-checked:bg-cyan-500 peer-disabled:opacity-50 transition-colors">
+                  {hasAgreedToTerms && (
+                    <CheckCircle className="h-full w-full text-white p-0.5" />
+                  )}
+                </div>
+              </div>
+              <span className="text-sm text-slate-300 group-hover:text-white transition-colors">
+                I, <strong className="text-white">{passenger.full_name}</strong>, have read and understand the above waiver.
+                I voluntarily agree to its terms and conditions and acknowledge that this is a <strong className="text-white">legally binding agreement</strong>.
+              </span>
+            </label>
+          </div>
+        </div>
+
+        {/* Step 4: E-Signature Consent */}
+        <div className={`space-y-3 transition-opacity ${hasAgreedToTerms ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
+          <div className="flex items-center gap-2">
+            <div className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${hasConsentedToEsign ? 'bg-emerald-500 text-white' : 'bg-slate-700 text-slate-400'}`}>
+              4
+            </div>
+            <h2 className="text-sm font-medium text-slate-300">Electronic Signature Consent</h2>
+            {hasConsentedToEsign && <CheckCircle className="h-4 w-4 text-emerald-400" />}
+          </div>
+          <div className="rounded-lg border border-slate-700 bg-slate-900 p-4 space-y-3">
+            <div className="flex items-start gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700">
+              <Shield className="h-5 w-5 text-cyan-400 flex-shrink-0 mt-0.5" />
+              <div className="text-xs text-slate-400 space-y-2">
+                <p>
+                  <strong className="text-slate-300">Electronic Signature Disclosure:</strong> By checking the box below and providing your electronic signature,
+                  you consent to sign this document electronically. Your electronic signature has the same legal effect as a handwritten signature.
+                </p>
+                <p>
+                  Your signature, along with your name, the date and time of signing, your IP address, and device information will be recorded
+                  to create a legally defensible signature record.
+                </p>
               </div>
             </div>
-            <span className="text-sm text-slate-300 group-hover:text-white transition-colors">
-              I, <strong className="text-white">{passenger.full_name}</strong>, have read and understand the above waiver.
-              I voluntarily agree to its terms and conditions and acknowledge that this is a legally binding agreement.
-            </span>
-          </label>
+            <label className="flex items-start gap-3 cursor-pointer group">
+              <div className="relative flex items-center justify-center pt-0.5">
+                <input
+                  type="checkbox"
+                  checked={hasConsentedToEsign}
+                  onChange={(e) => setHasConsentedToEsign(e.target.checked)}
+                  disabled={!hasAgreedToTerms}
+                  className="peer sr-only"
+                />
+                <div className="h-5 w-5 rounded border-2 border-slate-600 bg-slate-800 peer-checked:border-cyan-500 peer-checked:bg-cyan-500 peer-disabled:opacity-50 transition-colors">
+                  {hasConsentedToEsign && (
+                    <CheckCircle className="h-full w-full text-white p-0.5" />
+                  )}
+                </div>
+              </div>
+              <span className="text-sm text-slate-300 group-hover:text-white transition-colors">
+                I consent to use an <strong className="text-white">electronic signature</strong> and understand that my signature below
+                will be legally binding.
+              </span>
+            </label>
+          </div>
+        </div>
 
-          {/* Signature Pad */}
-          <SignaturePad
-            onSignatureChange={setSignatureData}
-            disabled={!hasAgreed}
-          />
-
-          {/* Submit Error */}
-          {submitError && (
-            <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30">
-              <p className="text-sm text-rose-400">{submitError}</p>
+        {/* Step 5: Sign */}
+        <div className={`space-y-3 transition-opacity ${canSign ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
+          <div className="flex items-center gap-2">
+            <div className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${signatureData ? 'bg-emerald-500 text-white' : 'bg-slate-700 text-slate-400'}`}>
+              5
             </div>
-          )}
+            <h2 className="text-sm font-medium text-slate-300">Sign the Waiver</h2>
+            {signatureData && <CheckCircle className="h-4 w-4 text-emerald-400" />}
+          </div>
+          <div className="rounded-lg border border-slate-700 bg-slate-900 p-4 space-y-4">
+            <SignaturePad
+              onSignatureChange={setSignatureData}
+              disabled={!canSign}
+              label="Sign here with your finger or mouse"
+            />
 
-          {/* Submit Button */}
-          <button
-            onClick={handleSubmit}
-            disabled={!canSubmit}
-            className="w-full px-6 py-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-medium transition-colors flex items-center justify-center gap-2"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="h-5 w-5 animate-spin" />
-                Submitting...
-              </>
-            ) : (
-              <>
-                <FileSignature className="h-5 w-5" />
-                Submit Signature
-              </>
+            {/* Submit Error */}
+            {submitError && (
+              <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30">
+                <p className="text-sm text-rose-400">{submitError}</p>
+              </div>
             )}
-          </button>
 
-          {!hasAgreed && (
-            <p className="text-xs text-slate-500 text-center">
-              Please read and agree to the terms above before signing.
-            </p>
-          )}
+            {/* Submit Button */}
+            <button
+              onClick={handleSubmit}
+              disabled={!canSubmit}
+              className="w-full px-6 py-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-medium transition-colors flex items-center justify-center gap-2"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  <FileSignature className="h-5 w-5" />
+                  Submit Signature
+                </>
+              )}
+            </button>
+
+            {!canSign && (
+              <p className="text-xs text-slate-500 text-center">
+                Please complete all steps above before signing.
+              </p>
+            )}
+          </div>
         </div>
 
         {/* Help Text */}
         <p className="text-center text-sm text-slate-500">
           By signing, you acknowledge that you have read, understood, and agree to the terms of this waiver.
+          A copy of the signed waiver will be available for your records.
         </p>
       </main>
 

@@ -1,13 +1,15 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { ChevronDown, ChevronUp, FileText } from 'lucide-react';
+import { substituteWaiverVariables, type WaiverVariableContext } from '@/lib/utils/waiver-variables';
 
 interface WaiverDocumentProps {
   title: string;
   content: string;
   version?: number;
   onScrollToEnd?: () => void;
+  variableContext?: WaiverVariableContext;
 }
 
 export function WaiverDocument({
@@ -15,10 +17,19 @@ export function WaiverDocument({
   content,
   version,
   onScrollToEnd,
+  variableContext,
 }: WaiverDocumentProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [hasScrolledToEnd, setHasScrolledToEnd] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
+
+  // Apply variable substitution
+  const processedContent = useMemo(() => {
+    if (variableContext) {
+      return substituteWaiverVariables(content, variableContext);
+    }
+    return content;
+  }, [content, variableContext]);
 
   useEffect(() => {
     const element = contentRef.current;
@@ -142,7 +153,7 @@ export function WaiverDocument({
           }}
         >
           <div className="prose prose-sm max-w-none">
-            {formatContent(content)}
+            {formatContent(processedContent)}
           </div>
 
           {/* Scroll indicator */}
