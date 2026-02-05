@@ -85,6 +85,9 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
   const [hibernationShowContactInfo, setHibernationShowContactInfo] = useState(initialProfile?.hibernation_show_contact_info ?? false);
   const [cancellationPolicy, setCancellationPolicy] = useState(initialProfile?.cancellation_policy || '');
   const [dockModeEnabled, setDockModeEnabled] = useState(initialProfile?.dock_mode_enabled ?? false);
+  const [seasonRevenueGoal, setSeasonRevenueGoal] = useState(
+    (initialProfile?.season_revenue_goal_cents ?? 0) / 100
+  );
 
   // Subscriber management state
   const [subscribers, setSubscribers] = useState<HibernationSubscriber[]>([]);
@@ -184,6 +187,7 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
         hibernation_show_contact_info: hibernationShowContactInfo,
         cancellation_policy: cancellationPolicy || null,
         dock_mode_enabled: dockModeEnabled,
+        season_revenue_goal_cents: Math.round(seasonRevenueGoal * 100),
       });
 
       if (result.success) {
@@ -535,6 +539,24 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
             />
             <p className="mt-1.5 text-xs text-slate-500">
               How far in advance guests can book trips.
+            </p>
+          </div>
+          <div>
+            <label htmlFor="seasonRevenueGoal" className={labelClassName}>
+              Season Revenue Goal ($)
+            </label>
+            <input
+              id="seasonRevenueGoal"
+              type="number"
+              min="0"
+              step="100"
+              value={seasonRevenueGoal || ''}
+              onChange={(e) => setSeasonRevenueGoal(parseFloat(e.target.value) || 0)}
+              placeholder="10000"
+              className={inputClassName}
+            />
+            <p className="mt-1.5 text-xs text-slate-500">
+              Your revenue target for the season. Shown on the dashboard fuel gauge.
             </p>
           </div>
         </div>

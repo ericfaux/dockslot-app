@@ -25,14 +25,8 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Verify user is the captain
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('user_id', user.id)
-      .single()
-
-    if (!profile || profile.id !== captainId) {
+    // Verify user is the captain (profiles.id = auth user id)
+    if (captainId !== user.id) {
       return NextResponse.json(
         { error: 'Access denied' },
         { status: 403 }

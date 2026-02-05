@@ -433,7 +433,7 @@ export default async function DashboardPage() {
   if (user) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('meeting_spot_latitude, meeting_spot_longitude, timezone, business_name, full_name, dock_mode_enabled')
+      .select('meeting_spot_latitude, meeting_spot_longitude, timezone, business_name, full_name, dock_mode_enabled, season_revenue_goal_cents, is_hibernating, hibernation_end_date')
       .eq('id', user.id)
       .single();
 
@@ -696,13 +696,56 @@ export default async function DashboardPage() {
   // Fetch action items
   const actionItems = user ? await getActionItems() : [];
 
-  // Mock metrics (would come from aggregation queries in production)
+  // Calculate real metrics from Supabase data
+  let seasonRevenueCents = 0;
+  let seasonRevenueGoalCents = captainProfile?.season_revenue_goal_cents || 0;
+
+  if (user) {
+    try {
+      // Season revenue: sum of payments from bookings this year
+      const yearStart = `${now.getFullYear()}-01-01T00:00:00`;
+      const { data: seasonBookings } = await supabase
+        .from('bookings')
+        .select('deposit_paid_cents, total_price_cents, payment_status')
+        .eq('captain_id', user.id)
+        .gte('scheduled_start', yearStart);
+
+      seasonRevenueCents = (seasonBookings || []).reduce((sum, b) => {
+        if (b.payment_status === 'fully_paid') return sum + b.total_price_cents;
+        if (b.payment_status === 'deposit_paid') return sum + b.deposit_paid_cents;
+        return sum;
+      }, 0);
+    } catch (err) {
+      console.error('Error calculating season revenue:', err);
+    }
+  }
+
+  // Revenue percentage: actual vs goal (default goal $10k if not configured)
+  const effectiveGoal = seasonRevenueGoalCents > 0 ? seasonRevenueGoalCents : 1000000; // $10,000 default
+  const revenuePercent = Math.min(Math.round((seasonRevenueCents / effectiveGoal) * 100), 100);
+
+  // Season days: calculate from availability windows or hibernation end date
+  let seasonDaysRemaining = 0;
+  let seasonDaysTotal = 365;
+
+  if (captainProfile?.is_hibernating && captainProfile?.hibernation_end_date) {
+    // If hibernating with end date, show days until season resumes
+    const endDate = new Date(captainProfile.hibernation_end_date);
+    seasonDaysRemaining = Math.max(0, Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+    seasonDaysTotal = seasonDaysRemaining; // gauge shows countdown
+  } else {
+    // Show days remaining in the calendar year (boating season proxy)
+    const yearEnd = new Date(now.getFullYear(), 11, 31);
+    seasonDaysRemaining = Math.ceil((yearEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    seasonDaysTotal = 365;
+  }
+
   const METRICS = {
-    revenuePercent: 70,
-    seasonDaysRemaining: 45,
-    seasonDaysTotal: 120,
+    revenuePercent,
+    seasonDaysRemaining,
+    seasonDaysTotal,
     pendingItems: pendingCount,
-    maxPending: 10,
+    maxPending: Math.max(pendingCount, 5),
   };
 
   return (
