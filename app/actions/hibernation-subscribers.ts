@@ -6,7 +6,7 @@
  */
 
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { createServiceClient } from '@/lib/supabase/service';
+import { createSupabaseServiceClient } from '@/utils/supabase/service';
 import { HibernationSubscriber } from '@/lib/db/types';
 import { isValidEmail, isValidUUID, sanitizeName } from '@/lib/utils/validation';
 
@@ -54,7 +54,7 @@ export async function subscribeToHibernationNotifications(
   const sanitizedName = name ? sanitizeName(name) : null;
 
   // Use service client for public action
-  const supabase = createServiceClient();
+  const supabase = createSupabaseServiceClient();
 
   // Check if captain exists, is hibernating, and allows notifications
   const { data: captain, error: captainError } = await supabase
@@ -229,7 +229,7 @@ export async function deleteHibernationSubscriber(
 export async function markSubscribersNotified(
   captainId: string
 ): Promise<ActionResult<number>> {
-  const supabase = createServiceClient();
+  const supabase = createSupabaseServiceClient();
 
   const { data, error } = await supabase
     .from('hibernation_subscribers')
