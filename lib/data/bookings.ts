@@ -25,7 +25,6 @@ const BOOKING_COLUMNS = `
   payment_status, total_price_cents, deposit_paid_cents, balance_due_cents,
   weather_hold_reason, original_date_if_rescheduled, internal_notes,
   special_requests, captain_instructions, guest_count_confirmed,
-  internal_notes, tags,
   created_at, updated_at
 ` as const;
 
@@ -56,7 +55,6 @@ interface RawBookingData {
   weather_hold_reason: string | null;
   original_date_if_rescheduled: string | null;
   internal_notes: string | null;
-  tags: string[];
   special_requests: string | null;
   captain_instructions: string | null;
   guest_count_confirmed: number | null;
@@ -172,10 +170,10 @@ export async function getBookingsWithFilters(filters: BookingListFilters): Promi
     query = query.in('payment_status', filters.paymentStatus);
   }
 
-  // Apply tags filter (any tag match)
-  if (filters.tags && filters.tags.length > 0) {
-    query = query.overlaps('tags', filters.tags);
-  }
+  // Note: tags filtering disabled until migration is applied
+  // if (filters.tags && filters.tags.length > 0) {
+  //   query = query.overlaps('tags', filters.tags);
+  // }
 
   // Apply guest search (name, email, or phone)
   if (filters.search) {
@@ -462,9 +460,10 @@ export async function getBookingsForExport(
   if (filters.paymentStatus && filters.paymentStatus.length > 0) {
     query = query.in('payment_status', filters.paymentStatus);
   }
-  if (filters.tags && filters.tags.length > 0) {
-    query = query.overlaps('tags', filters.tags);
-  }
+  // Note: tags filtering disabled until migration is applied
+  // if (filters.tags && filters.tags.length > 0) {
+  //   query = query.overlaps('tags', filters.tags);
+  // }
   if (filters.search) {
     query = query.or(`guest_name.ilike.%${filters.search}%,guest_email.ilike.%${filters.search}%,guest_phone.ilike.%${filters.search}%`);
   }
