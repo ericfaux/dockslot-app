@@ -22,7 +22,7 @@ export default async function OnboardingPage() {
   const { data: profile } = await supabase
     .from('profiles')
     .select('*')
-    .eq('user_id', user.id)
+    .eq('id', user.id)
     .single()
 
   if (!profile) {
@@ -30,7 +30,7 @@ export default async function OnboardingPage() {
     const { data: newProfile } = await supabase
       .from('profiles')
       .insert({
-        user_id: user.id,
+        id: user.id,
         email: user.email,
         business_name: user.user_metadata?.business_name || null,
         onboarding_step: 0,
@@ -48,6 +48,9 @@ export default async function OnboardingPage() {
         />
       )
     }
+
+    // Insert failed — redirect to login
+    redirect('/login')
   }
 
   // If already completed, redirect to dashboard
