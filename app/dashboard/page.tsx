@@ -557,7 +557,6 @@ export default async function DashboardPage() {
       pendingCount = pendingBookings.totalCount;
 
       // Count bookings in the next 48 hours (for weather alert widget)
-      const now = new Date();
       const in48h = addHours(now, 48);
       const upcoming48hBookings = await getBookingsWithFilters({
         captainId: user.id,
