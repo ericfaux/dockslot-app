@@ -1,5 +1,5 @@
 // components/booking/BookingSkeleton.tsx
-// Skeleton loading components for booking pages
+// Skeleton loading components for booking pages (light theme)
 // Provides visual feedback during data fetching
 
 'use client';
@@ -11,7 +11,7 @@ interface SkeletonProps {
 function Skeleton({ className = '' }: SkeletonProps) {
   return (
     <div
-      className={`animate-pulse rounded-lg bg-slate-700/50 ${className}`}
+      className={`animate-pulse rounded-lg bg-slate-200 ${className}`}
     />
   );
 }
@@ -47,7 +47,7 @@ export function CalendarSkeleton() {
 // Time slots skeleton
 export function TimeSlotsSkeleton() {
   return (
-    <div className="rounded-lg border border-slate-700 bg-slate-800 p-4">
+    <div className="rounded-xl border border-slate-200 bg-white p-4">
       <div className="mb-4 flex items-center gap-2">
         <Skeleton className="h-5 w-5 rounded-full" />
         <Skeleton className="h-5 w-48" />
@@ -65,9 +65,9 @@ export function TimeSlotsSkeleton() {
 // Trip card skeleton
 export function TripCardSkeleton() {
   return (
-    <div className="rounded-lg border border-slate-700 bg-slate-900 p-4">
+    <div className="rounded-xl border border-slate-200 bg-white p-4">
       {/* Header */}
-      <div className="flex items-start gap-3 border-b border-slate-800 pb-4 mb-4">
+      <div className="flex items-start gap-3 border-b border-slate-100 pb-4 mb-4">
         <Skeleton className="h-10 w-10 rounded-full" />
         <div className="flex-1 space-y-2">
           <Skeleton className="h-5 w-3/4" />
@@ -102,7 +102,7 @@ export function TripCardSkeleton() {
 // Booking summary skeleton
 export function BookingSummarySkeleton() {
   return (
-    <div className="rounded-lg border border-slate-700 bg-slate-800 p-6 space-y-4">
+    <div className="rounded-xl border border-slate-200 bg-white p-6 space-y-4">
       <Skeleton className="h-6 w-32 mb-4" />
 
       {Array.from({ length: 4 }).map((_, i) => (
@@ -112,7 +112,7 @@ export function BookingSummarySkeleton() {
         </div>
       ))}
 
-      <div className="border-t border-slate-700 pt-4">
+      <div className="border-t border-slate-200 pt-4">
         <div className="flex justify-between">
           <Skeleton className="h-6 w-28" />
           <Skeleton className="h-6 w-20" />
@@ -138,7 +138,7 @@ export function BookingPageSkeleton() {
       </div>
 
       {/* Main content card */}
-      <div className="rounded-lg border border-slate-700 bg-slate-800 p-6">
+      <div className="rounded-xl border border-slate-200 bg-white p-6">
         <Skeleton className="h-6 w-40 mb-6" />
         <CalendarSkeleton />
       </div>

@@ -1,9 +1,9 @@
 // components/booking/ShareBookingButton.tsx
-// Share booking details via native share API or clipboard
+// Share booking details via native share API or clipboard (light theme)
 
 'use client';
 
-import { Share2, Copy, Check } from 'lucide-react';
+import { Share2, Check } from 'lucide-react';
 import { useState } from 'react';
 
 interface ShareBookingButtonProps {
@@ -28,20 +28,17 @@ export function ShareBookingButton({
   };
 
   const handleShare = async () => {
-    // Try native share API first (mobile)
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
         await navigator.share(shareContent);
         return;
       } catch (err) {
-        // User cancelled or API failed, fall back to clipboard
         if ((err as Error).name === 'AbortError') {
-          return; // User cancelled, don't show error
+          return;
         }
       }
     }
 
-    // Fall back to clipboard copy
     try {
       const shareText = `${title}\n\n${text}${url ? `\n\n${url}` : ''}`;
       await navigator.clipboard.writeText(shareText);
@@ -58,21 +55,21 @@ export function ShareBookingButton({
       onClick={handleShare}
       className={`
         flex items-center justify-center gap-2 w-full
-        rounded-lg border border-slate-600 bg-slate-800
-        px-4 py-3 text-sm font-medium text-slate-100
-        transition-colors hover:bg-slate-700
+        rounded-xl border border-slate-200 bg-white
+        px-4 py-3 text-sm font-medium text-slate-700
+        transition-colors hover:bg-slate-50 shadow-sm
         min-h-[48px]
         ${className}
       `}
     >
       {copied ? (
         <>
-          <Check className="h-4 w-4 text-green-400" />
+          <Check className="h-4 w-4 text-emerald-500" />
           <span>Copied to clipboard!</span>
         </>
       ) : (
         <>
-          <Share2 className="h-4 w-4 text-cyan-400" />
+          <Share2 className="h-4 w-4 text-cyan-600" />
           <span>Share Trip Details</span>
         </>
       )}

@@ -1,10 +1,10 @@
 // components/booking/TrustSignals.tsx
-// Trust signals for the booking flow
+// Trust signals for the booking flow (light theme for guest-facing pages)
 // Includes secure payment badge, cancellation policy, captain info
 
 'use client';
 
-import { Shield, Lock, Clock, User, AlertCircle, MapPin, Star } from 'lucide-react';
+import { Shield, Lock, Clock, User, MapPin, Star } from 'lucide-react';
 import Image from 'next/image';
 
 // Secure payment badge
@@ -16,13 +16,13 @@ export function SecurePaymentBadge({ className = '' }: SecurePaymentBadgeProps) 
   return (
     <div
       className={`
-        flex items-center gap-2 text-sm text-slate-400
+        flex items-center gap-2 text-sm text-slate-500
         ${className}
       `}
     >
-      <Lock className="h-4 w-4 text-green-400" />
+      <Lock className="h-4 w-4 text-emerald-600" />
       <span>Secure payment via Stripe</span>
-      <Shield className="h-4 w-4 text-slate-500" />
+      <Shield className="h-4 w-4 text-slate-400" />
     </div>
   );
 }
@@ -42,20 +42,20 @@ export function CancellationPolicy({
   return (
     <div
       className={`
-        rounded-lg border border-slate-700 bg-slate-800/50 p-4
+        rounded-xl border border-slate-200 bg-amber-50/50 p-4
         ${className}
       `}
     >
       <div className="flex items-start gap-3">
-        <Clock className="h-5 w-5 text-amber-400 flex-shrink-0 mt-0.5" />
+        <Clock className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
         <div>
-          <h4 className="text-sm font-medium text-slate-100 mb-1">
+          <h4 className="text-sm font-medium text-slate-900 mb-1">
             Cancellation Policy
           </h4>
           {policy ? (
-            <p className="text-sm text-slate-400">{policy}</p>
+            <p className="text-sm text-slate-600">{policy}</p>
           ) : (
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-slate-600">
               Free cancellation up to {hoursNotice} hours before your trip.
               Deposit refunded minus processing fees.
             </p>
@@ -88,7 +88,6 @@ export function CaptainInfoCard({
   className = '',
   compact = false,
 }: CaptainInfoCardProps) {
-  // Generate initials for avatar fallback
   const initials = name
     .split(' ')
     .map((n) => n[0])
@@ -99,7 +98,6 @@ export function CaptainInfoCard({
   if (compact) {
     return (
       <div className={`flex items-center gap-3 ${className}`}>
-        {/* Avatar */}
         <div className="relative h-10 w-10 flex-shrink-0">
           {avatarUrl ? (
             <Image
@@ -109,19 +107,17 @@ export function CaptainInfoCard({
               className="rounded-full object-cover"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center rounded-full bg-cyan-500/20 text-cyan-400 text-sm font-semibold">
+            <div className="flex h-full w-full items-center justify-center rounded-full bg-cyan-100 text-cyan-700 text-sm font-semibold">
               {initials}
             </div>
           )}
         </div>
-
-        {/* Info */}
         <div className="min-w-0">
-          <p className="text-sm font-medium text-slate-100 truncate">
+          <p className="text-sm font-medium text-slate-900 truncate">
             {businessName || name}
           </p>
           {meetingSpotName && (
-            <p className="text-xs text-slate-400 truncate">
+            <p className="text-xs text-slate-500 truncate">
               <MapPin className="inline h-3 w-3 mr-1" />
               {meetingSpotName}
             </p>
@@ -134,12 +130,11 @@ export function CaptainInfoCard({
   return (
     <div
       className={`
-        rounded-lg border border-slate-700 bg-slate-800/50 p-4
+        rounded-xl border border-slate-200 bg-white p-4 shadow-sm
         ${className}
       `}
     >
       <div className="flex items-start gap-4">
-        {/* Avatar */}
         <div className="relative h-14 w-14 flex-shrink-0">
           {avatarUrl ? (
             <Image
@@ -149,46 +144,68 @@ export function CaptainInfoCard({
               className="rounded-full object-cover"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center rounded-full bg-cyan-500/20 text-cyan-400 text-lg font-semibold">
+            <div className="flex h-full w-full items-center justify-center rounded-full bg-cyan-100 text-cyan-700 text-lg font-semibold">
               {initials}
             </div>
           )}
         </div>
-
-        {/* Info */}
         <div className="min-w-0 flex-1">
-          <h4 className="text-base font-semibold text-slate-100">
+          <h4 className="text-base font-semibold text-slate-900">
             {businessName || name}
           </h4>
           {businessName && name && (
-            <p className="text-sm text-slate-400 flex items-center gap-1">
+            <p className="text-sm text-slate-500 flex items-center gap-1">
               <User className="h-3 w-3" />
               Captain {name.split(' ')[0]}
             </p>
           )}
-
-          {/* Meeting location */}
           {meetingSpotName && (
-            <div className="mt-2 flex items-start gap-2 text-sm text-slate-400">
-              <MapPin className="h-4 w-4 flex-shrink-0 mt-0.5" />
+            <div className="mt-2 flex items-start gap-2 text-sm text-slate-500">
+              <MapPin className="h-4 w-4 flex-shrink-0 mt-0.5 text-cyan-600" />
               <div>
-                <p className="text-slate-300">{meetingSpotName}</p>
+                <p className="text-slate-700">{meetingSpotName}</p>
                 {meetingSpotAddress && (
-                  <p className="text-slate-500 text-xs mt-0.5">{meetingSpotAddress}</p>
+                  <p className="text-slate-400 text-xs mt-0.5">{meetingSpotAddress}</p>
                 )}
               </div>
             </div>
           )}
-
-          {/* Timezone */}
           {timezone && (
-            <p className="mt-2 text-xs text-slate-500 flex items-center gap-1">
+            <p className="mt-2 text-xs text-slate-400 flex items-center gap-1">
               <Clock className="h-3 w-3" />
               All times in {timezone.replace(/_/g, ' ')}
             </p>
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+// Star rating display
+interface StarRatingProps {
+  rating: number;
+  totalReviews: number;
+  className?: string;
+}
+
+export function StarRating({ rating, totalReviews, className = '' }: StarRatingProps) {
+  return (
+    <div className={`flex items-center gap-1.5 ${className}`}>
+      <div className="flex items-center gap-0.5">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className={`h-4 w-4 ${
+              star <= Math.round(rating)
+                ? 'fill-amber-400 text-amber-400'
+                : 'fill-slate-200 text-slate-200'
+            }`}
+          />
+        ))}
+      </div>
+      <span className="text-sm font-medium text-slate-700">{rating.toFixed(1)}</span>
+      <span className="text-sm text-slate-400">({totalReviews} {totalReviews === 1 ? 'review' : 'reviews'})</span>
     </div>
   );
 }
@@ -228,11 +245,9 @@ export function TrustSignalsSection({
           timezone={captain.timezone}
         />
       )}
-
       {showCancellationPolicy && (
         <CancellationPolicy policy={cancellationPolicy} />
       )}
-
       {showSecureBadge && (
         <div className="flex justify-center">
           <SecurePaymentBadge />

@@ -1,5 +1,5 @@
 // app/book/[captainId]/[tripTypeId]/page.tsx
-// Booking flow page - Date selection + guest details
+// Booking flow page - Date selection + guest details (light theme)
 // Mobile-first checkout experience
 
 import { createSupabaseServiceClient } from "@/utils/supabase/service";
@@ -32,7 +32,7 @@ export default async function BookingPage({ params }: BookingPageProps) {
 
   // Check if hibernating
   if (profile.is_hibernating) {
-    redirect(`/c/${captainId}`);
+    redirect(`/book/${captainId}`);
   }
 
   // Fetch trip type
@@ -57,19 +57,19 @@ export default async function BookingPage({ params }: BookingPageProps) {
   const vessel = vessels?.[0];
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <div className="sticky top-0 z-10 border-b border-slate-800 bg-slate-900/95 backdrop-blur supports-[backdrop-filter]:bg-slate-900/80">
+      <div className="sticky top-0 z-10 border-b border-slate-200 bg-white/95 backdrop-blur-lg shadow-sm">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
           <Link
-            href={`/c/${captainId}`}
-            className="flex items-center gap-2 text-sm text-slate-400 transition-colors hover:text-slate-100"
+            href={`/book/${captainId}`}
+            className="flex items-center gap-2 text-sm text-slate-500 transition-colors hover:text-slate-900"
           >
             <ChevronLeft className="h-4 w-4" />
-            <span>Back to profile</span>
+            <span>Back to trips</span>
           </Link>
           <div className="text-right">
-            <div className="text-sm font-medium text-slate-100">
+            <div className="text-sm font-medium text-slate-900">
               {profile.business_name || "Charter Booking"}
             </div>
             <div className="text-xs text-slate-500">{tripType.title}</div>
@@ -80,48 +80,48 @@ export default async function BookingPage({ params }: BookingPageProps) {
       {/* Main Content */}
       <div className="mx-auto max-w-4xl px-4 py-8">
         <div className="mb-8">
-          <h1 className="mb-2 text-3xl font-bold text-slate-100">
+          <h1 className="mb-2 text-3xl font-bold text-slate-900">
             Book Your Trip
           </h1>
-          <p className="text-slate-400">
+          <p className="text-slate-500">
             Select your preferred date and time, then provide guest details
           </p>
         </div>
 
         {/* Trip Summary Card */}
-        <div className="mb-8 rounded-lg border border-slate-700 bg-slate-800 p-6">
-          <h2 className="mb-4 text-lg font-semibold text-slate-100">
+        <div className="mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="mb-4 text-lg font-semibold text-slate-900">
             Trip Summary
           </h2>
           <div className="space-y-3 text-sm">
             <div className="flex justify-between">
-              <span className="text-slate-400">Trip Type</span>
-              <span className="font-medium text-slate-100">{tripType.title}</span>
+              <span className="text-slate-500">Trip Type</span>
+              <span className="font-medium text-slate-900">{tripType.title}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Duration</span>
-              <span className="font-medium text-slate-100">
+              <span className="text-slate-500">Duration</span>
+              <span className="font-medium text-slate-900">
                 {tripType.duration_hours} hours
               </span>
             </div>
             {vessel && (
               <div className="flex justify-between">
-                <span className="text-slate-400">Vessel</span>
-                <span className="font-medium text-slate-100">
+                <span className="text-slate-500">Vessel</span>
+                <span className="font-medium text-slate-900">
                   {vessel.name} (up to {vessel.capacity} guests)
                 </span>
               </div>
             )}
-            <div className="border-t border-slate-700 pt-3">
+            <div className="border-t border-slate-200 pt-3">
               <div className="flex justify-between text-base">
-                <span className="font-semibold text-slate-100">Total Price</span>
-                <span className="font-bold text-slate-100">
+                <span className="font-semibold text-slate-900">Total Price</span>
+                <span className="font-bold text-slate-900">
                   ${(tripType.price_total / 100).toFixed(2)}
                 </span>
               </div>
               <div className="mt-2 flex justify-between text-sm">
-                <span className="text-slate-400">Deposit to book</span>
-                <span className="font-medium text-cyan-400">
+                <span className="text-slate-500">Deposit to book</span>
+                <span className="font-medium text-cyan-700">
                   ${(tripType.deposit_amount / 100).toFixed(2)}
                 </span>
               </div>
@@ -139,6 +139,8 @@ export default async function BookingPage({ params }: BookingPageProps) {
           maxCapacity={vessel?.capacity || 6}
           captainTimezone={profile.timezone || undefined}
           cancellationPolicy={profile.cancellation_policy || undefined}
+          meetingSpotLatitude={profile.meeting_spot_latitude || undefined}
+          meetingSpotLongitude={profile.meeting_spot_longitude || undefined}
         />
       </div>
     </div>

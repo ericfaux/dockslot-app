@@ -44,25 +44,22 @@ export function TripCard({
   return (
     <Link
       href={`/book/${captainId}/${id}`}
-      className="group relative flex flex-col rounded-xl border border-slate-700 bg-slate-900 transition-all hover:border-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/10 active:scale-[0.98] min-h-[160px]"
-      style={{
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03), 0 4px 20px rgba(0,0,0,0.3)',
-      }}
+      className="group relative flex flex-col rounded-xl border border-slate-200 bg-white transition-all hover:border-cyan-400 hover:shadow-lg hover:shadow-cyan-100/50 active:scale-[0.98] min-h-[160px] shadow-sm"
     >
       {/* Card Header */}
-      <div className="flex items-start justify-between border-b border-slate-800 p-4">
+      <div className="flex items-start justify-between border-b border-slate-100 p-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500/10">
-            <Anchor className="h-6 w-6 text-cyan-400" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-50">
+            <Anchor className="h-6 w-6 text-cyan-600" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-white group-hover:text-cyan-400 transition-colors">
+            <h3 className="text-lg font-semibold text-slate-900 group-hover:text-cyan-700 transition-colors">
               {title}
             </h3>
           </div>
         </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-800 group-hover:bg-cyan-500/20 transition-colors">
-          <ChevronRight className="h-5 w-5 text-slate-500 group-hover:text-cyan-400 transition-colors" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 group-hover:bg-cyan-100 transition-colors">
+          <ChevronRight className="h-5 w-5 text-slate-400 group-hover:text-cyan-600 transition-colors" />
         </div>
       </div>
 
@@ -70,7 +67,7 @@ export function TripCard({
       <div className="flex flex-1 flex-col gap-4 p-4">
         {/* Description */}
         {description && (
-          <p className="text-sm text-slate-400 line-clamp-2">
+          <p className="text-sm text-slate-500 line-clamp-2">
             {description}
           </p>
         )}
@@ -79,39 +76,36 @@ export function TripCard({
         <div className="flex flex-wrap gap-4 mt-auto">
           {/* Duration */}
           <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-800">
-              <Clock className="h-4 w-4 text-cyan-400" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100">
+              <Clock className="h-4 w-4 text-cyan-600" />
             </div>
             <div>
-              <div className="text-xs text-slate-500">Duration</div>
-              <div className="text-sm font-medium text-white">{formatDuration(duration_hours)}</div>
+              <div className="text-xs text-slate-400">Duration</div>
+              <div className="text-sm font-medium text-slate-900">{formatDuration(duration_hours)}</div>
             </div>
           </div>
 
           {/* Price */}
           <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-800">
-              <DollarSign className="h-4 w-4 text-emerald-400" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100">
+              <DollarSign className="h-4 w-4 text-emerald-600" />
             </div>
             <div>
-              <div className="text-xs text-slate-500">Total Price</div>
-              <div className="text-sm font-medium text-white">{formatPrice(price_total)}</div>
+              <div className="text-xs text-slate-400">Total Price</div>
+              <div className="text-sm font-medium text-slate-900">{formatPrice(price_total)}</div>
             </div>
           </div>
         </div>
 
         {/* Deposit Info */}
         {deposit_amount > 0 && (
-          <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 px-3 py-2.5">
-            <p className="text-xs text-amber-400 font-medium">
+          <div className="rounded-lg bg-cyan-50 border border-cyan-100 px-3 py-2.5">
+            <p className="text-xs text-cyan-700 font-medium">
               {formatPrice(deposit_amount)} deposit to book
             </p>
           </div>
         )}
       </div>
-
-      {/* Hover Effect Overlay */}
-      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-500/0 via-cyan-500/0 to-cyan-500/0 group-hover:from-cyan-500/5 group-hover:via-transparent group-hover:to-transparent transition-all pointer-events-none" />
     </Link>
   );
 }
