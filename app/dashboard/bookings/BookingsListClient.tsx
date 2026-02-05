@@ -17,6 +17,7 @@ import { STATUS_COLORS, STATUS_LABELS } from '@/components/calendar/types'
 import { ExportButton } from './ExportButton'
 import FilterPresetsMenu from '../components/FilterPresetsMenu'
 import BulkActionsBar from '../components/BulkActionsBar'
+import { SwipeableBookingRow } from './SwipeableBookingRow'
 import Link from 'next/link'
 
 interface BookingsListClientProps {
@@ -111,6 +112,23 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
     fetchBookings()
   }, [fetchBookings])
 
+  // Handle weather hold action (defined after fetchBookings)
+  const handleWeatherHold = useCallback(async (bookingId: string) => {
+    try {
+      const response = await fetch(`/api/bookings/${bookingId}/weather-hold`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: 'Quick weather hold' }),
+      })
+      if (response.ok) {
+        // Refresh the bookings list
+        fetchBookings()
+      }
+    } catch (error) {
+      console.error('Error setting weather hold:', error)
+    }
+  }, [fetchBookings])
+
   const formatTime = (isoString: string): string => {
     try {
       return format(parseISO(isoString), 'MMM d, yyyy • h:mm a')
@@ -187,145 +205,15 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
             </div>
           )}
 
-          {bookings.map((booking) => {
-            const colors = STATUS_COLORS[booking.status]
-            const statusLabel = STATUS_LABELS[booking.status]
-            const isSelected = selectedBookings.has(booking.id)
-
-            return (
-              <div
-                key={booking.id}
-                className={`flex items-start gap-3 rounded-lg border p-4 transition-all ${
-                  isSelected
-                    ? 'border-cyan-500 bg-cyan-500/10'
-                    : 'border-slate-700 bg-slate-800/50 hover:border-cyan-500/50 hover:bg-slate-800/70'
-                }`}
-              >
-                {/* Checkbox */}
-                <input
-                  type="checkbox"
-                  name="booking-select"
-                  value={booking.id}
-                  checked={isSelected}
-                  onChange={() => handleSelectBooking(booking.id)}
-                  onClick={(e) => e.stopPropagation()}
-                  className="mt-1 h-4 w-4 rounded border-slate-600 bg-slate-700 text-cyan-500 focus:ring-2 focus:ring-cyan-500 focus:ring-offset-0"
-                />
-
-                <Link
-                  href={`/dashboard/schedule?booking=${booking.id}`}
-                  className="flex flex-1 items-start justify-between gap-4"
-                >
-                  {/* Left: Booking Info */}
-                  <div className="flex-1 space-y-3">
-                    {/* Guest Name & Status */}
-                    <div className="flex items-center gap-3">
-                      <h3 className="font-mono text-lg font-semibold text-slate-100">
-                        {booking.guest_name}
-                      </h3>
-                      <div className="flex items-center gap-2">
-                        <div className={`h-2 w-2 rounded-full ${colors.dot}`} />
-                        <span className={`text-sm ${colors.text}`}>
-                          {statusLabel}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Details Grid */}
-                    <div className="grid grid-cols-1 gap-2 text-sm text-slate-300 sm:grid-cols-2 lg:grid-cols-3">
-                      {/* Date/Time */}
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-slate-500" />
-                        <span>{formatTime(booking.scheduled_start)}</span>
-                      </div>
-
-                      {/* Party Size */}
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4 text-slate-500" />
-                        <span>{booking.party_size} guests</span>
-                      </div>
-
-                      {/* Vessel */}
-                      {booking.vessel && (
-                        <div className="flex items-center gap-2">
-                          <Ship className="h-4 w-4 text-slate-500" />
-                          <span>{booking.vessel.name}</span>
-                        </div>
-                      )}
-
-                      {/* Trip Type */}
-                      {booking.trip_type && (
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-slate-500" />
-                          <span>{booking.trip_type.title}</span>
-                        </div>
-                      )}
-
-                      {/* Payment */}
-                      <div className="flex items-center gap-2">
-                        <CreditCard
-                          className={`h-4 w-4 ${
-                            booking.payment_status === 'fully_paid'
-                              ? 'text-emerald-400'
-                              : booking.payment_status === 'deposit_paid'
-                              ? 'text-amber-400'
-                              : 'text-slate-500'
-                          }`}
-                        />
-                        <span>
-                          {booking.payment_status === 'fully_paid'
-                            ? 'Fully Paid'
-                            : booking.payment_status === 'deposit_paid'
-                            ? `Deposit: ${formatPrice(booking.deposit_paid_cents)}`
-                            : 'Unpaid'}
-                        </span>
-                      </div>
-
-                      {/* Total */}
-                      <div className="flex items-center gap-2">
-                        <span className="text-slate-500">Total:</span>
-                        <span className="font-medium">
-                          {formatPrice(booking.total_price_cents)}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Tags */}
-                    {booking.tags && booking.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {booking.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="flex items-center gap-1 rounded-full bg-cyan-500/20 px-2.5 py-0.5 text-xs font-medium text-cyan-300"
-                          >
-                            <TagIcon className="h-3 w-3" />
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Captain Notes Preview */}
-                    {booking.internal_notes && (
-                      <div className="rounded bg-slate-900/50 p-2 text-sm text-slate-400">
-                        <span className="font-medium text-slate-300">
-                          Note:{' '}
-                        </span>
-                        {booking.internal_notes.length > 100
-                          ? `${booking.internal_notes.slice(0, 100)}...`
-                          : booking.internal_notes}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Right: Chevron */}
-                  <div className="flex items-center">
-                    <ChevronRight className="h-5 w-5 text-slate-500" />
-                  </div>
-                </Link>
-              </div>
-            )
-          })}
+          {bookings.map((booking) => (
+            <SwipeableBookingRow
+              key={booking.id}
+              booking={booking}
+              isSelected={selectedBookings.has(booking.id)}
+              onSelect={handleSelectBooking}
+              onWeatherHold={handleWeatherHold}
+            />
+          ))}
         </div>
       )}
 

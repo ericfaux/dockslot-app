@@ -74,6 +74,9 @@ export default function QuickStatsWidgets({
     })}`
   }
 
+  // Get current month for analytics filter
+  const currentMonth = new Date().toISOString().slice(0, 7) // YYYY-MM format
+
   const widgets = [
     {
       icon: Calendar,
@@ -82,6 +85,7 @@ export default function QuickStatsWidgets({
       label: 'Today',
       value: stats.todayBookings.toString(),
       subtext: stats.todayBookings === 1 ? 'booking' : 'bookings',
+      link: '/dashboard/schedule',
     },
     {
       icon: Clock,
@@ -90,6 +94,7 @@ export default function QuickStatsWidgets({
       label: 'This Week',
       value: stats.weekBookings.toString(),
       subtext: stats.weekBookings === 1 ? 'booking' : 'bookings',
+      link: '/dashboard/schedule',
     },
     {
       icon: DollarSign,
@@ -103,6 +108,7 @@ export default function QuickStatsWidgets({
           : `${stats.revenueChange.toFixed(1)}% from last month`,
       subtextColor:
         stats.revenueChange >= 0 ? 'text-emerald-400' : 'text-rose-400',
+      link: `/dashboard/reports?view=revenue&month=${currentMonth}`,
     },
     {
       icon: AlertCircle,
@@ -131,6 +137,7 @@ export default function QuickStatsWidgets({
         stats.monthRevenue / (stats.weekBookings || 1) * 4 // Rough estimate
       ),
       subtext: 'this month',
+      link: `/dashboard/reports?view=analytics&month=${currentMonth}`,
     },
   ]
 

@@ -24,6 +24,7 @@ interface CalendarWeekViewProps {
   onBlockClick?: (booking: CalendarBooking) => void;
   onQuickBlockClick?: () => void;
   onBlackoutClick?: (blackout: BlackoutDate) => void;
+  onEmptySlotClick?: (date: Date, hour: number) => void;
   isLoading?: boolean;
 }
 
@@ -40,6 +41,7 @@ export function CalendarWeekView({
   onBlockClick,
   onQuickBlockClick,
   onBlackoutClick,
+  onEmptySlotClick,
   isLoading,
 }: CalendarWeekViewProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -213,6 +215,7 @@ export function CalendarWeekView({
                   onBlockClick={onBlockClick}
                   blackoutDate={blackoutDate}
                   onBlackoutClick={onBlackoutClick}
+                  onEmptySlotClick={onEmptySlotClick}
                 />
               );
             })}

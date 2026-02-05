@@ -302,3 +302,36 @@ export async function deleteBlackoutDate(
   revalidatePath('/dashboard/schedule');
   return { success: true };
 }
+
+// ============================================================================
+// Convenience Wrapper - Auto-detects user from session
+// ============================================================================
+
+export interface CreateBlackoutParams {
+  startDate: Date;
+  endDate?: Date;
+  reason?: string;
+}
+
+/**
+ * Creates a blackout date or date range, automatically detecting the user from the session.
+ * This is a convenience wrapper for createBlackoutDate and createBlackoutDateRange.
+ */
+export async function createBlackout(params: CreateBlackoutParams): Promise<ActionResult<BlackoutDate | BlackoutDate[]>> {
+  const supabase = await createSupabaseServerClient();
+
+  // Get the current user
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) {
+    return { success: false, error: 'Not authenticated', code: 'UNAUTHORIZED' };
+  }
+
+  const captainId = user.id;
+
+  // Delegate to the appropriate function
+  if (params.endDate) {
+    return createBlackoutDateRange(captainId, params.startDate, params.endDate, params.reason);
+  } else {
+    return createBlackoutDate(captainId, params.startDate, params.reason);
+  }
+}
