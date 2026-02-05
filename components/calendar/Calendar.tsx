@@ -10,6 +10,10 @@ import { getBlackoutDates } from '@/app/actions/blackout';
  * Calendar - Main calendar component with multiple view modes
  */
 
+interface ExtendedCalendarProps extends CalendarProps {
+  onEmptySlotClick?: (date: Date, hour: number) => void;
+}
+
 export function Calendar({
   captainId,
   initialDate = new Date(),
@@ -19,8 +23,9 @@ export function Calendar({
   onBlockClick,
   onQuickBlockClick,
   onBlackoutClick,
+  onEmptySlotClick,
   refreshKey = 0,
-}: CalendarProps) {
+}: ExtendedCalendarProps) {
   const [currentDate, setCurrentDate] = useState(initialDate);
   const [currentView, setCurrentView] = useState<CalendarView>(initialView);
   const [bookings, setBookings] = useState<CalendarBooking[]>([]);
@@ -150,6 +155,7 @@ export function Calendar({
           onBlockClick={handleBlockClick}
           onQuickBlockClick={onQuickBlockClick}
           onBlackoutClick={handleBlackoutClick}
+          onEmptySlotClick={onEmptySlotClick}
           isLoading={isLoading}
         />
       );
@@ -166,6 +172,7 @@ export function Calendar({
           onBlockClick={handleBlockClick}
           onQuickBlockClick={onQuickBlockClick}
           onBlackoutClick={handleBlackoutClick}
+          onEmptySlotClick={onEmptySlotClick}
           isLoading={isLoading}
         />
       );

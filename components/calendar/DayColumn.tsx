@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { format, parseISO, isSameDay } from 'date-fns';
-import { X } from 'lucide-react';
+import { useMemo, useState, useCallback } from 'react';
+import { format, parseISO, isSameDay, addHours, setHours, setMinutes } from 'date-fns';
+import { X, Plus } from 'lucide-react';
 import { CalendarBlock } from './CalendarBlock';
 import { NowIndicator } from './NowIndicator';
 import { DayColumnProps, CalendarBooking } from './types';
@@ -17,6 +17,10 @@ interface PositionedBooking {
   height: number;
 }
 
+interface ExtendedDayColumnProps extends DayColumnProps {
+  onEmptySlotClick?: (date: Date, hour: number) => void;
+}
+
 export function DayColumn({
   date,
   bookings,
@@ -27,10 +31,58 @@ export function DayColumn({
   onBlockClick,
   blackoutDate,
   onBlackoutClick,
-}: DayColumnProps) {
+  onEmptySlotClick,
+}: ExtendedDayColumnProps) {
   const totalHeight = (endHour - startHour) * pixelsPerHour;
   const [showTooltip, setShowTooltip] = useState(false);
+  const [hoveredHour, setHoveredHour] = useState<number | null>(null);
   const isBlocked = !!blackoutDate;
+
+  // Handle click on time grid (empty slot)
+  const handleGridClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (isBlocked || !onEmptySlotClick) return;
+
+    // Get click position relative to the grid
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickY = e.clientY - rect.top;
+
+    // Calculate the hour clicked
+    const hourOffset = Math.floor(clickY / pixelsPerHour);
+    const clickedHour = startHour + hourOffset;
+
+    // Check if there's a booking at this hour
+    const hasBookingAtHour = bookings.some((booking) => {
+      const start = parseISO(booking.scheduled_start);
+      const end = parseISO(booking.scheduled_end);
+      return start.getHours() <= clickedHour && end.getHours() > clickedHour;
+    });
+
+    if (!hasBookingAtHour) {
+      onEmptySlotClick(date, clickedHour);
+    }
+  }, [isBlocked, onEmptySlotClick, pixelsPerHour, startHour, bookings, date]);
+
+  // Handle hover for visual feedback
+  const handleGridMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (isBlocked || !onEmptySlotClick) {
+      setHoveredHour(null);
+      return;
+    }
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickY = e.clientY - rect.top;
+    const hourOffset = Math.floor(clickY / pixelsPerHour);
+    const hour = startHour + hourOffset;
+
+    // Check if there's a booking at this hour
+    const hasBookingAtHour = bookings.some((booking) => {
+      const start = parseISO(booking.scheduled_start);
+      const end = parseISO(booking.scheduled_end);
+      return start.getHours() <= hour && end.getHours() > hour;
+    });
+
+    setHoveredHour(hasBookingAtHour ? null : hour);
+  }, [isBlocked, onEmptySlotClick, pixelsPerHour, startHour, bookings]);
 
   // Calculate positions for each booking
   const positionedBookings = useMemo((): PositionedBooking[] => {
@@ -113,7 +165,13 @@ export function DayColumn({
       </div>
 
       {/* Time Grid */}
-      <div className="relative flex-1" style={{ height: totalHeight }}>
+      <div
+        className={`relative flex-1 ${onEmptySlotClick && !isBlocked ? 'cursor-pointer' : ''}`}
+        style={{ height: totalHeight }}
+        onClick={handleGridClick}
+        onMouseMove={handleGridMouseMove}
+        onMouseLeave={() => setHoveredHour(null)}
+      >
         {/* Hour grid lines */}
         {gridLines.map((hour, index) => (
           <div
@@ -122,6 +180,22 @@ export function DayColumn({
             style={{ top: index * pixelsPerHour }}
           />
         ))}
+
+        {/* Hover indicator for empty slot */}
+        {hoveredHour !== null && (
+          <div
+            className="absolute left-0 right-0 flex items-center justify-center bg-cyan-500/10 border border-dashed border-cyan-500/40 transition-all z-5"
+            style={{
+              top: (hoveredHour - startHour) * pixelsPerHour,
+              height: pixelsPerHour,
+            }}
+          >
+            <div className="flex items-center gap-1 rounded-full bg-cyan-500/20 px-2 py-1">
+              <Plus className="h-3 w-3 text-cyan-400" />
+              <span className="text-xs font-medium text-cyan-400">Add booking</span>
+            </div>
+          </div>
+        )}
 
         {/* Half-hour grid lines (more subtle) */}
         {gridLines.slice(0, -1).map((hour, index) => (
