@@ -28,17 +28,22 @@ export default function QuickStatsWidgets({
 }: QuickStatsWidgetsProps) {
   const [stats, setStats] = useState<QuickStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [hasError, setHasError] = useState(false)
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
+        setHasError(false)
         const response = await fetch(`/api/dashboard/quick-stats?captainId=${captainId}`)
         if (response.ok) {
           const data = await response.json()
           setStats(data)
+        } else {
+          setHasError(true)
         }
       } catch (error) {
         console.error('Error fetching quick stats:', error)
+        setHasError(true)
       } finally {
         setIsLoading(false)
       }
@@ -50,20 +55,8 @@ export default function QuickStatsWidgets({
     return () => clearInterval(interval)
   }, [captainId])
 
-  if (isLoading) {
-    return (
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {[...Array(6)].map((_, i) => (
-          <div
-            key={i}
-            className="h-32 animate-pulse rounded-lg border border-slate-700 bg-slate-800/50"
-          />
-        ))}
-      </div>
-    )
-  }
-
-  if (!stats) {
+  // Don't render anything while loading or on error — avoids persistent skeleton states
+  if (isLoading || hasError || !stats) {
     return null
   }
 
