@@ -14,6 +14,9 @@ interface TimeSlot {
   start: string;
   end: string;
   available: boolean;
+  booked_count: number;
+  total_capacity: number;
+  remaining_capacity: number;
 }
 
 interface DateSlotPickerProps {
@@ -63,6 +66,7 @@ export function DateSlotPicker({
 }: DateSlotPickerProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [availabilityData, setAvailabilityData] = useState<Record<string, TimeSlot[]>>({});
+  const [resolvedTimezone, setResolvedTimezone] = useState<string | undefined>(timezone);
   const [loading, setLoading] = useState(true);
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -83,6 +87,9 @@ export function DateSlotPicker({
 
       const data = await response.json();
       setAvailabilityData(data.availability || {});
+      if (data.captain_timezone) {
+        setResolvedTimezone(data.captain_timezone);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load availability');
     } finally {
@@ -132,6 +139,7 @@ export function DateSlotPicker({
     : [];
 
   const availableSlots = selectedDateSlots.filter(slot => slot.available);
+  const bookedSlots = selectedDateSlots.filter(slot => !slot.available);
 
   const handleRetry = () => {
     setRetryCount(prev => prev + 1);
@@ -143,10 +151,10 @@ export function DateSlotPicker({
   return (
     <div className="space-y-6">
       {/* Timezone indicator */}
-      {timezone && (
-        <div className="flex items-center justify-center gap-1.5 text-xs text-slate-500">
+      {resolvedTimezone && (
+        <div className="flex items-center justify-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-xs text-slate-600">
           <Clock className="h-3 w-3" />
-          <span>Times shown in {timezone.replace(/_/g, ' ')}</span>
+          <span>All times shown in <span className="font-medium">{resolvedTimezone.replace(/_/g, ' ')}</span></span>
         </div>
       )}
 
@@ -277,14 +285,14 @@ export function DateSlotPicker({
             </div>
             {availableSlots.length > 0 && (
               <span className="text-xs text-slate-500">
-                {availableSlots.length} {availableSlots.length === 1 ? 'slot' : 'slots'}
+                {availableSlots.length} {availableSlots.length === 1 ? 'slot' : 'slots'} available
               </span>
             )}
           </div>
 
           {slotsLoading ? (
             <TimeSlotsSkeleton />
-          ) : availableSlots.length === 0 ? (
+          ) : selectedDateSlots.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-8 text-center">
               <AlertCircle className="h-8 w-8 text-slate-300" />
               <div>
@@ -298,9 +306,37 @@ export function DateSlotPicker({
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {availableSlots.map((slot, index) => {
-                const isSelectedTime = selectedTime === slot.start;
+              {selectedDateSlots.map((slot, index) => {
+                const isSelectedTime = selectedTime === slot.start && slot.available;
                 const duration = getDurationText(slot.start, slot.end);
+                const isLastSpot = slot.available && slot.remaining_capacity <= slot.total_capacity / 6 && slot.remaining_capacity > 0;
+                const isBooked = !slot.available;
+
+                if (isBooked) {
+                  // Grayed-out booked slot
+                  return (
+                    <div
+                      key={`${slot.start}-${index}`}
+                      className="relative flex flex-col items-start rounded-xl border border-slate-100 bg-slate-50 p-4 text-left min-h-[72px] opacity-60 cursor-not-allowed"
+                      aria-disabled="true"
+                    >
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-lg font-semibold text-slate-400 line-through">
+                          {formatTime(slot.start)}
+                        </span>
+                        <span className="text-sm text-slate-300 line-through">
+                          - {formatTime(slot.end)}
+                        </span>
+                      </div>
+                      <span className="text-xs mt-1 text-slate-400">
+                        {duration}
+                      </span>
+                      <div className="absolute top-3 right-3 rounded-full bg-slate-200 px-2 py-0.5">
+                        <span className="text-[10px] font-medium text-slate-500">Booked</span>
+                      </div>
+                    </div>
+                  );
+                }
 
                 return (
                   <button
@@ -314,7 +350,9 @@ export function DateSlotPicker({
                       active:scale-[0.98]
                       ${isSelectedTime
                         ? 'border-cyan-600 bg-cyan-50 ring-2 ring-cyan-200'
-                        : 'border-slate-200 bg-white hover:border-cyan-400 hover:bg-cyan-50/50 shadow-sm'
+                        : isLastSpot
+                          ? 'border-amber-300 bg-amber-50/50 hover:border-amber-400 hover:bg-amber-50 shadow-sm'
+                          : 'border-slate-200 bg-white hover:border-cyan-400 hover:bg-cyan-50/50 shadow-sm'
                       }
                     `}
                   >
@@ -329,11 +367,28 @@ export function DateSlotPicker({
                       </span>
                     </div>
 
-                    <span className={`text-xs mt-1 ${
-                      isSelectedTime ? 'text-cyan-600' : 'text-slate-400'
-                    }`}>
-                      {duration}
-                    </span>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className={`text-xs ${
+                        isSelectedTime ? 'text-cyan-600' : 'text-slate-400'
+                      }`}>
+                        {duration}
+                      </span>
+                      {slot.total_capacity > 1 && (
+                        <span className={`text-xs ${
+                          isLastSpot ? 'text-amber-600 font-medium' : 'text-emerald-600'
+                        }`}>
+                          {slot.remaining_capacity} of {slot.total_capacity} spots
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Last spot indicator */}
+                    {isLastSpot && !isSelectedTime && (
+                      <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5">
+                        <div className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+                        <span className="text-[10px] font-semibold text-amber-700">Last spot!</span>
+                      </div>
+                    )}
 
                     {isSelectedTime && (
                       <div className="absolute top-3 right-3 h-5 w-5 rounded-full bg-cyan-600 flex items-center justify-center">

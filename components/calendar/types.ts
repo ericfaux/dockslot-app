@@ -91,16 +91,16 @@ export const STATUS_COLORS: Record<BookingStatus, {
     dot: 'bg-emerald-500',
   },
   weather_hold: {
-    bg: 'bg-amber-500/20',
-    border: 'border-amber-500',
-    text: 'text-amber-300',
-    dot: 'bg-amber-500',
-  },
-  rescheduled: {
     bg: 'bg-blue-500/20',
     border: 'border-blue-500',
     text: 'text-blue-300',
     dot: 'bg-blue-500',
+  },
+  rescheduled: {
+    bg: 'bg-purple-500/20',
+    border: 'border-purple-500',
+    text: 'text-purple-300',
+    dot: 'bg-purple-500',
   },
   completed: {
     bg: 'bg-slate-500/20',

@@ -9,6 +9,7 @@ import { BlackoutModal } from './BlackoutModal';
 import { UnblockConfirmModal } from './UnblockConfirmModal';
 import { QuickBookingModal } from './QuickBookingModal';
 import { createBlackoutDate, createBlackoutDateRange, deleteBlackoutDate } from '@/app/actions/blackout';
+import { quickCreateBooking } from '@/app/actions/bookings';
 
 interface ScheduleClientProps {
   captainId: string;
@@ -126,6 +127,34 @@ export function ScheduleClient({ captainId, isHibernating, hibernationEndDate }:
     setIsQuickBookingOpen(false);
   }, [quickBookingSlot, router]);
 
+  const handleQuickCreate = useCallback(async (data: {
+    guestName: string;
+    guestPhone: string;
+    partySize: number;
+    source: 'walk_up' | 'phone' | 'other';
+    date: Date;
+    hour: number;
+  }) => {
+    const startTime = setMinutes(setHours(data.date, data.hour), 0);
+    const endTime = new Date(startTime.getTime() + 4 * 60 * 60 * 1000); // Default 4-hour trip
+
+    const result = await quickCreateBooking({
+      captain_id: captainId,
+      guest_name: data.guestName,
+      guest_phone: data.guestPhone || undefined,
+      party_size: data.partySize,
+      scheduled_start: startTime.toISOString(),
+      scheduled_end: endTime.toISOString(),
+      source: data.source,
+    });
+
+    if (result.success) {
+      setRefreshKey((k) => k + 1);
+    } else {
+      throw new Error(result.error || 'Failed to create booking');
+    }
+  }, [captainId]);
+
   return (
     <div className="relative h-full">
       {/* Calendar */}
@@ -169,6 +198,7 @@ export function ScheduleClient({ captainId, isHibernating, hibernationEndDate }:
         slot={quickBookingSlot}
         onClose={handleCloseQuickBooking}
         onCreateBooking={handleCreateManualBooking}
+        onQuickCreate={handleQuickCreate}
       />
     </div>
   );
