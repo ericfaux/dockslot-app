@@ -23,8 +23,10 @@ import {
 import { FloatPlanCard } from "./components/FloatPlanCard";
 import { BookingLinkCard } from "@/components/BookingLinkCard";
 import { ActionItemsWidget } from "./components/ActionItemsWidget";
+import WeatherAlertWidget from "./components/WeatherAlertWidget";
 import { getActionItems } from "@/app/actions/action-items";
 import { BookingStatus, ACTIVE_BOOKING_STATUSES } from "@/lib/db/types";
+import { addHours } from "date-fns";
 import { checkMarineConditions } from "@/lib/weather/noaa";
 import { getBuoyData } from "@/lib/weather/buoy";
 import SunCalc from "suncalc";
@@ -507,6 +509,7 @@ export default async function DashboardPage() {
   const today = format(new Date(), "yyyy-MM-dd");
   let nextTrip = null;
   let pendingCount = 0;
+  let upcoming48hCount = 0;
 
   if (user) {
     try {
@@ -552,6 +555,17 @@ export default async function DashboardPage() {
         limit: 100,
       });
       pendingCount = pendingBookings.totalCount;
+
+      // Count bookings in the next 48 hours (for weather alert widget)
+      const in48h = addHours(now, 48);
+      const upcoming48hBookings = await getBookingsWithFilters({
+        captainId: user.id,
+        startDate: format(now, "yyyy-MM-dd"),
+        endDate: format(in48h, "yyyy-MM-dd"),
+        status: ["confirmed", "rescheduled"] as BookingStatus[],
+        limit: 100,
+      });
+      upcoming48hCount = upcoming48hBookings.totalCount;
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
     }
@@ -573,10 +587,19 @@ export default async function DashboardPage() {
     <div className="space-y-6">
       {/* ═══ SECTION 1: THE HORIZON WIDGET ═══ */}
       <section aria-label="Day Overview">
-        <HorizonWidget 
-          captainName={displayName} 
+        <HorizonWidget
+          captainName={displayName}
           timezone={captainTimezone}
           weatherData={weatherData}
+        />
+      </section>
+
+      {/* ═══ SECTION 1.25: WEATHER ALERT ═══ */}
+      <section aria-label="Weather Alert">
+        <WeatherAlertWidget
+          lat={captainProfile?.meeting_spot_latitude ?? null}
+          lon={captainProfile?.meeting_spot_longitude ?? null}
+          upcomingBookingsCount={upcoming48hCount}
         />
       </section>
 
