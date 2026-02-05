@@ -12,6 +12,8 @@ import { createBlackoutDate, createBlackoutDateRange, deleteBlackoutDate } from 
 
 interface ScheduleClientProps {
   captainId: string;
+  isHibernating?: boolean;
+  hibernationEndDate?: string | null;
 }
 
 /**
@@ -19,7 +21,7 @@ interface ScheduleClientProps {
  * Manages calendar state and booking detail panel
  */
 
-export function ScheduleClient({ captainId }: ScheduleClientProps) {
+export function ScheduleClient({ captainId, isHibernating, hibernationEndDate }: ScheduleClientProps) {
   const router = useRouter();
   const [selectedBooking, setSelectedBooking] = useState<CalendarBooking | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);

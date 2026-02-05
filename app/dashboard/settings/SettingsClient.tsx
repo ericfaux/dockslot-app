@@ -14,9 +14,17 @@ import {
   ChevronDown,
   Anchor,
   ExternalLink,
+  Users,
+  Download,
+  Trash2,
 } from 'lucide-react';
-import { Profile, AvailabilityWindow } from '@/lib/db/types';
+import { Profile, AvailabilityWindow, HibernationSubscriber } from '@/lib/db/types';
 import { updateProfile } from '@/app/actions/profile';
+import {
+  getHibernationSubscribers,
+  deleteHibernationSubscriber,
+  exportHibernationSubscribers,
+} from '@/app/actions/hibernation-subscribers';
 import { BookingLinkCard } from '@/components/BookingLinkCard';
 import { AvailabilitySettings } from './AvailabilitySettings';
 import { CalendarExport } from './components/CalendarExport';
@@ -60,8 +68,55 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
   const [advanceBookingDays, setAdvanceBookingDays] = useState(initialProfile?.advance_booking_days ?? 30);
   const [isHibernating, setIsHibernating] = useState(initialProfile?.is_hibernating ?? false);
   const [hibernationMessage, setHibernationMessage] = useState(initialProfile?.hibernation_message || '');
+  const [hibernationEndDate, setHibernationEndDate] = useState(initialProfile?.hibernation_end_date || '');
+  const [hibernationResumeTime, setHibernationResumeTime] = useState(initialProfile?.hibernation_resume_time || '');
+  const [hibernationShowReturnDate, setHibernationShowReturnDate] = useState(initialProfile?.hibernation_show_return_date ?? true);
+  const [hibernationAllowNotifications, setHibernationAllowNotifications] = useState(initialProfile?.hibernation_allow_notifications ?? true);
+  const [hibernationShowContactInfo, setHibernationShowContactInfo] = useState(initialProfile?.hibernation_show_contact_info ?? false);
   const [cancellationPolicy, setCancellationPolicy] = useState(initialProfile?.cancellation_policy || '');
   const [dockModeEnabled, setDockModeEnabled] = useState(initialProfile?.dock_mode_enabled ?? false);
+
+  // Subscriber management state
+  const [subscribers, setSubscribers] = useState<HibernationSubscriber[]>([]);
+  const [subscribersLoading, setSubscribersLoading] = useState(false);
+  const [subscribersExpanded, setSubscribersExpanded] = useState(false);
+
+  const loadSubscribers = async () => {
+    if (subscribersLoading) return;
+    setSubscribersLoading(true);
+    const result = await getHibernationSubscribers();
+    if (result.success && result.data) {
+      setSubscribers(result.data);
+    }
+    setSubscribersLoading(false);
+  };
+
+  const handleDeleteSubscriber = async (subscriberId: string) => {
+    const result = await deleteHibernationSubscriber(subscriberId);
+    if (result.success) {
+      setSubscribers(subscribers.filter(s => s.id !== subscriberId));
+    }
+  };
+
+  const handleExportSubscribers = async () => {
+    const result = await exportHibernationSubscribers();
+    if (result.success && result.data) {
+      const blob = new Blob([result.data], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'hibernation-subscribers.csv';
+      a.click();
+      window.URL.revokeObjectURL(url);
+    }
+  };
+
+  const toggleSubscribers = () => {
+    if (!subscribersExpanded && subscribers.length === 0) {
+      loadSubscribers();
+    }
+    setSubscribersExpanded(!subscribersExpanded);
+  };
 
   const handleSave = () => {
     startTransition(async () => {
@@ -81,6 +136,11 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
         advance_booking_days: advanceBookingDays,
         is_hibernating: isHibernating,
         hibernation_message: hibernationMessage || null,
+        hibernation_end_date: hibernationEndDate || null,
+        hibernation_resume_time: hibernationResumeTime || null,
+        hibernation_show_return_date: hibernationShowReturnDate,
+        hibernation_allow_notifications: hibernationAllowNotifications,
+        hibernation_show_contact_info: hibernationShowContactInfo,
         cancellation_policy: cancellationPolicy || null,
         dock_mode_enabled: dockModeEnabled,
       });
@@ -401,7 +461,7 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
           <h2 className="text-lg font-semibold text-white">Hibernation Mode</h2>
         </div>
         <p className="mb-4 text-sm text-slate-400">
-          Temporarily pause new bookings during off-season or when you're unavailable.
+          Temporarily pause new bookings during off-season. Set a return date to automatically resume accepting bookings.
         </p>
         <div className="space-y-4">
           <label className="flex cursor-pointer items-center gap-3">
@@ -428,19 +488,169 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
               {isHibernating ? 'Hibernation mode is ON' : 'Hibernation mode is OFF'}
             </span>
           </label>
+
           {isHibernating && (
-            <div>
-              <label htmlFor="hibernationMessage" className={labelClassName}>
-                Message for Visitors
-              </label>
-              <textarea
-                id="hibernationMessage"
-                value={hibernationMessage}
-                onChange={(e) => setHibernationMessage(e.target.value)}
-                placeholder="We're currently on break and will return in Spring 2024. Check back soon for new availability!"
-                rows={2}
-                className={inputClassName}
-              />
+            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 space-y-4">
+              {/* Scheduled Resumption */}
+              <div>
+                <label htmlFor="hibernationEndDate" className={labelClassName}>
+                  Hibernation Ends On
+                </label>
+                <div className="flex gap-3">
+                  <input
+                    id="hibernationEndDate"
+                    type="date"
+                    value={hibernationEndDate}
+                    onChange={(e) => setHibernationEndDate(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                    className={`${inputClassName} flex-1`}
+                  />
+                  <input
+                    id="hibernationResumeTime"
+                    type="time"
+                    value={hibernationResumeTime}
+                    onChange={(e) => setHibernationResumeTime(e.target.value)}
+                    placeholder="08:00"
+                    className={`${inputClassName} w-32`}
+                  />
+                </div>
+                <p className="mt-1.5 text-xs text-slate-500">
+                  Your booking page will automatically reopen on this date{hibernationResumeTime ? ` at ${hibernationResumeTime}` : ' at midnight'} ({timezone.split('/')[1]?.replace('_', ' ') || timezone}).
+                </p>
+              </div>
+
+              {/* Guest-facing options */}
+              <div className="space-y-3 pt-2">
+                <label className="flex cursor-pointer items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={hibernationShowReturnDate}
+                    onChange={(e) => setHibernationShowReturnDate(e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-600 bg-slate-800 text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-900"
+                  />
+                  <span className="text-sm text-slate-300">
+                    Show return date to guests
+                  </span>
+                </label>
+
+                <label className="flex cursor-pointer items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={hibernationAllowNotifications}
+                    onChange={(e) => setHibernationAllowNotifications(e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-600 bg-slate-800 text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-900"
+                  />
+                  <span className="text-sm text-slate-300">
+                    Let guests sign up for &quot;We&apos;re Back!&quot; notifications
+                  </span>
+                </label>
+
+                <label className="flex cursor-pointer items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={hibernationShowContactInfo}
+                    onChange={(e) => setHibernationShowContactInfo(e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-600 bg-slate-800 text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-900"
+                  />
+                  <span className="text-sm text-slate-300">
+                    Show contact info during hibernation
+                  </span>
+                </label>
+              </div>
+
+              {/* Off-season message */}
+              <div className="pt-2">
+                <label htmlFor="hibernationMessage" className={labelClassName}>
+                  Off-Season Message
+                </label>
+                <textarea
+                  id="hibernationMessage"
+                  value={hibernationMessage}
+                  onChange={(e) => setHibernationMessage(e.target.value)}
+                  placeholder="We're taking a winter break! See you in the spring."
+                  rows={2}
+                  className={inputClassName}
+                />
+                <p className="mt-1.5 text-xs text-slate-500">
+                  This message is shown to guests who visit your booking page during hibernation.
+                </p>
+              </div>
+
+              {/* Notification Subscribers */}
+              {hibernationAllowNotifications && (
+                <div className="pt-4 border-t border-amber-500/20">
+                  <button
+                    type="button"
+                    onClick={toggleSubscribers}
+                    className="flex w-full items-center justify-between text-sm text-slate-300 hover:text-white transition-colors"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      Notification Subscribers
+                    </span>
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform ${subscribersExpanded ? 'rotate-180' : ''}`}
+                    />
+                  </button>
+
+                  {subscribersExpanded && (
+                    <div className="mt-3 space-y-3">
+                      {subscribersLoading ? (
+                        <div className="flex items-center justify-center py-4">
+                          <Loader2 className="h-5 w-5 animate-spin text-amber-400" />
+                        </div>
+                      ) : subscribers.length === 0 ? (
+                        <p className="text-sm text-slate-500 py-2">
+                          No subscribers yet. Guests can sign up on your booking page.
+                        </p>
+                      ) : (
+                        <>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-slate-400">
+                              {subscribers.length} subscriber{subscribers.length !== 1 ? 's' : ''}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={handleExportSubscribers}
+                              className="flex items-center gap-1.5 text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
+                            >
+                              <Download className="h-3.5 w-3.5" />
+                              Export CSV
+                            </button>
+                          </div>
+                          <div className="max-h-48 overflow-y-auto space-y-2">
+                            {subscribers.map((sub) => (
+                              <div
+                                key={sub.id}
+                                className="flex items-center justify-between rounded-md bg-slate-800/50 px-3 py-2"
+                              >
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-sm text-white truncate">
+                                    {sub.email}
+                                  </p>
+                                  {sub.name && (
+                                    <p className="text-xs text-slate-400 truncate">
+                                      {sub.name}
+                                    </p>
+                                  )}
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteSubscriber(sub.id)}
+                                  className="ml-2 p-1.5 text-slate-500 hover:text-rose-400 transition-colors"
+                                  title="Remove subscriber"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
