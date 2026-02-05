@@ -4,8 +4,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, LogOut } from "lucide-react";
-import { navLinks } from "./nav-links";
+import { Menu, X, LogOut, ChevronDown } from "lucide-react";
+import { primaryNavLinks, secondaryNavLinks } from "./nav-links";
 
 interface MobileHeaderProps {
   userEmail: string;
@@ -14,9 +14,15 @@ interface MobileHeaderProps {
 
 export function MobileHeader({ userEmail, signOutAction }: MobileHeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const pathname = usePathname();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
+
+  const isSecondaryActive = secondaryNavLinks.some((link) =>
+    pathname.startsWith(link.href)
+  );
+  const showMore = moreOpen || isSecondaryActive;
 
   const closeDrawer = useCallback(() => {
     setIsOpen(false);
@@ -120,12 +126,15 @@ export function MobileHeader({ userEmail, signOutAction }: MobileHeaderProps) {
 
           {/* Navigation Links */}
           <nav className="flex-1 py-4 overflow-y-auto">
+            {/* Primary Links */}
             <ul className="space-y-1 px-3">
-              {navLinks.map((link) => {
+              {primaryNavLinks.map((link) => {
                 const isActive =
                   link.href === "/dashboard"
                     ? pathname === "/dashboard"
-                    : pathname.startsWith(link.href);
+                    : link.href === "/dashboard/settings"
+                      ? pathname.startsWith("/dashboard/settings")
+                      : pathname.startsWith(link.href);
                 const Icon = link.icon;
 
                 return (
@@ -146,6 +155,49 @@ export function MobileHeader({ userEmail, signOutAction }: MobileHeaderProps) {
                 );
               })}
             </ul>
+
+            {/* More Section */}
+            <div className="mt-4 px-3">
+              <button
+                type="button"
+                onClick={() => setMoreOpen((prev) => !prev)}
+                className="flex items-center justify-between w-full h-9 px-3 text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 rounded-md"
+                aria-expanded={showMore}
+              >
+                <span>More</span>
+                <ChevronDown
+                  size={14}
+                  aria-hidden="true"
+                  className={`transition-transform duration-200 ${showMore ? "rotate-180" : ""}`}
+                />
+              </button>
+
+              {showMore && (
+                <ul className="space-y-1 mt-1">
+                  {secondaryNavLinks.map((link) => {
+                    const isActive = pathname.startsWith(link.href);
+                    const Icon = link.icon;
+
+                    return (
+                      <li key={link.href}>
+                        <Link
+                          href={link.href}
+                          onClick={closeDrawer}
+                          className={`flex items-center gap-3 h-10 px-3 rounded-r-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 ${
+                            isActive
+                              ? "bg-white/10 text-white border-l-4 border-amber-500 pl-2"
+                              : "text-zinc-400 hover:bg-white/5 hover:text-white border-l-4 border-transparent pl-2"
+                          }`}
+                        >
+                          <Icon size={16} aria-hidden="true" />
+                          <span>{link.label}</span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
           </nav>
 
           {/* User Profile Section */}

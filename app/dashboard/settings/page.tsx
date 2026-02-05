@@ -9,6 +9,7 @@ import { redirect } from 'next/navigation';
 import { getProfile } from '@/app/actions/profile';
 import { getAvailabilityWindows, ensureAvailabilityExists } from '@/app/actions/availability';
 import { SettingsClient } from './SettingsClient';
+import { SettingsSubNav } from './components/SettingsSubNav';
 
 export default async function SettingsPage() {
   const { user, supabase } = await requireAuth()
@@ -58,6 +59,9 @@ export default async function SettingsPage() {
           Manage your captain profile, business details, and booking preferences.
         </p>
       </section>
+
+      {/* Quick Access to Configuration Sub-pages */}
+      <SettingsSubNav />
 
       {/* Settings Client Component */}
       <SettingsClient

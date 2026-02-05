@@ -24,16 +24,12 @@ export interface NavLink {
   icon: LucideIcon;
 }
 
-export const navLinks: NavLink[] = [
+/** Primary nav — always visible (5 items) */
+export const primaryNavLinks: NavLink[] = [
   {
     href: "/dashboard",
     label: "Dashboard",
     icon: LayoutDashboard,
-  },
-  {
-    href: "/dashboard/trips",
-    label: "Trips",
-    icon: Anchor,
   },
   {
     href: "/dashboard/schedule",
@@ -42,8 +38,27 @@ export const navLinks: NavLink[] = [
   },
   {
     href: "/dashboard/bookings",
-    label: "All Bookings",
+    label: "Bookings",
     icon: List,
+  },
+  {
+    href: "/dashboard/guests",
+    label: "Guests",
+    icon: Users,
+  },
+  {
+    href: "/dashboard/settings",
+    label: "Settings",
+    icon: Settings,
+  },
+];
+
+/** Secondary nav — shown in collapsible "More" section */
+export const secondaryNavLinks: NavLink[] = [
+  {
+    href: "/dashboard/reports",
+    label: "Reports",
+    icon: FileText,
   },
   {
     href: "/dashboard/modifications",
@@ -61,39 +76,9 @@ export const navLinks: NavLink[] = [
     icon: Users,
   },
   {
-    href: "/dashboard/vessels",
-    label: "Vessels",
-    icon: Ship,
-  },
-  {
-    href: "/dashboard/waivers",
-    label: "Waivers",
-    icon: FileSignature,
-  },
-  {
-    href: "/dashboard/reports",
-    label: "Trip Reports",
-    icon: FileText,
-  },
-  {
-    href: "/dashboard/reports-advanced",
-    label: "Analytics Reports",
-    icon: BarChart3,
-  },
-  {
-    href: "/dashboard/guests",
-    label: "Guests",
-    icon: Users,
-  },
-  {
     href: "/dashboard/reviews",
     label: "Reviews",
     icon: Star,
-  },
-  {
-    href: "/dashboard/settings/referrals",
-    label: "Referrals",
-    icon: Gift,
   },
   {
     href: "/dashboard/analytics",
@@ -101,13 +86,23 @@ export const navLinks: NavLink[] = [
     icon: BarChart3,
   },
   {
-    href: "/dashboard/payments",
-    label: "Payments",
-    icon: CreditCard,
+    href: "/dashboard/reports-advanced",
+    label: "Advanced Reports",
+    icon: BarChart3,
   },
-  {
-    href: "/dashboard/settings",
-    label: "Settings",
-    icon: Settings,
-  },
+];
+
+/**
+ * Full flat list for backward compatibility.
+ * Includes all primary + secondary links plus items that moved into Settings.
+ */
+export const navLinks: NavLink[] = [
+  ...primaryNavLinks,
+  ...secondaryNavLinks,
+  // These still exist as pages but are now accessed via Settings sub-nav
+  { href: "/dashboard/trips", label: "Trip Types", icon: Anchor },
+  { href: "/dashboard/vessels", label: "Vessels", icon: Ship },
+  { href: "/dashboard/waivers", label: "Waivers", icon: FileSignature },
+  { href: "/dashboard/payments", label: "Payments", icon: CreditCard },
+  { href: "/dashboard/settings/referrals", label: "Referrals", icon: Gift },
 ];
