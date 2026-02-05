@@ -94,15 +94,15 @@ export const secondaryNavLinks: NavLink[] = [
 
 /**
  * Full flat list for backward compatibility.
- * Includes all primary + secondary links plus items that moved into Settings.
+ * These items now live as tabs within Settings.
  */
 export const navLinks: NavLink[] = [
   ...primaryNavLinks,
   ...secondaryNavLinks,
-  // These still exist as pages but are now accessed via Settings sub-nav
-  { href: "/dashboard/trips", label: "Trip Types", icon: Anchor },
-  { href: "/dashboard/vessels", label: "Vessels", icon: Ship },
-  { href: "/dashboard/waivers", label: "Waivers", icon: FileSignature },
-  { href: "/dashboard/payments", label: "Payments", icon: CreditCard },
-  { href: "/dashboard/settings/referrals", label: "Referrals", icon: Gift },
+  // These now redirect to Settings tabs
+  { href: "/dashboard/settings?tab=trip-types", label: "Trip Types", icon: Anchor },
+  { href: "/dashboard/settings?tab=vessels", label: "Vessels", icon: Ship },
+  { href: "/dashboard/settings?tab=waivers", label: "Waivers", icon: FileSignature },
+  { href: "/dashboard/settings?tab=payments", label: "Payments", icon: CreditCard },
+  { href: "/dashboard/settings?tab=booking-page", label: "Referrals", icon: Gift },
 ];

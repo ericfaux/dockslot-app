@@ -1,17 +1,9 @@
+// app/dashboard/settings/referrals/page.tsx
+// Redirects to Settings > Booking Page tab (which contains referrals)
+export const dynamic = 'force-dynamic';
+
 import { redirect } from 'next/navigation';
-import { createSupabaseServerClient } from '@/utils/supabase/server';
-import ReferralProgramClient from './ReferralProgramClient';
 
-export default async function ReferralProgramPage() {
-  const supabase = await createSupabaseServerClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/login');
-  }
-
-  return <ReferralProgramClient />;
+export default function ReferralProgramPage() {
+  redirect('/dashboard/settings?tab=booking-page');
 }
