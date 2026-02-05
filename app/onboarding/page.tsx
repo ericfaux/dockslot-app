@@ -31,6 +31,8 @@ export default async function OnboardingPage() {
       .from('profiles')
       .insert({
         user_id: user.id,
+        email: user.email,
+        business_name: user.user_metadata?.business_name || null,
         onboarding_step: 0,
         onboarding_completed: false,
       })
@@ -38,7 +40,13 @@ export default async function OnboardingPage() {
       .single()
 
     if (newProfile) {
-      return <OnboardingWizard profile={newProfile} />
+      return (
+        <OnboardingWizard
+          profile={newProfile}
+          userEmail={user.email || ''}
+          userId={user.id}
+        />
+      )
     }
   }
 
@@ -47,5 +55,11 @@ export default async function OnboardingPage() {
     redirect('/dashboard')
   }
 
-  return <OnboardingWizard profile={profile} />
+  return (
+    <OnboardingWizard
+      profile={profile}
+      userEmail={user.email || ''}
+      userId={user.id}
+    />
+  )
 }

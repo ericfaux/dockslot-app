@@ -39,6 +39,17 @@ export async function signInAction(formData: FormData): Promise<void> {
     redirect("/login?mode=signin&error=" + encodeURIComponent(message));
   }
 
+  // Check if captain has completed onboarding
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("onboarding_completed")
+    .eq("id", (await supabase.auth.getUser()).data.user?.id)
+    .single();
+
+  if (!profile || !profile.onboarding_completed) {
+    redirect("/onboarding");
+  }
+
   redirect("/dashboard");
 }
 
@@ -93,5 +104,6 @@ export async function registerAction(formData: FormData): Promise<void> {
     redirect("/login?mode=register&error=" + encodeURIComponent(message));
   }
 
-  redirect("/dashboard");
+  // New registrations always go to onboarding
+  redirect("/onboarding");
 }

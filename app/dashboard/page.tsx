@@ -662,18 +662,21 @@ export default async function DashboardPage() {
   let hasVessel = false;
   let hasTripType = false;
   let hasAnyBooking = false;
+  let hasAvailability = false;
   const hasMeetingSpot = !!(captainProfile?.meeting_spot_latitude && captainProfile?.meeting_spot_longitude);
 
   if (user) {
     try {
-      const [vesselResult, tripTypeResult, bookingResult] = await Promise.all([
-        supabase.from('vessels').select('id', { count: 'exact', head: true }).eq('captain_id', user.id),
-        supabase.from('trip_types').select('id', { count: 'exact', head: true }).eq('captain_id', user.id),
+      const [vesselResult, tripTypeResult, bookingResult, availabilityResult] = await Promise.all([
+        supabase.from('vessels').select('id', { count: 'exact', head: true }).eq('owner_id', user.id),
+        supabase.from('trip_types').select('id', { count: 'exact', head: true }).eq('owner_id', user.id),
         supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('captain_id', user.id).limit(1),
+        supabase.from('availability_windows').select('id', { count: 'exact', head: true }).eq('owner_id', user.id),
       ]);
       hasVessel = (vesselResult.count || 0) > 0;
       hasTripType = (tripTypeResult.count || 0) > 0;
       hasAnyBooking = (bookingResult.count || 0) > 0;
+      hasAvailability = (availabilityResult.count || 0) > 0;
     } catch (err) {
       console.error('Error checking onboarding status:', err);
     }
@@ -783,6 +786,7 @@ export default async function DashboardPage() {
             hasVessel={hasVessel}
             hasTripType={hasTripType}
             hasBooking={hasAnyBooking}
+            hasAvailability={hasAvailability}
             bookingPageUrl={`/book/${user.id}`}
           />
         </section>
