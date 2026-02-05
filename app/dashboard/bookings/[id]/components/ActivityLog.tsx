@@ -1,0 +1,338 @@
+'use client';
+
+import { useState, useMemo } from 'react';
+import { format, parseISO } from 'date-fns';
+import {
+  Clock,
+  Calendar,
+  CreditCard,
+  User,
+  FileText,
+  CloudRain,
+  Mail,
+  Edit3,
+  CheckCircle,
+  XCircle,
+  RotateCcw,
+  DollarSign,
+  AlertCircle,
+  ChevronDown,
+  ChevronUp,
+  Anchor,
+} from 'lucide-react';
+import { BookingLog } from '@/lib/db/types';
+
+interface AuditLog {
+  id: string;
+  table_name: string;
+  record_id: string;
+  action: string;
+  changed_fields: string[] | null;
+  old_values: Record<string, unknown> | null;
+  new_values: Record<string, unknown> | null;
+  user_id: string | null;
+  created_at: string;
+}
+
+interface TimelineEvent {
+  id: string;
+  timestamp: string;
+  type: 'booking_log' | 'audit_log';
+  icon: React.ReactNode;
+  iconColor: string;
+  bgColor: string;
+  title: string;
+  description: string;
+  actor?: string;
+  metadata?: Record<string, unknown>;
+}
+
+interface ActivityLogProps {
+  logs: BookingLog[];
+  auditLogs: AuditLog[];
+  isLoading: boolean;
+}
+
+const EVENT_CONFIG: Record<string, { icon: React.ElementType; color: string; bg: string }> = {
+  booking_created: { icon: Calendar, color: 'text-cyan-400', bg: 'bg-cyan-500/20' },
+  status_changed: { icon: Edit3, color: 'text-amber-400', bg: 'bg-amber-500/20' },
+  payment_received: { icon: CreditCard, color: 'text-emerald-400', bg: 'bg-emerald-500/20' },
+  payment_refunded: { icon: RotateCcw, color: 'text-purple-400', bg: 'bg-purple-500/20' },
+  waiver_signed: { icon: FileText, color: 'text-blue-400', bg: 'bg-blue-500/20' },
+  passenger_added: { icon: User, color: 'text-cyan-400', bg: 'bg-cyan-500/20' },
+  passenger_updated: { icon: User, color: 'text-slate-400', bg: 'bg-slate-500/20' },
+  rescheduled: { icon: Calendar, color: 'text-amber-400', bg: 'bg-amber-500/20' },
+  weather_hold_set: { icon: CloudRain, color: 'text-amber-400', bg: 'bg-amber-500/20' },
+  note_added: { icon: Edit3, color: 'text-slate-400', bg: 'bg-slate-500/20' },
+  guest_communication: { icon: Mail, color: 'text-blue-400', bg: 'bg-blue-500/20' },
+  completed: { icon: CheckCircle, color: 'text-emerald-400', bg: 'bg-emerald-500/20' },
+  cancelled: { icon: XCircle, color: 'text-rose-400', bg: 'bg-rose-500/20' },
+  balance_requested: { icon: DollarSign, color: 'text-cyan-400', bg: 'bg-cyan-500/20' },
+  default: { icon: Clock, color: 'text-slate-400', bg: 'bg-slate-500/20' },
+};
+
+function getEventConfig(eventType: string) {
+  return EVENT_CONFIG[eventType] || EVENT_CONFIG.default;
+}
+
+function formatActorType(actorType: string): string {
+  switch (actorType) {
+    case 'captain':
+      return 'Captain';
+    case 'guest':
+      return 'Guest';
+    case 'system':
+      return 'System';
+    default:
+      return actorType;
+  }
+}
+
+export function ActivityLog({ logs, auditLogs, isLoading }: ActivityLogProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  // Process and merge logs into timeline events
+  const timelineEvents = useMemo(() => {
+    const events: TimelineEvent[] = [];
+
+    // Process booking logs
+    logs.forEach((log) => {
+      const config = getEventConfig(log.entry_type);
+      const Icon = config.icon;
+
+      events.push({
+        id: `log-${log.id}`,
+        timestamp: log.created_at,
+        type: 'booking_log',
+        icon: <Icon className="h-4 w-4" />,
+        iconColor: config.color,
+        bgColor: config.bg,
+        title: formatLogTitle(log.entry_type),
+        description: log.description,
+        actor: formatActorType(log.actor_type),
+        metadata: {
+          old_value: log.old_value,
+          new_value: log.new_value,
+        },
+      });
+    });
+
+    // Process audit logs (only include meaningful ones not already in booking_logs)
+    auditLogs.forEach((log) => {
+      // Skip if there's already a booking log for this action
+      const isDuplicate = logs.some(
+        (bl) =>
+          Math.abs(new Date(bl.created_at).getTime() - new Date(log.created_at).getTime()) < 1000
+      );
+
+      if (isDuplicate) return;
+
+      const config = getEventConfig(log.action);
+      const Icon = config.icon;
+
+      events.push({
+        id: `audit-${log.id}`,
+        timestamp: log.created_at,
+        type: 'audit_log',
+        icon: <Icon className="h-4 w-4" />,
+        iconColor: config.color,
+        bgColor: config.bg,
+        title: formatAuditTitle(log.action, log.changed_fields),
+        description: formatAuditDescription(log),
+        actor: log.user_id ? 'Captain' : 'System',
+        metadata: {
+          changed_fields: log.changed_fields,
+          old_values: log.old_values,
+          new_values: log.new_values,
+        },
+      });
+    });
+
+    // Sort by timestamp (newest first)
+    return events.sort(
+      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+  }, [logs, auditLogs]);
+
+  const displayedEvents = isExpanded ? timelineEvents : timelineEvents.slice(0, 5);
+  const hasMore = timelineEvents.length > 5;
+
+  return (
+    <section
+      aria-label="Activity Log"
+      className="rounded-lg border border-slate-700 bg-slate-800/50 p-6 print:border-slate-300 print:bg-white"
+    >
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="flex items-center gap-2 text-lg font-semibold text-cyan-400 print:text-cyan-600">
+          <Anchor className="h-5 w-5" />
+          Captain&apos;s Log
+        </h2>
+        {timelineEvents.length > 0 && (
+          <span className="text-xs text-slate-500">{timelineEvents.length} entries</span>
+        )}
+      </div>
+
+      {/* Loading State */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-8">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-cyan-500 border-t-transparent" />
+        </div>
+      ) : timelineEvents.length === 0 ? (
+        <div className="rounded bg-slate-900/30 p-6 text-center print:bg-slate-100">
+          <Clock className="mx-auto mb-2 h-8 w-8 text-slate-500" />
+          <p className="text-slate-400">No activity recorded yet</p>
+        </div>
+      ) : (
+        <>
+          {/* Timeline */}
+          <div className="space-y-4">
+            {displayedEvents.map((event, index) => (
+              <div key={event.id} className="flex gap-3">
+                {/* Timeline connector */}
+                <div className="flex flex-col items-center">
+                  <div
+                    className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ${event.bgColor} ${event.iconColor}`}
+                  >
+                    {event.icon}
+                  </div>
+                  {index < displayedEvents.length - 1 && (
+                    <div className="h-full w-px bg-slate-700 print:bg-slate-300" />
+                  )}
+                </div>
+
+                {/* Event content */}
+                <div className="min-w-0 flex-1 pb-4">
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <h4 className="font-medium text-slate-200 print:text-black">
+                        {event.title}
+                      </h4>
+                      <p className="mt-0.5 text-sm text-slate-400 print:text-slate-600">
+                        {event.description}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                    <time>{format(parseISO(event.timestamp), 'MMM d, yyyy • h:mm a')}</time>
+                    {event.actor && (
+                      <>
+                        <span>•</span>
+                        <span>{event.actor}</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Show More/Less Button */}
+          {hasMore && (
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded border border-slate-700 py-2 text-sm text-cyan-400 transition-colors hover:bg-slate-700/50 print:hidden"
+            >
+              {isExpanded ? (
+                <>
+                  <ChevronUp className="h-4 w-4" />
+                  Show Less
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="h-4 w-4" />
+                  Show {timelineEvents.length - 5} More Entries
+                </>
+              )}
+            </button>
+          )}
+        </>
+      )}
+    </section>
+  );
+}
+
+// Helper functions
+function formatLogTitle(entryType: string): string {
+  const titles: Record<string, string> = {
+    booking_created: 'Booking Created',
+    status_changed: 'Status Updated',
+    payment_received: 'Payment Received',
+    payment_refunded: 'Refund Issued',
+    waiver_signed: 'Waiver Signed',
+    passenger_added: 'Passenger Added',
+    passenger_updated: 'Passenger Updated',
+    rescheduled: 'Booking Rescheduled',
+    weather_hold_set: 'Weather Hold Set',
+    note_added: 'Note Added',
+    guest_communication: 'Message Sent',
+    completed: 'Trip Completed',
+    cancelled: 'Booking Cancelled',
+    balance_requested: 'Balance Requested',
+  };
+
+  return titles[entryType] || entryType
+    .split('_')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+function formatAuditTitle(action: string, changedFields: string[] | null): string {
+  if (action === 'update' && changedFields && changedFields.length > 0) {
+    const fields = changedFields
+      .filter((f) => !['updated_at'].includes(f))
+      .map((f) => f.replace(/_/g, ' '))
+      .slice(0, 2);
+
+    if (fields.length === 0) return 'Record Updated';
+    return `Updated ${fields.join(', ')}${changedFields.length > 2 ? '...' : ''}`;
+  }
+
+  switch (action) {
+    case 'insert':
+      return 'Record Created';
+    case 'delete':
+      return 'Record Deleted';
+    default:
+      return action.charAt(0).toUpperCase() + action.slice(1);
+  }
+}
+
+function formatAuditDescription(log: AuditLog): string {
+  if (log.action === 'update' && log.changed_fields) {
+    const meaningfulChanges = log.changed_fields.filter(
+      (f) => !['updated_at', 'created_at'].includes(f)
+    );
+
+    if (meaningfulChanges.length === 0) return 'Record updated';
+
+    const changes = meaningfulChanges
+      .slice(0, 2)
+      .map((field) => {
+        const oldVal = log.old_values?.[field];
+        const newVal = log.new_values?.[field];
+
+        // Format the field name
+        const fieldName = field.replace(/_/g, ' ');
+
+        // Format values nicely
+        const formatValue = (val: unknown): string => {
+          if (val === null || val === undefined) return 'empty';
+          if (typeof val === 'boolean') return val ? 'yes' : 'no';
+          if (typeof val === 'number') return val.toString();
+          if (typeof val === 'string' && val.length > 30) return val.slice(0, 30) + '...';
+          return String(val);
+        };
+
+        if (oldVal !== undefined && newVal !== undefined) {
+          return `${fieldName}: ${formatValue(oldVal)} → ${formatValue(newVal)}`;
+        }
+
+        return fieldName;
+      })
+      .join(', ');
+
+    return changes || 'Fields updated';
+  }
+
+  return `Booking ${log.action}`;
+}
