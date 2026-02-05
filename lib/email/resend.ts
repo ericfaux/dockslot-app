@@ -65,45 +65,75 @@ export async function sendBookingConfirmation(params: {
   time: string;
   vessel: string;
   meetingSpot: string;
+  meetingSpotInstructions?: string;
   captainName: string;
+  captainPhone?: string;
   totalPrice: string;
   depositPaid: string;
   balanceDue: string;
   managementUrl: string;
-}): Promise<{ success: boolean; error?: string }> {
+  waiverUrl?: string;
+  cancellationPolicy?: string;
+  whatToBring?: string;
+  businessName?: string;
+  logoUrl?: string;
+  emailSignature?: string;
+}): Promise<{ success: boolean; error?: string; messageId?: string }> {
+  const whatToBringItems = params.whatToBring
+    ? params.whatToBring.split('\n').filter(Boolean).map(item => `<li>${item.trim()}</li>`).join('')
+    : `<li>Photo ID</li><li>Sunscreen &amp; sunglasses</li><li>Light jacket or windbreaker</li><li>Camera or phone for photos</li><li>Any medications you may need</li>`;
+
+  const displayName = params.businessName || params.captainName;
+
   const html = `
 <!DOCTYPE html>
 <html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
 <body style="margin: 0; padding: 0; background-color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto; background-color: #1e293b;">
     <tr>
       <td style="padding: 40px 20px; text-align: center; background: linear-gradient(to bottom, #0c4a6e, #0f172a);">
-        <h1 style="margin: 0; color: #06b6d4; font-size: 28px;">⚓ DockSlot</h1>
+        ${params.logoUrl ? `<img src="${params.logoUrl}" alt="${displayName}" style="max-height: 60px; margin-bottom: 10px;">` : ''}
+        <h1 style="margin: 0; color: #06b6d4; font-size: 28px;">${displayName}</h1>
         <p style="margin: 10px 0 0; color: #94a3b8;">Charter Booking Confirmed</p>
       </td>
     </tr>
-    
+
     <tr>
       <td style="padding: 30px 20px;">
-        <h2 style="margin: 0 0 20px; color: #f1f5f9; font-size: 24px;">Hi ${params.guestName}! 🎉</h2>
+        <h2 style="margin: 0 0 20px; color: #f1f5f9; font-size: 24px;">Hi ${params.guestName}!</h2>
         <p style="margin: 0 0 20px; color: #cbd5e1; line-height: 1.6;">
           Your charter trip is confirmed! We can't wait to have you aboard.
         </p>
-        
-        <div style="background-color: #0f172a; border-left: 4px solid #06b6d4; padding: 20px; margin: 20px 0;">
+
+        <div style="background-color: #0f172a; border-left: 4px solid #06b6d4; padding: 20px; margin: 20px 0; border-radius: 6px;">
           <h3 style="margin: 0 0 15px; color: #06b6d4;">Trip Details</h3>
           <p style="margin: 5px 0; color: #cbd5e1;"><strong>Trip:</strong> ${params.tripType}</p>
-          <p style="margin: 5px 0; color: #cbd5e1;"><strong>Date & Time:</strong> ${params.date} at ${params.time}</p>
+          <p style="margin: 5px 0; color: #cbd5e1;"><strong>Date &amp; Time:</strong> ${params.date} at ${params.time}</p>
           <p style="margin: 5px 0; color: #cbd5e1;"><strong>Vessel:</strong> ${params.vessel}</p>
           <p style="margin: 5px 0; color: #cbd5e1;"><strong>Captain:</strong> ${params.captainName}</p>
+          ${params.captainPhone ? `<p style="margin: 5px 0; color: #cbd5e1;"><strong>Contact:</strong> ${params.captainPhone}</p>` : ''}
         </div>
 
-        <div style="background-color: #0f172a; border-left: 4px solid #10b981; padding: 20px; margin: 20px 0;">
+        <div style="background-color: #0f172a; border-left: 4px solid #10b981; padding: 20px; margin: 20px 0; border-radius: 6px;">
           <h3 style="margin: 0 0 10px; color: #10b981;">Meeting Location</h3>
-          <p style="margin: 0; color: #cbd5e1;">${params.meetingSpot}</p>
+          <p style="margin: 0 0 5px; color: #cbd5e1; font-size: 16px;">${params.meetingSpot}</p>
+          ${params.meetingSpotInstructions ? `<p style="margin: 10px 0 0; color: #94a3b8; font-size: 13px; font-style: italic;">${params.meetingSpotInstructions}</p>` : ''}
         </div>
 
-        <div style="background-color: #0f172a; padding: 20px; margin: 20px 0;">
+        ${params.waiverUrl ? `
+        <div style="background-color: #422006; border-left: 4px solid #fbbf24; padding: 15px; margin: 20px 0; border-radius: 6px;">
+          <p style="margin: 0 0 10px; color: #fde68a; font-size: 14px;">
+            <strong>Waiver Required:</strong> Please sign the liability waiver before your trip.
+          </p>
+          <a href="${params.waiverUrl}" style="color: #fbbf24; text-decoration: underline; font-weight: 600;">Sign Waiver Now</a>
+        </div>
+        ` : ''}
+
+        <div style="background-color: #0f172a; padding: 20px; margin: 20px 0; border-radius: 6px;">
           <h3 style="margin: 0 0 15px; color: #f1f5f9;">Payment Summary</h3>
           <p style="margin: 5px 0; color: #cbd5e1;">Total: ${params.totalPrice}</p>
           <p style="margin: 5px 0; color: #10b981;"><strong>Deposit Paid: ${params.depositPaid}</strong></p>
@@ -111,11 +141,31 @@ export async function sendBookingConfirmation(params: {
           <p style="margin: 10px 0 0; color: #94a3b8; font-size: 12px;">Balance due at time of trip</p>
         </div>
 
+        <div style="background-color: #0f172a; padding: 20px; margin: 20px 0; border-radius: 6px;">
+          <h3 style="margin: 0 0 15px; color: #f1f5f9;">What to Bring</h3>
+          <ul style="margin: 0; padding-left: 20px; color: #cbd5e1; line-height: 1.8;">
+            ${whatToBringItems}
+          </ul>
+        </div>
+
+        ${params.cancellationPolicy ? `
+        <div style="background-color: #0f172a; padding: 15px; margin: 20px 0; border-radius: 6px; border: 1px solid #334155;">
+          <h4 style="margin: 0 0 8px; color: #94a3b8; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Cancellation Policy</h4>
+          <p style="margin: 0; color: #94a3b8; font-size: 13px; line-height: 1.5;">${params.cancellationPolicy}</p>
+        </div>
+        ` : ''}
+
         <div style="text-align: center; margin: 30px 0;">
           <a href="${params.managementUrl}" style="display: inline-block; background-color: #06b6d4; color: #0f172a; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600;">
             View Booking Details
           </a>
         </div>
+
+        ${params.emailSignature ? `
+        <div style="margin: 20px 0 0; padding-top: 15px; border-top: 1px solid #334155;">
+          <p style="margin: 0; color: #94a3b8; font-size: 13px; white-space: pre-line;">${params.emailSignature}</p>
+        </div>
+        ` : ''}
       </td>
     </tr>
 
@@ -133,7 +183,7 @@ export async function sendBookingConfirmation(params: {
 
   return sendEmail({
     to: params.to,
-    subject: `⚓ Booking Confirmed: ${params.tripType} on ${params.date}`,
+    subject: `Booking Confirmed: ${params.tripType} on ${params.date}`,
     html,
   });
 }
@@ -499,6 +549,190 @@ ${messageHtml}
   return sendEmail({
     to: params.to,
     subject: params.subject,
+    html,
+  });
+}
+
+/**
+ * Send deposit reminder email
+ * For pending_deposit bookings that haven't paid within 24h
+ */
+export async function sendDepositReminder(params: {
+  to: string;
+  guestName: string;
+  tripType: string;
+  date: string;
+  time: string;
+  vessel: string;
+  captainName: string;
+  depositAmount: string;
+  paymentUrl: string;
+  businessName?: string;
+  logoUrl?: string;
+}): Promise<{ success: boolean; error?: string; messageId?: string }> {
+  const displayName = params.businessName || params.captainName;
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto; background-color: #1e293b;">
+    <tr>
+      <td style="padding: 40px 20px; text-align: center; background: linear-gradient(to bottom, #92400e, #0f172a);">
+        ${params.logoUrl ? `<img src="${params.logoUrl}" alt="${displayName}" style="max-height: 60px; margin-bottom: 10px;">` : ''}
+        <h1 style="margin: 0; color: #fbbf24; font-size: 28px;">Deposit Reminder</h1>
+        <p style="margin: 10px 0 0; color: #94a3b8;">Complete Your Booking</p>
+      </td>
+    </tr>
+
+    <tr>
+      <td style="padding: 30px 20px;">
+        <h2 style="margin: 0 0 20px; color: #f1f5f9; font-size: 24px;">Hi ${params.guestName},</h2>
+        <p style="margin: 0 0 20px; color: #cbd5e1; line-height: 1.6;">
+          We noticed your deposit for the upcoming charter trip is still pending. Please complete your payment to secure your spot!
+        </p>
+
+        <div style="background-color: #0f172a; border-left: 4px solid #06b6d4; padding: 20px; margin: 20px 0; border-radius: 6px;">
+          <h3 style="margin: 0 0 15px; color: #06b6d4;">Trip Details</h3>
+          <p style="margin: 5px 0; color: #cbd5e1;"><strong>Trip:</strong> ${params.tripType}</p>
+          <p style="margin: 5px 0; color: #cbd5e1;"><strong>Date &amp; Time:</strong> ${params.date} at ${params.time}</p>
+          <p style="margin: 5px 0; color: #cbd5e1;"><strong>Vessel:</strong> ${params.vessel}</p>
+          <p style="margin: 5px 0; color: #cbd5e1;"><strong>Captain:</strong> ${params.captainName}</p>
+        </div>
+
+        <div style="background-color: #422006; border-left: 4px solid #fbbf24; padding: 20px; margin: 20px 0; border-radius: 6px;">
+          <p style="margin: 0 0 5px; color: #fde68a; font-size: 14px;">Deposit Required</p>
+          <p style="margin: 0; color: #fbbf24; font-size: 28px; font-weight: 700;">${params.depositAmount}</p>
+          <p style="margin: 10px 0 0; color: #fde68a; font-size: 13px;">Your spot is not confirmed until the deposit is received.</p>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${params.paymentUrl}" style="display: inline-block; background-color: #fbbf24; color: #0f172a; padding: 16px 40px; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 16px;">
+            Pay Deposit Now
+          </a>
+        </div>
+
+        <p style="margin: 20px 0 0; color: #94a3b8; font-size: 13px; text-align: center;">
+          If you've already paid or no longer wish to book, you can ignore this email.
+        </p>
+      </td>
+    </tr>
+
+    <tr>
+      <td style="padding: 20px; text-align: center; background-color: #0f172a; border-top: 1px solid #334155;">
+        <p style="margin: 0; color: #64748b; font-size: 12px;">
+          Powered by <span style="color: #06b6d4;">DockSlot</span>
+        </p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `;
+
+  return sendEmail({
+    to: params.to,
+    subject: `Deposit Reminder: ${params.tripType} on ${params.date}`,
+    html,
+  });
+}
+
+/**
+ * Send cancellation confirmation email
+ */
+export async function sendCancellationConfirmation(params: {
+  to: string;
+  guestName: string;
+  tripType: string;
+  date: string;
+  time: string;
+  vessel: string;
+  captainName: string;
+  reason?: string;
+  refundInfo?: string;
+  managementUrl: string;
+  businessName?: string;
+  logoUrl?: string;
+}): Promise<{ success: boolean; error?: string; messageId?: string }> {
+  const displayName = params.businessName || params.captainName;
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto; background-color: #1e293b;">
+    <tr>
+      <td style="padding: 40px 20px; text-align: center; background: linear-gradient(to bottom, #991b1b, #0f172a);">
+        ${params.logoUrl ? `<img src="${params.logoUrl}" alt="${displayName}" style="max-height: 60px; margin-bottom: 10px;">` : ''}
+        <h1 style="margin: 0; color: #fca5a5; font-size: 28px;">Booking Cancelled</h1>
+        <p style="margin: 10px 0 0; color: #94a3b8;">Cancellation Confirmation</p>
+      </td>
+    </tr>
+
+    <tr>
+      <td style="padding: 30px 20px;">
+        <h2 style="margin: 0 0 20px; color: #f1f5f9; font-size: 24px;">Hi ${params.guestName},</h2>
+        <p style="margin: 0 0 20px; color: #cbd5e1; line-height: 1.6;">
+          Your booking has been cancelled. Here are the details:
+        </p>
+
+        <div style="background-color: #0f172a; border-left: 4px solid #ef4444; padding: 20px; margin: 20px 0; border-radius: 6px;">
+          <h3 style="margin: 0 0 15px; color: #fca5a5;">Cancelled Trip</h3>
+          <p style="margin: 5px 0; color: #cbd5e1;"><strong>Trip:</strong> ${params.tripType}</p>
+          <p style="margin: 5px 0; color: #cbd5e1;"><strong>Date &amp; Time:</strong> ${params.date} at ${params.time}</p>
+          <p style="margin: 5px 0; color: #cbd5e1;"><strong>Vessel:</strong> ${params.vessel}</p>
+          <p style="margin: 5px 0; color: #cbd5e1;"><strong>Captain:</strong> ${params.captainName}</p>
+        </div>
+
+        ${params.reason ? `
+        <div style="background-color: #0f172a; border-left: 4px solid #64748b; padding: 15px; margin: 20px 0; border-radius: 6px;">
+          <h4 style="margin: 0 0 8px; color: #94a3b8;">Reason</h4>
+          <p style="margin: 0; color: #cbd5e1; font-style: italic;">${params.reason}</p>
+        </div>
+        ` : ''}
+
+        ${params.refundInfo ? `
+        <div style="background-color: #064e3b; border-left: 4px solid #10b981; padding: 15px; margin: 20px 0; border-radius: 6px;">
+          <h4 style="margin: 0 0 8px; color: #10b981;">Refund Information</h4>
+          <p style="margin: 0; color: #d1fae5;">${params.refundInfo}</p>
+        </div>
+        ` : ''}
+
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${params.managementUrl}" style="display: inline-block; background-color: #06b6d4; color: #0f172a; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600;">
+            View Booking Details
+          </a>
+        </div>
+
+        <p style="margin: 20px 0 0; color: #94a3b8; font-size: 14px; text-align: center;">
+          We hope to see you on the water in the future!
+        </p>
+      </td>
+    </tr>
+
+    <tr>
+      <td style="padding: 20px; text-align: center; background-color: #0f172a; border-top: 1px solid #334155;">
+        <p style="margin: 0; color: #64748b; font-size: 12px;">
+          Powered by <span style="color: #06b6d4;">DockSlot</span>
+        </p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `;
+
+  return sendEmail({
+    to: params.to,
+    subject: `Booking Cancelled: ${params.tripType} on ${params.date}`,
     html,
   });
 }

@@ -11,6 +11,7 @@ import {
   FileSignature,
   CreditCard,
   Link2,
+  Bell,
   Wrench,
   ChevronRight,
 } from 'lucide-react';
@@ -25,6 +26,7 @@ import { WaiversTab } from '../tabs/WaiversTab';
 import { PaymentsTab } from '../tabs/PaymentsTab';
 import { BookingPageTab } from '../tabs/BookingPageTab';
 import { AdvancedTab } from '../tabs/AdvancedTab';
+import { NotificationsTab } from '../tabs/NotificationsTab';
 
 export interface WaiverTemplate {
   id: string;
@@ -61,6 +63,7 @@ const TABS: TabDefinition[] = [
   { id: 'availability', label: 'Availability', icon: Clock },
   { id: 'waivers', label: 'Waivers', icon: FileSignature },
   { id: 'payments', label: 'Payments', icon: CreditCard },
+  { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'booking-page', label: 'Booking Page', icon: Link2 },
   { id: 'advanced', label: 'Advanced', icon: Wrench },
 ];
@@ -147,6 +150,9 @@ export function SettingsTabs(props: SettingsTabsProps) {
             businessName={props.profile?.business_name || props.profile?.full_name || ''}
             email={props.userEmail}
           />
+        )}
+        {activeTab === 'notifications' && (
+          <NotificationsTab />
         )}
         {activeTab === 'booking-page' && (
           <BookingPageTab initialProfile={props.profile} />
