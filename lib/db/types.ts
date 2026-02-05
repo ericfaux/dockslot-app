@@ -362,6 +362,31 @@ export interface WaitlistStats {
 }
 
 // ============================================================================
+// Email Preferences Types
+// ============================================================================
+
+export interface EmailPreferences {
+  captain_id: string;
+  booking_confirmation_enabled: boolean;
+  deposit_reminder_enabled: boolean;
+  trip_reminder_enabled: boolean;
+  trip_reminder_timing: ('24h' | '48h')[];
+  weather_alert_enabled: boolean;
+  review_request_enabled: boolean;
+  cancellation_notification_enabled: boolean;
+  sms_booking_confirmation: boolean;
+  sms_day_of_reminder: boolean;
+  sms_weather_hold: boolean;
+  custom_what_to_bring: string | null;
+  business_name_override: string | null;
+  business_phone_override: string | null;
+  logo_url: string | null;
+  email_signature: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// ============================================================================
 // Hibernation Subscriber Types
 // ============================================================================
 
