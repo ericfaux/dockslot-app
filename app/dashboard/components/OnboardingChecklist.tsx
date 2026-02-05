@@ -8,9 +8,11 @@ import {
   Calendar,
   Share2,
   Ticket,
+  Clock,
   Check,
   ChevronRight,
   X,
+  AlertCircle,
 } from 'lucide-react';
 
 interface OnboardingChecklistProps {
@@ -18,12 +20,14 @@ interface OnboardingChecklistProps {
   hasVessel: boolean;
   hasTripType: boolean;
   hasBooking: boolean;
+  hasAvailability?: boolean;
   bookingPageUrl: string;
 }
 
 interface ChecklistItem {
   id: string;
   label: string;
+  description: string;
   completed: boolean;
   icon: React.ReactNode;
   href?: string;
@@ -35,6 +39,7 @@ export function OnboardingChecklist({
   hasVessel,
   hasTripType,
   hasBooking,
+  hasAvailability = true,
   bookingPageUrl,
 }: OnboardingChecklistProps) {
   const [isDismissed, setIsDismissed] = useState(false);
@@ -51,6 +56,7 @@ export function OnboardingChecklist({
     {
       id: 'meeting-spot',
       label: 'Set up your meeting spot',
+      description: 'Add a location so guests know where to meet you',
       completed: hasMeetingSpot,
       icon: <MapPin className="h-4 w-4" />,
       href: '/dashboard/settings',
@@ -58,20 +64,31 @@ export function OnboardingChecklist({
     {
       id: 'vessel',
       label: 'Add a vessel',
+      description: 'Add your boat to start accepting bookings',
       completed: hasVessel,
       icon: <Ship className="h-4 w-4" />,
-      href: '/dashboard/fleet',
+      href: '/dashboard/vessels',
     },
     {
       id: 'trip-type',
-      label: 'Create your first trip type',
+      label: 'Create a trip type',
+      description: 'Define what kind of trips you offer',
       completed: hasTripType,
       icon: <Calendar className="h-4 w-4" />,
-      href: '/dashboard/trip-types',
+      href: '/dashboard/trips',
+    },
+    {
+      id: 'availability',
+      label: 'Set your availability',
+      description: 'Configure your weekly schedule',
+      completed: hasAvailability,
+      icon: <Clock className="h-4 w-4" />,
+      href: '/dashboard/schedule',
     },
     {
       id: 'share-link',
       label: 'Share your booking link',
+      description: 'Send your link to potential guests',
       completed: false,
       icon: <Share2 className="h-4 w-4" />,
       action: 'copy-link',
@@ -79,6 +96,7 @@ export function OnboardingChecklist({
     {
       id: 'first-booking',
       label: 'Get your first booking',
+      description: 'Once a guest books, you\'re ready to go',
       completed: hasBooking,
       icon: <Ticket className="h-4 w-4" />,
       href: '/dashboard/bookings',
@@ -113,7 +131,7 @@ export function OnboardingChecklist({
       <div className="mb-4 flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-slate-100">
-            Get started with DockSlot
+            Complete your setup
           </h3>
           <p className="mt-1 text-sm text-slate-400">
             {completedCount} of {items.length} steps completed
@@ -135,6 +153,20 @@ export function OnboardingChecklist({
           style={{ width: `${(completedCount / items.length) * 100}%` }}
         />
       </div>
+
+      {/* Highlight missing critical items */}
+      {(!hasVessel || !hasTripType) && (
+        <div className="mb-4 rounded-lg bg-amber-500/10 border border-amber-500/20 p-3 flex items-start gap-2">
+          <AlertCircle className="h-4 w-4 text-amber-400 mt-0.5 flex-shrink-0" />
+          <p className="text-sm text-amber-300">
+            {!hasVessel && !hasTripType
+              ? 'Add a vessel and create a trip type to start accepting bookings.'
+              : !hasVessel
+              ? 'Add a vessel to start accepting bookings.'
+              : 'Create a trip type to start accepting bookings.'}
+          </p>
+        </div>
+      )}
 
       {/* Checklist items */}
       <div className="space-y-2">
@@ -159,21 +191,63 @@ export function OnboardingChecklist({
                     item.icon
                   )}
                 </div>
-                <span className="flex-1 text-sm text-slate-300">
-                  {linkCopied ? 'Link copied!' : item.label}
-                </span>
+                <div className="flex-1 min-w-0">
+                  <span className="text-sm text-slate-300 block">
+                    {linkCopied ? 'Link copied!' : item.label}
+                  </span>
+                  {!linkCopied && (
+                    <span className="text-xs text-slate-500 block">{item.description}</span>
+                  )}
+                </div>
                 <ChevronRight className="h-4 w-4 text-slate-600" />
               </button>
             );
           }
 
-          const Wrapper = item.href ? Link : 'div';
-          const wrapperProps = item.href ? { href: item.href } : {};
+          if (item.href) {
+            return (
+              <Link
+                key={item.id}
+                href={item.href}
+                className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-slate-700/50"
+              >
+                <div
+                  className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full ${
+                    item.completed
+                      ? 'bg-emerald-500/20 text-emerald-400'
+                      : 'border border-slate-600 text-slate-500'
+                  }`}
+                >
+                  {item.completed ? (
+                    <Check className="h-3.5 w-3.5" />
+                  ) : (
+                    item.icon
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span
+                    className={`text-sm block ${
+                      item.completed
+                        ? 'text-slate-500 line-through'
+                        : 'text-slate-300'
+                    }`}
+                  >
+                    {item.label}
+                  </span>
+                  {!item.completed && (
+                    <span className="text-xs text-slate-500 block">{item.description}</span>
+                  )}
+                </div>
+                {!item.completed && (
+                  <ChevronRight className="h-4 w-4 text-slate-600" />
+                )}
+              </Link>
+            );
+          }
 
           return (
-            <Wrapper
+            <div
               key={item.id}
-              {...(wrapperProps as any)}
               className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-slate-700/50"
             >
               <div
@@ -189,19 +263,24 @@ export function OnboardingChecklist({
                   item.icon
                 )}
               </div>
-              <span
-                className={`flex-1 text-sm ${
-                  item.completed
-                    ? 'text-slate-500 line-through'
-                    : 'text-slate-300'
-                }`}
-              >
-                {item.label}
-              </span>
-              {!item.completed && item.href && (
+              <div className="flex-1 min-w-0">
+                <span
+                  className={`text-sm block ${
+                    item.completed
+                      ? 'text-slate-500 line-through'
+                      : 'text-slate-300'
+                  }`}
+                >
+                  {item.label}
+                </span>
+                {!item.completed && (
+                  <span className="text-xs text-slate-500 block">{item.description}</span>
+                )}
+              </div>
+              {!item.completed && (
                 <ChevronRight className="h-4 w-4 text-slate-600" />
               )}
-            </Wrapper>
+            </div>
           );
         })}
       </div>

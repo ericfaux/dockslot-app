@@ -12,7 +12,18 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   // Auth with automatic retry and redirect
-  const { user } = await requireAuth();
+  const { user, supabase: authSupabase } = await requireAuth();
+
+  // Check if captain has completed onboarding
+  const { data: onboardingProfile } = await authSupabase
+    .from("profiles")
+    .select("onboarding_completed")
+    .eq("id", user.id)
+    .single();
+
+  if (onboardingProfile && !onboardingProfile.onboarding_completed) {
+    redirect("/onboarding");
+  }
 
   // Extract user details for the UI
   const userEmail = user.email ?? "Unknown";
