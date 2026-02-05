@@ -39,6 +39,7 @@ export interface UpdateProfileParams {
   is_hibernating?: boolean;
   hibernation_message?: string | null;
   cancellation_policy?: string | null;
+  dock_mode_enabled?: boolean;
 }
 
 // ============================================================================
@@ -225,6 +226,11 @@ export async function updateProfile(
   // Cancellation policy
   if (params.cancellation_policy !== undefined) {
     updateData.cancellation_policy = sanitizeText(params.cancellation_policy, 2000);
+  }
+
+  // Dock mode
+  if (params.dock_mode_enabled !== undefined) {
+    updateData.dock_mode_enabled = Boolean(params.dock_mode_enabled);
   }
 
   if (Object.keys(updateData).length === 0) {
