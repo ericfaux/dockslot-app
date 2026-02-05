@@ -54,6 +54,8 @@ export interface Profile {
   meeting_spot_name: string | null;
   meeting_spot_address: string | null;
   meeting_spot_instructions: string | null;
+  meeting_spot_latitude: number | null;
+  meeting_spot_longitude: number | null;
   phone: string | null;
   email: string | null;
   is_hibernating: boolean;

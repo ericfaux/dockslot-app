@@ -34,6 +34,8 @@ export interface UpdateProfileParams {
   meeting_spot_name?: string | null;
   meeting_spot_address?: string | null;
   meeting_spot_instructions?: string | null;
+  meeting_spot_latitude?: number | null;
+  meeting_spot_longitude?: number | null;
   booking_buffer_minutes?: number;
   advance_booking_days?: number;
   is_hibernating?: boolean;
@@ -195,6 +197,31 @@ export async function updateProfile(
 
   if (params.meeting_spot_instructions !== undefined) {
     updateData.meeting_spot_instructions = sanitizeText(params.meeting_spot_instructions, 1000);
+  }
+
+  // Meeting spot coordinates
+  if (params.meeting_spot_latitude !== undefined) {
+    if (params.meeting_spot_latitude !== null) {
+      if (typeof params.meeting_spot_latitude !== 'number' || isNaN(params.meeting_spot_latitude)) {
+        return { success: false, error: 'Invalid latitude value', code: 'VALIDATION' };
+      }
+      if (params.meeting_spot_latitude < -90 || params.meeting_spot_latitude > 90) {
+        return { success: false, error: 'Latitude must be between -90 and 90', code: 'VALIDATION' };
+      }
+    }
+    updateData.meeting_spot_latitude = params.meeting_spot_latitude;
+  }
+
+  if (params.meeting_spot_longitude !== undefined) {
+    if (params.meeting_spot_longitude !== null) {
+      if (typeof params.meeting_spot_longitude !== 'number' || isNaN(params.meeting_spot_longitude)) {
+        return { success: false, error: 'Invalid longitude value', code: 'VALIDATION' };
+      }
+      if (params.meeting_spot_longitude < -180 || params.meeting_spot_longitude > 180) {
+        return { success: false, error: 'Longitude must be between -180 and 180', code: 'VALIDATION' };
+      }
+    }
+    updateData.meeting_spot_longitude = params.meeting_spot_longitude;
   }
 
   // Booking buffer minutes
