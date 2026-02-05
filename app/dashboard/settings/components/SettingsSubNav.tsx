@@ -1,6 +1,10 @@
 "use client";
 
 // app/dashboard/settings/components/SettingsSubNav.tsx
+// This component is kept for backward compatibility but is no longer used
+// in the main settings page (replaced by SettingsTabs).
+// It may still be referenced by other pages.
+
 import Link from "next/link";
 import {
   Ship,
@@ -15,31 +19,31 @@ import {
 
 const settingsLinks = [
   {
-    href: "/dashboard/vessels",
+    href: "/dashboard/settings?tab=vessels",
     label: "Vessels",
     description: "Manage your boats",
     icon: Ship,
   },
   {
-    href: "/dashboard/trips",
+    href: "/dashboard/settings?tab=trip-types",
     label: "Trip Types",
     description: "Configure trip offerings",
     icon: Anchor,
   },
   {
-    href: "/dashboard/waivers",
+    href: "/dashboard/settings?tab=waivers",
     label: "Waivers",
     description: "Liability waivers",
     icon: FileSignature,
   },
   {
-    href: "/dashboard/payments",
+    href: "/dashboard/settings?tab=payments",
     label: "Payments",
     description: "Payment configuration",
     icon: CreditCard,
   },
   {
-    href: "/dashboard/settings/referrals",
+    href: "/dashboard/settings?tab=booking-page",
     label: "Referrals",
     description: "Referral program",
     icon: Gift,
@@ -57,9 +61,9 @@ const settingsLinks = [
     icon: MessageSquare,
   },
   {
-    href: "/dashboard/settings/availability-templates",
+    href: "/dashboard/settings?tab=availability",
     label: "Availability",
-    description: "Availability templates",
+    description: "Weekly schedule & booking settings",
     icon: Calendar,
   },
 ];
