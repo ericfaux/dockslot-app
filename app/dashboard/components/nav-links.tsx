@@ -58,7 +58,7 @@ export const secondaryNavLinks: NavLink[] = [
   {
     href: "/dashboard/reports",
     label: "Reports",
-    icon: FileText,
+    icon: BarChart3,
   },
   {
     href: "/dashboard/modifications",
@@ -79,16 +79,6 @@ export const secondaryNavLinks: NavLink[] = [
     href: "/dashboard/reviews",
     label: "Reviews",
     icon: Star,
-  },
-  {
-    href: "/dashboard/analytics",
-    label: "Analytics",
-    icon: BarChart3,
-  },
-  {
-    href: "/dashboard/reports-advanced",
-    label: "Advanced Reports",
-    icon: BarChart3,
   },
 ];
 
