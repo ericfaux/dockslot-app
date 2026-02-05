@@ -20,7 +20,7 @@ import {
   Navigation,
   Users,
 } from "lucide-react";
-import { FloatPlanCard } from "./components/FloatPlanCard";
+import { FloatPlanWidget, FloatPlanTrip, WeatherSummary } from "./components/FloatPlanWidget";
 import { BookingLinkCard } from "@/components/BookingLinkCard";
 import { ActionItemsWidget } from "./components/ActionItemsWidget";
 import WeatherAlertWidget from "./components/WeatherAlertWidget";
@@ -505,11 +505,17 @@ export default async function DashboardPage() {
     }
   }
 
-  // Fetch today's bookings for the Float Plan
-  const today = format(new Date(), "yyyy-MM-dd");
-  let nextTrip = null;
+  // Fetch today's and tomorrow's bookings for the Float Plan
+  const now = new Date();
+  const today = format(now, "yyyy-MM-dd");
+  const tomorrow = format(addHours(now, 24), "yyyy-MM-dd");
+
+  let todayTrips: FloatPlanTrip[] = [];
+  let tomorrowTrips: FloatPlanTrip[] = [];
+  let nextUpcomingTrip: FloatPlanTrip | null = null;
   let pendingCount = 0;
   let upcoming48hCount = 0;
+  let floatPlanWeather: WeatherSummary | null = null;
 
   if (user) {
     try {
@@ -521,31 +527,123 @@ export default async function DashboardPage() {
         status: ACTIVE_BOOKING_STATUSES as BookingStatus[],
         sortField: "scheduled_start",
         sortDir: "asc",
+        limit: 20,
+      });
+
+      // Get tomorrow's bookings
+      const tomorrowBookings = await getBookingsWithFilters({
+        captainId: user.id,
+        startDate: tomorrow,
+        endDate: tomorrow,
+        status: ACTIVE_BOOKING_STATUSES as BookingStatus[],
+        sortField: "scheduled_start",
+        sortDir: "asc",
         limit: 10,
       });
 
-      // Find the next upcoming trip (first one that hasn't started yet or is in progress)
-      const now = new Date();
-      const upcomingBooking = todayBookings.bookings.find((b) => {
-        const startTime = parseISO(b.scheduled_start);
-        const endTime = parseISO(b.scheduled_end);
-        // Show if it hasn't ended yet
-        return endTime > now;
+      // Fetch waiver counts for today's bookings
+      const waiverCounts = new Map<string, { signed: number; total: number }>();
+      if (todayBookings.bookings.length > 0) {
+        const bookingIds = todayBookings.bookings.map((b) => b.id);
+
+        // Get passenger counts per booking
+        const { data: passengers } = await supabase
+          .from("passengers")
+          .select("booking_id")
+          .in("booking_id", bookingIds);
+
+        // Get waiver signature counts per booking
+        const { data: signatures } = await supabase
+          .from("waiver_signatures")
+          .select("booking_id")
+          .in("booking_id", bookingIds);
+
+        // Count passengers per booking
+        const passengerCountMap = new Map<string, number>();
+        for (const p of passengers || []) {
+          passengerCountMap.set(p.booking_id, (passengerCountMap.get(p.booking_id) || 0) + 1);
+        }
+
+        // Count signatures per booking
+        const signatureCountMap = new Map<string, number>();
+        for (const s of signatures || []) {
+          signatureCountMap.set(s.booking_id, (signatureCountMap.get(s.booking_id) || 0) + 1);
+        }
+
+        // Build waiver counts map
+        for (const booking of todayBookings.bookings) {
+          const passengerCount = passengerCountMap.get(booking.id) || booking.party_size;
+          const signatureCount = signatureCountMap.get(booking.id) || 0;
+          waiverCounts.set(booking.id, {
+            signed: signatureCount,
+            total: passengerCount,
+          });
+        }
+      }
+
+      // Transform today's bookings to FloatPlanTrip format
+      todayTrips = todayBookings.bookings.map((b) => {
+        const waiverInfo = waiverCounts.get(b.id) || { signed: 0, total: b.party_size };
+        return {
+          id: b.id,
+          scheduledStart: b.scheduled_start,
+          scheduledEnd: b.scheduled_end,
+          tripType: b.trip_type?.title || "Charter Trip",
+          guestName: b.guest_name,
+          guestPhone: b.guest_phone,
+          partySize: b.party_size,
+          vesselCapacity: b.vessel?.capacity || 6,
+          status: b.status,
+          paymentStatus: b.payment_status,
+          waiversSigned: waiverInfo.signed,
+          waiversTotal: waiverInfo.total,
+        };
       });
 
-      if (upcomingBooking) {
-        // For now, use mock waiver data until waiver system is integrated
-        nextTrip = {
-          id: upcomingBooking.id,
-          time: format(parseISO(upcomingBooking.scheduled_start), "h:mm a"),
-          tripType: upcomingBooking.trip_type?.title || "Charter Trip",
-          guestName: upcomingBooking.guest_name,
-          partySize: upcomingBooking.party_size,
-          status: upcomingBooking.status,
-          paymentStatus: upcomingBooking.payment_status,
-          waiversSigned: upcomingBooking.party_size - 1, // Mock: assume most signed
-          waiversTotal: upcomingBooking.party_size,
-        };
+      // Transform tomorrow's bookings
+      tomorrowTrips = tomorrowBookings.bookings.map((b) => ({
+        id: b.id,
+        scheduledStart: b.scheduled_start,
+        scheduledEnd: b.scheduled_end,
+        tripType: b.trip_type?.title || "Charter Trip",
+        guestName: b.guest_name,
+        guestPhone: b.guest_phone,
+        partySize: b.party_size,
+        vesselCapacity: b.vessel?.capacity || 6,
+        status: b.status,
+        paymentStatus: b.payment_status,
+        waiversSigned: 0, // Not needed for tomorrow preview
+        waiversTotal: b.party_size,
+      }));
+
+      // If no trips today, find the next upcoming trip
+      if (todayTrips.length === 0) {
+        const futureBookings = await getBookingsWithFilters({
+          captainId: user.id,
+          startDate: tomorrow,
+          status: ACTIVE_BOOKING_STATUSES as BookingStatus[],
+          sortField: "scheduled_start",
+          sortDir: "asc",
+          limit: 1,
+        });
+
+        if (futureBookings.bookings.length > 0) {
+          const b = futureBookings.bookings[0];
+          nextUpcomingTrip = {
+            id: b.id,
+            scheduledStart: b.scheduled_start,
+            scheduledEnd: b.scheduled_end,
+            tripType: b.trip_type?.title || "Charter Trip",
+            guestName: b.guest_name,
+            guestPhone: b.guest_phone,
+            partySize: b.party_size,
+            vesselCapacity: b.vessel?.capacity || 6,
+            status: b.status,
+            paymentStatus: b.payment_status,
+            waiversSigned: 0,
+            waiversTotal: b.party_size,
+          };
+        }
       }
 
       // Count pending deposit bookings
@@ -566,6 +664,27 @@ export default async function DashboardPage() {
         limit: 100,
       });
       upcoming48hCount = upcoming48hBookings.totalCount;
+
+      // Build weather summary for Float Plan (if we have weather data and trips today)
+      if (todayTrips.length > 0 && (weatherData.windSpeed !== null || weatherData.waterTemp !== null)) {
+        // Check if there are any weather advisories
+        let hasAdvisory = false;
+        let advisoryMessage = "";
+
+        if (weatherData.windSpeed !== null && weatherData.windSpeed > 15) {
+          hasAdvisory = true;
+          advisoryMessage = `Wind advisory: ${weatherData.windSpeed} kts ${weatherData.windDirection || ""} - review trips`;
+        }
+
+        floatPlanWeather = {
+          temperature: weatherData.waterTemp || undefined,
+          windSpeed: weatherData.windSpeed ? `${weatherData.windSpeed} kts` : undefined,
+          windDirection: weatherData.windDirection || undefined,
+          condition: "Good conditions for charter",
+          hasAdvisory,
+          advisoryMessage,
+        };
+      }
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
     }
@@ -635,15 +754,21 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      {/* ═══ SECTION 3: FLOAT PLAN / NEXT TRIP ═══ */}
-      <section aria-label="Next Trip">
+      {/* ═══ SECTION 3: FLOAT PLAN / MISSION CONTROL ═══ */}
+      <section aria-label="Float Plan - Today's Trips">
         <div className="mb-3 flex items-center gap-2">
           <span className="font-mono text-xs uppercase tracking-widest text-slate-500">
             Float Plan
           </span>
           <div className="h-px flex-1 bg-slate-800" />
         </div>
-        <FloatPlanCard booking={nextTrip} />
+        <FloatPlanWidget
+          todayTrips={todayTrips}
+          tomorrowTrips={tomorrowTrips}
+          nextUpcomingTrip={nextUpcomingTrip}
+          weather={floatPlanWeather}
+          timezone={captainTimezone}
+        />
       </section>
 
       {/* ═══ SECTION 3.3: ACTION ITEMS ═══ */}
