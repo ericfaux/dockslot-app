@@ -1,5 +1,6 @@
 export { Calendar } from './Calendar';
 export { CalendarWeekView } from './CalendarWeekView';
+export { CalendarDayView } from './CalendarDayView';
 export { CalendarBlock } from './CalendarBlock';
 export { DayColumn } from './DayColumn';
 export { TimeColumn } from './TimeColumn';

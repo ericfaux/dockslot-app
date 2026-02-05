@@ -209,10 +209,10 @@ export function BookingDetailPanel({
         onClick={onClose}
       />
 
-      {/* Panel */}
+      {/* Panel - full screen on mobile, slide-over on desktop */}
       <div
-        className={`fixed bottom-0 right-0 top-0 z-50 w-full max-w-md transform overflow-y-auto bg-slate-900 shadow-2xl transition-transform duration-300 ease-out ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
+        className={`fixed inset-0 md:inset-auto md:bottom-0 md:right-0 md:top-0 z-50 w-full md:max-w-md transform overflow-y-auto bg-slate-900 shadow-2xl transition-transform duration-300 ease-out ${
+          isOpen ? 'translate-y-0 md:translate-y-0 translate-x-0 md:translate-x-0' : 'translate-y-full md:translate-y-0 md:translate-x-full'
         }`}
       >
         {/* Header */}
@@ -229,15 +229,15 @@ export function BookingDetailPanel({
             </div>
             <button
               onClick={onClose}
-              className="rounded-md p-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200"
+              className="rounded-md p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
         </div>
 
-        {/* Content */}
-        <div className="p-4 space-y-6">
+        {/* Content - extra bottom padding on mobile for safe area */}
+        <div className="p-4 pb-8 md:pb-4 space-y-6">
           {/* Date & Time */}
           <div className="rounded-lg bg-slate-800/50 p-4">
             <div className="mb-3 font-mono text-sm font-medium text-slate-400">
@@ -380,6 +380,22 @@ export function BookingDetailPanel({
             />
           )}
 
+          {/* Mobile Call Guest Button - prominent on mobile */}
+          {booking.guest_phone && (
+            <div className="md:hidden">
+              <a
+                href={`tel:${booking.guest_phone}`}
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-cyan-500/20 px-6 py-4 min-h-[52px] font-mono text-lg font-bold uppercase tracking-wide text-cyan-400 transition-all duration-75 ease-out hover:bg-cyan-500/30 active:translate-y-0.5"
+                style={{
+                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
+                }}
+              >
+                <Phone className="h-5 w-5" />
+                CALL GUEST
+              </a>
+            </div>
+          )}
+
           {/* Actions */}
           {!isTerminal && (
             <div className="space-y-3">
@@ -392,7 +408,7 @@ export function BookingDetailPanel({
                 <button
                   onClick={() => handleAction('complete')}
                   disabled={isPending}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-500/20 px-6 py-4 font-mono text-lg font-bold uppercase tracking-wide text-emerald-400 transition-all duration-75 ease-out hover:bg-emerald-500/30 active:translate-y-0.5 disabled:opacity-50"
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-500/20 px-6 py-4 min-h-[52px] font-mono text-lg font-bold uppercase tracking-wide text-emerald-400 transition-all duration-75 ease-out hover:bg-emerald-500/30 active:translate-y-0.5 disabled:opacity-50"
                   style={{
                     boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
                   }}
@@ -408,15 +424,15 @@ export function BookingDetailPanel({
                   <button
                     onClick={handleRequestBalancePayment}
                     disabled={isRequestingBalance || balanceSuccess}
-                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-cyan-500/20 px-6 py-4 font-mono text-lg font-bold uppercase tracking-wide text-cyan-400 transition-all duration-75 ease-out hover:bg-cyan-500/30 active:translate-y-0.5 disabled:opacity-50"
+                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-cyan-500/20 px-6 py-4 min-h-[52px] font-mono text-lg font-bold uppercase tracking-wide text-cyan-400 transition-all duration-75 ease-out hover:bg-cyan-500/30 active:translate-y-0.5 disabled:opacity-50"
                     style={{
                       boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
                     }}
                   >
                     <DollarSign className="h-5 w-5" />
-                    {isRequestingBalance 
-                      ? 'Sending...' 
-                      : balanceSuccess 
+                    {isRequestingBalance
+                      ? 'Sending...'
+                      : balanceSuccess
                       ? 'Email Sent! ✓'
                       : 'REQUEST BALANCE PAYMENT'}
                   </button>
@@ -428,33 +444,37 @@ export function BookingDetailPanel({
                 </div>
               )}
 
-              {/* Secondary Actions */}
+              {/* Weather Hold - large button on mobile */}
+              {canSetWeatherHold && (
+                <button
+                  onClick={() => setShowWeatherModal(true)}
+                  disabled={isPending}
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-amber-500/20 px-6 py-4 min-h-[52px] font-mono text-base md:text-lg font-bold uppercase tracking-wide text-amber-400 transition-all duration-75 ease-out hover:bg-amber-500/30 active:translate-y-0.5 disabled:opacity-50"
+                  style={{
+                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
+                  }}
+                >
+                  <CloudRain className="h-5 w-5" />
+                  WEATHER HOLD
+                </button>
+              )}
+
+              {/* Secondary Actions - 2-column grid with 44px min touch targets */}
               <div className="grid grid-cols-2 gap-2">
                 {/* Send Message (always available) */}
                 <button
                   onClick={() => setShowSendMessageModal(true)}
-                  className="flex items-center justify-center gap-2 rounded-lg bg-cyan-500/10 px-4 py-3 font-mono text-sm font-medium text-cyan-400 transition-colors hover:bg-cyan-500/20"
+                  className="flex items-center justify-center gap-2 rounded-lg bg-cyan-500/10 px-4 py-3 min-h-[44px] font-mono text-sm font-medium text-cyan-400 transition-colors hover:bg-cyan-500/20"
                 >
                   <Mail className="h-4 w-4" />
                   Send Message
                 </button>
 
-                {canSetWeatherHold && (
-                  <button
-                    onClick={() => setShowWeatherModal(true)}
-                    disabled={isPending}
-                    className="flex items-center justify-center gap-2 rounded-lg bg-amber-500/10 px-4 py-3 font-mono text-sm font-medium text-amber-400 transition-colors hover:bg-amber-500/20 disabled:opacity-50"
-                  >
-                    <CloudRain className="h-4 w-4" />
-                    Weather Hold
-                  </button>
-                )}
-
                 {canClearWeatherHold && (
                   <button
                     onClick={() => handleAction('clear_weather')}
                     disabled={isPending}
-                    className="flex items-center justify-center gap-2 rounded-lg bg-emerald-500/10 px-4 py-3 font-mono text-sm font-medium text-emerald-400 transition-colors hover:bg-emerald-500/20 disabled:opacity-50"
+                    className="flex items-center justify-center gap-2 rounded-lg bg-emerald-500/10 px-4 py-3 min-h-[44px] font-mono text-sm font-medium text-emerald-400 transition-colors hover:bg-emerald-500/20 disabled:opacity-50"
                   >
                     <CheckCircle className="h-4 w-4" />
                     Clear Hold
@@ -464,7 +484,7 @@ export function BookingDetailPanel({
                 {canRefund && (
                   <Link
                     href={`/dashboard/bookings/${booking.id}/refund`}
-                    className="flex items-center justify-center gap-2 rounded-lg bg-purple-500/10 px-4 py-3 font-mono text-sm font-medium text-purple-400 transition-colors hover:bg-purple-500/20"
+                    className="flex items-center justify-center gap-2 rounded-lg bg-purple-500/10 px-4 py-3 min-h-[44px] font-mono text-sm font-medium text-purple-400 transition-colors hover:bg-purple-500/20"
                   >
                     <RotateCcw className="h-4 w-4" />
                     Refund
@@ -475,7 +495,7 @@ export function BookingDetailPanel({
                   <button
                     onClick={() => handleAction('no_show')}
                     disabled={isPending}
-                    className="flex items-center justify-center gap-2 rounded-lg bg-amber-500/10 px-4 py-3 font-mono text-sm font-medium text-amber-400 transition-colors hover:bg-amber-500/20 disabled:opacity-50"
+                    className="flex items-center justify-center gap-2 rounded-lg bg-amber-500/10 px-4 py-3 min-h-[44px] font-mono text-sm font-medium text-amber-400 transition-colors hover:bg-amber-500/20 disabled:opacity-50"
                   >
                     <AlertCircle className="h-4 w-4" />
                     No Show
@@ -486,7 +506,7 @@ export function BookingDetailPanel({
                   <button
                     onClick={() => handleAction('cancel')}
                     disabled={isPending}
-                    className="flex items-center justify-center gap-2 rounded-lg bg-rose-500/10 px-4 py-3 font-mono text-sm font-medium text-rose-400 transition-colors hover:bg-rose-500/20 disabled:opacity-50"
+                    className="flex items-center justify-center gap-2 rounded-lg bg-rose-500/10 px-4 py-3 min-h-[44px] font-mono text-sm font-medium text-rose-400 transition-colors hover:bg-rose-500/20 disabled:opacity-50"
                   >
                     <XCircle className="h-4 w-4" />
                     Cancel
@@ -497,7 +517,7 @@ export function BookingDetailPanel({
               {/* Duplicate Button (always available) */}
               <button
                 onClick={() => setShowDuplicateModal(true)}
-                className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-600 px-4 py-3 font-mono text-sm font-medium text-slate-300 transition-colors hover:bg-slate-700/50"
+                className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-600 px-4 py-3 min-h-[44px] font-mono text-sm font-medium text-slate-300 transition-colors hover:bg-slate-700/50"
               >
                 <Copy className="h-4 w-4" />
                 Duplicate Booking

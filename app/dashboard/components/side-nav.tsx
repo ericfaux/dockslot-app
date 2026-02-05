@@ -23,17 +23,20 @@ export function SideNav({ userEmail, signOutAction }: SideNavProps) {
   const showMore = moreOpen || isSecondaryActive;
 
   return (
-    <aside className="hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:w-64 bg-slate-900 text-zinc-100">
+    <aside className="hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:w-16 lg:w-64 bg-slate-900 text-zinc-100 transition-all duration-200 group/sidebar hover:md:w-64 z-30">
       <div className="flex flex-col h-full">
         {/* Logo / Brand */}
-        <div className="flex items-center h-16 px-6 border-b border-white/10">
-          <span className="text-lg font-semibold tracking-tight">DockSlot</span>
+        <div className="flex items-center h-16 px-4 lg:px-6 border-b border-white/10">
+          <span className="text-lg font-semibold tracking-tight whitespace-nowrap overflow-hidden">
+            <span className="hidden lg:inline group-hover/sidebar:inline">DockSlot</span>
+            <span className="lg:hidden group-hover/sidebar:hidden">DS</span>
+          </span>
         </div>
 
         {/* Navigation Links */}
-        <nav className="flex-1 py-4 overflow-y-auto">
+        <nav className="flex-1 py-4 overflow-y-auto overflow-x-hidden">
           {/* Primary Links */}
-          <ul className="space-y-1 px-3">
+          <ul className="space-y-1 px-2 lg:px-3">
             {primaryNavLinks.map((link) => {
               const isActive =
                 link.href === "/dashboard"
@@ -47,14 +50,15 @@ export function SideNav({ userEmail, signOutAction }: SideNavProps) {
                 <li key={link.href}>
                   <Link
                     href={link.href}
+                    title={link.label}
                     className={`flex items-center gap-3 h-11 px-3 rounded-r-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 ${
                       isActive
                         ? "bg-white/10 text-white border-l-4 border-amber-500 pl-2"
                         : "text-zinc-300 hover:bg-white/5 hover:text-white border-l-4 border-transparent pl-2"
                     }`}
                   >
-                    <Icon size={18} aria-hidden="true" />
-                    <span>{link.label}</span>
+                    <Icon size={18} aria-hidden="true" className="flex-shrink-0" />
+                    <span className="hidden lg:inline group-hover/sidebar:inline whitespace-nowrap">{link.label}</span>
                   </Link>
                 </li>
               );
@@ -62,7 +66,7 @@ export function SideNav({ userEmail, signOutAction }: SideNavProps) {
           </ul>
 
           {/* More Section */}
-          <div className="mt-4 px-3">
+          <div className="mt-4 px-2 lg:px-3 hidden lg:block group-hover/sidebar:block">
             <button
               type="button"
               onClick={() => setMoreOpen((prev) => !prev)}
@@ -93,8 +97,8 @@ export function SideNav({ userEmail, signOutAction }: SideNavProps) {
                             : "text-zinc-400 hover:bg-white/5 hover:text-white border-l-4 border-transparent pl-2"
                         }`}
                       >
-                        <Icon size={16} aria-hidden="true" />
-                        <span>{link.label}</span>
+                        <Icon size={16} aria-hidden="true" className="flex-shrink-0" />
+                        <span className="whitespace-nowrap">{link.label}</span>
                       </Link>
                     </li>
                   );
@@ -105,8 +109,8 @@ export function SideNav({ userEmail, signOutAction }: SideNavProps) {
         </nav>
 
         {/* User Profile Section */}
-        <div className="border-t border-white/10 p-4">
-          <div className="mb-3">
+        <div className="border-t border-white/10 p-2 lg:p-4">
+          <div className="mb-3 hidden lg:block group-hover/sidebar:block">
             <p className="text-xs text-zinc-400 uppercase tracking-wide mb-1">
               Signed in as
             </p>
@@ -117,10 +121,11 @@ export function SideNav({ userEmail, signOutAction }: SideNavProps) {
           <form action={signOutAction}>
             <button
               type="submit"
+              title="Sign Out"
               className="flex items-center justify-center gap-2 w-full h-11 px-3 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white text-sm font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
             >
-              <LogOut size={18} aria-hidden="true" />
-              <span>Sign Out</span>
+              <LogOut size={18} aria-hidden="true" className="flex-shrink-0" />
+              <span className="hidden lg:inline group-hover/sidebar:inline whitespace-nowrap">Sign Out</span>
             </button>
           </form>
         </div>

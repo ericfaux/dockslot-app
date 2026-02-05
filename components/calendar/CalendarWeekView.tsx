@@ -110,40 +110,40 @@ export function CalendarWeekView({
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-lg bg-slate-900/50">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-slate-700/50 px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-700/50 px-3 md:px-4 py-3">
         {/* Navigation */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 md:gap-2">
           <button
             onClick={handlePrevWeek}
-            className="rounded-md p-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200"
+            className="rounded-md p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
           <button
             onClick={handleNextWeek}
-            className="rounded-md p-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200"
+            className="rounded-md p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200"
           >
             <ChevronRight className="h-5 w-5" />
           </button>
           <button
             onClick={handleToday}
-            className="rounded-md px-3 py-1.5 font-mono text-xs font-medium text-cyan-400 transition-colors hover:bg-cyan-400/10"
+            className="rounded-md px-3 py-1.5 min-h-[44px] font-mono text-xs font-medium text-cyan-400 transition-colors hover:bg-cyan-400/10"
           >
             TODAY
           </button>
           {onQuickBlockClick && (
             <button
               onClick={onQuickBlockClick}
-              className="flex items-center gap-1.5 rounded-md px-3 py-1.5 font-mono text-xs font-medium text-rose-400 transition-colors hover:bg-rose-400/10"
+              className="flex items-center gap-1.5 rounded-md px-3 py-1.5 min-h-[44px] font-mono text-xs font-medium text-rose-400 transition-colors hover:bg-rose-400/10"
             >
               <CalendarX className="h-3.5 w-3.5" />
-              QUICK BLOCK
+              <span className="hidden sm:inline">QUICK </span>BLOCK
             </button>
           )}
         </div>
 
         {/* Date Range */}
-        <div className="flex items-center gap-2">
+        <div className="hidden sm:flex items-center gap-2">
           <CalendarIcon className="h-4 w-4 text-slate-500" />
           <span className="font-mono text-sm font-medium text-slate-300">
             {dateRangeLabel}
@@ -152,11 +152,11 @@ export function CalendarWeekView({
 
         {/* View Switcher */}
         <div className="flex items-center gap-1 rounded-lg bg-slate-800/50 p-1">
-          {(['day', 'week', 'month'] as CalendarView[]).map((view) => (
+          {(['day', 'week'] as CalendarView[]).map((view) => (
             <button
               key={view}
               onClick={() => onViewChange(view)}
-              className={`rounded-md px-3 py-1 font-mono text-xs font-medium transition-all ${
+              className={`rounded-md px-2.5 py-1 min-h-[36px] font-mono text-xs font-medium transition-all ${
                 view === 'week'
                   ? 'bg-cyan-500/20 text-cyan-400'
                   : 'text-slate-500 hover:text-slate-300'

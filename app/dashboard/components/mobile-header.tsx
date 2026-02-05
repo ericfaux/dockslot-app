@@ -76,7 +76,6 @@ export function MobileHeader({ userEmail, signOutAction }: MobileHeaderProps) {
     <>
       {/* Mobile Header Bar */}
       <header className="md:hidden fixed top-0 left-0 right-0 z-40 h-16 bg-slate-900 text-zinc-100 flex items-center justify-between px-4 border-b border-white/10">
-        <span className="text-lg font-semibold tracking-tight">DockSlot</span>
         <button
           ref={menuButtonRef}
           type="button"
@@ -88,6 +87,9 @@ export function MobileHeader({ userEmail, signOutAction }: MobileHeaderProps) {
         >
           <Menu size={24} aria-hidden="true" />
         </button>
+        <span className="text-lg font-semibold tracking-tight">DockSlot</span>
+        {/* Spacer for centering */}
+        <div className="w-11" />
       </header>
 
       {/* Backdrop */}
@@ -99,11 +101,11 @@ export function MobileHeader({ userEmail, signOutAction }: MobileHeaderProps) {
         />
       )}
 
-      {/* Slide-over Drawer */}
+      {/* Slide-over Drawer (slides from left) */}
       <div
         id="mobile-nav-drawer"
-        className={`md:hidden fixed inset-y-0 right-0 z-50 w-72 max-w-full bg-slate-900 text-zinc-100 transform transition-transform duration-200 ease-in-out ${
-          isOpen ? "translate-x-0" : "translate-x-full"
+        className={`md:hidden fixed inset-y-0 left-0 z-50 w-72 max-w-[80vw] bg-slate-900 text-zinc-100 transform transition-transform duration-200 ease-in-out ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         aria-hidden={!isOpen}
       >

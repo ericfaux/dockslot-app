@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfDay, endOfDay } from 'date-fns';
 import { CalendarWeekView } from './CalendarWeekView';
+import { CalendarDayView } from './CalendarDayView';
 import { CalendarProps, CalendarView, CalendarBooking, BlackoutDate } from './types';
 import { getBlackoutDates } from '@/app/actions/blackout';
 
@@ -12,6 +13,18 @@ import { getBlackoutDates } from '@/app/actions/blackout';
 
 interface ExtendedCalendarProps extends CalendarProps {
   onEmptySlotClick?: (date: Date, hour: number) => void;
+}
+
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+  return isMobile;
 }
 
 export function Calendar({
@@ -26,12 +39,20 @@ export function Calendar({
   onEmptySlotClick,
   refreshKey = 0,
 }: ExtendedCalendarProps) {
+  const isMobile = useIsMobile();
   const [currentDate, setCurrentDate] = useState(initialDate);
   const [currentView, setCurrentView] = useState<CalendarView>(initialView);
   const [bookings, setBookings] = useState<CalendarBooking[]>([]);
   const [blackoutDates, setBlackoutDates] = useState<BlackoutDate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Default to day view on mobile
+  useEffect(() => {
+    if (isMobile && currentView === 'week') {
+      setCurrentView('day');
+    }
+  }, [isMobile]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Calculate date range based on current view
   const getDateRange = useCallback((date: Date, view: CalendarView) => {
@@ -144,24 +165,24 @@ export function Calendar({
 
   // Render based on current view
   switch (currentView) {
-    case 'week':
-      return (
-        <CalendarWeekView
-          date={currentDate}
-          bookings={bookings}
-          blackoutDates={blackoutDates}
-          onDateChange={handleDateChange}
-          onViewChange={handleViewChange}
-          onBlockClick={handleBlockClick}
-          onQuickBlockClick={onQuickBlockClick}
-          onBlackoutClick={handleBlackoutClick}
-          onEmptySlotClick={onEmptySlotClick}
-          isLoading={isLoading}
-        />
-      );
     case 'day':
+      return (
+        <CalendarDayView
+          date={currentDate}
+          bookings={bookings}
+          blackoutDates={blackoutDates}
+          onDateChange={handleDateChange}
+          onViewChange={handleViewChange}
+          onBlockClick={handleBlockClick}
+          onQuickBlockClick={onQuickBlockClick}
+          onBlackoutClick={handleBlackoutClick}
+          onEmptySlotClick={onEmptySlotClick}
+          isLoading={isLoading}
+        />
+      );
+    case 'week':
     case 'month':
-      // Placeholder for other views - default to week view for now
+    default:
       return (
         <CalendarWeekView
           date={currentDate}
@@ -176,7 +197,5 @@ export function Calendar({
           isLoading={isLoading}
         />
       );
-    default:
-      return null;
   }
 }
