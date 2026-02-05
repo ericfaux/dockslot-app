@@ -5,21 +5,20 @@
 export const dynamic = 'force-dynamic';
 
 import { requireAuth } from '@/lib/auth/server';
-import { redirect } from 'next/navigation';
 import { PaymentsClient } from './PaymentsClient';
 
 export default async function PaymentsPage() {
   const { user, supabase } = await requireAuth()
 
   // Fetch profile with Stripe account info
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', user.id)
     .single();
 
-  if (!profile) {
-    redirect('/login');
+  if (profileError) {
+    console.error('[Payments] Profile query failed for user:', user.id, profileError);
   }
 
   return (
@@ -39,9 +38,9 @@ export default async function PaymentsPage() {
 
       {/* Payments Client Component */}
       <PaymentsClient
-        stripeAccountId={profile.stripe_account_id}
-        stripeOnboardingComplete={profile.stripe_onboarding_complete || false}
-        businessName={profile.business_name || profile.full_name || ''}
+        stripeAccountId={profile?.stripe_account_id ?? null}
+        stripeOnboardingComplete={profile?.stripe_onboarding_complete ?? false}
+        businessName={profile?.business_name || profile?.full_name || ''}
         email={user.email || ''}
       />
 

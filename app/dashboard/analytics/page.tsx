@@ -1,4 +1,3 @@
-import { redirect } from 'next/navigation';
 import { requireAuth } from '@/lib/auth/server';
 import { BarChart3 } from 'lucide-react';
 import { EnhancedExport } from './components/EnhancedExport';
@@ -22,15 +21,18 @@ export default async function AnalyticsPage() {
   const { user, supabase } = await requireAuth();
 
   // Get captain profile
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('id')
     .eq('id', user.id)
     .single();
 
-  if (!profile) {
-    redirect('/login');
+  if (profileError) {
+    console.error('[Analytics] Profile query failed for user:', user.id, profileError);
   }
+
+  // Use fallback value if profile query fails - user is still authenticated
+  const captainId = profile?.id ?? user.id;
 
   // Fetch all bookings with related data for analytics
   const { data: bookings } = await supabase
@@ -53,7 +55,7 @@ export default async function AnalyticsPage() {
       trip_type:trip_types(id, title),
       vessel:vessels(id, name)
     `)
-    .eq('captain_id', profile.id)
+    .eq('captain_id', captainId)
     .order('scheduled_start', { ascending: false });
 
   // Transform to AnalyticsBooking type
@@ -99,7 +101,7 @@ export default async function AnalyticsPage() {
             Business insights and performance metrics
           </p>
         </div>
-        <EnhancedExport captainId={profile.id} />
+        <EnhancedExport captainId={captainId} />
       </div>
 
       {/* Quick Stats Row */}
