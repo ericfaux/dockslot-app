@@ -28,6 +28,9 @@ import SunCalc from "suncalc";
 import { weatherCache } from "@/lib/cache";
 import QuickStatsWidgets from "./components/QuickStatsWidgets";
 import { OnboardingChecklist } from "./components/OnboardingChecklist";
+import { HelpTooltip } from "@/components/HelpTooltip";
+import { WelcomeBanner } from "./components/WelcomeBanner";
+import { FeatureNudges } from "./components/FeatureNudges";
 
 interface WeatherData {
   waterTemp: number | null;
@@ -739,6 +742,9 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6 sm:space-y-8">
+      {/* ═══ WELCOME BANNER (first-run) ═══ */}
+      <WelcomeBanner />
+
       {/* ═══ SECTION 1: THE HORIZON WIDGET ═══ */}
       <section aria-label="Day Overview">
         <HorizonWidget
@@ -760,7 +766,10 @@ export default async function DashboardPage() {
                 <Anchor className="h-6 w-6 text-cyan-400" />
               </div>
               <div>
-                <span className="text-lg font-bold text-white">Enter Dock Mode</span>
+                <span className="inline-flex items-center text-lg font-bold text-white">
+                  Enter Dock Mode
+                  <HelpTooltip text="A simplified, high-contrast view designed for use on the water — large text, big buttons, essential info only." />
+                </span>
                 <p className="text-sm text-slate-400">Simplified view for on-water use</p>
               </div>
             </div>
@@ -771,6 +780,13 @@ export default async function DashboardPage() {
 
       {/* ═══ SECTION 1.25: WEATHER ALERT ═══ */}
       <section aria-label="Weather Alert">
+        <div className="mb-3 flex items-center gap-2">
+          <span className="font-mono text-xs uppercase tracking-widest text-slate-500">
+            Weather Alerts
+          </span>
+          <HelpTooltip text="DockSlot monitors NOAA marine weather for your location and alerts you about dangerous conditions before upcoming trips." />
+          <div className="h-px flex-1 bg-slate-800" />
+        </div>
         <WeatherAlertWidget
           lat={captainProfile?.meeting_spot_latitude ?? null}
           lon={captainProfile?.meeting_spot_longitude ?? null}
@@ -836,6 +852,7 @@ export default async function DashboardPage() {
           <span className="font-mono text-xs uppercase tracking-widest text-slate-500">
             Float Plan
           </span>
+          <HelpTooltip text="Your Float Plan shows today's trips at a glance — guest names, times, party sizes, waiver status, and weather conditions." />
           <div className="h-px flex-1 bg-slate-800" />
         </div>
         <FloatPlanWidget
@@ -870,6 +887,14 @@ export default async function DashboardPage() {
           <BookingLinkCard captainId={user.id} compact />
         </section>
       )}
+
+      {/* ═══ FEATURE NUDGES (after 7 days) ═══ */}
+      <FeatureNudges
+        hasVessel={hasVessel}
+        hasTripType={hasTripType}
+        hasBooking={hasAnyBooking}
+        dockModeEnabled={dockModeEnabled}
+      />
 
       {/* ═══ BOTTOM ACCENT BAR ═══ */}
       <div

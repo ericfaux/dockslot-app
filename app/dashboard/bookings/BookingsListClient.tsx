@@ -18,7 +18,9 @@ import { ExportButton } from './ExportButton'
 import FilterPresetsMenu from '../components/FilterPresetsMenu'
 import BulkActionsBar from '../components/BulkActionsBar'
 import { SwipeableBookingRow } from './SwipeableBookingRow'
+import { EmptyState } from '@/components/EmptyState'
 import Link from 'next/link'
+import { List } from 'lucide-react'
 
 interface BookingsListClientProps {
   captainId: string
@@ -182,12 +184,24 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-cyan-500 border-t-transparent" />
         </div>
       ) : bookings.length === 0 ? (
-        <div className="rounded-lg border border-slate-700 bg-slate-800/30 p-12 text-center">
-          <p className="text-slate-400">No bookings found</p>
-          <p className="mt-2 text-sm text-slate-500">
-            Try adjusting your filters or search query
-          </p>
-        </div>
+        filters.search || filters.tags.length > 0 || filters.statuses.length > 0 || filters.paymentStatus.length > 0 || filters.dateRange.start ? (
+          <div className="rounded-lg border border-slate-700 bg-slate-800/30 p-12 text-center">
+            <p className="text-slate-400">No bookings found</p>
+            <p className="mt-2 text-sm text-slate-500">
+              Try adjusting your filters or search query
+            </p>
+          </div>
+        ) : (
+          <EmptyState
+            icon={List}
+            title="No bookings yet"
+            description="Your first booking is a big deal — let's make it happen! Share your booking link with potential guests or create a booking manually."
+            actions={[
+              { label: 'Share Booking Link', href: '/dashboard/settings?tab=booking-page' },
+              { label: 'Create Booking', href: '/dashboard/schedule', variant: 'secondary' },
+            ]}
+          />
+        )
       ) : (
         <div className="space-y-3">
           {/* Select All */}

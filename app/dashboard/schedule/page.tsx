@@ -6,6 +6,7 @@ import { Moon, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { ScheduleClient } from './ScheduleClient';
 import { ExportBookingsButton } from './components/ExportBookingsButton';
+import { HelpTooltip } from '@/components/HelpTooltip';
 
 /**
  * Schedule Page - Server Component
@@ -41,8 +42,9 @@ export default async function SchedulePage() {
           <div className="flex items-start gap-3">
             <Moon className="h-5 w-5 text-amber-400 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <p className="text-sm font-medium text-amber-200">
+              <p className="inline-flex items-center text-sm font-medium text-amber-200">
                 Hibernation Mode Active
+                <HelpTooltip text="Pause your booking page during off-season. Set a return date and we'll automatically resume accepting bookings." />
               </p>
               <p className="text-sm text-amber-200/70 mt-1">
                 Your booking page is paused. New bookings cannot be created during hibernation.
