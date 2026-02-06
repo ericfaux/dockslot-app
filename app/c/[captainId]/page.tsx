@@ -116,7 +116,7 @@ export default async function CaptainProfilePage({ params }: CaptainProfileProps
               </h1>
               {profile.full_name && profile.business_name && (
                 <p className="text-lg text-slate-400">
-                  Captain {profile.full_name}
+                  {profile.full_name}
                 </p>
               )}
             </div>
