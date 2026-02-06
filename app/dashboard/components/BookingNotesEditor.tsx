@@ -93,16 +93,16 @@ export default function BookingNotesEditor({
   }
 
   return (
-    <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-4">
+    <div className="rounded-lg border border-slate-200 bg-white p-4">
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="flex items-center gap-2 text-sm font-semibold text-cyan-400">
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-cyan-600">
           <Edit3 className="h-4 w-4" />
           Captain&apos;s Notes & Tags
         </h3>
         {!isEditing && (
           <button
             onClick={() => setIsEditing(true)}
-            className="rounded px-3 py-1 text-sm text-cyan-400 hover:bg-slate-700/50"
+            className="rounded px-3 py-1 text-sm text-cyan-600 hover:bg-slate-100"
           >
             Edit
           </button>
@@ -110,7 +110,7 @@ export default function BookingNotesEditor({
       </div>
 
       {error && (
-        <div className="mb-3 rounded border border-red-500/50 bg-red-500/10 p-2 text-sm text-red-400">
+        <div className="mb-3 rounded border border-red-500/50 bg-red-50 p-2 text-sm text-red-600">
           {error}
         </div>
       )}
@@ -127,14 +127,14 @@ export default function BookingNotesEditor({
           {tags.map((tag) => (
             <span
               key={tag}
-              className="flex items-center gap-1 rounded-full bg-cyan-500/20 px-3 py-1 text-xs font-medium text-cyan-300"
+              className="flex items-center gap-1 rounded-full bg-cyan-50 px-3 py-1 text-xs font-medium text-cyan-600"
             >
               <Tag className="h-3 w-3" />
               {tag}
               {isEditing && (
                 <button
                   onClick={() => removeTag(tag)}
-                  className="ml-1 hover:text-red-400"
+                  className="ml-1 hover:text-red-600"
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -151,7 +151,7 @@ export default function BookingNotesEditor({
                 <button
                   key={tag}
                   onClick={() => addTag(tag)}
-                  className="rounded border border-slate-600 px-2 py-1 text-xs text-slate-300 hover:border-cyan-500 hover:bg-cyan-500/10 hover:text-cyan-300"
+                  className="rounded border border-slate-300 px-2 py-1 text-xs text-slate-600 hover:border-cyan-500 hover:bg-cyan-50 hover:text-cyan-600"
                 >
                   + {tag}
                 </button>
@@ -169,11 +169,11 @@ export default function BookingNotesEditor({
                   }
                 }}
                 placeholder="Custom tag..."
-                className="flex-1 rounded border border-slate-600 bg-slate-900/50 px-3 py-1 text-sm text-slate-200 placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+                className="flex-1 rounded border border-slate-300 bg-white px-3 py-1 text-sm text-slate-700 placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
               />
               <button
                 onClick={handleAddCustomTag}
-                className="rounded bg-slate-700 px-3 py-1 text-sm text-cyan-400 hover:bg-slate-600"
+                className="rounded bg-slate-100 px-3 py-1 text-sm text-cyan-600 hover:bg-slate-200"
               >
                 Add
               </button>
@@ -193,10 +193,10 @@ export default function BookingNotesEditor({
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Special requests, preferences, reminders..."
             rows={4}
-            className="w-full rounded border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+            className="w-full rounded border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
           />
         ) : (
-          <div className="rounded bg-slate-900/30 p-3 text-sm text-slate-300">
+          <div className="rounded bg-slate-50 p-3 text-sm text-slate-600">
             {notes || (
               <span className="italic text-slate-500">No notes yet</span>
             )}
@@ -218,7 +218,7 @@ export default function BookingNotesEditor({
           <button
             onClick={handleCancel}
             disabled={isSaving}
-            className="rounded border border-slate-600 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-700/50 disabled:opacity-50"
+            className="rounded border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-50"
           >
             Cancel
           </button>

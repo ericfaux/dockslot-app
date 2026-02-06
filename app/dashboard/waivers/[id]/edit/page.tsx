@@ -26,7 +26,7 @@ export default async function EditWaiverPage({ params }: Props) {
   return (
     <div className="max-w-4xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Edit Waiver Template</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Edit Waiver Template</h1>
         <p className="mt-1 text-sm text-slate-400">
           Update the liability waiver that passengers must sign
         </p>

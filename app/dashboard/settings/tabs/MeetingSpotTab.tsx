@@ -112,27 +112,27 @@ export function MeetingSpotTab({ initialProfile }: MeetingSpotTabProps) {
     setShowManualCoords(false);
   };
 
-  const inputClassName = "w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-white placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500";
-  const labelClassName = "block text-sm font-medium text-slate-300 mb-1.5";
-  const sectionClassName = "rounded-xl border border-slate-800 bg-slate-900/50 p-6";
+  const inputClassName = "w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-slate-900 placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500";
+  const labelClassName = "block text-sm font-medium text-slate-600 mb-1.5";
+  const sectionClassName = "rounded-xl border border-slate-200 bg-white p-6";
 
   return (
     <div className="space-y-6">
       {error && (
-        <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
+        <div className="rounded-lg border border-rose-500/30 bg-rose-50 px-4 py-3 text-sm text-rose-600">
           {error}
         </div>
       )}
       {success && (
-        <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
+        <div className="rounded-lg border border-emerald-500/30 bg-emerald-50 px-4 py-3 text-sm text-emerald-600">
           {success}
         </div>
       )}
 
       <section className={sectionClassName}>
         <div className="mb-4 flex items-center gap-2">
-          <MapPin className="h-5 w-5 text-cyan-400" />
-          <h2 className="text-lg font-semibold text-white">Meeting Spot</h2>
+          <MapPin className="h-5 w-5 text-cyan-600" />
+          <h2 className="text-lg font-semibold text-slate-900">Meeting Spot</h2>
         </div>
         <p className="mb-4 text-sm text-slate-400">
           Where should guests meet you for trips? This information is shared after booking.
@@ -179,11 +179,11 @@ export function MeetingSpotTab({ initialProfile }: MeetingSpotTabProps) {
           </div>
 
           {/* Coordinate Status & Weather Location */}
-          <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-4 space-y-3">
+          <div className="rounded-lg border border-slate-200 bg-white p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-slate-300">Weather Location</span>
+              <span className="text-sm font-medium text-slate-600">Weather Location</span>
               {geocodeStatus === 'loading' && (
-                <span className="flex items-center gap-1.5 text-xs text-cyan-400">
+                <span className="flex items-center gap-1.5 text-xs text-cyan-600">
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
                   Geocoding...
                 </span>
@@ -192,24 +192,24 @@ export function MeetingSpotTab({ initialProfile }: MeetingSpotTabProps) {
 
             {meetingSpotLat !== null && meetingSpotLon !== null ? (
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-emerald-400" />
-                <span className="text-sm text-emerald-300">
+                <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-emerald-600" />
+                <span className="text-sm text-emerald-600">
                   {meetingSpotLat.toFixed(4)}, {meetingSpotLon.toFixed(4)} — Location verified
                 </span>
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 flex-shrink-0 text-amber-400" />
-                <span className="text-sm text-amber-300">
+                <AlertTriangle className="h-4 w-4 flex-shrink-0 text-amber-600" />
+                <span className="text-sm text-amber-600">
                   No coordinates set — save with an address to auto-detect, or enter manually below
                 </span>
               </div>
             )}
 
             {geocodeStatus === 'error' && geocodeMessage && (
-              <div className="flex items-start gap-2 rounded-md bg-rose-500/10 border border-rose-500/20 px-3 py-2">
-                <AlertTriangle className="h-4 w-4 flex-shrink-0 text-rose-400 mt-0.5" />
-                <span className="text-xs text-rose-300">{geocodeMessage}</span>
+              <div className="flex items-start gap-2 rounded-md bg-rose-50 border border-rose-500/20 px-3 py-2">
+                <AlertTriangle className="h-4 w-4 flex-shrink-0 text-rose-600 mt-0.5" />
+                <span className="text-xs text-rose-600">{geocodeMessage}</span>
               </div>
             )}
 
@@ -220,7 +220,7 @@ export function MeetingSpotTab({ initialProfile }: MeetingSpotTabProps) {
             <button
               type="button"
               onClick={() => setShowManualCoords(!showManualCoords)}
-              className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
+              className="text-xs text-cyan-600 hover:text-cyan-600 transition-colors"
             >
               {showManualCoords ? 'Hide manual entry' : 'Enter coordinates manually'}
             </button>
@@ -260,7 +260,7 @@ export function MeetingSpotTab({ initialProfile }: MeetingSpotTabProps) {
                 <button
                   type="button"
                   onClick={handleManualCoordsSubmit}
-                  className="rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-600 transition-colors"
+                  className="rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 transition-colors"
                 >
                   Set Coordinates
                 </button>
@@ -276,7 +276,7 @@ export function MeetingSpotTab({ initialProfile }: MeetingSpotTabProps) {
       {/* Save Button */}
       <div className="flex items-center justify-end gap-3 pt-2">
         {hasChanges && (
-          <div className="flex items-center gap-1.5 text-sm text-amber-400">
+          <div className="flex items-center gap-1.5 text-sm text-amber-600">
             <AlertCircle className="h-4 w-4" />
             Unsaved changes
           </div>

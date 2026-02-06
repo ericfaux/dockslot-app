@@ -33,8 +33,8 @@ const STATUS_CONFIG: Record<
     label: 'Awaiting Deposit',
     icon: Clock,
     colors: {
-      bg: 'bg-amber-500/10',
-      text: 'text-amber-400',
+      bg: 'bg-amber-50',
+      text: 'text-amber-600',
       border: 'border-amber-500/30',
       ring: 'ring-amber-500/20',
     },
@@ -43,8 +43,8 @@ const STATUS_CONFIG: Record<
     label: 'Confirmed',
     icon: CheckCircle,
     colors: {
-      bg: 'bg-emerald-500/10',
-      text: 'text-emerald-400',
+      bg: 'bg-emerald-50',
+      text: 'text-emerald-600',
       border: 'border-emerald-500/30',
       ring: 'ring-emerald-500/20',
     },
@@ -53,8 +53,8 @@ const STATUS_CONFIG: Record<
     label: 'Weather Hold',
     icon: CloudRain,
     colors: {
-      bg: 'bg-amber-500/10',
-      text: 'text-amber-400',
+      bg: 'bg-amber-50',
+      text: 'text-amber-600',
       border: 'border-amber-500/30',
       ring: 'ring-amber-500/20',
     },
@@ -64,7 +64,7 @@ const STATUS_CONFIG: Record<
     icon: Calendar,
     colors: {
       bg: 'bg-blue-500/10',
-      text: 'text-blue-400',
+      text: 'text-blue-600',
       border: 'border-blue-500/30',
       ring: 'ring-blue-500/20',
     },
@@ -83,8 +83,8 @@ const STATUS_CONFIG: Record<
     label: 'Cancelled',
     icon: XCircle,
     colors: {
-      bg: 'bg-rose-500/10',
-      text: 'text-rose-400',
+      bg: 'bg-rose-50',
+      text: 'text-rose-600',
       border: 'border-rose-500/30',
       ring: 'ring-rose-500/20',
     },
@@ -93,8 +93,8 @@ const STATUS_CONFIG: Record<
     label: 'No Show',
     icon: AlertCircle,
     colors: {
-      bg: 'bg-rose-500/10',
-      text: 'text-rose-400',
+      bg: 'bg-rose-50',
+      text: 'text-rose-600',
       border: 'border-rose-500/30',
       ring: 'ring-rose-500/20',
     },
@@ -149,16 +149,16 @@ const PAYMENT_CONFIG = {
   deposit_paid: {
     label: 'Deposit Paid',
     colors: {
-      bg: 'bg-amber-500/10',
-      text: 'text-amber-400',
+      bg: 'bg-amber-50',
+      text: 'text-amber-600',
       border: 'border-amber-500/30',
     },
   },
   fully_paid: {
     label: 'Fully Paid',
     colors: {
-      bg: 'bg-emerald-500/10',
-      text: 'text-emerald-400',
+      bg: 'bg-emerald-50',
+      text: 'text-emerald-600',
       border: 'border-emerald-500/30',
     },
   },
@@ -166,7 +166,7 @@ const PAYMENT_CONFIG = {
     label: 'Partial Refund',
     colors: {
       bg: 'bg-purple-500/10',
-      text: 'text-purple-400',
+      text: 'text-purple-600',
       border: 'border-purple-500/30',
     },
   },
@@ -174,7 +174,7 @@ const PAYMENT_CONFIG = {
     label: 'Refunded',
     colors: {
       bg: 'bg-purple-500/10',
-      text: 'text-purple-400',
+      text: 'text-purple-600',
       border: 'border-purple-500/30',
     },
   },

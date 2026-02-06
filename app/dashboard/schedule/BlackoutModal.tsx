@@ -181,17 +181,17 @@ export function BlackoutModal({
       {/* Modal */}
       <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
-          className="pointer-events-auto w-full max-w-md max-h-[90vh] overflow-y-auto rounded-xl border border-slate-700 bg-slate-900 shadow-2xl"
+          className="pointer-events-auto w-full max-w-md max-h-[90vh] overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-700 bg-slate-900 p-4">
+          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white p-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-rose-500/20">
-                <CalendarX className="h-5 w-5 text-rose-400" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-rose-50">
+                <CalendarX className="h-5 w-5 text-rose-600" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-white">Block Date{isRangeMode ? 's' : ''}</h2>
+                <h2 className="text-lg font-semibold text-slate-900">Block Date{isRangeMode ? 's' : ''}</h2>
                 <p className="text-sm text-slate-400">
                   Prevent bookings on selected date{isRangeMode ? 's' : ''}
                 </p>
@@ -199,7 +199,7 @@ export function BlackoutModal({
             </div>
             <button
               onClick={handleClose}
-              className="rounded-md p-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
+              className="rounded-md p-2 text-slate-400 transition-colors hover:bg-white hover:text-slate-900"
             >
               <X className="h-5 w-5" />
             </button>
@@ -208,16 +208,16 @@ export function BlackoutModal({
           {/* Content */}
           <div className="space-y-5 p-4">
             {/* Mode Toggle */}
-            <div className="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-800/50 p-3">
+            <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-3">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-slate-400" />
-                <span className="text-sm text-slate-300">
+                <span className="text-sm text-slate-600">
                   {isRangeMode ? 'Date Range' : 'Single Date'}
                 </span>
               </div>
               <button
                 onClick={handleModeToggle}
-                className="flex items-center gap-2 text-sm text-cyan-400 transition-colors hover:text-cyan-300"
+                className="flex items-center gap-2 text-sm text-cyan-600 transition-colors hover:text-cyan-600"
               >
                 {isRangeMode ? (
                   <ToggleRight className="h-5 w-5" />
@@ -229,22 +229,22 @@ export function BlackoutModal({
             </div>
 
             {/* Mini Calendar */}
-            <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-3">
+            <div className="rounded-lg border border-slate-200 bg-white p-3">
               {/* Month Navigation */}
               <div className="mb-3 flex items-center justify-between">
                 <button
                   onClick={handlePrevMonth}
-                  className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-700 hover:text-white disabled:opacity-50"
+                  className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900 disabled:opacity-50"
                   disabled={isBefore(endOfMonth(subMonths(currentMonth, 1)), today)}
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
-                <span className="text-sm font-medium text-white">
+                <span className="text-sm font-medium text-slate-900">
                   {format(currentMonth, 'MMMM yyyy')}
                 </span>
                 <button
                   onClick={handleNextMonth}
-                  className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-700 hover:text-white"
+                  className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>
@@ -281,9 +281,9 @@ export function BlackoutModal({
                         relative h-9 text-xs font-medium transition-all
                         ${!isCurrentMonth ? 'text-slate-700' : ''}
                         ${isCurrentMonth && isDisabled ? 'cursor-not-allowed text-slate-600' : ''}
-                        ${isCurrentMonth && !isDisabled && !isSelected && !inRange ? 'text-slate-300 hover:bg-rose-500/20 hover:text-rose-400' : ''}
+                        ${isCurrentMonth && !isDisabled && !isSelected && !inRange ? 'text-slate-600 hover:bg-rose-50 hover:text-rose-600' : ''}
                         ${isSelected ? 'rounded bg-rose-500 text-white' : ''}
-                        ${inRange && !isStart && !isEnd ? 'bg-rose-500/30 text-rose-300' : ''}
+                        ${inRange && !isStart && !isEnd ? 'bg-rose-500/30 text-rose-600' : ''}
                         ${isStart ? 'rounded-l bg-rose-500 text-white' : ''}
                         ${isEnd ? 'rounded-r bg-rose-500 text-white' : ''}
                         ${isToday && !isSelected && !inRange ? 'ring-1 ring-cyan-500/50' : ''}
@@ -297,9 +297,9 @@ export function BlackoutModal({
 
               {/* Selection Summary */}
               {hasSelection && (
-                <div className="mt-3 flex items-center justify-between rounded-md bg-slate-700/50 px-3 py-2">
+                <div className="mt-3 flex items-center justify-between rounded-md bg-slate-100 px-3 py-2">
                   <span className="text-xs text-slate-400">Selected:</span>
-                  <span className="text-xs font-medium text-rose-400">
+                  <span className="text-xs font-medium text-rose-600">
                     {!isRangeMode && selectedDate
                       ? format(selectedDate, 'MMM d, yyyy')
                       : rangeStart && rangeEnd
@@ -314,14 +314,14 @@ export function BlackoutModal({
 
             {/* Reason Field */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-slate-300">
+              <label className="block text-sm font-medium text-slate-600">
                 Reason <span className="text-slate-500">(optional)</span>
               </label>
               <textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="e.g., Boat maintenance, Personal day, Tournament..."
-                className="w-full resize-none rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                className="w-full resize-none rounded-lg border border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
                 rows={2}
                 maxLength={500}
               />
@@ -332,7 +332,7 @@ export function BlackoutModal({
 
             {/* Error Message */}
             {error && (
-              <div className="flex items-center gap-2 rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-400">
+              <div className="flex items-center gap-2 rounded-lg border border-rose-500/30 bg-rose-50 px-4 py-3 text-sm text-rose-600">
                 <AlertTriangle className="h-4 w-4 flex-shrink-0" />
                 {error}
               </div>
@@ -340,18 +340,18 @@ export function BlackoutModal({
           </div>
 
           {/* Footer */}
-          <div className="sticky bottom-0 flex items-center justify-end gap-3 border-t border-slate-700 bg-slate-900 p-4">
+          <div className="sticky bottom-0 flex items-center justify-end gap-3 border-t border-slate-200 bg-white p-4">
             <button
               onClick={handleClose}
               disabled={isPending}
-              className="rounded-lg px-4 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-800 hover:text-white disabled:opacity-50"
+              className="rounded-lg px-4 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-white hover:text-slate-900 disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               onClick={handleSubmit}
               disabled={isPending || !hasSelection || (isRangeMode && !!rangeStart && !rangeEnd)}
-              className="flex items-center gap-2 rounded-lg bg-rose-500/20 px-6 py-2 font-medium text-rose-400 transition-colors hover:bg-rose-500/30 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex items-center gap-2 rounded-lg bg-rose-50 px-6 py-2 font-medium text-rose-600 transition-colors hover:bg-rose-500/30 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isPending ? (
                 <>

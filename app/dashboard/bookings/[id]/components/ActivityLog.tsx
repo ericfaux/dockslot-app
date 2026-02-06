@@ -54,20 +54,20 @@ interface ActivityLogProps {
 }
 
 const EVENT_CONFIG: Record<string, { icon: React.ElementType; color: string; bg: string }> = {
-  booking_created: { icon: Calendar, color: 'text-cyan-400', bg: 'bg-cyan-500/20' },
-  status_changed: { icon: Edit3, color: 'text-amber-400', bg: 'bg-amber-500/20' },
-  payment_received: { icon: CreditCard, color: 'text-emerald-400', bg: 'bg-emerald-500/20' },
-  payment_refunded: { icon: RotateCcw, color: 'text-purple-400', bg: 'bg-purple-500/20' },
-  waiver_signed: { icon: FileText, color: 'text-blue-400', bg: 'bg-blue-500/20' },
-  passenger_added: { icon: User, color: 'text-cyan-400', bg: 'bg-cyan-500/20' },
+  booking_created: { icon: Calendar, color: 'text-cyan-600', bg: 'bg-cyan-50' },
+  status_changed: { icon: Edit3, color: 'text-amber-600', bg: 'bg-amber-50' },
+  payment_received: { icon: CreditCard, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+  payment_refunded: { icon: RotateCcw, color: 'text-purple-600', bg: 'bg-purple-50' },
+  waiver_signed: { icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50' },
+  passenger_added: { icon: User, color: 'text-cyan-600', bg: 'bg-cyan-50' },
   passenger_updated: { icon: User, color: 'text-slate-400', bg: 'bg-slate-500/20' },
-  rescheduled: { icon: Calendar, color: 'text-amber-400', bg: 'bg-amber-500/20' },
-  weather_hold_set: { icon: CloudRain, color: 'text-amber-400', bg: 'bg-amber-500/20' },
+  rescheduled: { icon: Calendar, color: 'text-amber-600', bg: 'bg-amber-50' },
+  weather_hold_set: { icon: CloudRain, color: 'text-amber-600', bg: 'bg-amber-50' },
   note_added: { icon: Edit3, color: 'text-slate-400', bg: 'bg-slate-500/20' },
-  guest_communication: { icon: Mail, color: 'text-blue-400', bg: 'bg-blue-500/20' },
-  completed: { icon: CheckCircle, color: 'text-emerald-400', bg: 'bg-emerald-500/20' },
-  cancelled: { icon: XCircle, color: 'text-rose-400', bg: 'bg-rose-500/20' },
-  balance_requested: { icon: DollarSign, color: 'text-cyan-400', bg: 'bg-cyan-500/20' },
+  guest_communication: { icon: Mail, color: 'text-blue-600', bg: 'bg-blue-50' },
+  completed: { icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+  cancelled: { icon: XCircle, color: 'text-rose-600', bg: 'bg-rose-50' },
+  balance_requested: { icon: DollarSign, color: 'text-cyan-600', bg: 'bg-cyan-50' },
   default: { icon: Clock, color: 'text-slate-400', bg: 'bg-slate-500/20' },
 };
 
@@ -160,10 +160,10 @@ export function ActivityLog({ logs, auditLogs, isLoading }: ActivityLogProps) {
   return (
     <section
       aria-label="Activity Log"
-      className="rounded-lg border border-slate-700 bg-slate-800/50 p-6 print:border-slate-300 print:bg-white"
+      className="rounded-lg border border-slate-200 bg-white p-6 print:border-slate-300 print:bg-white"
     >
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="flex items-center gap-2 text-lg font-semibold text-cyan-400 print:text-cyan-600">
+        <h2 className="flex items-center gap-2 text-lg font-semibold text-cyan-600 print:text-cyan-600">
           <Anchor className="h-5 w-5" />
           Captain&apos;s Log
         </h2>
@@ -178,7 +178,7 @@ export function ActivityLog({ logs, auditLogs, isLoading }: ActivityLogProps) {
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-cyan-500 border-t-transparent" />
         </div>
       ) : timelineEvents.length === 0 ? (
-        <div className="rounded bg-slate-900/30 p-6 text-center print:bg-slate-100">
+        <div className="rounded bg-slate-50 p-6 text-center print:bg-slate-100">
           <Clock className="mx-auto mb-2 h-8 w-8 text-slate-500" />
           <p className="text-slate-400">No activity recorded yet</p>
         </div>
@@ -196,7 +196,7 @@ export function ActivityLog({ logs, auditLogs, isLoading }: ActivityLogProps) {
                     {event.icon}
                   </div>
                   {index < displayedEvents.length - 1 && (
-                    <div className="h-full w-px bg-slate-700 print:bg-slate-300" />
+                    <div className="h-full w-px bg-slate-100 print:bg-slate-300" />
                   )}
                 </div>
 
@@ -204,7 +204,7 @@ export function ActivityLog({ logs, auditLogs, isLoading }: ActivityLogProps) {
                 <div className="min-w-0 flex-1 pb-4">
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
-                      <h4 className="font-medium text-slate-200 print:text-black">
+                      <h4 className="font-medium text-slate-700 print:text-black">
                         {event.title}
                       </h4>
                       <p className="mt-0.5 text-sm text-slate-400 print:text-slate-600">
@@ -230,7 +230,7 @@ export function ActivityLog({ logs, auditLogs, isLoading }: ActivityLogProps) {
           {hasMore && (
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded border border-slate-700 py-2 text-sm text-cyan-400 transition-colors hover:bg-slate-700/50 print:hidden"
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded border border-slate-200 py-2 text-sm text-cyan-600 transition-colors hover:bg-slate-100 print:hidden"
             >
               {isExpanded ? (
                 <>

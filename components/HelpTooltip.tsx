@@ -36,7 +36,7 @@ export function HelpTooltip({ text }: HelpTooltipProps) {
         ref={buttonRef}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="ml-1.5 rounded-full p-0.5 text-slate-500 hover:text-slate-300 hover:bg-slate-700/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
+        className="ml-1.5 rounded-full p-0.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
         aria-label="More info"
       >
         <HelpCircle className="h-4 w-4" />
@@ -45,11 +45,11 @@ export function HelpTooltip({ text }: HelpTooltipProps) {
       {isOpen && (
         <div
           ref={tooltipRef}
-          className="absolute left-1/2 top-full z-50 mt-2 w-72 -translate-x-1/2 rounded-lg border border-slate-600 bg-slate-800 p-3 shadow-xl"
+          className="absolute left-1/2 top-full z-50 mt-2 w-72 -translate-x-1/2 rounded-lg border border-slate-200 bg-white p-3 shadow-xl"
         >
           {/* Arrow */}
-          <div className="absolute -top-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-l border-t border-slate-600 bg-slate-800" />
-          <p className="relative text-sm text-slate-300 leading-relaxed">{text}</p>
+          <div className="absolute -top-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-l border-t border-slate-200 bg-white" />
+          <p className="relative text-sm text-slate-600 leading-relaxed">{text}</p>
         </div>
       )}
     </span>

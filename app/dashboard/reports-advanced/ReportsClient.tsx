@@ -89,14 +89,14 @@ export default function ReportsClient({ vessels, tripTypes }: ReportsClientProps
   if (loading && !data) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
+        <Loader2 className="w-8 h-8 text-cyan-600 animate-spin" />
       </div>
     )
   }
 
   if (!data) {
     return (
-      <div className="p-8 text-center bg-slate-800/50 rounded-lg border border-slate-700">
+      <div className="p-8 text-center bg-white rounded-lg border border-slate-200">
         <p className="text-slate-400">No data available</p>
       </div>
     )
@@ -107,45 +107,45 @@ export default function ReportsClient({ vessels, tripTypes }: ReportsClientProps
   return (
     <div className="space-y-6">
       {/* Filters */}
-      <div className="p-6 bg-slate-800 rounded-xl border border-slate-700">
+      <div className="p-6 bg-white rounded-xl border border-slate-200">
         <div className="flex items-center gap-2 mb-4">
-          <Filter className="w-5 h-5 text-cyan-400" />
-          <h2 className="text-lg font-semibold text-white">Filters</h2>
+          <Filter className="w-5 h-5 text-cyan-600" />
+          <h2 className="text-lg font-semibold text-slate-900">Filters</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-slate-600 mb-2">
               Start Date
             </label>
             <input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+              className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-slate-600 mb-2">
               End Date
             </label>
             <input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+              className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-slate-600 mb-2">
               Status
             </label>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+              className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
             >
               <option value="">All Statuses</option>
               <option value="confirmed">Confirmed</option>
@@ -157,13 +157,13 @@ export default function ReportsClient({ vessels, tripTypes }: ReportsClientProps
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-slate-600 mb-2">
               Vessel
             </label>
             <select
               value={vesselId}
               onChange={(e) => setVesselId(e.target.value)}
-              className="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+              className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
             >
               <option value="">All Vessels</option>
               {vessels.map(v => (
@@ -173,13 +173,13 @@ export default function ReportsClient({ vessels, tripTypes }: ReportsClientProps
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-slate-600 mb-2">
               Trip Type
             </label>
             <select
               value={tripTypeId}
               onChange={(e) => setTripTypeId(e.target.value)}
-              className="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+              className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
             >
               <option value="">All Trip Types</option>
               {tripTypes.map(tt => (
@@ -192,7 +192,7 @@ export default function ReportsClient({ vessels, tripTypes }: ReportsClientProps
         {(startDate || endDate || status || vesselId || tripTypeId) && (
           <button
             onClick={clearFilters}
-            className="mt-4 px-4 py-2 text-sm text-cyan-400 hover:text-cyan-300 transition-colors"
+            className="mt-4 px-4 py-2 text-sm text-cyan-600 hover:text-cyan-600 transition-colors"
           >
             Clear All Filters
           </button>
@@ -243,9 +243,9 @@ export default function ReportsClient({ vessels, tripTypes }: ReportsClientProps
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Revenue by Month */}
         {charts.revenueByMonth.length > 0 && (
-          <div className="p-6 bg-slate-800 rounded-xl border border-slate-700">
-            <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-cyan-400" />
+          <div className="p-6 bg-white rounded-xl border border-slate-200">
+            <h3 className="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-cyan-600" />
               Revenue by Month
             </h3>
             <div className="space-y-3">
@@ -256,11 +256,11 @@ export default function ReportsClient({ vessels, tripTypes }: ReportsClientProps
                   <div key={month}>
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-sm text-slate-400">{month}</span>
-                      <span className="text-sm font-mono text-white">
+                      <span className="text-sm font-mono text-slate-900">
                         ${(revenue / 100).toFixed(0)}
                       </span>
                     </div>
-                    <div className="h-2 bg-slate-900 rounded-full overflow-hidden">
+                    <div className="h-2 bg-white rounded-full overflow-hidden">
                       <div
                         className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 transition-all"
                         style={{ width: `${percentage}%` }}
@@ -274,8 +274,8 @@ export default function ReportsClient({ vessels, tripTypes }: ReportsClientProps
         )}
 
         {/* Status Breakdown */}
-        <div className="p-6 bg-slate-800 rounded-xl border border-slate-700">
-          <h3 className="text-lg font-semibold text-white mb-6">Status Breakdown</h3>
+        <div className="p-6 bg-white rounded-xl border border-slate-200">
+          <h3 className="text-lg font-semibold text-slate-900 mb-6">Status Breakdown</h3>
           <div className="space-y-3">
             {Object.entries(breakdowns.status).map(([status, count]) => {
               const total = metrics.totalBookings
@@ -286,11 +286,11 @@ export default function ReportsClient({ vessels, tripTypes }: ReportsClientProps
                     <span className="text-sm text-slate-400 capitalize">
                       {status.replace('_', ' ')}
                     </span>
-                    <span className="text-sm font-mono text-white">
+                    <span className="text-sm font-mono text-slate-900">
                       {count} ({percentage.toFixed(1)}%)
                     </span>
                   </div>
-                  <div className="h-2 bg-slate-900 rounded-full overflow-hidden">
+                  <div className="h-2 bg-white rounded-full overflow-hidden">
                     <div
                       className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all"
                       style={{ width: `${percentage}%` }}
@@ -307,9 +307,9 @@ export default function ReportsClient({ vessels, tripTypes }: ReportsClientProps
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Bookings by Vessel */}
         {Object.keys(breakdowns.vessel).length > 0 && (
-          <div className="p-6 bg-slate-800 rounded-xl border border-slate-700">
-            <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-              <Ship className="w-5 h-5 text-cyan-400" />
+          <div className="p-6 bg-white rounded-xl border border-slate-200">
+            <h3 className="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
+              <Ship className="w-5 h-5 text-cyan-600" />
               Bookings by Vessel
             </h3>
             <div className="space-y-3">
@@ -322,9 +322,9 @@ export default function ReportsClient({ vessels, tripTypes }: ReportsClientProps
                     <div key={vessel}>
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-sm text-slate-400">{vessel}</span>
-                        <span className="text-sm font-mono text-white">{count}</span>
+                        <span className="text-sm font-mono text-slate-900">{count}</span>
                       </div>
-                      <div className="h-2 bg-slate-900 rounded-full overflow-hidden">
+                      <div className="h-2 bg-white rounded-full overflow-hidden">
                         <div
                           className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all"
                           style={{ width: `${percentage}%` }}
@@ -339,9 +339,9 @@ export default function ReportsClient({ vessels, tripTypes }: ReportsClientProps
 
         {/* Bookings by Trip Type */}
         {Object.keys(breakdowns.tripType).length > 0 && (
-          <div className="p-6 bg-slate-800 rounded-xl border border-slate-700">
-            <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-              <Anchor className="w-5 h-5 text-cyan-400" />
+          <div className="p-6 bg-white rounded-xl border border-slate-200">
+            <h3 className="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
+              <Anchor className="w-5 h-5 text-cyan-600" />
               Bookings by Trip Type
             </h3>
             <div className="space-y-3">
@@ -354,9 +354,9 @@ export default function ReportsClient({ vessels, tripTypes }: ReportsClientProps
                     <div key={tripType}>
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-sm text-slate-400">{tripType}</span>
-                        <span className="text-sm font-mono text-white">{count}</span>
+                        <span className="text-sm font-mono text-slate-900">{count}</span>
                       </div>
-                      <div className="h-2 bg-slate-900 rounded-full overflow-hidden">
+                      <div className="h-2 bg-white rounded-full overflow-hidden">
                         <div
                           className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all"
                           style={{ width: `${percentage}%` }}
@@ -382,23 +382,23 @@ interface MetricCardProps {
 
 function MetricCard({ icon, label, value, color }: MetricCardProps) {
   const colorClasses = {
-    cyan: 'bg-cyan-500/10 text-cyan-400',
-    emerald: 'bg-emerald-500/10 text-emerald-400',
-    blue: 'bg-blue-500/10 text-blue-400',
-    amber: 'bg-amber-500/10 text-amber-400',
-    purple: 'bg-purple-500/10 text-purple-400',
-    rose: 'bg-rose-500/10 text-rose-400',
+    cyan: 'bg-cyan-50 text-cyan-600',
+    emerald: 'bg-emerald-50 text-emerald-600',
+    blue: 'bg-blue-500/10 text-blue-600',
+    amber: 'bg-amber-50 text-amber-600',
+    purple: 'bg-purple-500/10 text-purple-600',
+    rose: 'bg-rose-50 text-rose-600',
   }
 
   return (
-    <div className="p-6 bg-slate-800 rounded-xl border border-slate-700">
+    <div className="p-6 bg-white rounded-xl border border-slate-200">
       <div className="flex items-center gap-4">
         <div className={`p-3 rounded-lg ${colorClasses[color]}`}>
           {icon}
         </div>
         <div>
           <p className="text-sm text-slate-400">{label}</p>
-          <p className="text-2xl font-bold text-white mt-1">{value}</p>
+          <p className="text-2xl font-bold text-slate-900 mt-1">{value}</p>
         </div>
       </div>
     </div>

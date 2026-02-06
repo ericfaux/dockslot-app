@@ -24,7 +24,7 @@ export default async function ReviewsPage() {
   return (
     <div className="p-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">
+        <h1 className="text-3xl font-bold text-slate-900 mb-2">
           Reviews & Ratings
         </h1>
         <p className="text-slate-400">

@@ -41,7 +41,7 @@ export default async function NewTripReportPage({
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Create Trip Report</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Create Trip Report</h1>
         <p className="mt-1 text-sm text-slate-400">
           Document trip details for safety records and compliance
         </p>

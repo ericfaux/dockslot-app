@@ -19,7 +19,7 @@ export default async function NewBookingPage() {
   return (
     <div className="flex flex-col">
       <div className="mb-6">
-        <h1 className="font-mono text-2xl font-bold text-slate-100">
+        <h1 className="font-mono text-2xl font-bold text-slate-800">
           New Booking
         </h1>
         <p className="mt-1 text-sm text-slate-400">

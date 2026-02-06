@@ -190,52 +190,52 @@ export function PaymentTimeline({ booking, payments, isLoading, onRefresh }: Pay
   const getEventColors = (event: TimelineEvent) => {
     if (event.status === 'pending') {
       return {
-        bg: 'bg-amber-500/20',
+        bg: 'bg-amber-50',
         border: 'border-amber-500/50',
-        text: 'text-amber-400',
-        icon: 'text-amber-400',
+        text: 'text-amber-600',
+        icon: 'text-amber-600',
       };
     }
     if (event.type === 'refund') {
       return {
-        bg: 'bg-purple-500/20',
+        bg: 'bg-purple-50',
         border: 'border-purple-500/50',
-        text: 'text-purple-400',
-        icon: 'text-purple-400',
+        text: 'text-purple-600',
+        icon: 'text-purple-600',
       };
     }
     return {
-      bg: 'bg-emerald-500/20',
+      bg: 'bg-emerald-50',
       border: 'border-emerald-500/50',
-      text: 'text-emerald-400',
-      icon: 'text-emerald-400',
+      text: 'text-emerald-600',
+      icon: 'text-emerald-600',
     };
   };
 
   return (
     <section
       aria-label="Payment Timeline"
-      className="rounded-lg border border-slate-700 bg-slate-800/50 p-6 print:border-slate-300 print:bg-white"
+      className="rounded-lg border border-slate-200 bg-white p-6 print:border-slate-300 print:bg-white"
     >
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="flex items-center gap-2 text-lg font-semibold text-cyan-400 print:text-cyan-600">
+        <h2 className="flex items-center gap-2 text-lg font-semibold text-cyan-600 print:text-cyan-600">
           <CreditCard className="h-5 w-5" />
           Payment Timeline
         </h2>
 
         {/* Balance Status Badge */}
         {booking.payment_status === 'fully_paid' ? (
-          <span className="flex items-center gap-1.5 rounded-full bg-emerald-500/20 px-3 py-1 text-sm font-medium text-emerald-300">
+          <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-600">
             <CheckCircle className="h-4 w-4" />
             Paid in Full
           </span>
         ) : booking.payment_status === 'deposit_paid' && booking.balance_due_cents > 0 ? (
-          <span className="flex items-center gap-1.5 rounded-full bg-amber-500/20 px-3 py-1 text-sm font-medium text-amber-300">
+          <span className="flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-sm font-medium text-amber-600">
             <DollarSign className="h-4 w-4" />
             ${(booking.balance_due_cents / 100).toFixed(2)} due
           </span>
         ) : booking.payment_status === 'unpaid' ? (
-          <span className="flex items-center gap-1.5 rounded-full bg-rose-500/20 px-3 py-1 text-sm font-medium text-rose-300">
+          <span className="flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1 text-sm font-medium text-rose-600">
             <XCircle className="h-4 w-4" />
             Deposit pending
           </span>
@@ -244,7 +244,7 @@ export function PaymentTimeline({ booking, payments, isLoading, onRefresh }: Pay
 
       {/* Alerts */}
       {error && (
-        <div className="mb-4 flex items-center gap-2 rounded border border-rose-500/50 bg-rose-500/10 p-3 text-sm text-rose-400">
+        <div className="mb-4 flex items-center gap-2 rounded border border-rose-500/50 bg-rose-50 p-3 text-sm text-rose-600">
           <AlertCircle className="h-4 w-4" />
           {error}
           <button onClick={() => setError(null)} className="ml-auto hover:underline">
@@ -253,7 +253,7 @@ export function PaymentTimeline({ booking, payments, isLoading, onRefresh }: Pay
         </div>
       )}
       {success && (
-        <div className="mb-4 flex items-center gap-2 rounded border border-emerald-500/50 bg-emerald-500/10 p-3 text-sm text-emerald-400">
+        <div className="mb-4 flex items-center gap-2 rounded border border-emerald-500/50 bg-emerald-50 p-3 text-sm text-emerald-600">
           <CheckCircle className="h-4 w-4" />
           {success}
           <button onClick={() => setSuccess(null)} className="ml-auto hover:underline">
@@ -283,7 +283,7 @@ export function PaymentTimeline({ booking, payments, isLoading, onRefresh }: Pay
                       {getEventIcon(event)}
                     </div>
                     {index < timelineEvents.length - 1 && (
-                      <div className="h-full w-px bg-slate-700" />
+                      <div className="h-full w-px bg-slate-100" />
                     )}
                   </div>
 
@@ -301,13 +301,13 @@ export function PaymentTimeline({ booking, payments, isLoading, onRefresh }: Pay
                       <div className="text-right">
                         <span
                           className={`font-mono text-lg font-semibold ${
-                            event.type === 'refund' ? 'text-purple-400' : colors.text
+                            event.type === 'refund' ? 'text-purple-600' : colors.text
                           }`}
                         >
                           {event.type === 'refund' ? '-' : ''}${(event.amount / 100).toFixed(2)}
                         </span>
                         {event.status === 'completed' && (
-                          <span className="ml-2 text-emerald-400">
+                          <span className="ml-2 text-emerald-600">
                             <Check className="inline h-4 w-4" />
                           </span>
                         )}
@@ -323,7 +323,7 @@ export function PaymentTimeline({ booking, payments, isLoading, onRefresh }: Pay
           {booking.payment_status !== 'fully_paid' &&
             booking.payment_status !== 'fully_refunded' &&
             booking.status !== 'cancelled' && (
-              <div className="mt-6 border-t border-slate-700 pt-4 print:hidden">
+              <div className="mt-6 border-t border-slate-200 pt-4 print:hidden">
                 <div className="flex flex-wrap gap-3">
                   {booking.payment_status === 'deposit_paid' && booking.balance_due_cents > 0 && (
                     <button
@@ -338,7 +338,7 @@ export function PaymentTimeline({ booking, payments, isLoading, onRefresh }: Pay
 
                   <button
                     onClick={() => setIsRecordingCash(!isRecordingCash)}
-                    className="flex items-center gap-2 rounded-lg border border-slate-600 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-700"
+                    className="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100"
                   >
                     <Banknote className="h-4 w-4" />
                     Record Cash Payment
@@ -347,8 +347,8 @@ export function PaymentTimeline({ booking, payments, isLoading, onRefresh }: Pay
 
                 {/* Cash Payment Form */}
                 {isRecordingCash && (
-                  <div className="mt-4 rounded-lg border border-slate-700 bg-slate-900/50 p-4">
-                    <h4 className="mb-3 text-sm font-medium text-slate-300">
+                  <div className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
+                    <h4 className="mb-3 text-sm font-medium text-slate-600">
                       Record Cash Payment
                     </h4>
                     <div className="flex gap-3">
@@ -363,7 +363,7 @@ export function PaymentTimeline({ booking, payments, isLoading, onRefresh }: Pay
                           placeholder="0.00"
                           min="0"
                           step="0.01"
-                          className="w-full rounded-lg border border-slate-600 bg-slate-900 py-2 pl-7 pr-3 text-slate-200 placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+                          className="w-full rounded-lg border border-slate-300 bg-white py-2 pl-7 pr-3 text-slate-700 placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
                         />
                       </div>
                       <button
@@ -377,7 +377,7 @@ export function PaymentTimeline({ booking, payments, isLoading, onRefresh }: Pay
                           setIsRecordingCash(false);
                           setCashAmount('');
                         }}
-                        className="rounded-lg border border-slate-600 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800"
+                        className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-white"
                       >
                         Cancel
                       </button>
@@ -392,7 +392,7 @@ export function PaymentTimeline({ booking, payments, isLoading, onRefresh }: Pay
             <div className="mt-4 text-center print:hidden">
               <a
                 href={`/dashboard/bookings/${booking.id}/refund`}
-                className="text-sm text-slate-500 hover:text-slate-300 hover:underline"
+                className="text-sm text-slate-500 hover:text-slate-700 hover:underline"
               >
                 Issue Refund
               </a>

@@ -109,7 +109,7 @@ export function RefundClient({
       {/* Back Button */}
       <button
         onClick={() => router.back()}
-        className="flex items-center gap-2 text-sm text-slate-400 hover:text-slate-300 transition"
+        className="flex items-center gap-2 text-sm text-slate-400 hover:text-slate-700 transition"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to Schedule
@@ -117,11 +117,11 @@ export function RefundClient({
 
       {/* Error Alert */}
       {error && (
-        <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-4">
+        <div className="rounded-lg border border-red-500/50 bg-red-50 p-4">
           <div className="flex items-start gap-3">
-            <AlertCircle className="h-5 w-5 flex-shrink-0 text-red-400" />
+            <AlertCircle className="h-5 w-5 flex-shrink-0 text-red-600" />
             <div>
-              <p className="font-medium text-red-400">Error</p>
+              <p className="font-medium text-red-600">Error</p>
               <p className="mt-1 text-sm text-red-300">{error}</p>
             </div>
           </div>
@@ -129,30 +129,30 @@ export function RefundClient({
       )}
 
       {/* Booking Details Card */}
-      <div className="rounded-lg border border-slate-700 bg-slate-800 p-6">
-        <h3 className="mb-4 text-lg font-semibold text-slate-100">
+      <div className="rounded-lg border border-slate-200 bg-white p-6">
+        <h3 className="mb-4 text-lg font-semibold text-slate-800">
           Booking Details
         </h3>
         <div className="grid gap-4 text-sm">
           <div className="flex items-start gap-3">
-            <User className="h-5 w-5 flex-shrink-0 text-cyan-400" />
+            <User className="h-5 w-5 flex-shrink-0 text-cyan-600" />
             <div>
               <p className="text-slate-400">Guest</p>
-              <p className="font-medium text-slate-100">{guestName}</p>
+              <p className="font-medium text-slate-800">{guestName}</p>
             </div>
           </div>
           <div className="flex items-start gap-3">
-            <Mail className="h-5 w-5 flex-shrink-0 text-cyan-400" />
+            <Mail className="h-5 w-5 flex-shrink-0 text-cyan-600" />
             <div>
               <p className="text-slate-400">Email</p>
-              <p className="font-medium text-slate-100">{guestEmail}</p>
+              <p className="font-medium text-slate-800">{guestEmail}</p>
             </div>
           </div>
           <div className="flex items-start gap-3">
-            <Calendar className="h-5 w-5 flex-shrink-0 text-cyan-400" />
+            <Calendar className="h-5 w-5 flex-shrink-0 text-cyan-600" />
             <div>
               <p className="text-slate-400">Trip</p>
-              <p className="font-medium text-slate-100">{tripTitle}</p>
+              <p className="font-medium text-slate-800">{tripTitle}</p>
               <p className="text-sm text-slate-400">
                 {format(parseISO(scheduledDate), 'EEEE, MMMM d, yyyy • h:mm a')}
               </p>
@@ -162,14 +162,14 @@ export function RefundClient({
       </div>
 
       {/* Payment Summary */}
-      <div className="rounded-lg border border-slate-700 bg-slate-800 p-6">
-        <h3 className="mb-4 text-lg font-semibold text-slate-100">
+      <div className="rounded-lg border border-slate-200 bg-white p-6">
+        <h3 className="mb-4 text-lg font-semibold text-slate-800">
           Payment Summary
         </h3>
         <div className="space-y-3 text-sm">
           <div className="flex justify-between">
             <span className="text-slate-400">Total Price</span>
-            <span className="font-medium text-slate-100">
+            <span className="font-medium text-slate-800">
               ${(totalPriceCents / 100).toFixed(2)}
             </span>
           </div>
@@ -187,15 +187,15 @@ export function RefundClient({
               </span>
             </div>
           )}
-          <div className="flex justify-between border-t border-slate-700 pt-3">
-            <span className="font-medium text-slate-300">Total Paid</span>
-            <span className="font-bold text-slate-100">
+          <div className="flex justify-between border-t border-slate-200 pt-3">
+            <span className="font-medium text-slate-600">Total Paid</span>
+            <span className="font-bold text-slate-800">
               ${(paidSoFar / 100).toFixed(2)}
             </span>
           </div>
           <div className="flex justify-between">
             <span className="text-slate-400">Balance Due</span>
-            <span className="font-medium text-slate-300">
+            <span className="font-medium text-slate-600">
               ${(balanceDueCents / 100).toFixed(2)}
             </span>
           </div>
@@ -203,14 +203,14 @@ export function RefundClient({
       </div>
 
       {/* Refund Options */}
-      <div className="rounded-lg border border-slate-700 bg-slate-800 p-6">
-        <h3 className="mb-4 text-lg font-semibold text-slate-100">
+      <div className="rounded-lg border border-slate-200 bg-white p-6">
+        <h3 className="mb-4 text-lg font-semibold text-slate-800">
           Refund Amount
         </h3>
 
         <div className="space-y-3">
           {/* Full Refund */}
-          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-600 bg-slate-900/50 p-4 transition hover:bg-slate-900">
+          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-300 bg-white p-4 transition hover:bg-white">
             <input
               type="radio"
               name="refundType"
@@ -221,8 +221,8 @@ export function RefundClient({
             />
             <div className="flex-1">
               <div className="flex items-center justify-between">
-                <span className="font-medium text-slate-100">Full Refund</span>
-                <span className="font-bold text-slate-100">
+                <span className="font-medium text-slate-800">Full Refund</span>
+                <span className="font-bold text-slate-800">
                   ${(maxRefundCents / 100).toFixed(2)}
                 </span>
               </div>
@@ -234,7 +234,7 @@ export function RefundClient({
 
           {/* Deposit Only */}
           {depositPaidCents > 0 && (
-            <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-600 bg-slate-900/50 p-4 transition hover:bg-slate-900">
+            <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-300 bg-white p-4 transition hover:bg-white">
               <input
                 type="radio"
                 name="refundType"
@@ -245,10 +245,10 @@ export function RefundClient({
               />
               <div className="flex-1">
                 <div className="flex items-center justify-between">
-                  <span className="font-medium text-slate-100">
+                  <span className="font-medium text-slate-800">
                     Deposit Only
                   </span>
-                  <span className="font-bold text-slate-100">
+                  <span className="font-bold text-slate-800">
                     ${(depositPaidCents / 100).toFixed(2)}
                   </span>
                 </div>
@@ -260,7 +260,7 @@ export function RefundClient({
           )}
 
           {/* Partial Refund */}
-          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-600 bg-slate-900/50 p-4 transition hover:bg-slate-900">
+          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-300 bg-white p-4 transition hover:bg-white">
             <input
               type="radio"
               name="refundType"
@@ -271,7 +271,7 @@ export function RefundClient({
             />
             <div className="flex-1">
               <div className="mb-2 flex items-center justify-between">
-                <span className="font-medium text-slate-100">
+                <span className="font-medium text-slate-800">
                   Partial Refund
                 </span>
               </div>
@@ -287,7 +287,7 @@ export function RefundClient({
                     setCustomAmountCents(Math.round(parseFloat(e.target.value || '0') * 100))
                   }
                   disabled={refundType !== 'partial'}
-                  className="flex-1 rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-slate-100 disabled:opacity-50"
+                  className="flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800 disabled:opacity-50"
                   placeholder="0.00"
                 />
               </div>
@@ -300,8 +300,8 @@ export function RefundClient({
       </div>
 
       {/* Refund Reason */}
-      <div className="rounded-lg border border-slate-700 bg-slate-800 p-6">
-        <h3 className="mb-4 text-lg font-semibold text-slate-100">
+      <div className="rounded-lg border border-slate-200 bg-white p-6">
+        <h3 className="mb-4 text-lg font-semibold text-slate-800">
           Refund Reason
         </h3>
         <textarea
@@ -309,7 +309,7 @@ export function RefundClient({
           onChange={(e) => setReason(e.target.value)}
           placeholder="e.g., Weather cancellation, customer request, equipment failure..."
           rows={4}
-          className="w-full rounded-lg border border-slate-600 bg-slate-900 px-4 py-3 text-slate-100 placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+          className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-800 placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
           required
         />
         <p className="mt-2 text-xs text-slate-400">
@@ -338,7 +338,7 @@ export function RefundClient({
         <button
           onClick={() => router.back()}
           disabled={loading}
-          className="flex-1 rounded-lg border border-slate-600 bg-slate-700 px-6 py-4 font-semibold text-slate-100 transition hover:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex-1 rounded-lg border border-slate-300 bg-slate-100 px-6 py-4 font-semibold text-slate-800 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Cancel
         </button>

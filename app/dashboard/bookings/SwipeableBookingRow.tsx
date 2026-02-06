@@ -90,18 +90,18 @@ export function SwipeableBookingRow({
     >
       {/* Swipe backgrounds (mobile only) */}
       <div className="absolute inset-y-0 left-0 flex w-24 items-center justify-center bg-cyan-600 md:hidden">
-        <Eye className="h-6 w-6 text-white" />
+        <Eye className="h-6 w-6 text-slate-900" />
       </div>
       <div className="absolute inset-y-0 right-0 flex w-24 items-center justify-center bg-amber-600 md:hidden">
-        <CloudRain className="h-6 w-6 text-white" />
+        <CloudRain className="h-6 w-6 text-slate-900" />
       </div>
 
       {/* Main row content */}
       <div
-        className={`relative flex items-start gap-3 border p-4 transition-all bg-slate-900 ${
+        className={`relative flex items-start gap-3 border p-4 transition-all bg-white ${
           isSelected
-            ? 'border-cyan-500 bg-cyan-500/10'
-            : 'border-slate-700 bg-slate-800/50'
+            ? 'border-cyan-500 bg-cyan-50'
+            : 'border-slate-200 bg-white'
         }`}
         style={{
           transform: `translateX(${swipeOffset}px)`,
@@ -119,7 +119,7 @@ export function SwipeableBookingRow({
           checked={isSelected}
           onChange={() => onSelect(booking.id)}
           onClick={(e) => e.stopPropagation()}
-          className="mt-1 h-4 w-4 rounded border-slate-600 bg-slate-700 text-cyan-500 focus:ring-2 focus:ring-cyan-500 focus:ring-offset-0"
+          className="mt-1 h-4 w-4 rounded border-slate-300 bg-slate-100 text-cyan-500 focus:ring-2 focus:ring-cyan-500 focus:ring-offset-0"
         />
 
         <Link
@@ -135,7 +135,7 @@ export function SwipeableBookingRow({
           <div className="flex-1 space-y-3">
             {/* Guest Name & Status */}
             <div className="flex items-center gap-3">
-              <h3 className="font-mono text-lg font-semibold text-slate-100">
+              <h3 className="font-mono text-lg font-semibold text-slate-800">
                 {booking.guest_name}
               </h3>
               <div className="flex items-center gap-2">
@@ -145,7 +145,7 @@ export function SwipeableBookingRow({
             </div>
 
             {/* Details Grid */}
-            <div className="grid grid-cols-1 gap-2 text-sm text-slate-300 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-2 text-sm text-slate-600 sm:grid-cols-2 lg:grid-cols-3">
               {/* Date/Time */}
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-slate-500" />
@@ -179,9 +179,9 @@ export function SwipeableBookingRow({
                 <CreditCard
                   className={`h-4 w-4 ${
                     booking.payment_status === 'fully_paid'
-                      ? 'text-emerald-400'
+                      ? 'text-emerald-600'
                       : booking.payment_status === 'deposit_paid'
-                      ? 'text-amber-400'
+                      ? 'text-amber-600'
                       : 'text-slate-500'
                   }`}
                 />
@@ -209,7 +209,7 @@ export function SwipeableBookingRow({
                 {booking.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="flex items-center gap-1 rounded-full bg-cyan-500/20 px-2.5 py-0.5 text-xs font-medium text-cyan-300"
+                    className="flex items-center gap-1 rounded-full bg-cyan-50 px-2.5 py-0.5 text-xs font-medium text-cyan-600"
                   >
                     <TagIcon className="h-3 w-3" />
                     {tag}
@@ -220,8 +220,8 @@ export function SwipeableBookingRow({
 
             {/* Captain Notes Preview */}
             {booking.internal_notes && (
-              <div className="rounded bg-slate-900/50 p-2 text-sm text-slate-400">
-                <span className="font-medium text-slate-300">Note: </span>
+              <div className="rounded bg-white p-2 text-sm text-slate-400">
+                <span className="font-medium text-slate-600">Note: </span>
                 {booking.internal_notes.length > 100
                   ? `${booking.internal_notes.slice(0, 100)}...`
                   : booking.internal_notes}
@@ -243,7 +243,7 @@ export function SwipeableBookingRow({
                   e.stopPropagation()
                   window.location.href = `/dashboard/schedule?booking=${booking.id}`
                 }}
-                className="rounded-lg bg-cyan-500/20 px-3 py-1.5 text-xs font-medium text-cyan-400 transition-colors hover:bg-cyan-500/30"
+                className="rounded-lg bg-cyan-50 px-3 py-1.5 text-xs font-medium text-cyan-600 transition-colors hover:bg-cyan-500/30"
               >
                 View
               </button>
@@ -254,7 +254,7 @@ export function SwipeableBookingRow({
                     e.stopPropagation()
                     onWeatherHold(booking.id)
                   }}
-                  className="rounded-lg bg-amber-500/20 px-3 py-1.5 text-xs font-medium text-amber-400 transition-colors hover:bg-amber-500/30"
+                  className="rounded-lg bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-600 transition-colors hover:bg-amber-500/30"
                 >
                   Weather Hold
                 </button>
@@ -268,10 +268,10 @@ export function SwipeableBookingRow({
       {/* Mobile swipe hints - shown on first few rows */}
       <div className="pointer-events-none absolute inset-0 hidden">
         <div className="absolute inset-y-0 left-2 flex items-center">
-          <span className="text-xs text-cyan-400">← View</span>
+          <span className="text-xs text-cyan-600">← View</span>
         </div>
         <div className="absolute inset-y-0 right-2 flex items-center">
-          <span className="text-xs text-amber-400">Hold →</span>
+          <span className="text-xs text-amber-600">Hold →</span>
         </div>
       </div>
     </div>

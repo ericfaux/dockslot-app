@@ -115,7 +115,7 @@ export default function WaitlistClient() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-cyan-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-cyan-600" />
       </div>
     );
   }
@@ -124,7 +124,7 @@ export default function WaitlistClient() {
     <div className="space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white">Waitlist</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Waitlist</h1>
         <p className="text-slate-400 mt-1">
           Guests waiting for open slots on fully booked dates
         </p>
@@ -134,53 +134,53 @@ export default function WaitlistClient() {
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Active Waitlist */}
-          <div className="rounded-lg border border-slate-700 bg-slate-900 p-4">
+          <div className="rounded-lg border border-slate-200 bg-white p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-400">Active Waitlist</p>
-                <p className="text-2xl font-bold text-white mt-1">{stats.total_active}</p>
+                <p className="text-2xl font-bold text-slate-900 mt-1">{stats.total_active}</p>
               </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-cyan-500/10">
-                <Clock className="h-6 w-6 text-cyan-400" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-cyan-50">
+                <Clock className="h-6 w-6 text-cyan-600" />
               </div>
             </div>
           </div>
 
           {/* Notified */}
-          <div className="rounded-lg border border-slate-700 bg-slate-900 p-4">
+          <div className="rounded-lg border border-slate-200 bg-white p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-400">Notified</p>
-                <p className="text-2xl font-bold text-white mt-1">{stats.total_notified}</p>
+                <p className="text-2xl font-bold text-slate-900 mt-1">{stats.total_notified}</p>
               </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-amber-500/10">
-                <Bell className="h-6 w-6 text-amber-400" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-amber-50">
+                <Bell className="h-6 w-6 text-amber-600" />
               </div>
             </div>
           </div>
 
           {/* Converted */}
-          <div className="rounded-lg border border-slate-700 bg-slate-900 p-4">
+          <div className="rounded-lg border border-slate-200 bg-white p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-400">Converted</p>
-                <p className="text-2xl font-bold text-white mt-1">{stats.total_converted}</p>
+                <p className="text-2xl font-bold text-slate-900 mt-1">{stats.total_converted}</p>
               </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-500/10">
-                <CheckCircle className="h-6 w-6 text-emerald-400" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-50">
+                <CheckCircle className="h-6 w-6 text-emerald-600" />
               </div>
             </div>
           </div>
 
           {/* Conversion Rate */}
-          <div className="rounded-lg border border-slate-700 bg-slate-900 p-4">
+          <div className="rounded-lg border border-slate-200 bg-white p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-400">Conversion Rate</p>
-                <p className="text-2xl font-bold text-white mt-1">{stats.conversion_rate}%</p>
+                <p className="text-2xl font-bold text-slate-900 mt-1">{stats.conversion_rate}%</p>
               </div>
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-500/10">
-                <TrendingUp className="h-6 w-6 text-purple-400" />
+                <TrendingUp className="h-6 w-6 text-purple-600" />
               </div>
             </div>
           </div>
@@ -188,7 +188,7 @@ export default function WaitlistClient() {
       )}
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-700">
+      <div className="flex items-center gap-2 border-b border-slate-200">
         {[
           { value: 'active', label: 'Active', count: stats?.total_active },
           { value: 'notified', label: 'Notified', count: stats?.total_notified },
@@ -200,8 +200,8 @@ export default function WaitlistClient() {
             onClick={() => setStatusFilter(tab.value)}
             className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
               statusFilter === tab.value
-                ? 'border-cyan-500 text-cyan-400'
-                : 'border-transparent text-slate-400 hover:text-slate-300'
+                ? 'border-cyan-500 text-cyan-600'
+                : 'border-transparent text-slate-400 hover:text-slate-700'
             }`}
           >
             {tab.label}
@@ -214,7 +214,7 @@ export default function WaitlistClient() {
       {entries.length === 0 ? (
         <div className="text-center py-12">
           <div className="flex justify-center mb-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-800">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white">
               <Users className="h-8 w-8 text-slate-600" />
             </div>
           </div>
@@ -228,17 +228,17 @@ export default function WaitlistClient() {
           {entries.map((entry: any) => (
             <div
               key={entry.id}
-              className="rounded-lg border border-slate-700 bg-slate-900 p-4"
+              className="rounded-lg border border-slate-200 bg-white p-4"
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   {/* Guest Info */}
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-500/10">
-                      <Users className="h-5 w-5 text-cyan-400" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-50">
+                      <Users className="h-5 w-5 text-cyan-600" />
                     </div>
                     <div>
-                      <p className="text-white font-medium">{entry.guest_name}</p>
+                      <p className="text-slate-900 font-medium">{entry.guest_name}</p>
                       <div className="flex items-center gap-2 text-sm text-slate-400">
                         <Mail className="h-3.5 w-3.5" />
                         {entry.guest_email}
@@ -257,23 +257,23 @@ export default function WaitlistClient() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div>
                       <p className="text-xs text-slate-500">Trip Type</p>
-                      <p className="text-sm text-white mt-0.5">
+                      <p className="text-sm text-slate-900 mt-0.5">
                         {entry.trip_type?.title || 'Unknown'}
                       </p>
                     </div>
                     <div>
                       <p className="text-xs text-slate-500">Preferred Date</p>
-                      <p className="text-sm text-white mt-0.5 flex items-center gap-1">
+                      <p className="text-sm text-slate-900 mt-0.5 flex items-center gap-1">
                         <Calendar className="h-3.5 w-3.5" />
                         {formatDate(entry.preferred_date)}
                         {entry.flexible_dates && (
-                          <span className="text-xs text-amber-400">(flexible)</span>
+                          <span className="text-xs text-amber-600">(flexible)</span>
                         )}
                       </p>
                     </div>
                     <div>
                       <p className="text-xs text-slate-500">Time Window</p>
-                      <p className="text-sm text-white mt-0.5">
+                      <p className="text-sm text-slate-900 mt-0.5">
                         {entry.preferred_time_start && entry.preferred_time_end
                           ? `${formatTime(entry.preferred_time_start)} - ${formatTime(entry.preferred_time_end)}`
                           : 'Any time'}
@@ -283,9 +283,9 @@ export default function WaitlistClient() {
 
                   {/* Special Requests */}
                   {entry.special_requests && (
-                    <div className="mt-3 p-3 rounded-md bg-slate-800/50">
+                    <div className="mt-3 p-3 rounded-md bg-white">
                       <p className="text-xs text-slate-500 mb-1">Special Requests</p>
-                      <p className="text-sm text-slate-300">{entry.special_requests}</p>
+                      <p className="text-sm text-slate-600">{entry.special_requests}</p>
                     </div>
                   )}
 
@@ -308,7 +308,7 @@ export default function WaitlistClient() {
                   {entry.status === 'active' && (
                     <button
                       onClick={() => updateStatus(entry.id, 'notified')}
-                      className="p-2 rounded-lg bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 transition-colors"
+                      className="p-2 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-50 transition-colors"
                       title="Mark as notified"
                     >
                       <Bell className="h-4 w-4" />
@@ -317,7 +317,7 @@ export default function WaitlistClient() {
                   {(entry.status === 'active' || entry.status === 'notified') && (
                     <button
                       onClick={() => updateStatus(entry.id, 'converted')}
-                      className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors"
+                      className="p-2 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-50 transition-colors"
                       title="Mark as converted"
                     >
                       <CheckCircle className="h-4 w-4" />
@@ -325,7 +325,7 @@ export default function WaitlistClient() {
                   )}
                   <button
                     onClick={() => deleteEntry(entry.id)}
-                    className="p-2 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition-colors"
+                    className="p-2 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-50 transition-colors"
                     title="Delete"
                   >
                     <Trash2 className="h-4 w-4" />

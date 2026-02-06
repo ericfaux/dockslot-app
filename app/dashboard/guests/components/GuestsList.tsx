@@ -58,7 +58,7 @@ export function GuestsList({ guests }: Props) {
           placeholder="Search guests..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="flex-1 rounded-lg border border-slate-600 bg-slate-800 px-4 py-2 text-white placeholder-slate-400 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+          className="flex-1 rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-900 placeholder-slate-400 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
         />
 
         <div className="flex gap-2">
@@ -67,7 +67,7 @@ export function GuestsList({ guests }: Props) {
             className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
               filterType === 'all'
                 ? 'bg-cyan-600 text-white'
-                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
             All ({guests.length})
@@ -76,8 +76,8 @@ export function GuestsList({ guests }: Props) {
             onClick={() => setFilterType('repeat')}
             className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
               filterType === 'repeat'
-                ? 'bg-green-600 text-white'
-                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                ? 'bg-green-600 text-slate-900'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
             Repeat ({guests.filter((g) => g.totalTrips > 1).length})
@@ -87,7 +87,7 @@ export function GuestsList({ guests }: Props) {
             className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
               filterType === 'new'
                 ? 'bg-blue-600 text-white'
-                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
             New ({guests.filter((g) => g.totalTrips === 1).length})
@@ -105,10 +105,10 @@ export function GuestsList({ guests }: Props) {
           return (
             <div
               key={guest.email}
-              className={`rounded-lg border bg-slate-800 transition-colors ${
+              className={`rounded-lg border bg-white transition-colors ${
                 isVIP
                   ? 'border-amber-500/40 bg-gradient-to-r from-amber-500/5 to-transparent'
-                  : 'border-slate-700 hover:border-slate-600'
+                  : 'border-slate-200 hover:border-slate-300'
               }`}
             >
               <div
@@ -120,27 +120,27 @@ export function GuestsList({ guests }: Props) {
                   <div
                     className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full ${
                       isVIP
-                        ? 'bg-amber-500/20'
+                        ? 'bg-amber-50'
                         : isRepeat
                           ? 'bg-green-500/20'
-                          : 'bg-blue-500/20'
+                          : 'bg-blue-50'
                     }`}
                   >
                     {isVIP ? (
-                      <Award className="h-6 w-6 text-amber-400" />
+                      <Award className="h-6 w-6 text-amber-600" />
                     ) : isRepeat ? (
                       <Star className="h-6 w-6 text-green-400" />
                     ) : (
-                      <Users className="h-6 w-6 text-blue-400" />
+                      <Users className="h-6 w-6 text-blue-600" />
                     )}
                   </div>
 
                   {/* Info */}
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-white">{guest.name}</h3>
+                      <h3 className="font-semibold text-slate-900">{guest.name}</h3>
                       {isVIP && (
-                        <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs font-medium text-amber-300">
+                        <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-600">
                           VIP
                         </span>
                       )}
@@ -167,23 +167,23 @@ export function GuestsList({ guests }: Props) {
                     <div className="mt-3 grid gap-3 sm:grid-cols-4">
                       <div>
                         <p className="text-xs text-slate-500">Total Trips</p>
-                        <p className="font-semibold text-white">{guest.totalTrips}</p>
+                        <p className="font-semibold text-slate-900">{guest.totalTrips}</p>
                       </div>
                       <div>
                         <p className="text-xs text-slate-500">Total Spent</p>
-                        <p className="font-semibold text-white">
+                        <p className="font-semibold text-slate-900">
                           ${(guest.totalSpent / 100).toLocaleString()}
                         </p>
                       </div>
                       <div>
                         <p className="text-xs text-slate-500">Favorite Trip</p>
-                        <p className="font-semibold text-white">
+                        <p className="font-semibold text-slate-900">
                           {guest.favoriteTrip || 'N/A'}
                         </p>
                       </div>
                       <div>
                         <p className="text-xs text-slate-500">Last Trip</p>
-                        <p className="font-semibold text-white">
+                        <p className="font-semibold text-slate-900">
                           {guest.lastTripDate
                             ? format(parseISO(guest.lastTripDate), 'MMM d, yyyy')
                             : 'N/A'}
@@ -194,7 +194,7 @@ export function GuestsList({ guests }: Props) {
                 </div>
 
                 {/* Expand Toggle */}
-                <button className="ml-4 flex-shrink-0 text-slate-400 transition-colors hover:text-white">
+                <button className="ml-4 flex-shrink-0 text-slate-400 transition-colors hover:text-slate-900">
                   {isExpanded ? (
                     <ChevronUp className="h-5 w-5" />
                   ) : (
@@ -205,8 +205,8 @@ export function GuestsList({ guests }: Props) {
 
               {/* Expanded Details */}
               {isExpanded && (
-                <div className="border-t border-slate-700 p-5">
-                  <h4 className="mb-3 text-sm font-semibold text-white">
+                <div className="border-t border-slate-200 p-5">
+                  <h4 className="mb-3 text-sm font-semibold text-slate-900">
                     Booking History ({guest.bookings.length})
                   </h4>
                   <div className="space-y-2">
@@ -218,7 +218,7 @@ export function GuestsList({ guests }: Props) {
                       return (
                         <div
                           key={booking.id}
-                          className="flex items-center justify-between rounded-lg bg-slate-900/50 p-3"
+                          className="flex items-center justify-between rounded-lg bg-white p-3"
                         >
                           <div className="flex items-center gap-3">
                             <div
@@ -233,7 +233,7 @@ export function GuestsList({ guests }: Props) {
                               }`}
                             />
                             <div>
-                              <p className="text-sm font-medium text-white">
+                              <p className="text-sm font-medium text-slate-900">
                                 {tripType?.title || 'Unknown Trip'}
                               </p>
                               <p className="text-xs text-slate-400">
@@ -243,7 +243,7 @@ export function GuestsList({ guests }: Props) {
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="text-sm font-medium text-white">
+                            <p className="text-sm font-medium text-slate-900">
                               ${((booking.total_price_cents || 0) / 100).toFixed(0)}
                             </p>
                             <p className="text-xs capitalize text-slate-400">
@@ -266,7 +266,7 @@ export function GuestsList({ guests }: Props) {
                     </a>
                     <button 
                       onClick={() => alert(`Discount feature coming soon! For now, contact ${guest.name} at ${guest.email} directly.`)}
-                      className="flex items-center gap-2 rounded-lg border border-slate-600 bg-slate-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-600"
+                      className="flex items-center gap-2 rounded-lg border border-slate-300 bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 transition-colors hover:bg-slate-200"
                     >
                       <DollarSign className="h-4 w-4" />
                       Offer Discount
@@ -282,9 +282,9 @@ export function GuestsList({ guests }: Props) {
       {/* Empty State */}
       {filteredGuests.length === 0 && (
         searchQuery || filterType !== 'all' ? (
-          <div className="rounded-lg border border-slate-700 bg-slate-800 p-12 text-center">
+          <div className="rounded-lg border border-slate-200 bg-white p-12 text-center">
             <Users className="mx-auto h-12 w-12 text-slate-600" />
-            <h3 className="mt-4 text-lg font-medium text-white">No guests found</h3>
+            <h3 className="mt-4 text-lg font-medium text-slate-900">No guests found</h3>
             <p className="mt-2 text-sm text-slate-400">
               Try a different search term or filter
             </p>

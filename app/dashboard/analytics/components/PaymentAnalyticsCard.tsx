@@ -11,10 +11,10 @@ export function PaymentAnalyticsCard({ metrics }: Props) {
   const hasData = metrics.totalCollected > 0 || metrics.averageBookingValue > 0;
 
   return (
-    <div className="rounded-lg border border-slate-700 bg-slate-800 p-4 sm:p-6">
+    <div className="rounded-lg border border-slate-200 bg-white p-4 sm:p-6">
       <div className="mb-4 flex items-center gap-2">
         <CreditCard className="h-5 w-5 text-green-400" />
-        <h3 className="text-base sm:text-lg font-semibold text-white">Payment Analytics</h3>
+        <h3 className="text-base sm:text-lg font-semibold text-slate-900">Payment Analytics</h3>
       </div>
 
       {!hasData ? (
@@ -37,22 +37,22 @@ export function PaymentAnalyticsCard({ metrics }: Props) {
 
           {/* Payment Breakdown */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-lg bg-slate-700/50 p-3">
+            <div className="rounded-lg bg-slate-100 p-3">
               <div className="flex items-center gap-2 mb-1">
-                <Receipt className="h-4 w-4 text-cyan-400" />
+                <Receipt className="h-4 w-4 text-cyan-600" />
                 <span className="text-xs text-slate-400">Deposits</span>
               </div>
-              <p className="text-lg font-bold text-white">
+              <p className="text-lg font-bold text-slate-900">
                 ${metrics.totalDeposits.toLocaleString()}
               </p>
             </div>
 
-            <div className="rounded-lg bg-slate-700/50 p-3">
+            <div className="rounded-lg bg-slate-100 p-3">
               <div className="flex items-center gap-2 mb-1">
-                <Banknote className="h-4 w-4 text-blue-400" />
+                <Banknote className="h-4 w-4 text-blue-600" />
                 <span className="text-xs text-slate-400">Balance Paid</span>
               </div>
-              <p className="text-lg font-bold text-white">
+              <p className="text-lg font-bold text-slate-900">
                 ${metrics.totalBalancePayments.toLocaleString()}
               </p>
             </div>
@@ -61,12 +61,12 @@ export function PaymentAnalyticsCard({ metrics }: Props) {
           {/* Outstanding & Refunds */}
           <div className="space-y-2">
             {metrics.outstandingBalance > 0 && (
-              <div className="flex items-center justify-between rounded-lg bg-amber-500/10 border border-amber-500/30 p-3">
+              <div className="flex items-center justify-between rounded-lg bg-amber-50 border border-amber-500/30 p-3">
                 <div className="flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4 text-amber-400" />
-                  <span className="text-sm text-amber-400">Outstanding</span>
+                  <AlertCircle className="h-4 w-4 text-amber-600" />
+                  <span className="text-sm text-amber-600">Outstanding</span>
                 </div>
-                <span className="font-bold text-amber-400">
+                <span className="font-bold text-amber-600">
                   ${metrics.outstandingBalance.toLocaleString()}
                 </span>
               </div>
@@ -75,26 +75,26 @@ export function PaymentAnalyticsCard({ metrics }: Props) {
             {metrics.refundsIssued > 0 && (
               <div className="flex items-center justify-between text-sm text-slate-400">
                 <span>Refunds Issued</span>
-                <span className="text-rose-400">-${metrics.refundsIssued.toLocaleString()}</span>
+                <span className="text-rose-600">-${metrics.refundsIssued.toLocaleString()}</span>
               </div>
             )}
 
             {metrics.tipsReceived > 0 && (
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2 text-slate-400">
-                  <Gift className="h-4 w-4 text-purple-400" />
+                  <Gift className="h-4 w-4 text-purple-600" />
                   <span>Tips Received</span>
                 </div>
-                <span className="text-purple-400">+${metrics.tipsReceived.toLocaleString()}</span>
+                <span className="text-purple-600">+${metrics.tipsReceived.toLocaleString()}</span>
               </div>
             )}
           </div>
 
           {/* Average Booking Value */}
-          <div className="pt-3 border-t border-slate-700">
+          <div className="pt-3 border-t border-slate-200">
             <div className="flex items-center justify-between">
               <span className="text-sm text-slate-400">Avg Booking Value</span>
-              <span className="text-lg font-bold text-white">
+              <span className="text-lg font-bold text-slate-900">
                 ${metrics.averageBookingValue.toFixed(0)}
               </span>
             </div>
@@ -106,7 +106,7 @@ export function PaymentAnalyticsCard({ metrics }: Props) {
                   <span>Deposit Only</span>
                   <span>Fully Paid</span>
                 </div>
-                <div className="h-2 rounded-full bg-slate-700 overflow-hidden">
+                <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-cyan-500 to-cyan-400 transition-all duration-500"
                     style={{ width: `${metrics.depositPercentage}%` }}

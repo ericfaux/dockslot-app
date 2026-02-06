@@ -75,7 +75,7 @@ export function SettingsSubNav() {
         <span className="font-mono text-xs uppercase tracking-widest text-slate-500">
           Configuration
         </span>
-        <div className="h-px flex-1 bg-slate-800" />
+        <div className="h-px flex-1 bg-white" />
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {settingsLinks.map((link) => {
@@ -84,18 +84,18 @@ export function SettingsSubNav() {
             <Link
               key={link.href}
               href={link.href}
-              className="flex items-center gap-3 p-3 rounded-lg bg-slate-900/50 border border-white/5 hover:bg-white/5 hover:border-white/10 transition-colors group"
+              className="flex items-center gap-3 p-3 rounded-lg bg-white border border-white/5 hover:bg-white/5 hover:border-slate-200 transition-colors group"
             >
               <Icon
                 size={18}
-                className="text-zinc-500 group-hover:text-cyan-400 transition-colors shrink-0"
+                className="text-slate-500 group-hover:text-cyan-600 transition-colors shrink-0"
                 aria-hidden="true"
               />
               <div className="min-w-0">
                 <p className="text-sm font-medium text-zinc-200 truncate">
                   {link.label}
                 </p>
-                <p className="text-[11px] text-zinc-500 truncate hidden sm:block">
+                <p className="text-[11px] text-slate-500 truncate hidden sm:block">
                   {link.description}
                 </p>
               </div>

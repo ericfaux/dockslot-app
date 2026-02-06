@@ -11,10 +11,10 @@ export function WeatherMetricsCard({ metrics }: Props) {
   const hasData = metrics.weatherHoldsTotal > 0;
 
   return (
-    <div className="rounded-lg border border-slate-700 bg-slate-800 p-4 sm:p-6">
+    <div className="rounded-lg border border-slate-200 bg-white p-4 sm:p-6">
       <div className="mb-4 flex items-center gap-2">
-        <CloudRain className="h-5 w-5 text-amber-400" />
-        <h3 className="text-base sm:text-lg font-semibold text-white">Weather Impact</h3>
+        <CloudRain className="h-5 w-5 text-amber-600" />
+        <h3 className="text-base sm:text-lg font-semibold text-slate-900">Weather Impact</h3>
       </div>
 
       {!hasData ? (
@@ -29,26 +29,26 @@ export function WeatherMetricsCard({ metrics }: Props) {
         <div className="space-y-4">
           {/* Weather Holds This Season */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-lg bg-slate-700/50 p-3">
+            <div className="rounded-lg bg-slate-100 p-3">
               <div className="flex items-center gap-2 mb-1">
-                <CloudRain className="h-4 w-4 text-amber-400" />
+                <CloudRain className="h-4 w-4 text-amber-600" />
                 <span className="text-xs text-slate-400">This Season</span>
               </div>
-              <p className="text-2xl font-bold text-white">
+              <p className="text-2xl font-bold text-slate-900">
                 {metrics.weatherHoldsThisSeason}
               </p>
               <p className="text-xs text-slate-500">weather holds</p>
             </div>
 
             {/* Recovery Rate */}
-            <div className="rounded-lg bg-slate-700/50 p-3">
+            <div className="rounded-lg bg-slate-100 p-3">
               <div className="flex items-center gap-2 mb-1">
                 <TrendingUp className="h-4 w-4 text-green-400" />
                 <span className="text-xs text-slate-400">Recovery Rate</span>
               </div>
               <p className={`text-2xl font-bold ${
                 metrics.recoveryRate >= 70 ? 'text-green-400' :
-                metrics.recoveryRate >= 50 ? 'text-amber-400' : 'text-rose-400'
+                metrics.recoveryRate >= 50 ? 'text-amber-600' : 'text-rose-600'
               }`}>
                 {metrics.recoveryRate.toFixed(0)}%
               </p>
@@ -61,7 +61,7 @@ export function WeatherMetricsCard({ metrics }: Props) {
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2">
                 <RefreshCw className="h-4 w-4 text-green-400" />
-                <span className="text-slate-300">Rescheduled</span>
+                <span className="text-slate-600">Rescheduled</span>
               </div>
               <span className="font-medium text-green-400">
                 {metrics.rescheduledFromWeather}
@@ -70,17 +70,17 @@ export function WeatherMetricsCard({ metrics }: Props) {
 
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2">
-                <XCircle className="h-4 w-4 text-rose-400" />
-                <span className="text-slate-300">Cancelled</span>
+                <XCircle className="h-4 w-4 text-rose-600" />
+                <span className="text-slate-600">Cancelled</span>
               </div>
-              <span className="font-medium text-rose-400">
+              <span className="font-medium text-rose-600">
                 {metrics.cancelledFromWeather}
               </span>
             </div>
 
             {/* Progress bar showing recovery vs cancellation */}
             {(metrics.rescheduledFromWeather + metrics.cancelledFromWeather) > 0 && (
-              <div className="h-2 rounded-full bg-slate-700 overflow-hidden mt-2">
+              <div className="h-2 rounded-full bg-slate-100 overflow-hidden mt-2">
                 <div
                   className="h-full bg-gradient-to-r from-green-500 to-green-400 transition-all duration-500"
                   style={{ width: `${metrics.recoveryRate}%` }}

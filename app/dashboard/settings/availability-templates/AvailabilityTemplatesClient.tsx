@@ -85,7 +85,7 @@ export default function AvailabilityTemplatesClient() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
+        <Loader2 className="w-8 h-8 text-cyan-600 animate-spin" />
       </div>
     )
   }
@@ -95,7 +95,7 @@ export default function AvailabilityTemplatesClient() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white">Your Templates</h2>
+          <h2 className="text-2xl font-bold text-slate-900">Your Templates</h2>
           <p className="text-slate-400 text-sm mt-1">
             Create reusable weekly schedules
           </p>
@@ -114,9 +114,9 @@ export default function AvailabilityTemplatesClient() {
 
       {/* Templates Grid */}
       {templates.length === 0 ? (
-        <div className="p-12 text-center bg-slate-800/50 rounded-xl border border-slate-700">
+        <div className="p-12 text-center bg-white rounded-xl border border-slate-200">
           <Calendar className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-white mb-2">
+          <h3 className="text-lg font-semibold text-slate-900 mb-2">
             No Templates Yet
           </h3>
           <p className="text-slate-400 mb-6">
@@ -135,19 +135,19 @@ export default function AvailabilityTemplatesClient() {
           {templates.map((template) => (
             <div
               key={template.id}
-              className={`p-6 bg-slate-800 rounded-xl border ${
-                template.is_default ? 'border-amber-500/50' : 'border-slate-700'
+              className={`p-6 bg-white rounded-xl border ${
+                template.is_default ? 'border-amber-500/50' : 'border-slate-200'
               }`}
             >
               {/* Header */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <h3 className="text-lg font-semibold text-white">
+                    <h3 className="text-lg font-semibold text-slate-900">
                       {template.name}
                     </h3>
                     {template.is_default && (
-                      <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                      <Star className="w-4 h-4 fill-amber-400 text-amber-600" />
                     )}
                   </div>
                   <p className="text-sm text-slate-400">
@@ -160,7 +160,7 @@ export default function AvailabilityTemplatesClient() {
                       setEditingTemplate(template)
                       setShowCreateModal(true)
                     }}
-                    className="p-2 hover:bg-slate-700 rounded-lg transition-colors text-slate-400 hover:text-white"
+                    className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-900"
                     title="Edit"
                   >
                     <Edit2 className="w-4 h-4" />
@@ -169,14 +169,14 @@ export default function AvailabilityTemplatesClient() {
                     <>
                       <button
                         onClick={() => setDefault(template.id)}
-                        className="p-2 hover:bg-slate-700 rounded-lg transition-colors text-slate-400 hover:text-amber-400"
+                        className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-amber-600"
                         title="Set as default"
                       >
                         <Star className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => deleteTemplate(template.id)}
-                        className="p-2 hover:bg-slate-700 rounded-lg transition-colors text-slate-400 hover:text-rose-400"
+                        className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-rose-600"
                         title="Delete"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -200,7 +200,7 @@ export default function AvailabilityTemplatesClient() {
                           {slots.map((slot, i) => (
                             <span
                               key={i}
-                              className="px-2 py-1 bg-cyan-500/20 text-cyan-300 rounded text-xs"
+                              className="px-2 py-1 bg-cyan-50 text-cyan-600 rounded text-xs"
                             >
                               {slot.start} - {slot.end}
                             </span>
@@ -312,10 +312,10 @@ function TemplateEditorModal({ template, onClose, onSave }: TemplateEditorModalP
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-slate-800 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden border border-slate-700 shadow-2xl">
+      <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden border border-slate-200 shadow-2xl">
         {/* Header */}
-        <div className="p-6 border-b border-slate-700 bg-gradient-to-r from-cyan-900/20 to-blue-900/20">
-          <h2 className="text-2xl font-bold text-white">
+        <div className="p-6 border-b border-slate-200 bg-gradient-to-r from-cyan-900/20 to-blue-900/20">
+          <h2 className="text-2xl font-bold text-slate-900">
             {template ? 'Edit Template' : 'Create Template'}
           </h2>
         </div>
@@ -325,28 +325,28 @@ function TemplateEditorModal({ template, onClose, onSave }: TemplateEditorModalP
           <div className="space-y-6">
             {/* Name */}
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                Template Name <span className="text-rose-400">*</span>
+              <label className="block text-sm font-medium text-slate-600 mb-2">
+                Template Name <span className="text-rose-600">*</span>
               </label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g., Summer Hours, Weekend Schedule"
-                className="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
               />
             </div>
 
             {/* Weekly Schedule */}
             <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Weekly Schedule</h3>
+              <h3 className="text-lg font-semibold text-slate-900 mb-4">Weekly Schedule</h3>
               <div className="space-y-4">
                 {DAYS.map((day) => {
                   const slots = weeklySchedule[day] || []
                   return (
-                    <div key={day} className="p-4 bg-slate-900/50 rounded-lg">
+                    <div key={day} className="p-4 bg-white rounded-lg">
                       <div className="flex items-center justify-between mb-3">
-                        <span className="font-medium text-white capitalize">
+                        <span className="font-medium text-slate-900 capitalize">
                           {day}
                         </span>
                         <button
@@ -368,18 +368,18 @@ function TemplateEditorModal({ template, onClose, onSave }: TemplateEditorModalP
                                 type="time"
                                 value={slot.start}
                                 onChange={(e) => updateTimeSlot(day, index, 'start', e.target.value)}
-                                className="flex-1 px-3 py-2 bg-slate-900 border border-slate-700 rounded text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                                className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
                               />
                               <span className="text-slate-500">to</span>
                               <input
                                 type="time"
                                 value={slot.end}
                                 onChange={(e) => updateTimeSlot(day, index, 'end', e.target.value)}
-                                className="flex-1 px-3 py-2 bg-slate-900 border border-slate-700 rounded text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                                className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
                               />
                               <button
                                 onClick={() => removeTimeSlot(day, index)}
-                                className="p-2 hover:bg-slate-800 rounded text-slate-400 hover:text-rose-400 transition-colors"
+                                className="p-2 hover:bg-white rounded text-slate-400 hover:text-rose-600 transition-colors"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -395,19 +395,19 @@ function TemplateEditorModal({ template, onClose, onSave }: TemplateEditorModalP
 
             {/* Error */}
             {error && (
-              <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-lg">
-                <p className="text-sm text-rose-400">{error}</p>
+              <div className="p-4 bg-rose-50 border border-rose-500/20 rounded-lg">
+                <p className="text-sm text-rose-600">{error}</p>
               </div>
             )}
           </div>
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-slate-700 bg-slate-900/50 flex items-center justify-end gap-3">
+        <div className="p-6 border-t border-slate-200 bg-white flex items-center justify-end gap-3">
           <button
             onClick={onClose}
             disabled={isSaving}
-            className="px-6 py-2.5 text-slate-300 hover:text-white transition-colors disabled:opacity-50"
+            className="px-6 py-2.5 text-slate-600 hover:text-slate-900 transition-colors disabled:opacity-50"
           >
             Cancel
           </button>

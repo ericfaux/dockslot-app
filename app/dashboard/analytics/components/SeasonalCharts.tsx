@@ -30,14 +30,14 @@ function CustomTooltip({ active, payload, label, chartView }: CustomTooltipProps
   if (active && payload && payload.length) {
     const value = payload[0]?.value;
     return (
-      <div className="rounded-lg border border-slate-700 bg-slate-800 p-3 shadow-xl">
-        <p className="text-sm font-medium text-white mb-1">{label}</p>
+      <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-xl">
+        <p className="text-sm font-medium text-slate-900 mb-1">{label}</p>
         {chartView === 'revenue' ? (
-          <p className="text-sm text-cyan-400">
+          <p className="text-sm text-cyan-600">
             ${value?.toLocaleString()}
           </p>
         ) : (
-          <p className="text-sm text-blue-400">
+          <p className="text-sm text-blue-600">
             {value} bookings
           </p>
         )}
@@ -73,21 +73,21 @@ export function SeasonalCharts({ metrics }: Props) {
   );
 
   return (
-    <div className="rounded-lg border border-slate-700 bg-slate-800 p-4 sm:p-6">
+    <div className="rounded-lg border border-slate-200 bg-white p-4 sm:p-6">
       <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center gap-2">
-          <CalendarDays className="h-5 w-5 text-purple-400" />
-          <h3 className="text-base sm:text-lg font-semibold text-white">Seasonal Trends</h3>
+          <CalendarDays className="h-5 w-5 text-purple-600" />
+          <h3 className="text-base sm:text-lg font-semibold text-slate-900">Seasonal Trends</h3>
         </div>
 
         {/* Toggle buttons */}
-        <div className="flex rounded-lg bg-slate-700/50 p-1">
+        <div className="flex rounded-lg bg-slate-100 p-1">
           <button
             onClick={() => setChartView('revenue')}
             className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
               chartView === 'revenue'
                 ? 'bg-cyan-500 text-white'
-                : 'text-slate-400 hover:text-white'
+                : 'text-slate-400 hover:text-slate-900'
             }`}
           >
             Revenue
@@ -97,7 +97,7 @@ export function SeasonalCharts({ metrics }: Props) {
             className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
               chartView === 'bookings'
                 ? 'bg-blue-500 text-white'
-                : 'text-slate-400 hover:text-white'
+                : 'text-slate-400 hover:text-slate-900'
             }`}
           >
             Bookings
@@ -135,7 +135,7 @@ export function SeasonalCharts({ metrics }: Props) {
                   tickLine={false}
                   tickFormatter={chartView === 'revenue' ? formatCurrency : undefined}
                 />
-                <Tooltip content={renderTooltip} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
+                <Tooltip content={renderTooltip} cursor={{ fill: 'rgba(0,0,0,0.03)' }} />
                 {chartView === 'revenue' ? (
                   <Bar
                     dataKey="revenue"
@@ -166,11 +166,11 @@ export function SeasonalCharts({ metrics }: Props) {
           </div>
 
           {/* Year Comparison */}
-          <div className="mt-4 pt-4 border-t border-slate-700">
+          <div className="mt-4 pt-4 border-t border-slate-200">
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center">
                 <p className="text-xs text-slate-400 mb-1">Season to Date</p>
-                <p className="text-xl font-bold text-white">
+                <p className="text-xl font-bold text-slate-900">
                   ${metrics.seasonToDate.toLocaleString()}
                 </p>
               </div>
@@ -179,12 +179,12 @@ export function SeasonalCharts({ metrics }: Props) {
                 <p className="text-xs text-slate-400 mb-1">Same Period Last Year</p>
                 {metrics.samePeriodLastYear > 0 ? (
                   <>
-                    <p className="text-xl font-bold text-slate-300">
+                    <p className="text-xl font-bold text-slate-600">
                       ${metrics.samePeriodLastYear.toLocaleString()}
                     </p>
                     {metrics.yearOverYearChange !== null && (
                       <div className={`flex items-center justify-center gap-1 text-xs mt-1 ${
-                        metrics.yearOverYearChange >= 0 ? 'text-green-400' : 'text-rose-400'
+                        metrics.yearOverYearChange >= 0 ? 'text-green-400' : 'text-rose-600'
                       }`}>
                         {metrics.yearOverYearChange >= 0 ? (
                           <TrendingUp className="h-3 w-3" />

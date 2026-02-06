@@ -126,7 +126,7 @@ export function FloatPlanCard({ booking }: FloatPlanCardProps) {
         style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}
       >
         <div className="p-8 text-center">
-          <Navigation className="mx-auto h-10 w-10 text-slate-300" />
+          <Navigation className="mx-auto h-10 w-10 text-slate-600" />
           <p className="mt-4 font-mono text-lg text-slate-500">No upcoming trips today</p>
           <p className="mt-1 text-sm text-slate-400">
             Your next booking will appear here
@@ -234,10 +234,10 @@ export function FloatPlanCard({ booking }: FloatPlanCardProps) {
           <button
             onClick={handleDepart}
             disabled={isPending}
-            className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 px-6 py-4 font-mono text-lg font-bold uppercase tracking-wide text-white transition-all duration-75 ease-out hover:bg-slate-800 active:translate-y-1 active:border-b-0 disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-white px-6 py-4 font-mono text-lg font-bold uppercase tracking-wide text-slate-900 transition-all duration-75 ease-out hover:bg-white active:translate-y-1 active:border-b-0 disabled:cursor-not-allowed disabled:opacity-50"
             style={{
               borderBottom: '4px solid #0f172a',
-              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
+              boxShadow: 'inset 0 1px 0 rgba(0,0,0,0.03)',
             }}
           >
             <Navigation className="h-5 w-5" />

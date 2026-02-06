@@ -100,7 +100,7 @@ export default async function GuestsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white">Guest Management</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Guest Management</h1>
         <p className="mt-1 text-sm text-slate-400">
           Track repeat customers and build relationships
         </p>
@@ -108,49 +108,49 @@ export default async function GuestsPage() {
 
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-lg border border-slate-700 bg-slate-800 p-4">
+        <div className="rounded-lg border border-slate-200 bg-white p-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/20">
-              <Users className="h-5 w-5 text-blue-400" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50">
+              <Users className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-white">{totalGuests}</p>
+              <p className="text-2xl font-bold text-slate-900">{totalGuests}</p>
               <p className="text-sm text-slate-400">Total Guests</p>
             </div>
           </div>
         </div>
 
-        <div className="rounded-lg border border-slate-700 bg-slate-800 p-4">
+        <div className="rounded-lg border border-slate-200 bg-white p-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500/20">
               <TrendingUp className="h-5 w-5 text-green-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-white">{repeatGuests}</p>
+              <p className="text-2xl font-bold text-slate-900">{repeatGuests}</p>
               <p className="text-sm text-slate-400">Repeat Guests</p>
             </div>
           </div>
         </div>
 
-        <div className="rounded-lg border border-slate-700 bg-slate-800 p-4">
+        <div className="rounded-lg border border-slate-200 bg-white p-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500/20">
-              <TrendingUp className="h-5 w-5 text-purple-400" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-50">
+              <TrendingUp className="h-5 w-5 text-purple-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-white">{repeatRate.toFixed(0)}%</p>
+              <p className="text-2xl font-bold text-slate-900">{repeatRate.toFixed(0)}%</p>
               <p className="text-sm text-slate-400">Repeat Rate</p>
             </div>
           </div>
         </div>
 
-        <div className="rounded-lg border border-slate-700 bg-slate-800 p-4">
+        <div className="rounded-lg border border-slate-200 bg-white p-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-500/20">
-              <Users className="h-5 w-5 text-cyan-400" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-50">
+              <Users className="h-5 w-5 text-cyan-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-white">{avgTripsPerGuest.toFixed(1)}</p>
+              <p className="text-2xl font-bold text-slate-900">{avgTripsPerGuest.toFixed(1)}</p>
               <p className="text-sm text-slate-400">Avg Trips/Guest</p>
             </div>
           </div>

@@ -162,14 +162,14 @@ export function AvailabilitySettings({ initialWindows }: AvailabilitySettingsPro
     });
   };
 
-  const inputClassName = "w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-white text-sm transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed appearance-none";
-  const sectionClassName = "rounded-xl border border-slate-800 bg-slate-900/50 p-6";
+  const inputClassName = "w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-900 text-sm transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed appearance-none";
+  const sectionClassName = "rounded-xl border border-slate-200 bg-white p-6";
 
   return (
     <section className={sectionClassName}>
       <div className="mb-4 flex items-center gap-2">
-        <Clock className="h-5 w-5 text-cyan-400" />
-        <h2 className="text-lg font-semibold text-white">Weekly Availability</h2>
+        <Clock className="h-5 w-5 text-cyan-600" />
+        <h2 className="text-lg font-semibold text-slate-900">Weekly Availability</h2>
       </div>
       <p className="mb-6 text-sm text-slate-400">
         Set your available hours for each day of the week. Guests can only book during these times.
@@ -177,13 +177,13 @@ export function AvailabilitySettings({ initialWindows }: AvailabilitySettingsPro
 
       {/* First-time setup banner */}
       {isFirstTimeSetup && !hasBeenSaved && (
-        <div className="mb-4 flex items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3">
-          <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-400" />
+        <div className="mb-4 flex items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-50 px-4 py-3">
+          <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
           <div>
-            <p className="text-sm font-medium text-amber-300">
+            <p className="text-sm font-medium text-amber-600">
               Set up your availability to start accepting bookings
             </p>
-            <p className="mt-1 text-xs text-amber-400/80">
+            <p className="mt-1 text-xs text-amber-600/80">
               Review the default hours below and click &quot;Save Availability&quot; to enable your booking page.
               We&apos;ve pre-filled sensible defaults (6 AM - 9 PM, Monday off).
             </p>
@@ -193,14 +193,14 @@ export function AvailabilitySettings({ initialWindows }: AvailabilitySettingsPro
 
       {/* Error Message */}
       {error && (
-        <div className="mb-4 rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
+        <div className="mb-4 rounded-lg border border-rose-500/30 bg-rose-50 px-4 py-3 text-sm text-rose-600">
           {error}
         </div>
       )}
 
       {/* Success Message */}
       {success && (
-        <div className="mb-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
+        <div className="mb-4 rounded-lg border border-emerald-500/30 bg-emerald-50 px-4 py-3 text-sm text-emerald-600">
           {success}
         </div>
       )}
@@ -214,8 +214,8 @@ export function AvailabilitySettings({ initialWindows }: AvailabilitySettingsPro
               key={window.day_of_week}
               className={`flex flex-col gap-3 rounded-lg border p-4 transition-all sm:flex-row sm:items-center ${
                 window.is_active
-                  ? 'border-slate-700 bg-slate-800/50'
-                  : 'border-slate-800 bg-slate-900/30'
+                  ? 'border-slate-200 bg-white'
+                  : 'border-slate-200 bg-slate-50'
               }`}
             >
               {/* Day Name & Toggle */}
@@ -228,7 +228,7 @@ export function AvailabilitySettings({ initialWindows }: AvailabilitySettingsPro
                 >
                   <div
                     className={`h-6 w-11 rounded-full transition-colors ${
-                      window.is_active ? 'bg-cyan-500' : 'bg-slate-700'
+                      window.is_active ? 'bg-cyan-500' : 'bg-slate-100'
                     }`}
                   >
                     <div
@@ -240,7 +240,7 @@ export function AvailabilitySettings({ initialWindows }: AvailabilitySettingsPro
                 </button>
                 <span
                   className={`font-medium ${
-                    window.is_active ? 'text-white' : 'text-slate-500'
+                    window.is_active ? 'text-slate-900' : 'text-slate-500'
                   }`}
                 >
                   {DAY_NAMES[window.day_of_week]}
@@ -289,7 +289,7 @@ export function AvailabilitySettings({ initialWindows }: AvailabilitySettingsPro
 
                 {/* Validation Error */}
                 {dayError && window.is_active && (
-                  <span className="text-xs text-rose-400">{dayError}</span>
+                  <span className="text-xs text-rose-600">{dayError}</span>
                 )}
               </div>
             </div>

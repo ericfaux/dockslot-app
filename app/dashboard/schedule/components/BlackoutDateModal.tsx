@@ -58,20 +58,20 @@ export function BlackoutDateModal({ isOpen, onClose, onSubmit }: BlackoutDateMod
       {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
         <div
-          className="pointer-events-auto w-full max-w-md rounded-xl border border-slate-700 bg-slate-900 shadow-2xl"
+          className="pointer-events-auto w-full max-w-md rounded-xl border border-slate-200 bg-white shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-slate-700 p-4">
+          <div className="flex items-center justify-between border-b border-slate-200 p-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-rose-500/20">
-                <Ban className="h-5 w-5 text-rose-400" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-rose-50">
+                <Ban className="h-5 w-5 text-rose-600" />
               </div>
-              <h2 className="text-lg font-semibold text-white">Block Dates</h2>
+              <h2 className="text-lg font-semibold text-slate-900">Block Dates</h2>
             </div>
             <button
               onClick={onClose}
-              className="rounded-md p-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
+              className="rounded-md p-2 text-slate-400 transition-colors hover:bg-white hover:text-slate-900"
             >
               <X className="h-5 w-5" />
             </button>
@@ -81,8 +81,8 @@ export function BlackoutDateModal({ isOpen, onClose, onSubmit }: BlackoutDateMod
           <form onSubmit={handleSubmit} className="p-4 space-y-4">
             {/* Start Date */}
             <div className="space-y-2">
-              <label htmlFor="start-date" className="block text-sm font-medium text-slate-300">
-                Start Date <span className="text-rose-400">*</span>
+              <label htmlFor="start-date" className="block text-sm font-medium text-slate-600">
+                Start Date <span className="text-rose-600">*</span>
               </label>
               <input
                 type="date"
@@ -90,15 +90,15 @@ export function BlackoutDateModal({ isOpen, onClose, onSubmit }: BlackoutDateMod
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 min={format(new Date(), 'yyyy-MM-dd')}
-                className="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-slate-900 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
                 required
               />
             </div>
 
             {/* End Date */}
             <div className="space-y-2">
-              <label htmlFor="end-date" className="block text-sm font-medium text-slate-300">
-                End Date <span className="text-rose-400">*</span>
+              <label htmlFor="end-date" className="block text-sm font-medium text-slate-600">
+                End Date <span className="text-rose-600">*</span>
               </label>
               <input
                 type="date"
@@ -106,14 +106,14 @@ export function BlackoutDateModal({ isOpen, onClose, onSubmit }: BlackoutDateMod
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 min={startDate || format(new Date(), 'yyyy-MM-dd')}
-                className="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-slate-900 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
                 required
               />
             </div>
 
             {/* Reason */}
             <div className="space-y-2">
-              <label htmlFor="reason" className="block text-sm font-medium text-slate-300">
+              <label htmlFor="reason" className="block text-sm font-medium text-slate-600">
                 Reason (Optional)
               </label>
               <textarea
@@ -121,7 +121,7 @@ export function BlackoutDateModal({ isOpen, onClose, onSubmit }: BlackoutDateMod
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="e.g., Vessel maintenance, Personal time off..."
-                className="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 resize-none"
+                className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-slate-900 placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 resize-none"
                 rows={3}
               />
               <p className="text-xs text-slate-500">
@@ -131,7 +131,7 @@ export function BlackoutDateModal({ isOpen, onClose, onSubmit }: BlackoutDateMod
 
             {/* Error */}
             {error && (
-              <div className="rounded-lg bg-rose-500/10 border border-rose-500/30 p-3 text-sm text-rose-400">
+              <div className="rounded-lg bg-rose-50 border border-rose-500/30 p-3 text-sm text-rose-600">
                 {error}
               </div>
             )}
@@ -141,7 +141,7 @@ export function BlackoutDateModal({ isOpen, onClose, onSubmit }: BlackoutDateMod
               <button
                 type="submit"
                 disabled={isPending}
-                className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-rose-500/20 px-4 py-2 font-medium text-rose-400 transition-colors hover:bg-rose-500/30 disabled:opacity-50"
+                className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-rose-50 px-4 py-2 font-medium text-rose-600 transition-colors hover:bg-rose-500/30 disabled:opacity-50"
               >
                 {isPending ? (
                   <>
@@ -159,7 +159,7 @@ export function BlackoutDateModal({ isOpen, onClose, onSubmit }: BlackoutDateMod
                 type="button"
                 onClick={onClose}
                 disabled={isPending}
-                className="rounded-lg border border-slate-700 px-4 py-2 font-medium text-slate-400 transition-colors hover:bg-slate-800 hover:text-white disabled:opacity-50"
+                className="rounded-lg border border-slate-200 px-4 py-2 font-medium text-slate-400 transition-colors hover:bg-white hover:text-slate-900 disabled:opacity-50"
               >
                 Cancel
               </button>

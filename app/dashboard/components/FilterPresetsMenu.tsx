@@ -124,12 +124,12 @@ export default function FilterPresetsMenu({
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 rounded border border-slate-700 bg-slate-800/50 px-3 py-2 text-sm font-medium text-slate-300 hover:bg-slate-700/50"
+        className="flex items-center gap-2 rounded border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100"
       >
         <Star className="h-4 w-4" />
         Presets
         {presets.length > 0 && (
-          <span className="rounded-full bg-cyan-500/20 px-1.5 py-0.5 text-xs text-cyan-400">
+          <span className="rounded-full bg-cyan-50 px-1.5 py-0.5 text-xs text-cyan-600">
             {presets.length}
           </span>
         )}
@@ -144,15 +144,15 @@ export default function FilterPresetsMenu({
           />
 
           {/* Dropdown */}
-          <div className="absolute right-0 top-12 z-20 w-80 rounded-lg border border-slate-700 bg-slate-800 shadow-xl">
+          <div className="absolute right-0 top-12 z-20 w-80 rounded-lg border border-slate-200 bg-white shadow-xl">
             <div className="p-4">
               <div className="mb-3 flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-slate-200">
+                <h3 className="text-sm font-semibold text-slate-700">
                   Filter Presets
                 </h3>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="rounded p-1 text-slate-400 hover:bg-slate-700 hover:text-slate-200"
+                  className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -162,7 +162,7 @@ export default function FilterPresetsMenu({
               {hasActiveFilters && !showSaveForm && (
                 <button
                   onClick={() => setShowSaveForm(true)}
-                  className="mb-3 flex w-full items-center gap-2 rounded border border-cyan-500/50 bg-cyan-500/10 px-3 py-2 text-sm font-medium text-cyan-400 hover:bg-cyan-500/20"
+                  className="mb-3 flex w-full items-center gap-2 rounded border border-cyan-500/50 bg-cyan-50 px-3 py-2 text-sm font-medium text-cyan-600 hover:bg-cyan-50"
                 >
                   <Save className="h-4 w-4" />
                   Save Current Filters
@@ -171,7 +171,7 @@ export default function FilterPresetsMenu({
 
               {/* Save Form */}
               {showSaveForm && (
-                <div className="mb-3 space-y-2 rounded border border-slate-600 bg-slate-900/50 p-3">
+                <div className="mb-3 space-y-2 rounded border border-slate-300 bg-white p-3">
                   <input
                     type="text"
                     value={saveName}
@@ -181,11 +181,11 @@ export default function FilterPresetsMenu({
                       if (e.key === 'Escape') setShowSaveForm(false)
                     }}
                     placeholder="Preset name..."
-                    className="w-full rounded border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+                    className="w-full rounded border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
                     autoFocus
                   />
                   {error && (
-                    <p className="text-xs text-rose-400">{error}</p>
+                    <p className="text-xs text-rose-600">{error}</p>
                   )}
                   <div className="flex gap-2">
                     <button
@@ -201,7 +201,7 @@ export default function FilterPresetsMenu({
                         setError(null)
                         setSaveName('')
                       }}
-                      className="rounded border border-slate-600 px-3 py-1.5 text-sm font-medium text-slate-300 hover:bg-slate-700"
+                      className="rounded border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100"
                     >
                       Cancel
                     </button>
@@ -211,7 +211,7 @@ export default function FilterPresetsMenu({
 
               {/* Preset List */}
               {presets.length === 0 ? (
-                <div className="rounded bg-slate-900/50 p-6 text-center text-sm text-slate-500">
+                <div className="rounded bg-white p-6 text-center text-sm text-slate-500">
                   No saved presets yet
                 </div>
               ) : (
@@ -219,7 +219,7 @@ export default function FilterPresetsMenu({
                   {presets.map((preset) => (
                     <div
                       key={preset.id}
-                      className="group flex items-center gap-2 rounded border border-slate-700 bg-slate-900/50 p-2 hover:border-slate-600 hover:bg-slate-900"
+                      className="group flex items-center gap-2 rounded border border-slate-200 bg-white p-2 hover:border-slate-300 hover:bg-white"
                     >
                       <button
                         onClick={() => {
@@ -229,11 +229,11 @@ export default function FilterPresetsMenu({
                         className="flex-1 text-left"
                       >
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-slate-200">
+                          <span className="text-sm font-medium text-slate-700">
                             {preset.name}
                           </span>
                           {preset.is_default && (
-                            <span className="flex items-center gap-1 rounded-full bg-cyan-500/20 px-2 py-0.5 text-xs text-cyan-400">
+                            <span className="flex items-center gap-1 rounded-full bg-cyan-50 px-2 py-0.5 text-xs text-cyan-600">
                               <Check className="h-3 w-3" />
                               Default
                             </span>
@@ -246,7 +246,7 @@ export default function FilterPresetsMenu({
                         {!preset.is_default && (
                           <button
                             onClick={() => handleSetDefault(preset.id)}
-                            className="rounded p-1 text-slate-500 hover:bg-slate-700 hover:text-cyan-400"
+                            className="rounded p-1 text-slate-500 hover:bg-slate-100 hover:text-cyan-600"
                             title="Set as default"
                           >
                             <Star className="h-4 w-4" />
@@ -254,7 +254,7 @@ export default function FilterPresetsMenu({
                         )}
                         <button
                           onClick={() => handleDeletePreset(preset.id)}
-                          className="rounded p-1 text-slate-500 hover:bg-slate-700 hover:text-rose-400"
+                          className="rounded p-1 text-slate-500 hover:bg-slate-100 hover:text-rose-600"
                           title="Delete preset"
                         >
                           <Trash2 className="h-4 w-4" />

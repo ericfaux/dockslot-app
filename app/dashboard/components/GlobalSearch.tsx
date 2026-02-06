@@ -143,13 +143,13 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
       {/* Search Modal */}
       <div className="pointer-events-none fixed inset-0 z-50 flex items-start justify-center px-4 pt-[15vh]">
         <div
-          className="pointer-events-auto w-full max-w-xl rounded-xl border border-slate-700 bg-slate-900 shadow-2xl overflow-hidden"
+          className="pointer-events-auto w-full max-w-xl rounded-xl border border-slate-200 bg-white shadow-2xl overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Search Input */}
-          <div className="flex items-center gap-3 border-b border-slate-700 px-4">
+          <div className="flex items-center gap-3 border-b border-slate-200 px-4">
             {isLoading ? (
-              <Loader2 className="h-5 w-5 animate-spin text-cyan-400" />
+              <Loader2 className="h-5 w-5 animate-spin text-cyan-600" />
             ) : (
               <Search className="h-5 w-5 text-slate-400" />
             )}
@@ -163,17 +163,17 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
               }}
               onKeyDown={handleKeyDown}
               placeholder="Search guests, booking IDs, dates..."
-              className="flex-1 bg-transparent py-4 text-white placeholder-slate-500 focus:outline-none"
+              className="flex-1 bg-transparent py-4 text-slate-900 placeholder-slate-500 focus:outline-none"
             />
             {query && (
               <button
                 onClick={() => setQuery('')}
-                className="rounded-md p-1 text-slate-400 hover:bg-slate-800 hover:text-white"
+                className="rounded-md p-1 text-slate-400 hover:bg-white hover:text-slate-900"
               >
                 <X className="h-4 w-4" />
               </button>
             )}
-            <kbd className="rounded bg-slate-700 px-2 py-1 text-xs font-mono text-slate-400">
+            <kbd className="rounded bg-slate-100 px-2 py-1 text-xs font-mono text-slate-400">
               Esc
             </kbd>
           </div>
@@ -196,29 +196,29 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
                     onMouseEnter={() => setSelectedIndex(index)}
                     className={`flex w-full items-center gap-4 px-4 py-3 text-left transition-colors ${
                       index === selectedIndex
-                        ? 'bg-cyan-500/10'
-                        : 'hover:bg-slate-800/50'
+                        ? 'bg-cyan-50'
+                        : 'hover:bg-white'
                     }`}
                   >
                     {/* Icon */}
                     <div
                       className={`flex h-10 w-10 items-center justify-center rounded-full ${
                         result.type === 'booking'
-                          ? 'bg-cyan-500/20'
-                          : 'bg-purple-500/20'
+                          ? 'bg-cyan-50'
+                          : 'bg-purple-50'
                       }`}
                     >
                       {result.type === 'booking' ? (
-                        <Calendar className="h-5 w-5 text-cyan-400" />
+                        <Calendar className="h-5 w-5 text-cyan-600" />
                       ) : (
-                        <User className="h-5 w-5 text-purple-400" />
+                        <User className="h-5 w-5 text-purple-600" />
                       )}
                     </div>
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-slate-200 truncate">
+                        <span className="font-medium text-slate-700 truncate">
                           {result.guestName}
                         </span>
                         {result.status && (
@@ -261,23 +261,23 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between border-t border-slate-700 px-4 py-2 text-xs text-slate-500">
+          <div className="flex items-center justify-between border-t border-slate-200 px-4 py-2 text-xs text-slate-500">
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-1">
-                <kbd className="rounded bg-slate-700 px-1.5 py-0.5 font-mono">
+                <kbd className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">
                   ↑↓
                 </kbd>
                 Navigate
               </span>
               <span className="flex items-center gap-1">
-                <kbd className="rounded bg-slate-700 px-1.5 py-0.5 font-mono">
+                <kbd className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">
                   Enter
                 </kbd>
                 Open
               </span>
             </div>
             <span className="flex items-center gap-1">
-              <kbd className="rounded bg-slate-700 px-1.5 py-0.5 font-mono">
+              <kbd className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">
                 ⌘K
               </kbd>
               to search anywhere

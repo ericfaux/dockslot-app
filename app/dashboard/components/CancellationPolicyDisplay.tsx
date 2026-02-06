@@ -65,12 +65,12 @@ export default function CancellationPolicyDisplay({
 
   if (compact) {
     return (
-      <div className="flex items-start gap-2 p-3 bg-slate-900/50 rounded-lg border border-slate-700/50">
+      <div className="flex items-start gap-2 p-3 bg-white rounded-lg border border-slate-200">
         <Shield className={`w-4 h-4 mt-0.5 ${
-          eligibleForFullRefund ? 'text-emerald-400' : 'text-amber-400'
+          eligibleForFullRefund ? 'text-emerald-600' : 'text-amber-600'
         }`} />
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-slate-300">
+          <p className="text-sm text-slate-600">
             {policy.description}
           </p>
           {policy.custom_text && (
@@ -93,16 +93,16 @@ export default function CancellationPolicyDisplay({
       {/* Policy Summary */}
       <div className={`p-4 rounded-lg border ${
         eligibleForFullRefund
-          ? 'bg-emerald-500/10 border-emerald-500/20'
-          : 'bg-amber-500/10 border-amber-500/20'
+          ? 'bg-emerald-50 border-emerald-500/20'
+          : 'bg-amber-50 border-amber-500/20'
       }`}>
         <div className="flex items-start gap-3">
           <Shield className={`w-5 h-5 mt-0.5 ${
-            eligibleForFullRefund ? 'text-emerald-400' : 'text-amber-400'
+            eligibleForFullRefund ? 'text-emerald-600' : 'text-amber-600'
           }`} />
           <div className="flex-1 min-w-0">
             <p className={`font-medium ${
-              eligibleForFullRefund ? 'text-emerald-300' : 'text-amber-300'
+              eligibleForFullRefund ? 'text-emerald-600' : 'text-amber-600'
             }`}>
               {eligibleForFullRefund ? 'Full Refund Available' : 'Partial/No Refund'}
             </p>
@@ -118,7 +118,7 @@ export default function CancellationPolicyDisplay({
             <Clock className="w-4 h-4 text-slate-500" />
             <div>
               <p className="text-xs text-slate-500">Time Until Trip</p>
-              <p className="font-mono text-sm text-slate-300">
+              <p className="font-mono text-sm text-slate-600">
                 {policy.hours_until_trip}h
               </p>
             </div>
@@ -128,7 +128,7 @@ export default function CancellationPolicyDisplay({
             <DollarSign className="w-4 h-4 text-slate-500" />
             <div>
               <p className="text-xs text-slate-500">Refund Amount</p>
-              <p className="font-mono text-sm text-slate-300">
+              <p className="font-mono text-sm text-slate-600">
                 ${(policy.refund_amount / 100).toFixed(2)} ({policy.refund_percentage}%)
               </p>
             </div>
@@ -138,9 +138,9 @@ export default function CancellationPolicyDisplay({
 
       {/* Custom Policy Text */}
       {policy.custom_text && (
-        <div className="p-3 bg-slate-900/50 rounded-lg border border-slate-700/50">
+        <div className="p-3 bg-white rounded-lg border border-slate-200">
           <div className="flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 text-cyan-400 mt-0.5" />
+            <AlertCircle className="w-4 h-4 text-cyan-600 mt-0.5" />
             <p className="text-sm text-slate-400 leading-relaxed">
               {policy.custom_text}
             </p>
@@ -153,7 +153,7 @@ export default function CancellationPolicyDisplay({
         <p>• Full refund if cancelled {policy.hours_required}+ hours before trip</p>
         <p>• {policy.refund_percentage}% refund if cancelled within {policy.hours_required} hours</p>
         {!canCancel && (
-          <p className="text-amber-400">• This booking cannot be cancelled (already completed/cancelled)</p>
+          <p className="text-amber-600">• This booking cannot be cancelled (already completed/cancelled)</p>
         )}
       </div>
     </div>

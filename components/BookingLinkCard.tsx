@@ -62,9 +62,9 @@ export function BookingLinkCard({ captainId, compact = false }: BookingLinkCardP
       return (
         <button
           onClick={handleExpand}
-          className="inline-flex items-center gap-2 rounded-lg bg-slate-800 px-4 py-2.5 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-700 hover:text-white"
+          className="inline-flex items-center gap-2 rounded-lg bg-white border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900"
         >
-          <Share2 className="h-4 w-4 text-cyan-400" />
+          <Share2 className="h-4 w-4 text-cyan-600" />
           Share Booking Link
         </button>
       );
@@ -72,39 +72,34 @@ export function BookingLinkCard({ captainId, compact = false }: BookingLinkCardP
 
     // Expanded compact version for dashboard
     return (
-      <div
-        className="rounded-lg bg-slate-800 p-4"
-        style={{
-          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
-        }}
-      >
+      <div className="rounded-lg bg-white border border-slate-200 p-4">
         <div className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Link2 className="h-4 w-4 text-cyan-400" />
+            <Link2 className="h-4 w-4 text-cyan-600" />
             <span className="text-xs font-medium uppercase tracking-wider text-slate-500">
               Your Booking Link
             </span>
           </div>
           <button
             onClick={handleDismiss}
-            className="text-xs text-slate-500 transition-colors hover:text-slate-300"
+            className="text-xs text-slate-400 transition-colors hover:text-slate-600"
           >
             Minimize
           </button>
         </div>
 
-        <div className="flex items-center gap-2 rounded bg-slate-900 px-3 py-2">
-          <code className="flex-1 truncate font-mono text-sm text-slate-300">
+        <div className="flex items-center gap-2 rounded bg-slate-50 border border-slate-200 px-3 py-2">
+          <code className="flex-1 truncate font-mono text-sm text-slate-600">
             {bookingUrl}
           </code>
 
           <button
             onClick={copyToClipboard}
-            className="rounded p-1.5 transition-colors hover:bg-slate-700"
+            className="rounded p-1.5 transition-colors hover:bg-slate-200"
             title="Copy link"
           >
             {copied ? (
-              <Check className="h-4 w-4 text-emerald-400" />
+              <Check className="h-4 w-4 text-emerald-600" />
             ) : (
               <Copy className="h-4 w-4 text-slate-400" />
             )}
@@ -114,7 +109,7 @@ export function BookingLinkCard({ captainId, compact = false }: BookingLinkCardP
             href={bookingUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded p-1.5 transition-colors hover:bg-slate-700"
+            className="rounded p-1.5 transition-colors hover:bg-slate-200"
             title="Preview booking page"
           >
             <ExternalLink className="h-4 w-4 text-slate-400" />
@@ -122,7 +117,7 @@ export function BookingLinkCard({ captainId, compact = false }: BookingLinkCardP
         </div>
 
         {copied && (
-          <p className="mt-2 text-xs text-emerald-400">
+          <p className="mt-2 text-xs text-emerald-600">
             Copied to clipboard!
           </p>
         )}
@@ -132,19 +127,19 @@ export function BookingLinkCard({ captainId, compact = false }: BookingLinkCardP
 
   // Full version for settings page
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-6">
+    <div className="rounded-xl border border-slate-200 bg-white p-6">
       <div className="mb-4 flex items-center gap-2">
-        <Link2 className="h-5 w-5 text-cyan-400" />
-        <h2 className="text-lg font-semibold text-white">Your Booking Page</h2>
+        <Link2 className="h-5 w-5 text-cyan-600" />
+        <h2 className="text-lg font-semibold text-slate-900">Your Booking Page</h2>
       </div>
 
-      <p className="mb-4 text-sm text-slate-400">
+      <p className="mb-4 text-sm text-slate-500">
         Share this link with guests so they can book trips directly with you.
         Post it on social media, add it to your website, or send it via email.
       </p>
 
-      <div className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-3">
-        <code className="flex-1 truncate font-mono text-sm text-slate-300">
+      <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+        <code className="flex-1 truncate font-mono text-sm text-slate-600">
           {bookingUrl}
         </code>
 
@@ -152,8 +147,8 @@ export function BookingLinkCard({ captainId, compact = false }: BookingLinkCardP
           onClick={copyToClipboard}
           className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-all ${
             copied
-              ? 'bg-emerald-500/20 text-emerald-400'
-              : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+              ? 'bg-emerald-50 text-emerald-600'
+              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
           }`}
         >
           {copied ? (
@@ -180,7 +175,7 @@ export function BookingLinkCard({ captainId, compact = false }: BookingLinkCardP
         </a>
       </div>
 
-      <p className="mt-3 text-xs text-slate-500">
+      <p className="mt-3 text-xs text-slate-400">
         Guests can view your available trip types and request a booking at this link.
       </p>
     </div>

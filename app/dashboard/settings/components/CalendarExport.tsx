@@ -40,7 +40,7 @@ export function CalendarExport({ calendarToken, onRegenerate }: Props) {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-white">Calendar Export</h3>
+        <h3 className="text-lg font-semibold text-slate-900">Calendar Export</h3>
         <p className="mt-1 text-sm text-slate-400">
           Subscribe to your bookings in Apple Calendar, Google Calendar, Outlook, or any calendar app
         </p>
@@ -48,7 +48,7 @@ export function CalendarExport({ calendarToken, onRegenerate }: Props) {
 
       {/* Calendar URL */}
       <div>
-        <label className="block text-sm font-medium text-slate-300">
+        <label className="block text-sm font-medium text-slate-600">
           Calendar Subscription URL
         </label>
         <div className="mt-2 flex gap-2">
@@ -56,7 +56,7 @@ export function CalendarExport({ calendarToken, onRegenerate }: Props) {
             type="text"
             value={calendarUrl}
             readOnly
-            className="flex-1 rounded-lg border border-slate-600 bg-slate-700 px-4 py-2 font-mono text-sm text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            className="flex-1 rounded-lg border border-slate-300 bg-slate-100 px-4 py-2 font-mono text-sm text-slate-900 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
           />
           <button
             onClick={handleCopy}
@@ -81,15 +81,15 @@ export function CalendarExport({ calendarToken, onRegenerate }: Props) {
       </div>
 
       {/* Setup Instructions */}
-      <div className="rounded-lg border border-slate-700 bg-slate-800 p-6">
-        <h4 className="mb-4 font-semibold text-white">How to Subscribe</h4>
+      <div className="rounded-lg border border-slate-200 bg-white p-6">
+        <h4 className="mb-4 font-semibold text-slate-900">How to Subscribe</h4>
 
         <div className="space-y-4">
           {/* Apple Calendar */}
           <div>
             <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-cyan-400" />
-              <p className="font-medium text-white">Apple Calendar (iPhone, Mac)</p>
+              <Calendar className="h-4 w-4 text-cyan-600" />
+              <p className="font-medium text-slate-900">Apple Calendar (iPhone, Mac)</p>
             </div>
             <ol className="mt-2 space-y-1 pl-6 text-sm text-slate-400">
               <li>1. Open Calendar app</li>
@@ -102,8 +102,8 @@ export function CalendarExport({ calendarToken, onRegenerate }: Props) {
           {/* Google Calendar */}
           <div>
             <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-cyan-400" />
-              <p className="font-medium text-white">Google Calendar</p>
+              <Calendar className="h-4 w-4 text-cyan-600" />
+              <p className="font-medium text-slate-900">Google Calendar</p>
             </div>
             <ol className="mt-2 space-y-1 pl-6 text-sm text-slate-400">
               <li>1. Open Google Calendar on desktop</li>
@@ -117,8 +117,8 @@ export function CalendarExport({ calendarToken, onRegenerate }: Props) {
           {/* Outlook */}
           <div>
             <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-cyan-400" />
-              <p className="font-medium text-white">Outlook</p>
+              <Calendar className="h-4 w-4 text-cyan-600" />
+              <p className="font-medium text-slate-900">Outlook</p>
             </div>
             <ol className="mt-2 space-y-1 pl-6 text-sm text-slate-400">
               <li>1. Open Outlook Calendar</li>
@@ -131,8 +131,8 @@ export function CalendarExport({ calendarToken, onRegenerate }: Props) {
       </div>
 
       {/* What's Included */}
-      <div className="rounded-lg border border-slate-700 bg-slate-800 p-6">
-        <h4 className="mb-3 font-semibold text-white">What's Included</h4>
+      <div className="rounded-lg border border-slate-200 bg-white p-6">
+        <h4 className="mb-3 font-semibold text-slate-900">What's Included</h4>
         <ul className="space-y-2 text-sm text-slate-400">
           <li className="flex items-start gap-2">
             <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-green-400" />
@@ -158,9 +158,9 @@ export function CalendarExport({ calendarToken, onRegenerate }: Props) {
       </div>
 
       {/* Regenerate Token */}
-      <div className="flex items-center justify-between rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
+      <div className="flex items-center justify-between rounded-lg border border-amber-500/30 bg-amber-50 p-4">
         <div>
-          <p className="text-sm font-medium text-amber-300">Security Settings</p>
+          <p className="text-sm font-medium text-amber-600">Security Settings</p>
           <p className="mt-1 text-xs text-amber-200/70">
             Regenerate your calendar token if you suspect it's been compromised
           </p>
@@ -182,7 +182,7 @@ export function CalendarExport({ calendarToken, onRegenerate }: Props) {
           href="https://docs.dockslot.app/calendar-sync"
           target="_blank"
           rel="noopener noreferrer"
-          className="underline hover:text-cyan-400"
+          className="underline hover:text-cyan-600"
         >
           Learn more about calendar sync
         </a>

@@ -69,7 +69,7 @@ export default async function SettingsPage() {
           <span className="font-mono text-xs uppercase tracking-widest text-slate-500">
             Settings
           </span>
-          <div className="h-px flex-1 bg-slate-800" />
+          <div className="h-px flex-1 bg-white" />
         </div>
         <p className="mt-2 text-sm text-slate-400">
           Manage your captain profile, business details, and booking preferences.
@@ -79,7 +79,7 @@ export default async function SettingsPage() {
       {/* Tabbed Settings Interface */}
       <Suspense fallback={
         <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-600 border-t-cyan-400" />
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-300 border-t-cyan-400" />
         </div>
       }>
         <SettingsTabs

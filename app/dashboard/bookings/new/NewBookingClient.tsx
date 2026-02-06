@@ -145,25 +145,25 @@ export function NewBookingClient({
   }
 
   const inputClass =
-    'w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500'
+    'w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-slate-900 placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500'
   const selectClass =
-    'w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500'
-  const labelClass = 'block text-sm font-medium text-slate-300 mb-1'
+    'w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-slate-900 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500'
+  const labelClass = 'block text-sm font-medium text-slate-600 mb-1'
 
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl space-y-8">
       {/* Error Banner */}
       {error && (
-        <div className="flex items-start gap-3 rounded-lg border border-red-500/30 bg-red-500/10 p-4">
-          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-400" />
+        <div className="flex items-start gap-3 rounded-lg border border-red-500/30 bg-red-50 p-4">
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
           <p className="text-sm text-red-300">{error}</p>
         </div>
       )}
 
       {/* Trip Details Section */}
       <section className="space-y-4">
-        <div className="flex items-center gap-2 text-slate-200">
-          <Ship className="h-5 w-5 text-cyan-400" />
+        <div className="flex items-center gap-2 text-slate-700">
+          <Ship className="h-5 w-5 text-cyan-600" />
           <h2 className="text-lg font-semibold">Trip Details</h2>
         </div>
 
@@ -254,8 +254,8 @@ export function NewBookingClient({
 
       {/* Guest Information Section */}
       <section className="space-y-4">
-        <div className="flex items-center gap-2 text-slate-200">
-          <User className="h-5 w-5 text-cyan-400" />
+        <div className="flex items-center gap-2 text-slate-700">
+          <User className="h-5 w-5 text-cyan-600" />
           <h2 className="text-lg font-semibold">Guest Information</h2>
         </div>
 
@@ -331,8 +331,8 @@ export function NewBookingClient({
 
       {/* Additional Details Section */}
       <section className="space-y-4">
-        <div className="flex items-center gap-2 text-slate-200">
-          <Clock className="h-5 w-5 text-cyan-400" />
+        <div className="flex items-center gap-2 text-slate-700">
+          <Clock className="h-5 w-5 text-cyan-600" />
           <h2 className="text-lg font-semibold">Additional Details</h2>
         </div>
 
@@ -373,27 +373,27 @@ export function NewBookingClient({
 
       {/* Pricing Summary */}
       {selectedTripType && (
-        <section className="rounded-lg border border-slate-700 bg-slate-800/50 p-4">
-          <div className="flex items-center gap-2 text-slate-200 mb-3">
-            <DollarSign className="h-5 w-5 text-cyan-400" />
+        <section className="rounded-lg border border-slate-200 bg-white p-4">
+          <div className="flex items-center gap-2 text-slate-700 mb-3">
+            <DollarSign className="h-5 w-5 text-cyan-600" />
             <h2 className="text-lg font-semibold">Pricing Summary</h2>
           </div>
           <div className="space-y-2 text-sm">
-            <div className="flex justify-between text-slate-300">
+            <div className="flex justify-between text-slate-600">
               <span>Trip Total</span>
-              <span className="font-medium text-white">
+              <span className="font-medium text-slate-900">
                 ${selectedTripType.price_total.toFixed(2)}
               </span>
             </div>
-            <div className="flex justify-between text-slate-300">
+            <div className="flex justify-between text-slate-600">
               <span>Deposit Amount</span>
-              <span className="font-medium text-white">
+              <span className="font-medium text-slate-900">
                 ${selectedTripType.deposit_amount.toFixed(2)}
               </span>
             </div>
-            <div className="border-t border-slate-700 pt-2 flex justify-between text-slate-300">
+            <div className="border-t border-slate-200 pt-2 flex justify-between text-slate-600">
               <span>Balance Due (Day of Trip)</span>
-              <span className="font-medium text-cyan-400">
+              <span className="font-medium text-cyan-600">
                 $
                 {(
                   selectedTripType.price_total -
@@ -406,11 +406,11 @@ export function NewBookingClient({
       )}
 
       {/* Actions */}
-      <div className="flex items-center gap-3 border-t border-slate-800 pt-6">
+      <div className="flex items-center gap-3 border-t border-slate-200 pt-6">
         <button
           type="button"
           onClick={() => router.push('/dashboard/bookings')}
-          className="flex items-center gap-2 rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800"
+          className="flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-white"
         >
           <ArrowLeft className="h-4 w-4" />
           Cancel
@@ -419,7 +419,7 @@ export function NewBookingClient({
         <button
           type="submit"
           disabled={isPending}
-          className="flex items-center gap-2 rounded-lg bg-cyan-500 px-6 py-2 text-sm font-medium text-slate-900 hover:bg-cyan-400 disabled:opacity-50"
+          className="flex items-center gap-2 rounded-lg bg-cyan-500 px-6 py-2 text-sm font-medium text-white hover:bg-cyan-400 disabled:opacity-50"
         >
           {isPending ? (
             <Loader2 className="h-4 w-4 animate-spin" />

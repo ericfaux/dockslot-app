@@ -129,19 +129,19 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
     });
   };
 
-  const inputClassName = "w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-white placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500";
-  const labelClassName = "block text-sm font-medium text-slate-300 mb-1.5";
-  const sectionClassName = "rounded-xl border border-slate-800 bg-slate-900/50 p-6";
+  const inputClassName = "w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-slate-900 placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500";
+  const labelClassName = "block text-sm font-medium text-slate-600 mb-1.5";
+  const sectionClassName = "rounded-xl border border-slate-200 bg-white p-6";
 
   return (
     <div className="space-y-6">
       {error && (
-        <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
+        <div className="rounded-lg border border-rose-500/30 bg-rose-50 px-4 py-3 text-sm text-rose-600">
           {error}
         </div>
       )}
       {success && (
-        <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
+        <div className="rounded-lg border border-emerald-500/30 bg-emerald-50 px-4 py-3 text-sm text-emerald-600">
           {success}
         </div>
       )}
@@ -154,8 +154,8 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
       {/* Cancellation Policy */}
       <section className={sectionClassName}>
         <div className="mb-4 flex items-center gap-2">
-          <FileText className="h-5 w-5 text-cyan-400" />
-          <h2 className="text-lg font-semibold text-white">Cancellation Policy</h2>
+          <FileText className="h-5 w-5 text-cyan-600" />
+          <h2 className="text-lg font-semibold text-slate-900">Cancellation Policy</h2>
         </div>
         <div>
           <label htmlFor="cancellationPolicy" className={labelClassName}>
@@ -178,8 +178,8 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
       {/* Hibernation Mode */}
       <section className={sectionClassName}>
         <div className="mb-4 flex items-center gap-2">
-          <Moon className="h-5 w-5 text-cyan-400" />
-          <h2 className="text-lg font-semibold text-white">Hibernation Mode</h2>
+          <Moon className="h-5 w-5 text-cyan-600" />
+          <h2 className="text-lg font-semibold text-slate-900">Hibernation Mode</h2>
         </div>
         <p className="mb-4 text-sm text-slate-400">
           Temporarily pause new bookings during off-season. Set a return date to automatically resume accepting bookings.
@@ -195,7 +195,7 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
               />
               <div
                 className={`h-6 w-11 rounded-full transition-colors ${
-                  isHibernating ? 'bg-amber-500' : 'bg-slate-700'
+                  isHibernating ? 'bg-amber-500' : 'bg-slate-100'
                 }`}
               >
                 <div
@@ -205,13 +205,13 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
                 />
               </div>
             </div>
-            <span className="text-sm text-slate-300">
+            <span className="text-sm text-slate-600">
               {isHibernating ? 'Hibernation mode is ON' : 'Hibernation mode is OFF'}
             </span>
           </label>
 
           {isHibernating && (
-            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 space-y-4">
+            <div className="rounded-lg border border-amber-500/30 bg-amber-50 p-4 space-y-4">
               <div>
                 <label htmlFor="hibernationEndDate" className={labelClassName}>
                   Hibernation Ends On
@@ -245,9 +245,9 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
                     type="checkbox"
                     checked={hibernationShowReturnDate}
                     onChange={(e) => setHibernationShowReturnDate(e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-600 bg-slate-800 text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-900"
+                    className="h-4 w-4 rounded border-slate-300 bg-white text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-900"
                   />
-                  <span className="text-sm text-slate-300">
+                  <span className="text-sm text-slate-600">
                     Show return date to guests
                   </span>
                 </label>
@@ -257,9 +257,9 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
                     type="checkbox"
                     checked={hibernationAllowNotifications}
                     onChange={(e) => setHibernationAllowNotifications(e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-600 bg-slate-800 text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-900"
+                    className="h-4 w-4 rounded border-slate-300 bg-white text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-900"
                   />
-                  <span className="text-sm text-slate-300">
+                  <span className="text-sm text-slate-600">
                     Let guests sign up for &quot;We&apos;re Back!&quot; notifications
                   </span>
                 </label>
@@ -269,9 +269,9 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
                     type="checkbox"
                     checked={hibernationShowContactInfo}
                     onChange={(e) => setHibernationShowContactInfo(e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-600 bg-slate-800 text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-900"
+                    className="h-4 w-4 rounded border-slate-300 bg-white text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-900"
                   />
-                  <span className="text-sm text-slate-300">
+                  <span className="text-sm text-slate-600">
                     Show contact info during hibernation
                   </span>
                 </label>
@@ -300,7 +300,7 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
                   <button
                     type="button"
                     onClick={toggleSubscribers}
-                    className="flex w-full items-center justify-between text-sm text-slate-300 hover:text-white transition-colors"
+                    className="flex w-full items-center justify-between text-sm text-slate-600 hover:text-slate-900 transition-colors"
                   >
                     <span className="flex items-center gap-2">
                       <Users className="h-4 w-4" />
@@ -315,7 +315,7 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
                     <div className="mt-3 space-y-3">
                       {subscribersLoading ? (
                         <div className="flex items-center justify-center py-4">
-                          <Loader2 className="h-5 w-5 animate-spin text-amber-400" />
+                          <Loader2 className="h-5 w-5 animate-spin text-amber-600" />
                         </div>
                       ) : subscribers.length === 0 ? (
                         <p className="text-sm text-slate-500 py-2">
@@ -330,7 +330,7 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
                             <button
                               type="button"
                               onClick={handleExportSubscribers}
-                              className="flex items-center gap-1.5 text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
+                              className="flex items-center gap-1.5 text-xs text-cyan-600 hover:text-cyan-600 transition-colors"
                             >
                               <Download className="h-3.5 w-3.5" />
                               Export CSV
@@ -340,10 +340,10 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
                             {subscribers.map((sub) => (
                               <div
                                 key={sub.id}
-                                className="flex items-center justify-between rounded-md bg-slate-800/50 px-3 py-2"
+                                className="flex items-center justify-between rounded-md bg-white px-3 py-2"
                               >
                                 <div className="min-w-0 flex-1">
-                                  <p className="text-sm text-white truncate">
+                                  <p className="text-sm text-slate-900 truncate">
                                     {sub.email}
                                   </p>
                                   {sub.name && (
@@ -355,7 +355,7 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
                                 <button
                                   type="button"
                                   onClick={() => handleDeleteSubscriber(sub.id)}
-                                  className="ml-2 p-1.5 text-slate-500 hover:text-rose-400 transition-colors"
+                                  className="ml-2 p-1.5 text-slate-500 hover:text-rose-600 transition-colors"
                                   title="Remove subscriber"
                                 >
                                   <Trash2 className="h-4 w-4" />
@@ -377,7 +377,7 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
       {/* Save Button for Booking Page settings */}
       <div className="flex items-center justify-end gap-3 pt-2">
         {hasChanges && (
-          <div className="flex items-center gap-1.5 text-sm text-amber-400">
+          <div className="flex items-center gap-1.5 text-sm text-amber-600">
             <AlertCircle className="h-4 w-4" />
             Unsaved changes
           </div>
@@ -400,10 +400,10 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
       </div>
 
       {/* Promo Codes Section */}
-      <section className="rounded-xl border border-slate-800 bg-slate-900/50 p-6">
+      <section className="rounded-xl border border-slate-200 bg-white p-6">
         <div className="mb-4 flex items-center gap-2">
-          <Tag className="h-5 w-5 text-cyan-400" />
-          <h2 className="text-lg font-semibold text-white">Promo Codes</h2>
+          <Tag className="h-5 w-5 text-cyan-600" />
+          <h2 className="text-lg font-semibold text-slate-900">Promo Codes</h2>
         </div>
         <PromoCodesClient
           tripTypes={tripTypes.map(tt => ({ id: tt.id, title: tt.title }))}
@@ -411,10 +411,10 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
       </section>
 
       {/* Referral Program Section */}
-      <section className="rounded-xl border border-slate-800 bg-slate-900/50 p-6">
+      <section className="rounded-xl border border-slate-200 bg-white p-6">
         <div className="mb-4 flex items-center gap-2">
-          <Gift className="h-5 w-5 text-cyan-400" />
-          <h2 className="text-lg font-semibold text-white">Referral Program</h2>
+          <Gift className="h-5 w-5 text-cyan-600" />
+          <h2 className="text-lg font-semibold text-slate-900">Referral Program</h2>
         </div>
         <ReferralProgramClient />
       </section>

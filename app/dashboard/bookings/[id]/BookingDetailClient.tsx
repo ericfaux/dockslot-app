@@ -116,7 +116,7 @@ export function BookingDetailClient({ bookingId, initialBooking }: BookingDetail
           <div className="flex items-center gap-4">
             <Link
               href="/dashboard/bookings"
-              className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-2 text-sm text-slate-300 transition-colors hover:bg-slate-700/50"
+              className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 transition-colors hover:bg-slate-100"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to Bookings
@@ -126,7 +126,7 @@ export function BookingDetailClient({ bookingId, initialBooking }: BookingDetail
                 <span className="font-mono text-xs uppercase tracking-widest text-slate-500">
                   Captain&apos;s Logbook
                 </span>
-                <div className="h-px flex-1 bg-slate-800" />
+                <div className="h-px flex-1 bg-white" />
               </div>
               <p className="mt-1 text-sm text-slate-400">
                 Booking #{bookingId.slice(0, 8)}
@@ -137,14 +137,14 @@ export function BookingDetailClient({ bookingId, initialBooking }: BookingDetail
             <button
               onClick={handleRefresh}
               disabled={isLoading}
-              className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-2 text-sm text-slate-300 transition-colors hover:bg-slate-700/50 disabled:opacity-50"
+              className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 transition-colors hover:bg-slate-100 disabled:opacity-50"
             >
               <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
               Refresh
             </button>
             <button
               onClick={handlePrint}
-              className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-2 text-sm text-slate-300 transition-colors hover:bg-slate-700/50"
+              className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 transition-colors hover:bg-slate-100"
             >
               <Printer className="h-4 w-4" />
               Print
@@ -155,7 +155,7 @@ export function BookingDetailClient({ bookingId, initialBooking }: BookingDetail
 
       {/* Error State */}
       {error && (
-        <div className="flex items-center gap-2 rounded-lg border border-rose-500/50 bg-rose-500/10 p-4 text-rose-400">
+        <div className="flex items-center gap-2 rounded-lg border border-rose-500/50 bg-rose-50 p-4 text-rose-600">
           <AlertCircle className="h-5 w-5 flex-shrink-0" />
           <span>{error}</span>
           <button

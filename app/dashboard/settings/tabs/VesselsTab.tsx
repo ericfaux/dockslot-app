@@ -95,7 +95,7 @@ export function VesselsTab({ initialVessels }: VesselsTabProps) {
       </div>
 
       {error && (
-        <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
+        <div className="rounded-lg border border-rose-500/30 bg-rose-50 px-4 py-3 text-sm text-rose-600">
           {error}
         </div>
       )}
@@ -121,17 +121,17 @@ export function VesselsTab({ initialVessels }: VesselsTabProps) {
 
       {/* Vessels List */}
       {vessels.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-slate-700 bg-slate-900/50 py-16">
-          <div className="mb-4 rounded-full bg-slate-800 p-4">
+        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-slate-200 bg-white py-16">
+          <div className="mb-4 rounded-full bg-white p-4">
             <Plus className="h-8 w-8 text-slate-500" />
           </div>
-          <h3 className="mb-2 text-lg font-medium text-slate-300">No vessels yet</h3>
+          <h3 className="mb-2 text-lg font-medium text-slate-600">No vessels yet</h3>
           <p className="mb-4 max-w-sm text-center text-sm text-slate-500">
             Add your first vessel to start managing your fleet and assigning boats to trips.
           </p>
           <button
             onClick={handleAddNew}
-            className="text-sm font-medium text-cyan-400 hover:text-cyan-300"
+            className="text-sm font-medium text-cyan-600 hover:text-cyan-600"
           >
             Add your first vessel
           </button>

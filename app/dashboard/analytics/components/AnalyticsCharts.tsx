@@ -59,8 +59,8 @@ export function AnalyticsCharts({ bookings }: Props) {
   return (
     <div className="space-y-6">
       {/* Revenue Chart */}
-      <div className="rounded-lg border border-slate-700 bg-slate-800 p-4 sm:p-6 overflow-hidden">
-        <h3 className="mb-4 sm:mb-6 text-base sm:text-lg font-semibold text-white">Revenue Trend (Last 6 Months)</h3>
+      <div className="rounded-lg border border-slate-200 bg-white p-4 sm:p-6 overflow-hidden">
+        <h3 className="mb-4 sm:mb-6 text-base sm:text-lg font-semibold text-slate-900">Revenue Trend (Last 6 Months)</h3>
         <div className="space-y-2 sm:space-y-3">
           {monthlyRevenue.map((data, index) => (
             <div 
@@ -69,12 +69,12 @@ export function AnalyticsCharts({ bookings }: Props) {
               onMouseEnter={() => setHoveredMonth(data.month)}
               onMouseLeave={() => setHoveredMonth(null)}
             >
-              <div className="w-12 text-sm text-slate-400 group-hover:text-cyan-400 transition-colors">
+              <div className="w-12 text-sm text-slate-400 group-hover:text-cyan-600 transition-colors">
                 {data.month}
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-3">
-                  <div className="relative h-8 flex-1 overflow-hidden rounded-full bg-slate-700 group-hover:bg-slate-600 transition-colors">
+                  <div className="relative h-8 flex-1 overflow-hidden rounded-full bg-slate-100 group-hover:bg-slate-200 transition-colors">
                     <div
                       className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all duration-500 group-hover:from-cyan-400 group-hover:to-blue-400"
                       style={{
@@ -83,14 +83,14 @@ export function AnalyticsCharts({ bookings }: Props) {
                     />
                     {hoveredMonth === data.month && (
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-xs font-bold text-white drop-shadow-lg">
+                        <span className="text-xs font-bold text-slate-900 drop-shadow-lg">
                           ${data.revenue.toLocaleString()} ({data.count} trips)
                         </span>
                       </div>
                     )}
                   </div>
                   <div className="w-24 text-right">
-                    <p className="text-sm font-medium text-white group-hover:text-cyan-400 transition-colors">
+                    <p className="text-sm font-medium text-slate-900 group-hover:text-cyan-600 transition-colors">
                       ${data.revenue.toLocaleString()}
                     </p>
                     <p className="text-xs text-slate-500 group-hover:text-slate-400 transition-colors">
@@ -105,8 +105,8 @@ export function AnalyticsCharts({ bookings }: Props) {
       </div>
 
       {/* Status Distribution */}
-      <div className="rounded-lg border border-slate-700 bg-slate-800 p-6">
-        <h3 className="mb-6 text-lg font-semibold text-white">Booking Status Distribution</h3>
+      <div className="rounded-lg border border-slate-200 bg-white p-6">
+        <h3 className="mb-6 text-lg font-semibold text-slate-900">Booking Status Distribution</h3>
         <div className="space-y-4">
           {Object.entries(statusCounts).map(([status, count]) => {
             const percentage = (count / bookings.length) * 100;
@@ -115,14 +115,14 @@ export function AnalyticsCharts({ bookings }: Props) {
             return (
               <div key={status} className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm capitalize text-slate-300">
+                  <span className="text-sm capitalize text-slate-600">
                     {status.replace(/_/g, ' ')}
                   </span>
-                  <span className="text-sm font-medium text-white">
+                  <span className="text-sm font-medium text-slate-900">
                     {count} ({percentage.toFixed(0)}%)
                   </span>
                 </div>
-                <div className="h-2 overflow-hidden rounded-full bg-slate-700">
+                <div className="h-2 overflow-hidden rounded-full bg-slate-100">
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${color}`}
                     style={{ width: `${percentage}%` }}
@@ -136,9 +136,9 @@ export function AnalyticsCharts({ bookings }: Props) {
 
       {/* Quick Stats */}
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-lg border border-slate-700 bg-slate-800 p-6">
+        <div className="rounded-lg border border-slate-200 bg-white p-6">
           <h4 className="mb-4 text-sm font-medium text-slate-400">Average Booking Value</h4>
-          <p className="text-3xl font-bold text-white">
+          <p className="text-3xl font-bold text-slate-900">
             $
             {bookings.length > 0
               ? (
@@ -150,11 +150,11 @@ export function AnalyticsCharts({ bookings }: Props) {
           </p>
         </div>
 
-        <div className="rounded-lg border border-slate-700 bg-slate-800 p-6">
+        <div className="rounded-lg border border-slate-200 bg-white p-6">
           <h4 className="mb-4 text-sm font-medium text-slate-400">
             Total Projected Revenue
           </h4>
-          <p className="text-3xl font-bold text-white">
+          <p className="text-3xl font-bold text-slate-900">
             ${(bookings.reduce((sum, b) => sum + b.total_price_cents, 0) / 100).toLocaleString()}
           </p>
           <p className="mt-1 text-xs text-slate-500">
