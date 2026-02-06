@@ -48,9 +48,9 @@ export default async function GuestsPage() {
     const guest = guestMap.get(email);
     guest.bookings.push(booking);
     
-    if (booking.status === 'completed' || booking.status === 'confirmed') {
+    if (booking.status !== 'cancelled' && booking.status !== 'no_show') {
       guest.totalTrips++;
-      guest.totalSpent += booking.deposit_paid_cents || 0;
+      guest.totalSpent += booking.total_price_cents || 0;
     }
 
     const tripDate = new Date(booking.scheduled_start);
