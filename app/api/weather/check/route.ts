@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkMarineConditions, generateWeatherHoldReason } from '@/lib/weather/noaa';
 
-export const runtime = 'edge';
-
 /**
  * GET /api/weather/check?lat=LAT&lon=LON&date=ISO_DATE
  * 
