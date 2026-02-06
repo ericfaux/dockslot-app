@@ -123,6 +123,16 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Parse page number
+    let page = 1;
+    const pageParam = searchParams.get('page');
+    if (pageParam) {
+      const parsedPage = parseInt(pageParam, 10);
+      if (!isNaN(parsedPage) && parsedPage >= 1) {
+        page = parsedPage;
+      }
+    }
+
     // Build filters object
     const filters: BookingListFilters = {
       captainId,
@@ -137,6 +147,7 @@ export async function GET(request: NextRequest) {
       sortField,
       sortDir,
       cursor,
+      page,
       limit,
     };
 
@@ -147,6 +158,9 @@ export async function GET(request: NextRequest) {
       bookings: result.bookings,
       nextCursor: result.nextCursor,
       totalCount: result.totalCount,
+      page: result.page,
+      pageSize: result.pageSize,
+      totalPages: result.totalPages,
     });
   } catch (error) {
     console.error('Error in GET /api/bookings:', error);

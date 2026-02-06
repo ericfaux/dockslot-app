@@ -122,6 +122,7 @@ export interface BookingListFilters {
   sortField?: 'scheduled_start' | 'guest_name' | 'status' | 'created_at';
   sortDir?: 'asc' | 'desc';
   cursor?: string;
+  page?: number;
   limit?: number;
 }
 
@@ -129,11 +130,15 @@ export interface BookingListResult {
   bookings: BookingWithDetails[];
   nextCursor: string | null;
   totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
 }
 
 export async function getBookingsWithFilters(filters: BookingListFilters): Promise<BookingListResult> {
   const supabase = await createSupabaseServerClient();
   const limit = Math.min(filters.limit || 20, 100);
+  const page = Math.max(filters.page || 1, 1);
   const sortField = filters.sortField || 'scheduled_start';
   const sortDir = filters.sortDir || 'asc';
 
@@ -182,8 +187,14 @@ export async function getBookingsWithFilters(filters: BookingListFilters): Promi
     query = query.or(`guest_name.ilike.%${filters.search}%,guest_email.ilike.%${filters.search}%,guest_phone.ilike.%${filters.search}%`);
   }
 
-  // Apply cursor-based pagination
+  // Apply sorting
+  query = query
+    .order(sortField, { ascending: sortDir === 'asc' })
+    .order('id', { ascending: true }); // Secondary sort for stability
+
+  // Apply offset-based pagination using .range()
   if (filters.cursor) {
+    // Legacy cursor-based pagination support
     const decodedCursor = decodeCursor(filters.cursor);
     if (decodedCursor) {
       if (sortDir === 'asc') {
@@ -192,35 +203,52 @@ export async function getBookingsWithFilters(filters: BookingListFilters): Promi
         query = query.lt(sortField, decodedCursor.value);
       }
     }
+    query = query.limit(limit + 1);
+  } else {
+    // Offset-based pagination with .range()
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+    query = query.range(from, to);
   }
-
-  // Apply sorting and limit
-  query = query
-    .order(sortField, { ascending: sortDir === 'asc' })
-    .order('id', { ascending: true }) // Secondary sort for stability
-    .limit(limit + 1); // Fetch one extra to check if there's a next page
 
   const { data, error, count } = await query;
 
   if (error) {
     console.error('Error fetching bookings:', error);
-    return { bookings: [], nextCursor: null, totalCount: 0 };
+    return { bookings: [], nextCursor: null, totalCount: 0, page, pageSize: limit, totalPages: 0 };
+  }
+
+  const totalCount = count || 0;
+  const totalPages = Math.ceil(totalCount / limit);
+
+  if (filters.cursor) {
+    // Legacy cursor path
+    const bookings = transformBookingsData((data || []) as RawBookingData[]);
+    let nextCursor: string | null = null;
+    if (bookings.length > limit) {
+      const lastItem = bookings[limit - 1];
+      nextCursor = encodeCursor(sortField, lastItem[sortField as keyof Booking] as string);
+      bookings.pop();
+    }
+    return {
+      bookings: bookings.slice(0, limit),
+      nextCursor,
+      totalCount,
+      page,
+      pageSize: limit,
+      totalPages,
+    };
   }
 
   const bookings = transformBookingsData((data || []) as RawBookingData[]);
-  let nextCursor: string | null = null;
-
-  // Check if there's a next page
-  if (bookings.length > limit) {
-    const lastItem = bookings[limit - 1];
-    nextCursor = encodeCursor(sortField, lastItem[sortField as keyof Booking] as string);
-    bookings.pop(); // Remove the extra item
-  }
 
   return {
-    bookings: bookings.slice(0, limit),
-    nextCursor,
-    totalCount: count || 0,
+    bookings,
+    nextCursor: null,
+    totalCount,
+    page,
+    pageSize: limit,
+    totalPages,
   };
 }
 
