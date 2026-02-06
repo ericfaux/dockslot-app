@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
-import Link from 'next/link'
 import { format, parseISO } from 'date-fns'
 import {
   Calendar,
@@ -22,6 +21,7 @@ interface SwipeableBookingRowProps {
   isSelected: boolean
   onSelect: (id: string) => void
   onWeatherHold: (id: string) => void
+  onViewDetail: (booking: BookingWithDetails) => void
 }
 
 export function SwipeableBookingRow({
@@ -29,6 +29,7 @@ export function SwipeableBookingRow({
   isSelected,
   onSelect,
   onWeatherHold,
+  onViewDetail,
 }: SwipeableBookingRowProps) {
   const [swipeOffset, setSwipeOffset] = useState(0)
   const [isHovered, setIsHovered] = useState(false)
@@ -55,8 +56,8 @@ export function SwipeableBookingRow({
 
   const handleTouchEnd = useCallback(() => {
     if (swipeOffset > SWIPE_THRESHOLD) {
-      // Swiped right - View action
-      window.location.href = `/dashboard/schedule?booking=${booking.id}`
+      // Swiped right - View detail
+      onViewDetail(booking)
     } else if (swipeOffset < -SWIPE_THRESHOLD) {
       // Swiped left - Weather hold action
       onWeatherHold(booking.id)
@@ -64,7 +65,7 @@ export function SwipeableBookingRow({
     // Reset position with animation
     setSwipeOffset(0)
     isDragging.current = false
-  }, [swipeOffset, booking.id, onWeatherHold])
+  }, [swipeOffset, booking, onWeatherHold, onViewDetail])
 
   const formatTime = (isoString: string): string => {
     try {
@@ -122,12 +123,19 @@ export function SwipeableBookingRow({
           className="mt-1 h-4 w-4 rounded border-slate-300 bg-slate-100 text-cyan-500 focus:ring-2 focus:ring-cyan-500 focus:ring-offset-0"
         />
 
-        <Link
-          href={`/dashboard/schedule?booking=${booking.id}`}
-          className="flex flex-1 items-start justify-between gap-4"
-          onClick={(e) => {
-            if (isDragging.current) {
+        <div
+          role="button"
+          tabIndex={0}
+          className="flex flex-1 cursor-pointer items-start justify-between gap-4"
+          onClick={() => {
+            if (!isDragging.current) {
+              onViewDetail(booking)
+            }
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault()
+              onViewDetail(booking)
             }
           }}
         >
@@ -239,9 +247,8 @@ export function SwipeableBookingRow({
             >
               <button
                 onClick={(e) => {
-                  e.preventDefault()
                   e.stopPropagation()
-                  window.location.href = `/dashboard/schedule?booking=${booking.id}`
+                  onViewDetail(booking)
                 }}
                 className="rounded-lg bg-cyan-50 px-3 py-1.5 text-xs font-medium text-cyan-600 transition-colors hover:bg-cyan-500/30"
               >
@@ -250,7 +257,6 @@ export function SwipeableBookingRow({
               {canWeatherHold && (
                 <button
                   onClick={(e) => {
-                    e.preventDefault()
                     e.stopPropagation()
                     onWeatherHold(booking.id)
                   }}
@@ -262,7 +268,7 @@ export function SwipeableBookingRow({
             </div>
             <ChevronRight className="h-5 w-5 text-slate-500" />
           </div>
-        </Link>
+        </div>
       </div>
 
       {/* Mobile swipe hints - shown on first few rows */}
