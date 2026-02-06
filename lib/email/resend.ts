@@ -221,7 +221,7 @@ export async function sendWeatherHoldNotification(params: {
         
         <div style="background-color: #422006; border-left: 4px solid #fbbf24; padding: 20px; margin: 20px 0;">
           <p style="margin: 0; color: #fde68a; font-style: italic;">"${params.reason}"</p>
-          <p style="margin: 15px 0 0; color: #cbd5e1; font-size: 13px;">— Captain ${params.captainName}</p>
+          <p style="margin: 15px 0 0; color: #cbd5e1; font-size: 13px;">— ${params.captainName}</p>
         </div>
 
         <div style="text-align: center; margin: 30px 0;">

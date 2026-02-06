@@ -162,7 +162,7 @@ function weatherAlertEmailTemplate(params: {
     
     <tr>
       <td style="padding: 30px 20px;">
-        <h2 style="margin: 0 0 20px; color: #f1f5f9; font-size: 24px;">Captain ${params.captainName},</h2>
+        <h2 style="margin: 0 0 20px; color: #f1f5f9; font-size: 24px;">${params.captainName},</h2>
         <p style="margin: 0 0 20px; color: #cbd5e1; line-height: 1.6;">
           <strong style="color: ${
             params.recommendation === 'dangerous' ? '#fca5a5' : '#fbbf24'
