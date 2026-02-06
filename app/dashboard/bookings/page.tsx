@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 
+import { Suspense } from 'react'
 import { requireAuth } from '@/lib/auth/server'
 import { BookingsListClient } from './BookingsListClient'
 
@@ -40,7 +41,13 @@ export default async function BookingsListPage() {
       </div>
 
       {/* Bookings List with Filters */}
-      <BookingsListClient captainId={captainId} />
+      <Suspense fallback={
+        <div className="flex items-center justify-center py-12">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-cyan-500 border-t-transparent" />
+        </div>
+      }>
+        <BookingsListClient captainId={captainId} />
+      </Suspense>
     </div>
   )
 }

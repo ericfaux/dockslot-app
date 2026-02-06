@@ -1,36 +1,30 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { format, parseISO } from 'date-fns'
-import {
-  Calendar,
-  Users,
-  Ship,
-  CreditCard,
-  Clock,
-  Tag as TagIcon,
-  ChevronRight,
-} from 'lucide-react'
+import { useSearchParams, useRouter } from 'next/navigation'
+import { List } from 'lucide-react'
 import BookingFilters, { BookingFilterState } from '../schedule/BookingFilters'
 import { BookingWithDetails } from '@/lib/db/types'
-import { STATUS_COLORS, STATUS_LABELS } from '@/components/calendar/types'
 import { ExportButton } from './ExportButton'
 import FilterPresetsMenu from '../components/FilterPresetsMenu'
 import BulkActionsBar from '../components/BulkActionsBar'
 import { SwipeableBookingRow } from './SwipeableBookingRow'
+import { BookingDetailDrawer } from './BookingDetailDrawer'
 import { EmptyState } from '@/components/EmptyState'
-import Link from 'next/link'
-import { List } from 'lucide-react'
 
 interface BookingsListClientProps {
   captainId: string
 }
 
 export function BookingsListClient({ captainId }: BookingsListClientProps) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [bookings, setBookings] = useState<BookingWithDetails[]>([])
   const [availableTags, setAvailableTags] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedBookings, setSelectedBookings] = useState<Set<string>>(new Set())
+  const [drawerBooking, setDrawerBooking] = useState<BookingWithDetails | null>(null)
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [filters, setFilters] = useState<BookingFilterState>({
     search: '',
     tags: [],
@@ -60,6 +54,23 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
   const handleClearSelection = () => {
     setSelectedBookings(new Set())
   }
+
+  const handleViewDetail = useCallback((booking: BookingWithDetails) => {
+    setDrawerBooking(booking)
+    setIsDrawerOpen(true)
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('detail', booking.id)
+    router.replace(`/dashboard/bookings?${params.toString()}`, { scroll: false })
+  }, [searchParams, router])
+
+  const handleCloseDrawer = useCallback(() => {
+    setIsDrawerOpen(false)
+    setDrawerBooking(null)
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete('detail')
+    const paramStr = params.toString()
+    router.replace(`/dashboard/bookings${paramStr ? `?${paramStr}` : ''}`, { scroll: false })
+  }, [searchParams, router])
 
   // Fetch available tags
   useEffect(() => {
@@ -114,6 +125,18 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
     fetchBookings()
   }, [fetchBookings])
 
+  // Auto-open drawer if ?detail={id} is in URL
+  useEffect(() => {
+    const detailId = searchParams.get('detail')
+    if (detailId && bookings.length > 0 && !isDrawerOpen) {
+      const booking = bookings.find((b) => b.id === detailId)
+      if (booking) {
+        setDrawerBooking(booking)
+        setIsDrawerOpen(true)
+      }
+    }
+  }, [searchParams, bookings, isDrawerOpen])
+
   // Handle weather hold action (defined after fetchBookings)
   const handleWeatherHold = useCallback(async (bookingId: string) => {
     try {
@@ -130,18 +153,6 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
       console.error('Error setting weather hold:', error)
     }
   }, [fetchBookings])
-
-  const formatTime = (isoString: string): string => {
-    try {
-      return format(parseISO(isoString), 'MMM d, yyyy • h:mm a')
-    } catch {
-      return ''
-    }
-  }
-
-  const formatPrice = (cents: number): string => {
-    return `$${(cents / 100).toFixed(2)}`
-  }
 
   return (
     <div className={`space-y-6 ${selectedBookings.size > 0 ? 'pb-24' : ''}`}>
@@ -226,6 +237,7 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
               isSelected={selectedBookings.has(booking.id)}
               onSelect={handleSelectBooking}
               onWeatherHold={handleWeatherHold}
+              onViewDetail={handleViewDetail}
             />
           ))}
         </div>
@@ -240,6 +252,21 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
           availableTags={availableTags}
         />
       )}
+
+      {/* Booking Detail Drawer */}
+      <BookingDetailDrawer
+        booking={drawerBooking}
+        isOpen={isDrawerOpen}
+        onClose={handleCloseDrawer}
+        onRefresh={() => {
+          fetchBookings()
+          // Re-fetch the specific booking for the drawer
+          if (drawerBooking) {
+            const updated = bookings.find((b) => b.id === drawerBooking.id)
+            if (updated) setDrawerBooking(updated)
+          }
+        }}
+      />
     </div>
   )
 }
