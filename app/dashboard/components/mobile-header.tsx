@@ -75,12 +75,12 @@ export function MobileHeader({ userEmail, signOutAction }: MobileHeaderProps) {
   return (
     <>
       {/* Mobile Header Bar */}
-      <header className="md:hidden fixed top-0 left-0 right-0 z-40 h-16 bg-white text-slate-900 flex items-center justify-between px-4 border-b border-slate-200">
+      <header className="md:hidden fixed top-0 left-0 right-0 z-40 h-16 bg-slate-900 text-white flex items-center justify-between px-4 border-b border-slate-800">
         <button
           ref={menuButtonRef}
           type="button"
           onClick={openDrawer}
-          className="flex items-center justify-center w-11 h-11 rounded-md hover:bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+          className="flex items-center justify-center w-11 h-11 rounded-md hover:bg-slate-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
           aria-label="Open navigation menu"
           aria-expanded={isOpen}
           aria-controls="mobile-nav-drawer"
@@ -104,14 +104,14 @@ export function MobileHeader({ userEmail, signOutAction }: MobileHeaderProps) {
       {/* Slide-over Drawer (slides from left) */}
       <div
         id="mobile-nav-drawer"
-        className={`md:hidden fixed inset-y-0 left-0 z-50 w-72 max-w-[80vw] bg-white text-slate-900 transform transition-transform duration-200 ease-in-out ${
+        className={`md:hidden fixed inset-y-0 left-0 z-50 w-72 max-w-[80vw] bg-slate-900 text-white transform transition-transform duration-200 ease-in-out ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         aria-hidden={!isOpen}
       >
         <div className="flex flex-col h-full">
           {/* Drawer Header */}
-          <div className="flex items-center justify-between h-16 px-4 border-b border-slate-200">
+          <div className="flex items-center justify-between h-16 px-4 border-b border-slate-800">
             <span className="text-lg font-semibold tracking-tight">
               DockSlot
             </span>
@@ -119,7 +119,7 @@ export function MobileHeader({ userEmail, signOutAction }: MobileHeaderProps) {
               ref={closeButtonRef}
               type="button"
               onClick={closeDrawer}
-              className="flex items-center justify-center w-11 h-11 rounded-md hover:bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+              className="flex items-center justify-center w-11 h-11 rounded-md hover:bg-slate-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
               aria-label="Close navigation menu"
             >
               <X size={24} aria-hidden="true" />
@@ -144,10 +144,10 @@ export function MobileHeader({ userEmail, signOutAction }: MobileHeaderProps) {
                     <Link
                       href={link.href}
                       onClick={closeDrawer}
-                      className={`flex items-center gap-3 h-11 px-3 rounded-r-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
+                      className={`flex items-center gap-3 h-11 px-3 rounded-r-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 ${
                         isActive
-                          ? "bg-cyan-50 text-cyan-700 border-l-4 border-cyan-600 pl-2"
-                          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 border-l-4 border-transparent pl-2"
+                          ? "bg-slate-800 text-cyan-400 border-l-4 border-cyan-400 pl-2"
+                          : "text-slate-300 hover:bg-slate-800 hover:text-white border-l-4 border-transparent pl-2"
                       }`}
                     >
                       <Icon size={18} aria-hidden="true" />
@@ -163,7 +163,7 @@ export function MobileHeader({ userEmail, signOutAction }: MobileHeaderProps) {
               <button
                 type="button"
                 onClick={() => setMoreOpen((prev) => !prev)}
-                className="flex items-center justify-between w-full h-9 px-3 text-xs font-semibold uppercase tracking-wider text-slate-400 hover:text-slate-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white rounded-md"
+                className="flex items-center justify-between w-full h-9 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500 hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 rounded-md"
                 aria-expanded={showMore}
               >
                 <span>More</span>
@@ -185,10 +185,10 @@ export function MobileHeader({ userEmail, signOutAction }: MobileHeaderProps) {
                         <Link
                           href={link.href}
                           onClick={closeDrawer}
-                          className={`flex items-center gap-3 h-10 px-3 rounded-r-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
+                          className={`flex items-center gap-3 h-10 px-3 rounded-r-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 ${
                             isActive
-                              ? "bg-cyan-50 text-cyan-700 border-l-4 border-cyan-600 pl-2"
-                              : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 border-l-4 border-transparent pl-2"
+                              ? "bg-slate-800 text-cyan-400 border-l-4 border-cyan-400 pl-2"
+                              : "text-slate-400 hover:bg-slate-800 hover:text-white border-l-4 border-transparent pl-2"
                           }`}
                         >
                           <Icon size={16} aria-hidden="true" />
@@ -203,19 +203,19 @@ export function MobileHeader({ userEmail, signOutAction }: MobileHeaderProps) {
           </nav>
 
           {/* User Profile Section */}
-          <div className="border-t border-slate-200 p-4">
+          <div className="border-t border-slate-800 p-4">
             <div className="mb-3">
-              <p className="text-xs text-slate-400 uppercase tracking-wide mb-1">
+              <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">
                 Signed in as
               </p>
-              <p className="text-sm text-slate-700 truncate" title={userEmail}>
+              <p className="text-sm text-slate-300 truncate" title={userEmail}>
                 {userEmail}
               </p>
             </div>
             <form action={signOutAction}>
               <button
                 type="submit"
-                className="flex items-center justify-center gap-2 w-full h-11 px-3 bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-700 text-sm font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                className="flex items-center justify-center gap-2 w-full h-11 px-3 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-sm font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
               >
                 <LogOut size={18} aria-hidden="true" />
                 <span>Sign Out</span>
