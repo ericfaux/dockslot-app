@@ -14,6 +14,7 @@ import {
   CheckCircle,
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
+import { formatDollars } from '@/lib/utils/format';
 import type { GuestFormData } from './GuestForm';
 
 interface BookingSummaryProps {
@@ -51,15 +52,6 @@ export function BookingSummary({
   isSubmitting,
   submitError,
 }: BookingSummaryProps) {
-  const formatPrice = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
-
   const formatDuration = (hours: number) => {
     if (hours < 1) {
       return `${Math.round(hours * 60)} min`;
@@ -215,25 +207,25 @@ export function BookingSummary({
         <div className="space-y-3">
           <div className="flex justify-between items-center">
             <span className="text-slate-400">Trip Total</span>
-            <span className="text-white font-medium">{formatPrice(priceTotal)}</span>
+            <span className="text-white font-medium">{formatDollars(priceTotal)}</span>
           </div>
 
           <div className="flex justify-between items-center">
             <span className="text-slate-400">Deposit Due Now</span>
-            <span className="text-amber-400 font-medium">{formatPrice(depositAmount)}</span>
+            <span className="text-amber-400 font-medium">{formatDollars(depositAmount)}</span>
           </div>
 
           {balanceDue > 0 && (
             <div className="flex justify-between items-center pt-3 border-t border-slate-800">
               <span className="text-slate-400">Balance Due (Day of Trip)</span>
-              <span className="text-white font-medium">{formatPrice(balanceDue)}</span>
+              <span className="text-white font-medium">{formatDollars(balanceDue)}</span>
             </div>
           )}
         </div>
 
         <div className="mt-4 rounded-md bg-amber-500/10 border border-amber-500/20 px-4 py-3">
           <p className="text-sm text-amber-400">
-            A deposit of {formatPrice(depositAmount)} is required to confirm your booking.
+            A deposit of {formatDollars(depositAmount)} is required to confirm your booking.
           </p>
         </div>
       </div>

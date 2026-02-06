@@ -15,6 +15,7 @@ import {
   UserPlus,
 } from 'lucide-react';
 import { ReferralSettings, ReferralCode, ReferralStats } from '@/lib/db/types';
+import { formatCents } from '@/lib/utils/format';
 
 export default function ReferralProgramClient() {
   const [settings, setSettings] = useState<ReferralSettings | null>(null);
@@ -101,13 +102,9 @@ export default function ReferralProgramClient() {
     setTimeout(() => setCopiedCode(null), 2000);
   }
 
-  function formatCurrency(cents: number) {
-    return `$${(cents / 100).toFixed(2)}`;
-  }
-
   function formatReward(type: string, value: number) {
     if (type === 'percentage') return `${value}% off`;
-    if (type === 'fixed') return formatCurrency(value);
+    if (type === 'fixed') return formatCents(value);
     return 'Free Trip';
   }
 
@@ -168,7 +165,7 @@ export default function ReferralProgramClient() {
               <div>
                 <p className="text-sm text-slate-400">Referral Revenue</p>
                 <p className="text-2xl font-bold text-slate-900 mt-1">
-                  {formatCurrency(stats.total_bookings_value_cents)}
+                  {formatCents(stats.total_bookings_value_cents)}
                 </p>
               </div>
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-amber-50">
@@ -183,7 +180,7 @@ export default function ReferralProgramClient() {
               <div>
                 <p className="text-sm text-slate-400">Rewards Given</p>
                 <p className="text-2xl font-bold text-slate-900 mt-1">
-                  {formatCurrency(stats.total_rewards_given_cents)}
+                  {formatCents(stats.total_rewards_given_cents)}
                 </p>
               </div>
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-500/10">
@@ -235,7 +232,7 @@ export default function ReferralProgramClient() {
                 <p className="text-sm text-slate-400">Minimum Booking Value</p>
                 <p className="text-slate-900 font-medium mt-1">
                   {settings.min_booking_value_cents > 0
-                    ? formatCurrency(settings.min_booking_value_cents)
+                    ? formatCents(settings.min_booking_value_cents)
                     : 'No minimum'}
                 </p>
               </div>
@@ -311,10 +308,10 @@ export default function ReferralProgramClient() {
                       Used: <span className="text-slate-900">{code.times_used}</span>
                     </span>
                     <span className="text-xs text-slate-400">
-                      Value: <span className="text-slate-900">{formatCurrency(code.total_bookings_value_cents)}</span>
+                      Value: <span className="text-slate-900">{formatCents(code.total_bookings_value_cents)}</span>
                     </span>
                     <span className="text-xs text-slate-400">
-                      Rewards: <span className="text-slate-900">{formatCurrency(code.total_rewards_earned_cents)}</span>
+                      Rewards: <span className="text-slate-900">{formatCents(code.total_rewards_earned_cents)}</span>
                     </span>
                   </div>
                 </div>
@@ -377,7 +374,7 @@ export default function ReferralProgramClient() {
                 <div className="text-right">
                   <p className="text-sm font-medium text-slate-900">{referrer.times_used} referrals</p>
                   <p className="text-xs text-slate-400">
-                    {formatCurrency(referrer.total_bookings_value_cents)} value
+                    {formatCents(referrer.total_bookings_value_cents)} value
                   </p>
                 </div>
               </div>

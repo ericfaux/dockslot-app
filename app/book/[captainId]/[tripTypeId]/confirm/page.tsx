@@ -24,6 +24,7 @@ import { ProgressIndicator } from '@/components/booking/ProgressIndicator';
 import { StripeCheckoutButton } from '@/components/booking/StripeCheckoutButton';
 import { ManagementLinkCard } from '@/components/booking/ManagementLinkCard';
 import { ConfirmationActions } from './ConfirmationActions';
+import { formatDollars, formatCents } from '@/lib/utils/format';
 
 const BOOKING_STEPS = [
   { label: 'Select Trip', shortLabel: 'Trip' },
@@ -315,7 +316,7 @@ export default async function ConfirmPage({ params, searchParams }: ConfirmPageP
                         4
                       </span>
                       <span className="text-slate-600">
-                        Balance of ${((booking.balance_due_cents - (tripType?.deposit_amount || 0)) / 100).toFixed(2)} is due at the dock on the day of your trip.
+                        Balance of {formatCents(booking.balance_due_cents)} is due at the dock on the day of your trip.
                       </span>
                     </li>
                   </ol>
@@ -337,14 +338,14 @@ export default async function ConfirmPage({ params, searchParams }: ConfirmPageP
                 <div className="flex justify-between">
                   <span className="text-slate-500">Trip Total</span>
                   <span className="font-medium text-slate-900">
-                    ${(booking.total_price_cents / 100).toFixed(2)}
+                    {formatCents(booking.total_price_cents)}
                   </span>
                 </div>
                 {booking.promo_discount_cents > 0 && (
                   <div className="flex justify-between text-emerald-600">
                     <span>Promo Discount</span>
                     <span className="font-medium">
-                      -${(booking.promo_discount_cents / 100).toFixed(2)}
+                      -{formatCents(booking.promo_discount_cents)}
                     </span>
                   </div>
                 )}
@@ -352,14 +353,14 @@ export default async function ConfirmPage({ params, searchParams }: ConfirmPageP
                   <div className="flex justify-between">
                     <span className="text-slate-500">Deposit {depositPaid ? '(Paid)' : '(Due Now)'}</span>
                     <span className={`font-medium ${depositPaid ? 'text-emerald-600' : 'text-cyan-700'}`}>
-                      ${(tripType.deposit_amount / 100).toFixed(2)}
+                      {formatDollars(tripType.deposit_amount)}
                     </span>
                   </div>
                 )}
                 <div className="border-t border-slate-200 pt-3 flex justify-between text-base">
                   <span className="font-semibold text-slate-900">Balance Due at Trip</span>
                   <span className="font-bold text-slate-900">
-                    ${(booking.balance_due_cents / 100).toFixed(2)}
+                    {formatCents(booking.balance_due_cents)}
                   </span>
                 </div>
               </div>

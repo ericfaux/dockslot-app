@@ -27,6 +27,7 @@ import {
   type CreatePromoCodeParams,
 } from '@/app/actions/promo-codes';
 import type { PromoCode, PromoCodeStats, TripType } from '@/lib/db/types';
+import { formatCents } from '@/lib/utils/format';
 
 interface PromoCodesClientProps {
   tripTypes?: Pick<TripType, 'id' | 'title'>[];
@@ -154,11 +155,7 @@ export default function PromoCodesClient({ tripTypes = [] }: PromoCodesClientPro
 
   function formatDiscount(type: string, value: number) {
     if (type === 'percentage') return `${value}% off`;
-    return `$${(value / 100).toFixed(2)} off`;
-  }
-
-  function formatCurrency(cents: number) {
-    return `$${(cents / 100).toFixed(2)}`;
+    return `${formatCents(value)} off`;
   }
 
   function getCodeStatus(code: PromoCode): { label: string; color: string } {
@@ -203,11 +200,11 @@ export default function PromoCodesClient({ tripTypes = [] }: PromoCodesClientPro
           </div>
           <div className="rounded-lg border border-slate-200 bg-white p-4">
             <p className="text-xs text-slate-400">Discounts Given</p>
-            <p className="text-xl font-bold text-slate-900 mt-1">{formatCurrency(stats.total_discount_given_cents)}</p>
+            <p className="text-xl font-bold text-slate-900 mt-1">{formatCents(stats.total_discount_given_cents)}</p>
           </div>
           <div className="rounded-lg border border-slate-200 bg-white p-4">
             <p className="text-xs text-slate-400">Revenue from Promos</p>
-            <p className="text-xl font-bold text-slate-900 mt-1">{formatCurrency(stats.total_revenue_from_promos_cents)}</p>
+            <p className="text-xl font-bold text-slate-900 mt-1">{formatCents(stats.total_revenue_from_promos_cents)}</p>
           </div>
         </div>
       )}
@@ -497,10 +494,10 @@ export default function PromoCodesClient({ tripTypes = [] }: PromoCodesClientPro
                             Used: <span className="text-slate-900">{code.current_uses}{code.max_uses !== null ? `/${code.max_uses}` : ''}</span>
                           </span>
                           <span className="text-xs text-slate-400">
-                            Discounts: <span className="text-slate-900">{formatCurrency(code.total_discount_cents)}</span>
+                            Discounts: <span className="text-slate-900">{formatCents(code.total_discount_cents)}</span>
                           </span>
                           <span className="text-xs text-slate-400">
-                            Revenue: <span className="text-slate-900">{formatCurrency(code.total_booking_revenue_cents)}</span>
+                            Revenue: <span className="text-slate-900">{formatCents(code.total_booking_revenue_cents)}</span>
                           </span>
                           {code.valid_from && (
                             <span className="text-xs text-slate-400">

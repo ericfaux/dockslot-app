@@ -7,6 +7,7 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { BookingForm } from "./BookingForm";
+import { formatDollars } from "@/lib/utils/format";
 
 interface BookingPageProps {
   params: Promise<{
@@ -116,13 +117,13 @@ export default async function BookingPage({ params }: BookingPageProps) {
               <div className="flex justify-between text-base">
                 <span className="font-semibold text-slate-900">Total Price</span>
                 <span className="font-bold text-slate-900">
-                  ${(tripType.price_total / 100).toFixed(2)}
+                  {formatDollars(tripType.price_total)}
                 </span>
               </div>
               <div className="mt-2 flex justify-between text-sm">
                 <span className="text-slate-500">Deposit to book</span>
                 <span className="font-medium text-cyan-700">
-                  ${(tripType.deposit_amount / 100).toFixed(2)}
+                  {formatDollars(tripType.deposit_amount)}
                 </span>
               </div>
             </div>

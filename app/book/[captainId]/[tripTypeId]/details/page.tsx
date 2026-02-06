@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Anchor, AlertTriangle, ArrowLeft, Clock, DollarSign, Calendar, Loader2 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
+import { formatDollars } from '@/lib/utils/format';
 import { GuestForm, type GuestFormData } from '../../../components/GuestForm';
 import {
   getPublicCaptainProfile,
@@ -119,15 +120,6 @@ export default function GuestDetailsPage({ params }: Props) {
     router.push(`/book/${captainId}/${tripTypeId}/confirm`);
   };
 
-  const formatPrice = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
-
   const formatDuration = (hours: number) => {
     if (hours < 1) return `${Math.round(hours * 60)} min`;
     if (hours === 1) return '1 hour';
@@ -228,7 +220,7 @@ export default function GuestDetailsPage({ params }: Props) {
               </div>
               <div className="flex items-center gap-2 text-slate-400">
                 <DollarSign className="h-4 w-4 text-emerald-400" />
-                <span>{formatPrice(tripType.price_total)}</span>
+                <span>{formatDollars(tripType.price_total)}</span>
               </div>
             </div>
           </div>
