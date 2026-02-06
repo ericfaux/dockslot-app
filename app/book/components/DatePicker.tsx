@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, Loader2, Ban, CalendarOff } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader2, Ban, CalendarOff, Clock } from 'lucide-react';
+import { getTimezoneLabel } from '@/lib/utils/timezone';
 import {
   format,
   startOfMonth,
@@ -51,6 +52,8 @@ interface DatePickerProps {
   } | null;
   /** When true, hides the internal time slots panel (use when pairing with external TimeSlotPicker) */
   hideTimeSlots?: boolean;
+  /** Captain's IANA timezone (e.g. "America/New_York"). Displayed as a label above the calendar. */
+  timezone?: string;
 }
 
 export function DatePicker({
@@ -64,6 +67,7 @@ export function DatePicker({
   maxAdvanceDays = 60,
   selectedDateInfo,
   hideTimeSlots = false,
+  timezone,
 }: DatePickerProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
@@ -154,6 +158,13 @@ export function DatePicker({
       {/* Calendar */}
       <div className={hideTimeSlots ? 'w-full' : 'flex-1'}>
         <div className="rounded-lg border border-slate-700 bg-slate-900 p-4">
+          {/* Timezone indicator */}
+          {timezone && (
+            <div className="flex items-center justify-center gap-1.5 rounded-lg bg-slate-800 px-3 py-1.5 mb-4 text-xs text-slate-400">
+              <Clock className="h-3 w-3" />
+              <span>All times shown in <span className="font-medium text-slate-300">{getTimezoneLabel(timezone)}</span></span>
+            </div>
+          )}
           {/* Month Navigation */}
           <div className="flex items-center justify-between mb-4">
             <button

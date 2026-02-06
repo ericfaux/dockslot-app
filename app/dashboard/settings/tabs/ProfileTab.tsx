@@ -22,6 +22,7 @@ const TIMEZONES = [
   { value: 'America/Anchorage', label: 'Alaska Time (AKT)' },
   { value: 'Pacific/Honolulu', label: 'Hawaii Time (HT)' },
   { value: 'America/Puerto_Rico', label: 'Atlantic Time (AST)' },
+  { value: 'UTC', label: 'UTC' },
 ];
 
 interface ProfileTabProps {

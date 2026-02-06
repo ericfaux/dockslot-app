@@ -6,6 +6,7 @@
 
 import { Shield, Lock, Clock, User, MapPin, Star } from 'lucide-react';
 import Image from 'next/image';
+import { getTimezoneLabel } from '@/lib/utils/timezone';
 
 // Secure payment badge
 interface SecurePaymentBadgeProps {
@@ -173,7 +174,7 @@ export function CaptainInfoCard({
           {timezone && (
             <p className="mt-2 text-xs text-slate-400 flex items-center gap-1">
               <Clock className="h-3 w-3" />
-              All times in {timezone.replace(/_/g, ' ')}
+              All times in {getTimezoneLabel(timezone)}
             </p>
           )}
         </div>

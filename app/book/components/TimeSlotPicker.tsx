@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
 import { Loader2, Ban, CalendarOff, Clock } from 'lucide-react';
+import { getTimezoneLabel } from '@/lib/utils/timezone';
 
 // Slot type matching the API response
 export interface AvailableSlot {
@@ -24,6 +25,8 @@ export interface TimeSlotPickerProps {
   selectedDate: Date | null;
   onSlotSelect: (slot: AvailableSlot) => void;
   selectedSlot: AvailableSlot | null;
+  /** Captain's IANA timezone (e.g. "America/New_York"). Displayed as a label in the header. */
+  timezone?: string;
 }
 
 export function TimeSlotPicker({
@@ -32,6 +35,7 @@ export function TimeSlotPicker({
   selectedDate,
   onSlotSelect,
   selectedSlot,
+  timezone,
 }: TimeSlotPickerProps) {
   const [slots, setSlots] = useState<AvailableSlot[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -96,12 +100,20 @@ export function TimeSlotPicker({
   return (
     <div className="rounded-lg border border-slate-700 bg-slate-900 p-4">
       {/* Header */}
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center gap-2 mb-3">
         <Clock className="h-5 w-5 text-cyan-400" />
         <h3 className="text-lg font-semibold text-white">
           {selectedDate ? formatDateHeader(selectedDate) : 'Select a Time'}
         </h3>
       </div>
+
+      {/* Timezone indicator */}
+      {timezone && (
+        <div className="flex items-center gap-1.5 rounded-lg bg-slate-800 px-3 py-1.5 mb-4 text-xs text-slate-400">
+          <Clock className="h-3 w-3" />
+          <span>All times shown in <span className="font-medium text-slate-300">{getTimezoneLabel(timezone)}</span></span>
+        </div>
+      )}
 
       {/* No date selected state */}
       {!selectedDate && (
