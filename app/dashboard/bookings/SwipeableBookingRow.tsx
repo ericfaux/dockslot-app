@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { BookingWithDetails, BookingStatus } from '@/lib/db/types'
 import { STATUS_COLORS, STATUS_LABELS } from '@/components/calendar/types'
+import { formatCents } from '@/lib/utils/format'
 
 interface SwipeableBookingRowProps {
   booking: BookingWithDetails
@@ -73,10 +74,6 @@ export function SwipeableBookingRow({
     } catch {
       return ''
     }
-  }
-
-  const formatPrice = (cents: number): string => {
-    return `$${(cents / 100).toFixed(2)}`
   }
 
   const colors = STATUS_COLORS[booking.status]
@@ -197,7 +194,7 @@ export function SwipeableBookingRow({
                   {booking.payment_status === 'fully_paid'
                     ? 'Fully Paid'
                     : booking.payment_status === 'deposit_paid'
-                    ? `Deposit: ${formatPrice(booking.deposit_paid_cents)}`
+                    ? `Deposit: ${formatCents(booking.deposit_paid_cents)}`
                     : 'Unpaid'}
                 </span>
               </div>
@@ -206,7 +203,7 @@ export function SwipeableBookingRow({
               <div className="flex items-center gap-2">
                 <span className="text-slate-500">Total:</span>
                 <span className="font-medium">
-                  {formatPrice(booking.total_price_cents)}
+                  {formatCents(booking.total_price_cents)}
                 </span>
               </div>
             </div>

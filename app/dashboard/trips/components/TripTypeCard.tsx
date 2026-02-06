@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Clock, DollarSign, Pencil, Trash2, AlertTriangle } from 'lucide-react';
 import { TripType } from '@/lib/db/types';
+import { formatDollars } from '@/lib/utils/format';
 
 interface TripTypeCardProps {
   tripType: TripType;
@@ -13,15 +14,6 @@ interface TripTypeCardProps {
 
 export function TripTypeCard({ tripType, onEdit, onDelete, isDeleting }: TripTypeCardProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
 
   const formatDuration = (hours: number) => {
     if (hours === 1) return '1 hour';
@@ -104,7 +96,7 @@ export function TripTypeCard({ tripType, onEdit, onDelete, isDeleting }: TripTyp
           <div>
             <div className="text-sm text-slate-500">Total Price</div>
             <div className="font-mono text-lg text-emerald-600">
-              {formatCurrency(tripType.price_total)}
+              {formatDollars(tripType.price_total)}
             </div>
           </div>
         </div>
@@ -117,7 +109,7 @@ export function TripTypeCard({ tripType, onEdit, onDelete, isDeleting }: TripTyp
           <div>
             <div className="text-sm text-slate-500">Deposit Required</div>
             <div className="font-mono text-lg text-amber-600">
-              {formatCurrency(tripType.deposit_amount)}
+              {formatDollars(tripType.deposit_amount)}
             </div>
           </div>
         </div>

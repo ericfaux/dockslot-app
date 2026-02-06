@@ -3,6 +3,7 @@
 // Allows viewing details, cancellation, rescheduling (Phase 4)
 
 import { createSupabaseServiceClient } from "@/utils/supabase/service";
+import { formatCents } from "@/lib/utils/format";
 import { notFound } from "next/navigation";
 import { format, parseISO, isBefore } from "date-fns";
 import { 
@@ -335,14 +336,14 @@ export default async function ManageBookingPage({ params }: ManageBookingProps) 
           <div className="space-y-3">
             <div className="flex justify-between text-slate-300">
               <span>Trip Total</span>
-              <span className="font-medium">${(booking.total_price_cents / 100).toFixed(2)}</span>
+              <span className="font-medium">{formatCents(booking.total_price_cents)}</span>
             </div>
 
             {booking.deposit_paid_cents > 0 && (
               <div className="flex justify-between text-green-400">
                 <span>Deposit Paid</span>
                 <span className="font-medium">
-                  ${(booking.deposit_paid_cents / 100).toFixed(2)}
+                  {formatCents(booking.deposit_paid_cents)}
                 </span>
               </div>
             )}
@@ -353,7 +354,7 @@ export default async function ManageBookingPage({ params }: ManageBookingProps) 
                   {booking.balance_due_cents > 0 ? 'Balance Due' : 'Fully Paid'}
                 </span>
                 <span className={booking.balance_due_cents > 0 ? 'text-cyan-400' : 'text-green-400'}>
-                  ${(booking.balance_due_cents / 100).toFixed(2)}
+                  {formatCents(booking.balance_due_cents)}
                 </span>
               </div>
               {booking.balance_due_cents > 0 && (

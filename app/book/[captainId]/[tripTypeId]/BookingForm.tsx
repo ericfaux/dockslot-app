@@ -11,6 +11,7 @@ import { WeatherForecast } from '@/components/booking/WeatherForecast';
 import { Calendar, Users, Mail, User, MessageSquare, ChevronRight, AlertCircle, FileWarning, Tag, Loader2, CheckCircle, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
+import { formatDollars, formatCents } from '@/lib/utils/format';
 
 interface BookingFormProps {
   captainId: string;
@@ -536,8 +537,8 @@ export function BookingForm({
                     <span className="text-sm text-emerald-700">
                       {promoDiscountType === 'percentage'
                         ? `${promoDiscountValue}% discount applied`
-                        : `$${(promoDiscountCents / 100).toFixed(2)} discount applied`}
-                      {' '}&mdash; you save ${(promoDiscountCents / 100).toFixed(2)}!
+                        : `${formatCents(promoDiscountCents)} discount applied`}
+                      {' '}&mdash; you save {formatCents(promoDiscountCents)}!
                     </span>
                   </div>
                 )}
@@ -559,19 +560,19 @@ export function BookingForm({
               <div className="space-y-1.5 text-sm">
                 <div className="flex justify-between">
                   <span className="text-slate-500">Original Total</span>
-                  <span className="text-slate-400 line-through">${(totalPrice / 100).toFixed(2)}</span>
+                  <span className="text-slate-400 line-through">{formatDollars(totalPrice)}</span>
                 </div>
                 <div className="flex justify-between text-emerald-700">
                   <span>Promo Discount ({promoCode})</span>
-                  <span>-${(promoDiscountCents / 100).toFixed(2)}</span>
+                  <span>-{formatCents(promoDiscountCents)}</span>
                 </div>
                 <div className="flex justify-between border-t border-emerald-200 pt-1.5">
                   <span className="font-semibold text-slate-900">New Total</span>
-                  <span className="font-bold text-slate-900">${(effectiveTotalPrice / 100).toFixed(2)}</span>
+                  <span className="font-bold text-slate-900">{formatDollars(effectiveTotalPrice)}</span>
                 </div>
                 <div className="flex justify-between text-xs text-slate-500">
                   <span>Deposit Due Now</span>
-                  <span>${(effectiveDeposit / 100).toFixed(2)}</span>
+                  <span>{formatDollars(effectiveDeposit)}</span>
                 </div>
               </div>
             </div>
@@ -624,11 +625,11 @@ export function BookingForm({
                 <span className="text-cyan-700 font-semibold">
                   {promoDiscountCents > 0 && promoValid ? (
                     <>
-                      <span className="text-slate-400 line-through mr-1.5">${(depositAmount / 100).toFixed(2)}</span>
-                      ${(effectiveDeposit / 100).toFixed(2)}
+                      <span className="text-slate-400 line-through mr-1.5">{formatDollars(depositAmount)}</span>
+                      {formatDollars(effectiveDeposit)}
                     </>
                   ) : (
-                    `$${(depositAmount / 100).toFixed(2)}`
+                    formatDollars(depositAmount)
                   )}
                 </span>
               </div>

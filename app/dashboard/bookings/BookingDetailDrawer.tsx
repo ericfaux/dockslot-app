@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 import { BookingWithDetails, BookingStatus } from '@/lib/db/types'
 import StatusBadge, { PaymentBadge } from '@/app/dashboard/components/StatusBadge'
+import { formatCents } from '@/lib/utils/format'
 
 interface BookingDetailDrawerProps {
   booking: BookingWithDetails | null
@@ -60,10 +61,6 @@ export function BookingDetailDrawer({
       document.body.style.overflow = ''
     }
   }, [isOpen, onClose])
-
-  const formatPrice = (cents: number): string => {
-    return `$${(cents / 100).toFixed(2)}`
-  }
 
   const handleStatusChange = useCallback(async (newStatus: BookingStatus, confirmMsg: string) => {
     if (!booking || !confirm(confirmMsg)) return
@@ -274,13 +271,13 @@ export function BookingDetailDrawer({
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-slate-500">Total Price</span>
                   <span className="font-mono font-semibold text-slate-700">
-                    {formatPrice(booking.total_price_cents)}
+                    {formatCents(booking.total_price_cents)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-slate-500">Deposit Paid</span>
                   <span className="font-mono font-semibold text-emerald-600">
-                    {formatPrice(booking.deposit_paid_cents)}
+                    {formatCents(booking.deposit_paid_cents)}
                   </span>
                 </div>
                 <div className="border-t border-slate-200 pt-2">
@@ -291,7 +288,7 @@ export function BookingDetailDrawer({
                         ? 'text-amber-600'
                         : 'text-emerald-600'
                     }`}>
-                      {formatPrice(booking.balance_due_cents)}
+                      {formatCents(booking.balance_due_cents)}
                     </span>
                   </div>
                 </div>

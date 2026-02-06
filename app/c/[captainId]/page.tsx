@@ -17,6 +17,7 @@ import {
   Phone,
 } from "lucide-react";
 import Image from "next/image";
+import { formatDollars } from "@/lib/utils/format";
 
 interface CaptainProfileProps {
   params: Promise<{
@@ -211,13 +212,13 @@ export default async function CaptainProfilePage({ params }: CaptainProfileProps
                       <div className="flex items-baseline justify-between">
                         <span className="text-sm text-slate-400">Total Price</span>
                         <span className="text-2xl font-bold text-slate-100">
-                          ${(trip.price_total / 100).toFixed(0)}
+                          {formatDollars(trip.price_total)}
                         </span>
                       </div>
                       <div className="mt-2 flex items-baseline justify-between text-sm">
                         <span className="text-slate-500">Deposit to book</span>
                         <span className="text-slate-300">
-                          ${(trip.deposit_amount / 100).toFixed(0)}
+                          {formatDollars(trip.deposit_amount)}
                         </span>
                       </div>
                     </div>

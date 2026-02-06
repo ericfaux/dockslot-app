@@ -2,6 +2,7 @@
 
 import { Clock, DollarSign, ChevronRight, Anchor } from 'lucide-react';
 import Link from 'next/link';
+import { formatDollars } from '@/lib/utils/format';
 
 export interface TripCardProps {
   id: string;
@@ -22,15 +23,6 @@ export function TripCard({
   deposit_amount,
   captainId,
 }: TripCardProps) {
-  const formatPrice = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
-
   const formatDuration = (hours: number) => {
     if (hours < 1) {
       return `${Math.round(hours * 60)} min`;
@@ -92,7 +84,7 @@ export function TripCard({
             </div>
             <div>
               <div className="text-xs text-slate-400">Total Price</div>
-              <div className="text-sm font-medium text-slate-900">{formatPrice(price_total)}</div>
+              <div className="text-sm font-medium text-slate-900">{formatDollars(price_total)}</div>
             </div>
           </div>
         </div>
@@ -101,7 +93,7 @@ export function TripCard({
         {deposit_amount > 0 && (
           <div className="rounded-lg bg-cyan-50 border border-cyan-100 px-3 py-2.5">
             <p className="text-xs text-cyan-700 font-medium">
-              {formatPrice(deposit_amount)} deposit to book
+              {formatDollars(deposit_amount)} deposit to book
             </p>
           </div>
         )}

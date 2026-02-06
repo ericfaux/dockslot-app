@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { CheckCircle, Calendar, MapPin, Mail } from 'lucide-react';
 import { createSupabaseServiceClient } from '@/utils/supabase/service';
 import { notFound, redirect } from 'next/navigation';
+import { formatCents } from '@/lib/utils/format';
 
 interface PageProps {
   searchParams: Promise<{ session_id?: string; booking_id?: string }>;
@@ -114,20 +115,20 @@ async function PaymentSuccessContent({ searchParams }: PageProps) {
             <div className="flex justify-between text-sm">
               <span className="text-slate-400">Trip Total</span>
               <span className="text-white">
-                ${(booking.total_price_cents / 100).toFixed(2)}
+                {formatCents(booking.total_price_cents)}
               </span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-green-400">Deposit Paid</span>
               <span className="text-green-400 font-medium">
-                ${(booking.deposit_paid_cents / 100).toFixed(2)}
+                {formatCents(booking.deposit_paid_cents)}
               </span>
             </div>
             <div className="border-t border-slate-700 pt-2 mt-2"></div>
             <div className="flex justify-between">
               <span className="text-white font-medium">Balance Due</span>
               <span className="text-cyan-400 font-semibold text-lg">
-                ${(booking.balance_due_cents / 100).toFixed(2)}
+                {formatCents(booking.balance_due_cents)}
               </span>
             </div>
             <p className="text-slate-400 text-sm">
