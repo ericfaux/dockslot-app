@@ -51,6 +51,8 @@ export interface CalendarProps {
   onBlackoutClick?: (blackout: BlackoutDate) => void;
   blackoutDates?: BlackoutDate[];
   refreshKey?: number;
+  availabilityStartHour?: number;
+  availabilityEndHour?: number;
 }
 
 export interface DayColumnProps {

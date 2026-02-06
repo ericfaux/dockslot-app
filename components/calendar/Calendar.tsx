@@ -39,6 +39,8 @@ export function Calendar({
   onBlackoutClick,
   onEmptySlotClick,
   refreshKey = 0,
+  availabilityStartHour,
+  availabilityEndHour,
 }: ExtendedCalendarProps) {
   const isMobile = useIsMobile();
   const [currentDate, setCurrentDate] = useState(initialDate);
@@ -180,6 +182,8 @@ export function Calendar({
           onBlackoutClick={handleBlackoutClick}
           onEmptySlotClick={onEmptySlotClick}
           isLoading={isLoading}
+          availabilityStartHour={availabilityStartHour}
+          availabilityEndHour={availabilityEndHour}
         />
       );
     case 'week':
@@ -198,6 +202,8 @@ export function Calendar({
           onBlackoutClick={handleBlackoutClick}
           onEmptySlotClick={onEmptySlotClick}
           isLoading={isLoading}
+          availabilityStartHour={availabilityStartHour}
+          availabilityEndHour={availabilityEndHour}
         />
       );
   }
