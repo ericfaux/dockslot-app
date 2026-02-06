@@ -4,7 +4,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogOut, ChevronDown } from "lucide-react";
+import { LogOut, ChevronDown, HelpCircle } from "lucide-react";
 import { primaryNavLinks, secondaryNavLinks } from "./nav-links";
 
 interface SideNavProps {
@@ -118,16 +118,26 @@ export function SideNav({ userEmail, signOutAction }: SideNavProps) {
               {userEmail}
             </p>
           </div>
-          <form action={signOutAction}>
-            <button
-              type="submit"
-              title="Sign Out"
-              className="flex items-center justify-center gap-2 w-full h-11 px-3 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white text-sm font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+          <div className="space-y-2">
+            <Link
+              href="/docs"
+              title="Help & Documentation"
+              className="flex items-center justify-center gap-2 w-full h-11 px-3 bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white text-sm font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
             >
-              <LogOut size={18} aria-hidden="true" className="flex-shrink-0" />
-              <span className="hidden lg:inline group-hover/sidebar:inline whitespace-nowrap">Sign Out</span>
-            </button>
-          </form>
+              <HelpCircle size={18} aria-hidden="true" className="flex-shrink-0" />
+              <span className="hidden lg:inline group-hover/sidebar:inline whitespace-nowrap">Help</span>
+            </Link>
+            <form action={signOutAction}>
+              <button
+                type="submit"
+                title="Sign Out"
+                className="flex items-center justify-center gap-2 w-full h-11 px-3 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white text-sm font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+              >
+                <LogOut size={18} aria-hidden="true" className="flex-shrink-0" />
+                <span className="hidden lg:inline group-hover/sidebar:inline whitespace-nowrap">Sign Out</span>
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     </aside>

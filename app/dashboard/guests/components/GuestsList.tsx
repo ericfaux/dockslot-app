@@ -13,6 +13,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
+import { EmptyState } from '@/components/EmptyState';
 
 interface Guest {
   email: string;
@@ -280,15 +281,24 @@ export function GuestsList({ guests }: Props) {
 
       {/* Empty State */}
       {filteredGuests.length === 0 && (
-        <div className="rounded-lg border border-slate-700 bg-slate-800 p-12 text-center">
-          <Users className="mx-auto h-12 w-12 text-slate-600" />
-          <h3 className="mt-4 text-lg font-medium text-white">No guests found</h3>
-          <p className="mt-2 text-sm text-slate-400">
-            {searchQuery
-              ? 'Try a different search term'
-              : 'Start taking bookings to build your guest list'}
-          </p>
-        </div>
+        searchQuery || filterType !== 'all' ? (
+          <div className="rounded-lg border border-slate-700 bg-slate-800 p-12 text-center">
+            <Users className="mx-auto h-12 w-12 text-slate-600" />
+            <h3 className="mt-4 text-lg font-medium text-white">No guests found</h3>
+            <p className="mt-2 text-sm text-slate-400">
+              Try a different search term or filter
+            </p>
+          </div>
+        ) : (
+          <EmptyState
+            icon={Users}
+            title="No guests yet"
+            description="Your guest list grows automatically as bookings come in. Share your booking link to get your first guest!"
+            actions={[
+              { label: 'Share Booking Link', href: '/dashboard/settings?tab=booking-page' },
+            ]}
+          />
+        )
       )}
     </div>
   );

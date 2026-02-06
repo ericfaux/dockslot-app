@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Star, MessageSquare, Eye, EyeOff, Award, Trash2, Loader2 } from 'lucide-react'
+import { EmptyState } from '@/components/EmptyState'
 
 interface ReviewsClientProps {
   captainId: string
@@ -197,15 +198,14 @@ export default function ReviewsClient({ captainId }: ReviewsClientProps) {
       {/* Reviews List */}
       <div className="space-y-4">
         {reviews.length === 0 ? (
-          <div className="p-12 text-center bg-slate-800/50 rounded-xl border border-slate-700">
-            <Star className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-white mb-2">
-              No Reviews Yet
-            </h3>
-            <p className="text-slate-400">
-              Reviews will appear here once guests submit them.
-            </p>
-          </div>
+          <EmptyState
+            icon={Star}
+            title="No reviews yet"
+            description="Reviews build trust with new guests. After your first completed trip, we'll automatically ask your guest for a review."
+            actions={[
+              { label: 'View Completed Trips', href: '/dashboard/bookings?status=completed' },
+            ]}
+          />
         ) : (
           reviews.map((review) => (
             <div
