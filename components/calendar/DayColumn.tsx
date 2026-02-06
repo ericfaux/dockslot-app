@@ -115,15 +115,15 @@ export function DayColumn({
   }, [startHour, endHour]);
 
   const dayName = format(date, 'EEE');
-  const dayNumber = format(date, 'd');
-  const monthName = format(date, 'MMM');
+  const dateLabel = format(date, 'M/d');
+  const isWeekend = date.getDay() === 0 || date.getDay() === 6;
 
   return (
     <div className="flex flex-1 flex-col border-r border-slate-700/50 last:border-r-0">
-      {/* Day Header */}
+      {/* Day Header - sticky so it stays visible when scrolling */}
       <div
-        className={`relative flex flex-col items-center border-b border-slate-700/50 py-3 ${
-          isBlocked ? 'bg-rose-500/10' : isToday ? 'bg-cyan-500/10' : 'bg-slate-800/50'
+        className={`sticky top-0 z-10 relative flex h-14 flex-col items-center justify-center border-b border-slate-700/50 ${
+          isWeekend && !isBlocked && !isToday ? 'bg-slate-800' : 'bg-slate-900'
         }`}
         onMouseEnter={() => isBlocked && setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
@@ -131,6 +131,16 @@ export function DayColumn({
         role={isBlocked ? 'button' : undefined}
         tabIndex={isBlocked ? 0 : undefined}
       >
+        {/* Today tint overlay */}
+        {isToday && !isBlocked && (
+          <div className="pointer-events-none absolute inset-0 bg-cyan-500/10" />
+        )}
+
+        {/* Blocked tint overlay */}
+        {isBlocked && (
+          <div className="pointer-events-none absolute inset-0 bg-rose-500/10" />
+        )}
+
         {/* Blocked indicator */}
         {isBlocked && (
           <div className="absolute right-1 top-1">
@@ -139,17 +149,22 @@ export function DayColumn({
             </div>
           </div>
         )}
-        <span className={`font-mono text-xs uppercase tracking-wider ${isBlocked ? 'text-rose-400' : 'text-slate-500'}`}>
+
+        {/* Today accent bar */}
+        {isToday && !isBlocked && (
+          <div className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full bg-cyan-400" />
+        )}
+
+        <span className={`relative font-mono text-[11px] font-medium uppercase tracking-wider ${
+          isBlocked ? 'text-rose-400' : isToday ? 'text-cyan-400' : isWeekend ? 'text-slate-500' : 'text-slate-400'
+        }`}>
           {dayName}
         </span>
-        <span
-          className={`font-mono text-xl font-bold ${
-            isBlocked ? 'text-rose-400 line-through' : isToday ? 'text-cyan-400' : 'text-slate-300'
-          }`}
-        >
-          {dayNumber}
+        <span className={`relative font-mono text-sm ${
+          isBlocked ? 'text-rose-400/70 line-through' : isToday ? 'text-cyan-300 font-bold' : isWeekend ? 'text-slate-500' : 'text-slate-300'
+        }`}>
+          {dateLabel}
         </span>
-        <span className={`font-mono text-[10px] ${isBlocked ? 'text-rose-500' : 'text-slate-600'}`}>{monthName}</span>
 
         {/* Tooltip for blocked reason */}
         {isBlocked && showTooltip && (
@@ -224,6 +239,11 @@ export function DayColumn({
         {/* Today highlight */}
         {isToday && !isBlocked && (
           <div className="pointer-events-none absolute inset-0 bg-cyan-500/5" />
+        )}
+
+        {/* Weekend shade */}
+        {isWeekend && !isBlocked && !isToday && (
+          <div className="pointer-events-none absolute inset-0 bg-slate-400/[0.03]" />
         )}
 
         {/* Now indicator (only for today) */}
