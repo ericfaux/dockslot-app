@@ -211,15 +211,15 @@ export function BookingDetailPanel({
 
       {/* Panel - full screen on mobile, slide-over on desktop */}
       <div
-        className={`fixed inset-0 md:inset-auto md:bottom-0 md:right-0 md:top-0 z-50 w-full md:max-w-md transform overflow-y-auto bg-slate-900 shadow-2xl transition-transform duration-300 ease-out ${
+        className={`fixed inset-0 md:inset-auto md:bottom-0 md:right-0 md:top-0 z-50 w-full md:max-w-md transform overflow-y-auto bg-white shadow-2xl transition-transform duration-300 ease-out ${
           isOpen ? 'translate-y-0 md:translate-y-0 translate-x-0 md:translate-x-0' : 'translate-y-full md:translate-y-0 md:translate-x-full'
         }`}
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 border-b border-slate-700/50 bg-slate-900 p-4">
+        <div className="sticky top-0 z-10 border-b border-slate-200 bg-white p-4">
           <div className="flex items-start justify-between">
             <div>
-              <h2 className="font-mono text-lg font-bold text-slate-100">
+              <h2 className="font-mono text-lg font-bold text-slate-800">
                 {booking.guest_name}
               </h2>
               <div className="mt-1 flex items-center gap-2">
@@ -229,7 +229,7 @@ export function BookingDetailPanel({
             </div>
             <button
               onClick={onClose}
-              className="rounded-md p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200"
+              className="rounded-md p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-400 transition-colors hover:bg-white hover:text-slate-700"
             >
               <X className="h-5 w-5" />
             </button>
@@ -239,13 +239,13 @@ export function BookingDetailPanel({
         {/* Content - extra bottom padding on mobile for safe area */}
         <div className="p-4 pb-8 md:pb-4 space-y-6">
           {/* Date & Time */}
-          <div className="rounded-lg bg-slate-800/50 p-4">
+          <div className="rounded-lg bg-white p-4">
             <div className="mb-3 font-mono text-sm font-medium text-slate-400">
               {formatDate(booking.scheduled_start)}
             </div>
             <div className="flex items-center gap-3">
-              <Clock className="h-5 w-5 text-cyan-400" />
-              <span className="font-mono text-xl font-bold text-slate-100">
+              <Clock className="h-5 w-5 text-cyan-600" />
+              <span className="font-mono text-xl font-bold text-slate-800">
                 {formatTime(booking.scheduled_start)} - {formatTime(booking.scheduled_end)}
               </span>
             </div>
@@ -272,19 +272,19 @@ export function BookingDetailPanel({
             </h3>
 
             {booking.trip_type && (
-              <div className="flex items-center gap-3 text-slate-300">
+              <div className="flex items-center gap-3 text-slate-600">
                 <Navigation className="h-4 w-4 text-slate-500" />
                 <span>{booking.trip_type.title}</span>
               </div>
             )}
 
-            <div className="flex items-center gap-3 text-slate-300">
+            <div className="flex items-center gap-3 text-slate-600">
               <Users className="h-4 w-4 text-slate-500" />
               <span>{booking.party_size} guests</span>
             </div>
 
             {booking.vessel && (
-              <div className="flex items-center gap-3 text-slate-300">
+              <div className="flex items-center gap-3 text-slate-600">
                 <Ship className="h-4 w-4 text-slate-500" />
                 <span>{booking.vessel.name}</span>
               </div>
@@ -300,18 +300,18 @@ export function BookingDetailPanel({
               <CreditCard
                 className={`h-4 w-4 ${
                   booking.payment_status === 'fully_paid'
-                    ? 'text-emerald-400'
+                    ? 'text-emerald-600'
                     : booking.payment_status === 'deposit_paid'
-                    ? 'text-amber-400'
+                    ? 'text-amber-600'
                     : 'text-slate-500'
                 }`}
               />
               <span
                 className={
                   booking.payment_status === 'fully_paid'
-                    ? 'text-emerald-400'
+                    ? 'text-emerald-600'
                     : booking.payment_status === 'deposit_paid'
-                    ? 'text-amber-400'
+                    ? 'text-amber-600'
                     : 'text-slate-400'
                 }
               >
@@ -363,7 +363,7 @@ export function BookingDetailPanel({
 
           {/* Error Message */}
           {actionError && (
-            <div className="flex items-center gap-2 rounded-lg bg-rose-500/10 p-3 text-sm text-rose-400">
+            <div className="flex items-center gap-2 rounded-lg bg-rose-50 p-3 text-sm text-rose-600">
               <AlertCircle className="h-4 w-4 flex-shrink-0" />
               <span>{actionError}</span>
             </div>
@@ -385,9 +385,9 @@ export function BookingDetailPanel({
             <div className="md:hidden">
               <a
                 href={`tel:${booking.guest_phone}`}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-cyan-500/20 px-6 py-4 min-h-[52px] font-mono text-lg font-bold uppercase tracking-wide text-cyan-400 transition-all duration-75 ease-out hover:bg-cyan-500/30 active:translate-y-0.5"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-cyan-50 px-6 py-4 min-h-[52px] font-mono text-lg font-bold uppercase tracking-wide text-cyan-600 transition-all duration-75 ease-out hover:bg-cyan-500/30 active:translate-y-0.5"
                 style={{
-                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
+                  boxShadow: 'inset 0 1px 0 rgba(0,0,0,0.03)',
                 }}
               >
                 <Phone className="h-5 w-5" />
@@ -408,9 +408,9 @@ export function BookingDetailPanel({
                 <button
                   onClick={() => handleAction('complete')}
                   disabled={isPending}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-500/20 px-6 py-4 min-h-[52px] font-mono text-lg font-bold uppercase tracking-wide text-emerald-400 transition-all duration-75 ease-out hover:bg-emerald-500/30 active:translate-y-0.5 disabled:opacity-50"
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-50 px-6 py-4 min-h-[52px] font-mono text-lg font-bold uppercase tracking-wide text-emerald-600 transition-all duration-75 ease-out hover:bg-emerald-500/30 active:translate-y-0.5 disabled:opacity-50"
                   style={{
-                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
+                    boxShadow: 'inset 0 1px 0 rgba(0,0,0,0.03)',
                   }}
                 >
                   <CheckCircle className="h-5 w-5" />
@@ -424,9 +424,9 @@ export function BookingDetailPanel({
                   <button
                     onClick={handleRequestBalancePayment}
                     disabled={isRequestingBalance || balanceSuccess}
-                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-cyan-500/20 px-6 py-4 min-h-[52px] font-mono text-lg font-bold uppercase tracking-wide text-cyan-400 transition-all duration-75 ease-out hover:bg-cyan-500/30 active:translate-y-0.5 disabled:opacity-50"
+                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-cyan-50 px-6 py-4 min-h-[52px] font-mono text-lg font-bold uppercase tracking-wide text-cyan-600 transition-all duration-75 ease-out hover:bg-cyan-500/30 active:translate-y-0.5 disabled:opacity-50"
                     style={{
-                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
+                      boxShadow: 'inset 0 1px 0 rgba(0,0,0,0.03)',
                     }}
                   >
                     <DollarSign className="h-5 w-5" />
@@ -437,7 +437,7 @@ export function BookingDetailPanel({
                       : 'REQUEST BALANCE PAYMENT'}
                   </button>
                   {balanceSuccess && (
-                    <p className="mt-2 text-center text-xs text-emerald-400">
+                    <p className="mt-2 text-center text-xs text-emerald-600">
                       Payment request email sent to guest
                     </p>
                   )}
@@ -449,9 +449,9 @@ export function BookingDetailPanel({
                 <button
                   onClick={() => setShowWeatherModal(true)}
                   disabled={isPending}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-amber-500/20 px-6 py-4 min-h-[52px] font-mono text-base md:text-lg font-bold uppercase tracking-wide text-amber-400 transition-all duration-75 ease-out hover:bg-amber-500/30 active:translate-y-0.5 disabled:opacity-50"
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-amber-50 px-6 py-4 min-h-[52px] font-mono text-base md:text-lg font-bold uppercase tracking-wide text-amber-600 transition-all duration-75 ease-out hover:bg-amber-500/30 active:translate-y-0.5 disabled:opacity-50"
                   style={{
-                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
+                    boxShadow: 'inset 0 1px 0 rgba(0,0,0,0.03)',
                   }}
                 >
                   <CloudRain className="h-5 w-5" />
@@ -464,7 +464,7 @@ export function BookingDetailPanel({
                 {/* Send Message (always available) */}
                 <button
                   onClick={() => setShowSendMessageModal(true)}
-                  className="flex items-center justify-center gap-2 rounded-lg bg-cyan-500/10 px-4 py-3 min-h-[44px] font-mono text-sm font-medium text-cyan-400 transition-colors hover:bg-cyan-500/20"
+                  className="flex items-center justify-center gap-2 rounded-lg bg-cyan-50 px-4 py-3 min-h-[44px] font-mono text-sm font-medium text-cyan-600 transition-colors hover:bg-cyan-50"
                 >
                   <Mail className="h-4 w-4" />
                   Send Message
@@ -474,7 +474,7 @@ export function BookingDetailPanel({
                   <button
                     onClick={() => handleAction('clear_weather')}
                     disabled={isPending}
-                    className="flex items-center justify-center gap-2 rounded-lg bg-emerald-500/10 px-4 py-3 min-h-[44px] font-mono text-sm font-medium text-emerald-400 transition-colors hover:bg-emerald-500/20 disabled:opacity-50"
+                    className="flex items-center justify-center gap-2 rounded-lg bg-emerald-50 px-4 py-3 min-h-[44px] font-mono text-sm font-medium text-emerald-600 transition-colors hover:bg-emerald-50 disabled:opacity-50"
                   >
                     <CheckCircle className="h-4 w-4" />
                     Clear Hold
@@ -484,7 +484,7 @@ export function BookingDetailPanel({
                 {canRefund && (
                   <Link
                     href={`/dashboard/bookings/${booking.id}/refund`}
-                    className="flex items-center justify-center gap-2 rounded-lg bg-purple-500/10 px-4 py-3 min-h-[44px] font-mono text-sm font-medium text-purple-400 transition-colors hover:bg-purple-500/20"
+                    className="flex items-center justify-center gap-2 rounded-lg bg-purple-500/10 px-4 py-3 min-h-[44px] font-mono text-sm font-medium text-purple-600 transition-colors hover:bg-purple-50"
                   >
                     <RotateCcw className="h-4 w-4" />
                     Refund
@@ -495,7 +495,7 @@ export function BookingDetailPanel({
                   <button
                     onClick={() => handleAction('no_show')}
                     disabled={isPending}
-                    className="flex items-center justify-center gap-2 rounded-lg bg-amber-500/10 px-4 py-3 min-h-[44px] font-mono text-sm font-medium text-amber-400 transition-colors hover:bg-amber-500/20 disabled:opacity-50"
+                    className="flex items-center justify-center gap-2 rounded-lg bg-amber-50 px-4 py-3 min-h-[44px] font-mono text-sm font-medium text-amber-600 transition-colors hover:bg-amber-50 disabled:opacity-50"
                   >
                     <AlertCircle className="h-4 w-4" />
                     No Show
@@ -506,7 +506,7 @@ export function BookingDetailPanel({
                   <button
                     onClick={() => handleAction('cancel')}
                     disabled={isPending}
-                    className="flex items-center justify-center gap-2 rounded-lg bg-rose-500/10 px-4 py-3 min-h-[44px] font-mono text-sm font-medium text-rose-400 transition-colors hover:bg-rose-500/20 disabled:opacity-50"
+                    className="flex items-center justify-center gap-2 rounded-lg bg-rose-50 px-4 py-3 min-h-[44px] font-mono text-sm font-medium text-rose-600 transition-colors hover:bg-rose-50 disabled:opacity-50"
                   >
                     <XCircle className="h-4 w-4" />
                     Cancel
@@ -517,7 +517,7 @@ export function BookingDetailPanel({
               {/* Duplicate Button (always available) */}
               <button
                 onClick={() => setShowDuplicateModal(true)}
-                className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-600 px-4 py-3 min-h-[44px] font-mono text-sm font-medium text-slate-300 transition-colors hover:bg-slate-700/50"
+                className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 px-4 py-3 min-h-[44px] font-mono text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100"
               >
                 <Copy className="h-4 w-4" />
                 Duplicate Booking
@@ -559,7 +559,7 @@ export function BookingDetailPanel({
 
           {/* Terminal State Message */}
           {isTerminal && (
-            <div className="rounded-lg bg-slate-800/50 p-4 text-center">
+            <div className="rounded-lg bg-white p-4 text-center">
               <span className="font-mono text-sm text-slate-400">
                 This booking is {statusLabel.toLowerCase()} and cannot be modified.
               </span>

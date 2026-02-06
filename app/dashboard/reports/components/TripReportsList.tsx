@@ -45,7 +45,7 @@ export function TripReportsList({ reports }: Props) {
             placeholder="Search reports..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-slate-600 bg-slate-800 px-4 py-2 text-white placeholder-slate-400 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-900 placeholder-slate-400 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
           />
         </div>
       )}
@@ -71,24 +71,24 @@ export function TripReportsList({ reports }: Props) {
           return (
             <div
               key={report.id}
-              className="rounded-lg border border-slate-700 bg-slate-800 p-6 transition-colors hover:border-slate-600"
+              className="rounded-lg border border-slate-200 bg-white p-6 transition-colors hover:border-slate-300"
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-3">
                     <div
                       className={`flex h-10 w-10 items-center justify-center rounded-full ${
-                        hasIncidents ? 'bg-amber-500/20' : 'bg-green-500/20'
+                        hasIncidents ? 'bg-amber-50' : 'bg-green-500/20'
                       }`}
                     >
                       {hasIncidents ? (
-                        <AlertTriangle className="h-5 w-5 text-amber-400" />
+                        <AlertTriangle className="h-5 w-5 text-amber-600" />
                       ) : (
                         <CheckCircle className="h-5 w-5 text-green-400" />
                       )}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-white">
+                      <h3 className="font-semibold text-slate-900">
                         {tripType?.title} - {booking?.guest_name}
                       </h3>
                       <p className="text-sm text-slate-400">
@@ -101,28 +101,28 @@ export function TripReportsList({ reports }: Props) {
                   <div className="mt-4 grid gap-3 sm:grid-cols-3">
                     <div>
                       <p className="text-xs text-slate-500">Duration</p>
-                      <p className="font-medium text-white">{duration}</p>
+                      <p className="font-medium text-slate-900">{duration}</p>
                     </div>
                     <div>
                       <p className="text-xs text-slate-500">Passengers</p>
-                      <p className="font-medium text-white">{report.actual_passengers}</p>
+                      <p className="font-medium text-slate-900">{report.actual_passengers}</p>
                     </div>
                     <div>
                       <p className="text-xs text-slate-500">Conditions</p>
-                      <p className="font-medium text-white">{report.conditions_summary}</p>
+                      <p className="font-medium text-slate-900">{report.conditions_summary}</p>
                     </div>
                   </div>
 
                   {hasIncidents && (
-                    <div className="mt-4 rounded-lg bg-amber-500/10 p-3">
-                      <p className="text-xs font-medium text-amber-400">INCIDENT REPORTED</p>
+                    <div className="mt-4 rounded-lg bg-amber-50 p-3">
+                      <p className="text-xs font-medium text-amber-600">INCIDENT REPORTED</p>
                       <p className="mt-1 text-sm text-amber-200">{report.incidents}</p>
                     </div>
                   )}
 
                   {report.notes && (
                     <div className="mt-4">
-                      <p className="text-sm text-slate-300 line-clamp-2">{report.notes}</p>
+                      <p className="text-sm text-slate-600 line-clamp-2">{report.notes}</p>
                     </div>
                   )}
                 </div>
@@ -130,14 +130,14 @@ export function TripReportsList({ reports }: Props) {
                 <div className="ml-4 flex flex-col gap-2">
                   <Link
                     href={`/dashboard/reports/${report.id}`}
-                    className="flex items-center gap-2 rounded-lg bg-slate-700 px-3 py-2 text-sm text-white transition-colors hover:bg-slate-600"
+                    className="flex items-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-900 transition-colors hover:bg-slate-200"
                   >
                     <Eye className="h-4 w-4" />
                     View
                   </Link>
                   <button
                     onClick={() => downloadReport(report)}
-                    className="flex items-center gap-2 rounded-lg border border-slate-600 px-3 py-2 text-sm text-slate-300 transition-colors hover:bg-slate-700"
+                    className="flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-600 transition-colors hover:bg-slate-100"
                   >
                     <Download className="h-4 w-4" />
                     Export
@@ -150,7 +150,7 @@ export function TripReportsList({ reports }: Props) {
       </div>
 
       {filteredReports.length === 0 && searchQuery && (
-        <div className="rounded-lg border border-slate-700 bg-slate-800 p-8 text-center">
+        <div className="rounded-lg border border-slate-200 bg-white p-8 text-center">
           <FileText className="mx-auto h-10 w-10 text-slate-600" />
           <p className="mt-2 text-slate-400">No reports match your search</p>
         </div>

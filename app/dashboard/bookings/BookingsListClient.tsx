@@ -185,7 +185,7 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
         </div>
       ) : bookings.length === 0 ? (
         filters.search || filters.tags.length > 0 || filters.statuses.length > 0 || filters.paymentStatus.length > 0 || filters.dateRange.start ? (
-          <div className="rounded-lg border border-slate-700 bg-slate-800/30 p-12 text-center">
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-12 text-center">
             <p className="text-slate-400">No bookings found</p>
             <p className="mt-2 text-sm text-slate-500">
               Try adjusting your filters or search query
@@ -206,12 +206,12 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
         <div className="space-y-3">
           {/* Select All */}
           {bookings.length > 0 && (
-            <div className="flex items-center gap-3 rounded border border-slate-700 bg-slate-800/30 px-4 py-2">
+            <div className="flex items-center gap-3 rounded border border-slate-200 bg-slate-50 px-4 py-2">
               <input
                 type="checkbox"
                 checked={selectedBookings.size === bookings.length && bookings.length > 0}
                 onChange={handleSelectAll}
-                className="h-4 w-4 rounded border-slate-600 bg-slate-700 text-cyan-500 focus:ring-2 focus:ring-cyan-500 focus:ring-offset-0"
+                className="h-4 w-4 rounded border-slate-300 bg-slate-100 text-cyan-500 focus:ring-2 focus:ring-cyan-500 focus:ring-offset-0"
               />
               <span className="text-sm text-slate-400">
                 Select all ({bookings.length})

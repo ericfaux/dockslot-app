@@ -60,7 +60,7 @@ function VesselForm({ vessel, onSubmit, onClose, error }: VesselFormProps) {
     <form onSubmit={handleSubmit} className="p-6">
       {/* Error Message */}
       {displayError && (
-        <div className="mb-4 rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
+        <div className="mb-4 rounded-lg border border-rose-500/30 bg-rose-50 px-4 py-3 text-sm text-rose-600">
           {displayError}
         </div>
       )}
@@ -68,8 +68,8 @@ function VesselForm({ vessel, onSubmit, onClose, error }: VesselFormProps) {
       <div className="space-y-4">
         {/* Name */}
         <div>
-          <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-slate-300">
-            Vessel Name <span className="text-rose-400">*</span>
+          <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-slate-600">
+            Vessel Name <span className="text-rose-600">*</span>
           </label>
           <input
             type="text"
@@ -77,7 +77,7 @@ function VesselForm({ vessel, onSubmit, onClose, error }: VesselFormProps) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g., Sea Hunter"
-            className="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-white placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-slate-900 placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
             disabled={isPending}
             autoFocus
             required
@@ -86,8 +86,8 @@ function VesselForm({ vessel, onSubmit, onClose, error }: VesselFormProps) {
 
         {/* Capacity */}
         <div>
-          <label htmlFor="capacity" className="mb-1.5 block text-sm font-medium text-slate-300">
-            Passenger Capacity <span className="text-rose-400">*</span>
+          <label htmlFor="capacity" className="mb-1.5 block text-sm font-medium text-slate-600">
+            Passenger Capacity <span className="text-rose-600">*</span>
           </label>
           <input
             type="number"
@@ -98,7 +98,7 @@ function VesselForm({ vessel, onSubmit, onClose, error }: VesselFormProps) {
             step="1"
             min="1"
             max="100"
-            className="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 font-mono text-white placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 font-mono text-slate-900 placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
             disabled={isPending}
             required
           />
@@ -109,7 +109,7 @@ function VesselForm({ vessel, onSubmit, onClose, error }: VesselFormProps) {
 
         {/* Description */}
         <div>
-          <label htmlFor="description" className="mb-1.5 block text-sm font-medium text-slate-300">
+          <label htmlFor="description" className="mb-1.5 block text-sm font-medium text-slate-600">
             Description <span className="text-slate-500">(optional)</span>
           </label>
           <textarea
@@ -118,7 +118,7 @@ function VesselForm({ vessel, onSubmit, onClose, error }: VesselFormProps) {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Brief description of the vessel, equipment, or amenities..."
             rows={3}
-            className="w-full resize-none rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-white placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            className="w-full resize-none rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-slate-900 placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
             disabled={isPending}
           />
         </div>
@@ -130,7 +130,7 @@ function VesselForm({ vessel, onSubmit, onClose, error }: VesselFormProps) {
           type="button"
           onClick={onClose}
           disabled={isPending}
-          className="rounded-lg border border-slate-600 px-4 py-2.5 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-800 disabled:opacity-50"
+          className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-white disabled:opacity-50"
         >
           Cancel
         </button>
@@ -204,19 +204,19 @@ export function VesselModal({
       aria-labelledby="modal-title"
     >
       <div
-        className="relative w-full max-w-md rounded-lg border border-slate-700 bg-slate-900"
+        className="relative w-full max-w-md rounded-lg border border-slate-200 bg-white"
         style={{
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
         }}
       >
         {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-slate-800 px-6 py-4">
-          <h2 id="modal-title" className="text-lg font-medium text-white">
+        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+          <h2 id="modal-title" className="text-lg font-medium text-slate-900">
             {vessel ? 'Edit Vessel' : 'Add Vessel'}
           </h2>
           <button
             onClick={onClose}
-            className="rounded-md p-1 text-slate-400 hover:bg-slate-800 hover:text-white"
+            className="rounded-md p-1 text-slate-400 hover:bg-white hover:text-slate-900"
           >
             <X className="h-5 w-5" />
           </button>

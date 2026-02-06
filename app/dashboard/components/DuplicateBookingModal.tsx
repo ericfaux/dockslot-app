@@ -97,15 +97,15 @@ export default function DuplicateBookingModal({
       />
 
       {/* Modal */}
-      <div className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg border border-slate-700 bg-slate-900 p-6 shadow-2xl">
+      <div className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg border border-slate-200 bg-white p-6 shadow-2xl">
         {/* Header */}
         <div className="mb-4 flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-500/20">
-              <Copy className="h-5 w-5 text-cyan-400" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-50">
+              <Copy className="h-5 w-5 text-cyan-600" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-slate-100">
+              <h2 className="text-lg font-semibold text-slate-800">
                 Duplicate Booking
               </h2>
               <p className="text-sm text-slate-400">
@@ -115,7 +115,7 @@ export default function DuplicateBookingModal({
           </div>
           <button
             onClick={onClose}
-            className="rounded p-1 text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+            className="rounded p-1 text-slate-400 hover:bg-white hover:text-slate-700"
           >
             <X className="h-5 w-5" />
           </button>
@@ -125,7 +125,7 @@ export default function DuplicateBookingModal({
         <div className="space-y-4">
           {/* Guest Name */}
           <div>
-            <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-slate-300">
+            <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-slate-600">
               <Users className="h-4 w-4 text-slate-500" />
               Guest Name
             </label>
@@ -135,13 +135,13 @@ export default function DuplicateBookingModal({
               onChange={(e) =>
                 setFormData({ ...formData, guest_name: e.target.value })
               }
-              className="w-full rounded border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:border-cyan-500 focus:outline-none"
+              className="w-full rounded border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-cyan-500 focus:outline-none"
             />
           </div>
 
           {/* Email */}
           <div>
-            <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-slate-300">
+            <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-slate-600">
               <Mail className="h-4 w-4 text-slate-500" />
               Email
             </label>
@@ -151,13 +151,13 @@ export default function DuplicateBookingModal({
               onChange={(e) =>
                 setFormData({ ...formData, guest_email: e.target.value })
               }
-              className="w-full rounded border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:border-cyan-500 focus:outline-none"
+              className="w-full rounded border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-cyan-500 focus:outline-none"
             />
           </div>
 
           {/* Phone */}
           <div>
-            <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-slate-300">
+            <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-slate-600">
               <Phone className="h-4 w-4 text-slate-500" />
               Phone (optional)
             </label>
@@ -167,13 +167,13 @@ export default function DuplicateBookingModal({
               onChange={(e) =>
                 setFormData({ ...formData, guest_phone: e.target.value })
               }
-              className="w-full rounded border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:border-cyan-500 focus:outline-none"
+              className="w-full rounded border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-cyan-500 focus:outline-none"
             />
           </div>
 
           {/* Party Size */}
           <div>
-            <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-slate-300">
+            <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-slate-600">
               <Users className="h-4 w-4 text-slate-500" />
               Party Size
             </label>
@@ -187,14 +187,14 @@ export default function DuplicateBookingModal({
                   party_size: parseInt(e.target.value, 10),
                 })
               }
-              className="w-full rounded border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:border-cyan-500 focus:outline-none"
+              className="w-full rounded border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-cyan-500 focus:outline-none"
             />
           </div>
 
           {/* Date & Time */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-slate-300">
+              <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-slate-600">
                 <Calendar className="h-4 w-4 text-slate-500" />
                 Date
               </label>
@@ -204,11 +204,11 @@ export default function DuplicateBookingModal({
                 onChange={(e) =>
                   setFormData({ ...formData, scheduled_date: e.target.value })
                 }
-                className="w-full rounded border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:border-cyan-500 focus:outline-none"
+                className="w-full rounded border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-cyan-500 focus:outline-none"
               />
             </div>
             <div>
-              <label className="mb-1.5 text-sm font-medium text-slate-300">
+              <label className="mb-1.5 text-sm font-medium text-slate-600">
                 Time
               </label>
               <input
@@ -217,20 +217,20 @@ export default function DuplicateBookingModal({
                 onChange={(e) =>
                   setFormData({ ...formData, scheduled_time: e.target.value })
                 }
-                className="w-full rounded border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:border-cyan-500 focus:outline-none"
+                className="w-full rounded border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-cyan-500 focus:outline-none"
               />
             </div>
           </div>
 
           {/* Info Note */}
-          <div className="rounded bg-cyan-500/10 p-3 text-sm text-cyan-300">
+          <div className="rounded bg-cyan-50 p-3 text-sm text-cyan-600">
             <p className="font-medium">What gets copied:</p>
-            <ul className="mt-1 space-y-0.5 text-xs text-cyan-400">
+            <ul className="mt-1 space-y-0.5 text-xs text-cyan-600">
               <li>• Vessel & trip type</li>
               <li>• Pricing & special requests</li>
             </ul>
             <p className="mt-2 font-medium">What doesn&apos;t:</p>
-            <ul className="mt-1 space-y-0.5 text-xs text-cyan-400">
+            <ul className="mt-1 space-y-0.5 text-xs text-cyan-600">
               <li>• Payment status (starts fresh)</li>
               <li>• Captain notes & tags</li>
               <li>• Waivers & passengers</li>
@@ -239,7 +239,7 @@ export default function DuplicateBookingModal({
 
           {/* Error */}
           {error && (
-            <div className="rounded border border-rose-500/50 bg-rose-500/10 p-3 text-sm text-rose-400">
+            <div className="rounded border border-rose-500/50 bg-rose-50 p-3 text-sm text-rose-600">
               {error}
             </div>
           )}
@@ -250,7 +250,7 @@ export default function DuplicateBookingModal({
           <button
             onClick={onClose}
             disabled={isDuplicating}
-            className="flex-1 rounded border border-slate-600 px-4 py-2.5 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-800 disabled:opacity-50"
+            className="flex-1 rounded border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-white disabled:opacity-50"
           >
             Cancel
           </button>

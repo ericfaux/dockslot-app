@@ -51,7 +51,7 @@ export default function BookingQuickActions({
       label: 'Email Guest',
       icon: Mail,
       shortcut: 'E',
-      color: 'text-blue-400',
+      color: 'text-blue-600',
       action: () => {
         window.location.href = `mailto:${guestEmail}?subject=Your DockSlot Booking`
         onAction('email')
@@ -62,7 +62,7 @@ export default function BookingQuickActions({
       label: 'Text Guest',
       icon: MessageSquare,
       shortcut: 'S',
-      color: 'text-cyan-400',
+      color: 'text-cyan-600',
       action: () => {
         // Future: integrate SMS
         alert('SMS integration coming soon!')
@@ -74,7 +74,7 @@ export default function BookingQuickActions({
       label: 'Request Balance',
       icon: DollarSign,
       shortcut: 'B',
-      color: 'text-emerald-400',
+      color: 'text-emerald-600',
       show: bookingStatus === 'confirmed',
       action: () => {
         onAction('balance')
@@ -85,7 +85,7 @@ export default function BookingQuickActions({
       label: 'Weather Hold',
       icon: CloudRain,
       shortcut: 'W',
-      color: 'text-amber-400',
+      color: 'text-amber-600',
       show: ['confirmed', 'rescheduled'].includes(bookingStatus),
       action: () => {
         onAction('weather')
@@ -96,7 +96,7 @@ export default function BookingQuickActions({
       label: 'Complete Trip',
       icon: CheckCircle,
       shortcut: 'C',
-      color: 'text-emerald-400',
+      color: 'text-emerald-600',
       show: ['confirmed', 'rescheduled'].includes(bookingStatus),
       action: () => {
         onAction('complete')
@@ -107,7 +107,7 @@ export default function BookingQuickActions({
       label: 'Duplicate Booking',
       icon: Copy,
       shortcut: 'D',
-      color: 'text-purple-400',
+      color: 'text-purple-600',
       action: () => {
         onAction('duplicate')
       },
@@ -128,7 +128,7 @@ export default function BookingQuickActions({
       label: 'View on Calendar',
       icon: Navigation,
       shortcut: 'V',
-      color: 'text-cyan-400',
+      color: 'text-cyan-600',
       action: () => {
         window.location.href = `/dashboard/schedule?booking=${bookingId}`
         onAction('navigate')
@@ -162,11 +162,11 @@ export default function BookingQuickActions({
       {/* Trigger Button */}
       <button
         onClick={() => setShowMenu(!showMenu)}
-        className="flex items-center gap-2 rounded border border-slate-600 bg-slate-800 px-3 py-2 text-sm font-medium text-slate-300 hover:bg-slate-700"
+        className="flex items-center gap-2 rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100"
       >
         <MessageSquare className="h-4 w-4" />
         Quick Actions
-        <kbd className="rounded bg-slate-700 px-1.5 py-0.5 text-xs font-mono text-slate-400">
+        <kbd className="rounded bg-slate-100 px-1.5 py-0.5 text-xs font-mono text-slate-400">
           ⌘K
         </kbd>
       </button>
@@ -178,9 +178,9 @@ export default function BookingQuickActions({
             className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
             onClick={() => setShowMenu(false)}
           />
-          <div className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg border border-slate-700 bg-slate-900 shadow-2xl">
-            <div className="border-b border-slate-700 p-4">
-              <h3 className="text-sm font-semibold text-slate-200">
+          <div className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg border border-slate-200 bg-white shadow-2xl">
+            <div className="border-b border-slate-200 p-4">
+              <h3 className="text-sm font-semibold text-slate-700">
                 Quick Actions
               </h3>
               <p className="text-xs text-slate-500">
@@ -197,21 +197,21 @@ export default function BookingQuickActions({
                       action.action()
                       setShowMenu(false)
                     }}
-                    className="flex w-full items-center gap-3 rounded px-3 py-2.5 text-left transition-colors hover:bg-slate-800"
+                    className="flex w-full items-center gap-3 rounded px-3 py-2.5 text-left transition-colors hover:bg-white"
                   >
                     <Icon className={`h-5 w-5 ${action.color}`} />
-                    <span className="flex-1 text-sm text-slate-200">
+                    <span className="flex-1 text-sm text-slate-700">
                       {action.label}
                     </span>
-                    <kbd className="rounded bg-slate-800 px-2 py-1 font-mono text-xs text-slate-400">
+                    <kbd className="rounded bg-white px-2 py-1 font-mono text-xs text-slate-400">
                       {action.shortcut}
                     </kbd>
                   </button>
                 )
               })}
             </div>
-            <div className="border-t border-slate-700 p-3 text-center text-xs text-slate-500">
-              Press <kbd className="rounded bg-slate-800 px-1.5 py-0.5">Esc</kbd> to close
+            <div className="border-t border-slate-200 p-3 text-center text-xs text-slate-500">
+              Press <kbd className="rounded bg-white px-1.5 py-0.5">Esc</kbd> to close
             </div>
           </div>
         </>

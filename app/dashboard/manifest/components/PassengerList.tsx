@@ -21,7 +21,7 @@ export function PassengerList({ passengers, isExpanded }: PassengerListProps) {
   });
 
   return (
-    <div className="border-t border-slate-800 bg-slate-900/50 p-4">
+    <div className="border-t border-slate-200 bg-white p-4">
       <div className="mb-3 flex items-center gap-2">
         <User className="h-4 w-4 text-slate-500" />
         <span className="text-xs font-medium uppercase tracking-wider text-slate-500">
@@ -32,12 +32,12 @@ export function PassengerList({ passengers, isExpanded }: PassengerListProps) {
         {sortedPassengers.map((passenger) => (
           <div
             key={passenger.id}
-            className="flex flex-col gap-1 rounded-lg border border-slate-700/50 bg-slate-800/50 p-3"
+            className="flex flex-col gap-1 rounded-lg border border-slate-200 bg-white p-3"
           >
             <div className="flex items-center gap-2">
-              <span className="font-medium text-white">{passenger.full_name}</span>
+              <span className="font-medium text-slate-900">{passenger.full_name}</span>
               {passenger.is_primary_contact && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-cyan-500/20 px-2 py-0.5 text-xs font-medium text-cyan-400">
+                <span className="inline-flex items-center gap-1 rounded-full bg-cyan-50 px-2 py-0.5 text-xs font-medium text-cyan-600">
                   <Star className="h-3 w-3" />
                   Primary
                 </span>

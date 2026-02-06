@@ -49,7 +49,7 @@ export function ReportsPageClient({
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Reports</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Reports</h1>
           <p className="mt-1 text-sm text-slate-400">
             Revenue, booking insights, guest analytics, and season performance
           </p>
@@ -67,7 +67,7 @@ export function ReportsPageClient({
           )}
           <Link
             href="/dashboard/reports/new"
-            className="flex items-center gap-2 rounded-lg border border-slate-600 bg-slate-700 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-600"
+            className="flex items-center gap-2 rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm font-medium text-slate-900 transition-colors hover:bg-slate-200"
           >
             <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">Trip Report</span>
@@ -88,7 +88,7 @@ export function ReportsPageClient({
       ) : (
         <>
           {/* Tab Navigation */}
-          <div className="border-b border-slate-700">
+          <div className="border-b border-slate-200">
             <nav className="flex gap-1 overflow-x-auto" aria-label="Report tabs">
               {tabs.map((tab) => {
                 const isActive = activeTab === tab.id;
@@ -98,11 +98,11 @@ export function ReportsPageClient({
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
                       isActive
-                        ? 'border-cyan-500 text-cyan-400'
-                        : 'border-transparent text-slate-400 hover:border-slate-600 hover:text-slate-300'
+                        ? 'border-cyan-500 text-cyan-600'
+                        : 'border-transparent text-slate-400 hover:border-slate-300 hover:text-slate-700'
                     }`}
                   >
-                    <tab.icon className={`h-4 w-4 ${isActive ? 'text-cyan-400' : ''}`} />
+                    <tab.icon className={`h-4 w-4 ${isActive ? 'text-cyan-600' : ''}`} />
                     <span className="hidden sm:inline">{tab.label}</span>
                     <span className="sm:hidden">{tab.shortLabel}</span>
                   </button>

@@ -86,11 +86,11 @@ export function PaymentsClient({
     <div className="space-y-6">
       {/* Error Alert */}
       {error && (
-        <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-4">
+        <div className="rounded-lg border border-red-500/50 bg-red-50 p-4">
           <div className="flex items-start gap-3">
-            <AlertCircle className="h-5 w-5 flex-shrink-0 text-red-400" />
+            <AlertCircle className="h-5 w-5 flex-shrink-0 text-red-600" />
             <div>
-              <p className="font-medium text-red-400">Error</p>
+              <p className="font-medium text-red-600">Error</p>
               <p className="mt-1 text-sm text-red-300">{error}</p>
             </div>
           </div>
@@ -98,10 +98,10 @@ export function PaymentsClient({
       )}
 
       {/* Connection Status */}
-      <div className="rounded-lg border border-slate-700 bg-slate-800 p-6">
+      <div className="rounded-lg border border-slate-200 bg-white p-6">
         <div className="mb-4 flex items-start justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-slate-100">
+            <h3 className="text-lg font-semibold text-slate-800">
               Stripe Account Status
             </h3>
             <p className="mt-1 text-sm text-slate-400">
@@ -114,7 +114,7 @@ export function PaymentsClient({
             className={`flex h-10 w-10 items-center justify-center rounded-full ${
               isConnected
                 ? 'bg-green-500/20 text-green-400'
-                : 'bg-slate-700 text-slate-500'
+                : 'bg-slate-100 text-slate-500'
             }`}
           >
             {isConnected ? (
@@ -128,11 +128,11 @@ export function PaymentsClient({
         {isConnected ? (
           <div className="space-y-4">
             {/* Account Details */}
-            <div className="rounded-lg bg-slate-900/50 p-4">
+            <div className="rounded-lg bg-white p-4">
               <div className="grid gap-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-slate-400">Account ID</span>
-                  <span className="font-mono text-slate-200">
+                  <span className="font-mono text-slate-700">
                     {stripeAccountId}
                   </span>
                 </div>
@@ -151,7 +151,7 @@ export function PaymentsClient({
               <button
                 onClick={handleReturnToDashboard}
                 disabled={loading}
-                className="flex-1 rounded-lg border border-slate-600 bg-slate-700 px-4 py-3 text-sm font-medium text-slate-100 transition-all hover:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex-1 rounded-lg border border-slate-300 bg-slate-100 px-4 py-3 text-sm font-medium text-slate-800 transition-all hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <div className="flex items-center justify-center gap-2">
                   <ExternalLink className="h-4 w-4" />
@@ -164,8 +164,8 @@ export function PaymentsClient({
           <div className="space-y-4">
             {/* Benefits List */}
             <div className="space-y-2 text-sm">
-              <div className="flex items-start gap-3 text-slate-300">
-                <DollarSign className="h-5 w-5 flex-shrink-0 text-cyan-400" />
+              <div className="flex items-start gap-3 text-slate-600">
+                <DollarSign className="h-5 w-5 flex-shrink-0 text-cyan-600" />
                 <div>
                   <p className="font-medium">Accept deposits & full payments</p>
                   <p className="text-slate-500">
@@ -173,8 +173,8 @@ export function PaymentsClient({
                   </p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 text-slate-300">
-                <Shield className="h-5 w-5 flex-shrink-0 text-cyan-400" />
+              <div className="flex items-start gap-3 text-slate-600">
+                <Shield className="h-5 w-5 flex-shrink-0 text-cyan-600" />
                 <div>
                   <p className="font-medium">Secure & PCI compliant</p>
                   <p className="text-slate-500">
@@ -182,8 +182,8 @@ export function PaymentsClient({
                   </p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 text-slate-300">
-                <TrendingUp className="h-5 w-5 flex-shrink-0 text-cyan-400" />
+              <div className="flex items-start gap-3 text-slate-600">
+                <TrendingUp className="h-5 w-5 flex-shrink-0 text-cyan-600" />
                 <div>
                   <p className="font-medium">Fast payouts</p>
                   <p className="text-slate-500">
@@ -191,8 +191,8 @@ export function PaymentsClient({
                   </p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 text-slate-300">
-                <Zap className="h-5 w-5 flex-shrink-0 text-cyan-400" />
+              <div className="flex items-start gap-3 text-slate-600">
+                <Zap className="h-5 w-5 flex-shrink-0 text-cyan-600" />
                 <div>
                   <p className="font-medium">Automatic tax handling</p>
                   <p className="text-slate-500">
@@ -206,7 +206,7 @@ export function PaymentsClient({
             <button
               onClick={handleStripeConnect}
               disabled={loading}
-              className="w-full rounded-lg bg-cyan-500 px-4 py-3 font-semibold text-slate-900 transition-all hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50 active:scale-95"
+              className="w-full rounded-lg bg-cyan-500 px-4 py-3 font-semibold text-white transition-all hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50 active:scale-95"
             >
               {loading ? 'Connecting...' : 'Connect Stripe Account'}
             </button>
@@ -219,11 +219,11 @@ export function PaymentsClient({
       </div>
 
       {/* Pricing Info */}
-      <div className="rounded-lg border border-slate-700 bg-slate-800 p-6">
-        <h3 className="mb-4 text-lg font-semibold text-slate-100">
+      <div className="rounded-lg border border-slate-200 bg-white p-6">
+        <h3 className="mb-4 text-lg font-semibold text-slate-800">
           Stripe Pricing
         </h3>
-        <div className="space-y-3 text-sm text-slate-300">
+        <div className="space-y-3 text-sm text-slate-600">
           <div className="flex justify-between">
             <span className="text-slate-400">Per transaction</span>
             <span className="font-medium">2.9% + $0.30</span>
@@ -252,24 +252,24 @@ export function PaymentsClient({
 
       {/* Help Card */}
       {!isConnected && (
-        <div className="rounded-lg border border-slate-700 bg-slate-800 p-6">
-          <h3 className="mb-2 text-lg font-semibold text-slate-100">
+        <div className="rounded-lg border border-slate-200 bg-white p-6">
+          <h3 className="mb-2 text-lg font-semibold text-slate-800">
             Need Help?
           </h3>
           <p className="mb-4 text-sm text-slate-400">
             The onboarding process takes about 5 minutes. You'll need:
           </p>
-          <ul className="space-y-2 text-sm text-slate-300">
+          <ul className="space-y-2 text-sm text-slate-600">
             <li className="flex items-start gap-2">
-              <Check className="h-4 w-4 flex-shrink-0 text-cyan-400" />
+              <Check className="h-4 w-4 flex-shrink-0 text-cyan-600" />
               Business or personal information (name, address)
             </li>
             <li className="flex items-start gap-2">
-              <Check className="h-4 w-4 flex-shrink-0 text-cyan-400" />
+              <Check className="h-4 w-4 flex-shrink-0 text-cyan-600" />
               Tax ID (SSN or EIN)
             </li>
             <li className="flex items-start gap-2">
-              <Check className="h-4 w-4 flex-shrink-0 text-cyan-400" />
+              <Check className="h-4 w-4 flex-shrink-0 text-cyan-600" />
               Bank account details for payouts
             </li>
           </ul>

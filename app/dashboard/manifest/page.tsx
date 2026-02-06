@@ -24,7 +24,7 @@ export default async function ManifestPage() {
           <span className="font-mono text-xs uppercase tracking-widest text-slate-500">
             Manifest
           </span>
-          <div className="h-px flex-1 bg-slate-800" />
+          <div className="h-px flex-1 bg-white" />
         </div>
         <p className="mt-2 text-sm text-slate-400">
           View upcoming bookings and their passenger details. See who&apos;s coming on each trip.

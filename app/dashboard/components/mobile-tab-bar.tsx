@@ -9,7 +9,7 @@ export function MobileTabBar() {
   const pathname = usePathname();
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 h-16 bg-slate-900 border-t border-white/10 flex items-center justify-around px-1 safe-bottom">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 h-16 bg-white border-t border-slate-200 flex items-center justify-around px-1 safe-bottom">
       {primaryNavLinks.map((link) => {
         const isActive =
           link.href === "/dashboard"
@@ -25,8 +25,8 @@ export function MobileTabBar() {
             href={link.href}
             className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full text-[10px] font-medium transition-colors ${
               isActive
-                ? "text-amber-400"
-                : "text-zinc-400 active:text-zinc-200"
+                ? "text-cyan-600"
+                : "text-slate-400 active:text-slate-600"
             }`}
           >
             <Icon size={20} aria-hidden="true" />

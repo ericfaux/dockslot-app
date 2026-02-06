@@ -34,17 +34,17 @@ export function ShortcutsHelpModal({ isOpen, onClose }: ShortcutsHelpModalProps)
       {/* Modal */}
       <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
-          className="pointer-events-auto w-full max-w-md rounded-xl border border-slate-700 bg-slate-900 shadow-2xl"
+          className="pointer-events-auto w-full max-w-md rounded-xl border border-slate-200 bg-white shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-slate-700 p-4">
+          <div className="flex items-center justify-between border-b border-slate-200 p-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-500/20">
-                <Keyboard className="h-5 w-5 text-cyan-400" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-50">
+                <Keyboard className="h-5 w-5 text-cyan-600" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-white">
+                <h2 className="text-lg font-semibold text-slate-900">
                   Keyboard Shortcuts
                 </h2>
                 <p className="text-sm text-slate-400">
@@ -54,7 +54,7 @@ export function ShortcutsHelpModal({ isOpen, onClose }: ShortcutsHelpModalProps)
             </div>
             <button
               onClick={onClose}
-              className="rounded-md p-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
+              className="rounded-md p-2 text-slate-400 transition-colors hover:bg-white hover:text-slate-900"
             >
               <X className="h-5 w-5" />
             </button>
@@ -71,12 +71,12 @@ export function ShortcutsHelpModal({ isOpen, onClose }: ShortcutsHelpModalProps)
                   {shortcuts.map((shortcut) => (
                     <div
                       key={shortcut.key}
-                      className="flex items-center justify-between rounded-lg bg-slate-800/50 px-4 py-2.5"
+                      className="flex items-center justify-between rounded-lg bg-white px-4 py-2.5"
                     >
-                      <span className="text-sm text-slate-300">
+                      <span className="text-sm text-slate-600">
                         {shortcut.description}
                       </span>
-                      <kbd className="rounded bg-slate-700 px-2 py-1 font-mono text-xs font-medium text-cyan-400">
+                      <kbd className="rounded bg-slate-100 px-2 py-1 font-mono text-xs font-medium text-cyan-600">
                         {shortcut.key}
                       </kbd>
                     </div>
@@ -87,9 +87,9 @@ export function ShortcutsHelpModal({ isOpen, onClose }: ShortcutsHelpModalProps)
           </div>
 
           {/* Footer */}
-          <div className="border-t border-slate-700 p-4">
+          <div className="border-t border-slate-200 p-4">
             <p className="text-center text-xs text-slate-500">
-              Press <kbd className="rounded bg-slate-700 px-1.5 py-0.5 font-mono text-cyan-400">?</kbd> anytime to show this help
+              Press <kbd className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-cyan-600">?</kbd> anytime to show this help
             </p>
           </div>
         </div>

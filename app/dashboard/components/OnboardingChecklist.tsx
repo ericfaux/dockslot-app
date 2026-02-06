@@ -127,19 +127,19 @@ export function OnboardingChecklist({
   };
 
   return (
-    <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
+    <div className="rounded-lg border border-slate-200 bg-white p-6">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-slate-100">
+          <h3 className="text-lg font-semibold text-slate-800">
             Complete your setup
           </h3>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-slate-500">
             {completedCount} of {items.length} steps completed
           </p>
         </div>
         <button
           onClick={handleDismiss}
-          className="rounded p-1 text-slate-500 transition-colors hover:bg-slate-700 hover:text-slate-300"
+          className="rounded p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
           aria-label="Dismiss checklist"
         >
           <X className="h-4 w-4" />
@@ -147,7 +147,7 @@ export function OnboardingChecklist({
       </div>
 
       {/* Progress bar */}
-      <div className="mb-5 h-1.5 rounded-full bg-slate-700">
+      <div className="mb-5 h-1.5 rounded-full bg-slate-100">
         <div
           className="h-1.5 rounded-full bg-cyan-500 transition-all"
           style={{ width: `${(completedCount / items.length) * 100}%` }}
@@ -156,9 +156,9 @@ export function OnboardingChecklist({
 
       {/* Highlight missing critical items */}
       {(!hasVessel || !hasTripType) && (
-        <div className="mb-4 rounded-lg bg-amber-500/10 border border-amber-500/20 p-3 flex items-start gap-2">
-          <AlertCircle className="h-4 w-4 text-amber-400 mt-0.5 flex-shrink-0" />
-          <p className="text-sm text-amber-300">
+        <div className="mb-4 rounded-lg bg-amber-50 border border-amber-200 p-3 flex items-start gap-2">
+          <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+          <p className="text-sm text-amber-800">
             {!hasVessel && !hasTripType
               ? 'Add a vessel and create a trip type to start accepting bookings.'
               : !hasVessel
@@ -176,13 +176,13 @@ export function OnboardingChecklist({
               <button
                 key={item.id}
                 onClick={handleCopyLink}
-                className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-slate-700/50"
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-slate-50"
               >
                 <div
                   className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full ${
                     linkCopied
-                      ? 'bg-emerald-500/20 text-emerald-400'
-                      : 'border border-slate-600 text-slate-500'
+                      ? 'bg-emerald-50 text-emerald-600'
+                      : 'border border-slate-300 text-slate-400'
                   }`}
                 >
                   {linkCopied ? (
@@ -192,14 +192,14 @@ export function OnboardingChecklist({
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <span className="text-sm text-slate-300 block">
+                  <span className="text-sm text-slate-600 block">
                     {linkCopied ? 'Link copied!' : item.label}
                   </span>
                   {!linkCopied && (
-                    <span className="text-xs text-slate-500 block">{item.description}</span>
+                    <span className="text-xs text-slate-400 block">{item.description}</span>
                   )}
                 </div>
-                <ChevronRight className="h-4 w-4 text-slate-600" />
+                <ChevronRight className="h-4 w-4 text-slate-300" />
               </button>
             );
           }
@@ -209,13 +209,13 @@ export function OnboardingChecklist({
               <Link
                 key={item.id}
                 href={item.href}
-                className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-slate-700/50"
+                className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-slate-50"
               >
                 <div
                   className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full ${
                     item.completed
-                      ? 'bg-emerald-500/20 text-emerald-400'
-                      : 'border border-slate-600 text-slate-500'
+                      ? 'bg-emerald-50 text-emerald-600'
+                      : 'border border-slate-300 text-slate-400'
                   }`}
                 >
                   {item.completed ? (
@@ -228,18 +228,18 @@ export function OnboardingChecklist({
                   <span
                     className={`text-sm block ${
                       item.completed
-                        ? 'text-slate-500 line-through'
-                        : 'text-slate-300'
+                        ? 'text-slate-400 line-through'
+                        : 'text-slate-600'
                     }`}
                   >
                     {item.label}
                   </span>
                   {!item.completed && (
-                    <span className="text-xs text-slate-500 block">{item.description}</span>
+                    <span className="text-xs text-slate-400 block">{item.description}</span>
                   )}
                 </div>
                 {!item.completed && (
-                  <ChevronRight className="h-4 w-4 text-slate-600" />
+                  <ChevronRight className="h-4 w-4 text-slate-300" />
                 )}
               </Link>
             );
@@ -248,13 +248,13 @@ export function OnboardingChecklist({
           return (
             <div
               key={item.id}
-              className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-slate-700/50"
+              className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-slate-50"
             >
               <div
                 className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full ${
                   item.completed
-                    ? 'bg-emerald-500/20 text-emerald-400'
-                    : 'border border-slate-600 text-slate-500'
+                    ? 'bg-emerald-50 text-emerald-600'
+                    : 'border border-slate-300 text-slate-400'
                 }`}
               >
                 {item.completed ? (
@@ -267,18 +267,18 @@ export function OnboardingChecklist({
                 <span
                   className={`text-sm block ${
                     item.completed
-                      ? 'text-slate-500 line-through'
-                      : 'text-slate-300'
+                      ? 'text-slate-400 line-through'
+                      : 'text-slate-600'
                   }`}
                 >
                   {item.label}
                 </span>
                 {!item.completed && (
-                  <span className="text-xs text-slate-500 block">{item.description}</span>
+                  <span className="text-xs text-slate-400 block">{item.description}</span>
                 )}
               </div>
               {!item.completed && (
-                <ChevronRight className="h-4 w-4 text-slate-600" />
+                <ChevronRight className="h-4 w-4 text-slate-300" />
               )}
             </div>
           );

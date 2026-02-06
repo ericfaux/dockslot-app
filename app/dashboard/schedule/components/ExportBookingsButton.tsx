@@ -78,7 +78,7 @@ export function ExportBookingsButton({ captainId }: ExportBookingsButtonProps) {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 rounded-lg border border-slate-600 bg-slate-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-600"
+        className="flex items-center gap-2 rounded-lg border border-slate-300 bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 transition-colors hover:bg-slate-200"
       >
         <Download className="h-4 w-4" />
         Export CSV
@@ -93,16 +93,16 @@ export function ExportBookingsButton({ captainId }: ExportBookingsButtonProps) {
           />
 
           {/* Dropdown Menu */}
-          <div className="absolute right-0 top-12 z-20 w-64 rounded-lg border border-slate-700 bg-slate-800 shadow-xl">
+          <div className="absolute right-0 top-12 z-20 w-64 rounded-lg border border-slate-200 bg-white shadow-xl">
             <div className="p-4">
-              <h3 className="mb-3 text-sm font-semibold text-white">Export Bookings</h3>
+              <h3 className="mb-3 text-sm font-semibold text-slate-900">Export Bookings</h3>
               <div className="space-y-2">
                 <button
                   onClick={() => handleExport('this-month')}
                   disabled={exporting}
-                  className="flex w-full items-center gap-3 rounded-lg bg-slate-700 px-4 py-3 text-left text-sm text-white transition-colors hover:bg-slate-600 disabled:opacity-50"
+                  className="flex w-full items-center gap-3 rounded-lg bg-slate-100 px-4 py-3 text-left text-sm text-slate-900 transition-colors hover:bg-slate-200 disabled:opacity-50"
                 >
-                  <Calendar className="h-4 w-4 text-cyan-400" />
+                  <Calendar className="h-4 w-4 text-cyan-600" />
                   <div>
                     <p className="font-medium">This Month</p>
                     <p className="text-xs text-slate-400">
@@ -114,9 +114,9 @@ export function ExportBookingsButton({ captainId }: ExportBookingsButtonProps) {
                 <button
                   onClick={() => handleExport('last-month')}
                   disabled={exporting}
-                  className="flex w-full items-center gap-3 rounded-lg bg-slate-700 px-4 py-3 text-left text-sm text-white transition-colors hover:bg-slate-600 disabled:opacity-50"
+                  className="flex w-full items-center gap-3 rounded-lg bg-slate-100 px-4 py-3 text-left text-sm text-slate-900 transition-colors hover:bg-slate-200 disabled:opacity-50"
                 >
-                  <Calendar className="h-4 w-4 text-blue-400" />
+                  <Calendar className="h-4 w-4 text-blue-600" />
                   <div>
                     <p className="font-medium">Last Month</p>
                     <p className="text-xs text-slate-400">
@@ -128,7 +128,7 @@ export function ExportBookingsButton({ captainId }: ExportBookingsButtonProps) {
                 <button
                   onClick={() => handleExport('year')}
                   disabled={exporting}
-                  className="flex w-full items-center gap-3 rounded-lg bg-slate-700 px-4 py-3 text-left text-sm text-white transition-colors hover:bg-slate-600 disabled:opacity-50"
+                  className="flex w-full items-center gap-3 rounded-lg bg-slate-100 px-4 py-3 text-left text-sm text-slate-900 transition-colors hover:bg-slate-200 disabled:opacity-50"
                 >
                   <FileSpreadsheet className="h-4 w-4 text-green-400" />
                   <div>
@@ -142,9 +142,9 @@ export function ExportBookingsButton({ captainId }: ExportBookingsButtonProps) {
                 <button
                   onClick={() => handleExport('confirmed')}
                   disabled={exporting}
-                  className="flex w-full items-center gap-3 rounded-lg bg-slate-700 px-4 py-3 text-left text-sm text-white transition-colors hover:bg-slate-600 disabled:opacity-50"
+                  className="flex w-full items-center gap-3 rounded-lg bg-slate-100 px-4 py-3 text-left text-sm text-slate-900 transition-colors hover:bg-slate-200 disabled:opacity-50"
                 >
-                  <FileSpreadsheet className="h-4 w-4 text-amber-400" />
+                  <FileSpreadsheet className="h-4 w-4 text-amber-600" />
                   <div>
                     <p className="font-medium">Confirmed Only</p>
                     <p className="text-xs text-slate-400">
@@ -156,9 +156,9 @@ export function ExportBookingsButton({ captainId }: ExportBookingsButtonProps) {
                 <button
                   onClick={() => handleExport('all')}
                   disabled={exporting}
-                  className="flex w-full items-center gap-3 rounded-lg bg-slate-700 px-4 py-3 text-left text-sm text-white transition-colors hover:bg-slate-600 disabled:opacity-50"
+                  className="flex w-full items-center gap-3 rounded-lg bg-slate-100 px-4 py-3 text-left text-sm text-slate-900 transition-colors hover:bg-slate-200 disabled:opacity-50"
                 >
-                  <FileSpreadsheet className="h-4 w-4 text-purple-400" />
+                  <FileSpreadsheet className="h-4 w-4 text-purple-600" />
                   <div>
                     <p className="font-medium">All Bookings</p>
                     <p className="text-xs text-slate-400">
@@ -170,9 +170,9 @@ export function ExportBookingsButton({ captainId }: ExportBookingsButtonProps) {
 
               {exportStatus && (
                 <div className={`mt-3 text-center text-xs font-medium ${
-                  exportStatus.includes('failed') ? 'text-rose-400' :
+                  exportStatus.includes('failed') ? 'text-rose-600' :
                   exportStatus.includes('complete') ? 'text-green-400' :
-                  'text-cyan-400'
+                  'text-cyan-600'
                 }`}>
                   {exportStatus}
                 </div>

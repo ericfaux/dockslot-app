@@ -73,8 +73,8 @@ export default function QuickStatsWidgets({
   const widgets = [
     {
       icon: Calendar,
-      iconColor: 'text-cyan-400',
-      iconBg: 'bg-cyan-500/20',
+      iconColor: 'text-cyan-600',
+      iconBg: 'bg-cyan-50',
       label: 'Today',
       value: stats.todayBookings.toString(),
       subtext: stats.todayBookings === 1 ? 'booking' : 'bookings',
@@ -82,8 +82,8 @@ export default function QuickStatsWidgets({
     },
     {
       icon: Clock,
-      iconColor: 'text-blue-400',
-      iconBg: 'bg-blue-500/20',
+      iconColor: 'text-blue-600',
+      iconBg: 'bg-blue-50',
       label: 'This Week',
       value: stats.weekBookings.toString(),
       subtext: stats.weekBookings === 1 ? 'booking' : 'bookings',
@@ -91,8 +91,8 @@ export default function QuickStatsWidgets({
     },
     {
       icon: DollarSign,
-      iconColor: 'text-emerald-400',
-      iconBg: 'bg-emerald-500/20',
+      iconColor: 'text-emerald-600',
+      iconBg: 'bg-emerald-50',
       label: 'Month Revenue',
       value: formatCurrency(stats.monthRevenue),
       subtext:
@@ -100,13 +100,13 @@ export default function QuickStatsWidgets({
           ? `+${stats.revenueChange.toFixed(1)}% from last month`
           : `${stats.revenueChange.toFixed(1)}% from last month`,
       subtextColor:
-        stats.revenueChange >= 0 ? 'text-emerald-400' : 'text-rose-400',
+        stats.revenueChange >= 0 ? 'text-emerald-600' : 'text-rose-600',
       link: `/dashboard/reports?view=revenue&month=${currentMonth}`,
     },
     {
       icon: AlertCircle,
-      iconColor: 'text-amber-400',
-      iconBg: 'bg-amber-500/20',
+      iconColor: 'text-amber-600',
+      iconBg: 'bg-amber-50',
       label: 'Pending Deposits',
       value: stats.pendingDeposits.toString(),
       subtext: 'needs attention',
@@ -114,8 +114,8 @@ export default function QuickStatsWidgets({
     },
     {
       icon: Users,
-      iconColor: 'text-purple-400',
-      iconBg: 'bg-purple-500/20',
+      iconColor: 'text-purple-600',
+      iconBg: 'bg-purple-50',
       label: 'Upcoming',
       value: stats.upcomingTrips.toString(),
       subtext: 'next 7 days',
@@ -123,8 +123,8 @@ export default function QuickStatsWidgets({
     },
     {
       icon: TrendingUp,
-      iconColor: 'text-cyan-400',
-      iconBg: 'bg-cyan-500/20',
+      iconColor: 'text-cyan-600',
+      iconBg: 'bg-cyan-50',
       label: 'Avg Booking',
       value: formatCurrency(
         stats.monthRevenue / (stats.weekBookings || 1) * 4 // Rough estimate
@@ -146,8 +146,8 @@ export default function QuickStatsWidgets({
         return (
           <Wrapper key={index} {...wrapperProps}>
             <div
-              className={`rounded-lg border border-slate-700 bg-slate-800/50 p-4 transition-all ${
-                widget.link ? 'hover:border-cyan-500/50 hover:bg-slate-800/70' : ''
+              className={`rounded-lg border border-slate-200 bg-white p-4 transition-all ${
+                widget.link ? 'hover:border-cyan-300 hover:shadow-sm' : ''
               }`}
             >
               <div className="flex items-start justify-between">
@@ -155,12 +155,12 @@ export default function QuickStatsWidgets({
                   <div className="mb-1 text-xs font-medium uppercase tracking-wider text-slate-500">
                     {widget.label}
                   </div>
-                  <div className="mb-1 font-mono text-2xl font-bold text-slate-100">
+                  <div className="mb-1 font-mono text-2xl font-bold text-slate-900">
                     {widget.value}
                   </div>
                   <div
                     className={`text-xs ${
-                      widget.subtextColor || 'text-slate-400'
+                      widget.subtextColor || 'text-slate-500'
                     }`}
                   >
                     {widget.subtext}

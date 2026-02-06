@@ -85,7 +85,7 @@ function TripTypeForm({ tripType, onSubmit, onClose, error }: TripTypeFormProps)
     <form onSubmit={handleSubmit} className="p-6">
       {/* Error Message */}
       {displayError && (
-        <div className="mb-4 rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
+        <div className="mb-4 rounded-lg border border-rose-500/30 bg-rose-50 px-4 py-3 text-sm text-rose-600">
           {displayError}
         </div>
       )}
@@ -93,8 +93,8 @@ function TripTypeForm({ tripType, onSubmit, onClose, error }: TripTypeFormProps)
       <div className="space-y-4">
         {/* Title */}
         <div>
-          <label htmlFor="title" className="mb-1.5 block text-sm font-medium text-slate-300">
-            Title <span className="text-rose-400">*</span>
+          <label htmlFor="title" className="mb-1.5 block text-sm font-medium text-slate-600">
+            Title <span className="text-rose-600">*</span>
           </label>
           <input
             ref={titleInputRef}
@@ -103,7 +103,7 @@ function TripTypeForm({ tripType, onSubmit, onClose, error }: TripTypeFormProps)
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g., Half Day Inshore"
-            className="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-white placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-slate-900 placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
             disabled={isPending}
             autoFocus
             required
@@ -112,8 +112,8 @@ function TripTypeForm({ tripType, onSubmit, onClose, error }: TripTypeFormProps)
 
         {/* Duration */}
         <div>
-          <label htmlFor="duration" className="mb-1.5 block text-sm font-medium text-slate-300">
-            Duration (hours) <span className="text-rose-400">*</span>
+          <label htmlFor="duration" className="mb-1.5 block text-sm font-medium text-slate-600">
+            Duration (hours) <span className="text-rose-600">*</span>
           </label>
           <input
             type="number"
@@ -124,7 +124,7 @@ function TripTypeForm({ tripType, onSubmit, onClose, error }: TripTypeFormProps)
             step="0.5"
             min="0.5"
             max="24"
-            className="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 font-mono text-white placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 font-mono text-slate-900 placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
             disabled={isPending}
             required
           />
@@ -134,8 +134,8 @@ function TripTypeForm({ tripType, onSubmit, onClose, error }: TripTypeFormProps)
         <div className="grid grid-cols-2 gap-4">
           {/* Total Price */}
           <div>
-            <label htmlFor="price" className="mb-1.5 block text-sm font-medium text-slate-300">
-              Total Price ($) <span className="text-rose-400">*</span>
+            <label htmlFor="price" className="mb-1.5 block text-sm font-medium text-slate-600">
+              Total Price ($) <span className="text-rose-600">*</span>
             </label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
@@ -147,7 +147,7 @@ function TripTypeForm({ tripType, onSubmit, onClose, error }: TripTypeFormProps)
                 placeholder="0"
                 step="1"
                 min="0"
-                className="w-full rounded-lg border border-slate-700 bg-slate-800 py-2.5 pl-7 pr-4 font-mono text-white placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-7 pr-4 font-mono text-slate-900 placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
                 disabled={isPending}
                 required
               />
@@ -156,8 +156,8 @@ function TripTypeForm({ tripType, onSubmit, onClose, error }: TripTypeFormProps)
 
           {/* Deposit Amount */}
           <div>
-            <label htmlFor="deposit" className="mb-1.5 block text-sm font-medium text-slate-300">
-              Deposit ($) <span className="text-rose-400">*</span>
+            <label htmlFor="deposit" className="mb-1.5 block text-sm font-medium text-slate-600">
+              Deposit ($) <span className="text-rose-600">*</span>
             </label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
@@ -169,7 +169,7 @@ function TripTypeForm({ tripType, onSubmit, onClose, error }: TripTypeFormProps)
                 placeholder="0"
                 step="1"
                 min="0"
-                className="w-full rounded-lg border border-slate-700 bg-slate-800 py-2.5 pl-7 pr-4 font-mono text-white placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-7 pr-4 font-mono text-slate-900 placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
                 disabled={isPending}
                 required
               />
@@ -179,7 +179,7 @@ function TripTypeForm({ tripType, onSubmit, onClose, error }: TripTypeFormProps)
 
         {/* Description */}
         <div>
-          <label htmlFor="description" className="mb-1.5 block text-sm font-medium text-slate-300">
+          <label htmlFor="description" className="mb-1.5 block text-sm font-medium text-slate-600">
             Description <span className="text-slate-500">(optional)</span>
           </label>
           <textarea
@@ -188,7 +188,7 @@ function TripTypeForm({ tripType, onSubmit, onClose, error }: TripTypeFormProps)
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Brief description of what this trip includes..."
             rows={3}
-            className="w-full resize-none rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-white placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            className="w-full resize-none rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-slate-900 placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
             disabled={isPending}
           />
         </div>
@@ -200,7 +200,7 @@ function TripTypeForm({ tripType, onSubmit, onClose, error }: TripTypeFormProps)
           type="button"
           onClick={onClose}
           disabled={isPending}
-          className="rounded-lg border border-slate-600 px-4 py-2.5 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-800 disabled:opacity-50"
+          className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-white disabled:opacity-50"
         >
           Cancel
         </button>
@@ -276,19 +276,19 @@ export function TripTypeModal({
       aria-labelledby="modal-title"
     >
       <div
-        className="relative w-full max-w-md rounded-lg border border-slate-700 bg-slate-900"
+        className="relative w-full max-w-md rounded-lg border border-slate-200 bg-white"
         style={{
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
         }}
       >
         {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-slate-800 px-6 py-4">
-          <h2 id="modal-title" className="text-lg font-medium text-white">
+        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+          <h2 id="modal-title" className="text-lg font-medium text-slate-900">
             {tripType ? 'Edit Trip Type' : 'Add Trip Type'}
           </h2>
           <button
             onClick={onClose}
-            className="rounded-md p-1 text-slate-400 hover:bg-slate-800 hover:text-white"
+            className="rounded-md p-1 text-slate-400 hover:bg-white hover:text-slate-900"
           >
             <X className="h-5 w-5" />
           </button>

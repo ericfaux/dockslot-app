@@ -21,13 +21,13 @@ export interface BookingFilterState {
 }
 
 const STATUS_OPTIONS: { value: BookingStatus; label: string; color: string }[] = [
-  { value: 'pending_deposit', label: 'Awaiting Deposit', color: 'text-amber-400' },
-  { value: 'confirmed', label: 'Confirmed', color: 'text-emerald-400' },
-  { value: 'weather_hold', label: 'Weather Hold', color: 'text-amber-400' },
-  { value: 'rescheduled', label: 'Rescheduled', color: 'text-blue-400' },
+  { value: 'pending_deposit', label: 'Awaiting Deposit', color: 'text-amber-600' },
+  { value: 'confirmed', label: 'Confirmed', color: 'text-emerald-600' },
+  { value: 'weather_hold', label: 'Weather Hold', color: 'text-amber-600' },
+  { value: 'rescheduled', label: 'Rescheduled', color: 'text-blue-600' },
   { value: 'completed', label: 'Completed', color: 'text-slate-400' },
-  { value: 'cancelled', label: 'Cancelled', color: 'text-rose-400' },
-  { value: 'no_show', label: 'No Show', color: 'text-rose-400' },
+  { value: 'cancelled', label: 'Cancelled', color: 'text-rose-600' },
+  { value: 'no_show', label: 'No Show', color: 'text-rose-600' },
 ]
 
 const PAYMENT_OPTIONS = [
@@ -115,7 +115,7 @@ export default function BookingFilters({ onFilterChange, availableTags = [] }: B
           value={filters.search}
           onChange={(e) => handleSearchChange(e.target.value)}
           placeholder="Search bookings (guest name, email, phone)..."
-          className="w-full rounded-lg border border-slate-700 bg-slate-900/50 py-2.5 pl-10 pr-4 text-sm text-slate-200 placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+          className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-700 placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
         />
       </div>
 
@@ -123,7 +123,7 @@ export default function BookingFilters({ onFilterChange, availableTags = [] }: B
       <div className="flex items-center justify-between">
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="flex items-center gap-2 rounded px-3 py-2 text-sm text-cyan-400 hover:bg-slate-800/50"
+          className="flex items-center gap-2 rounded px-3 py-2 text-sm text-cyan-600 hover:bg-white"
         >
           <Tag className="h-4 w-4" />
           <span>
@@ -134,7 +134,7 @@ export default function BookingFilters({ onFilterChange, availableTags = [] }: B
         {hasActiveFilters && (
           <button
             onClick={clearAllFilters}
-            className="flex items-center gap-1 rounded px-3 py-2 text-sm text-slate-400 hover:bg-slate-800/50 hover:text-slate-300"
+            className="flex items-center gap-1 rounded px-3 py-2 text-sm text-slate-400 hover:bg-white hover:text-slate-700"
           >
             <X className="h-4 w-4" />
             Clear All
@@ -144,7 +144,7 @@ export default function BookingFilters({ onFilterChange, availableTags = [] }: B
 
       {/* Expanded Filters */}
       {isExpanded && (
-        <div className="space-y-4 rounded-lg border border-slate-700 bg-slate-800/30 p-4">
+        <div className="space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
           {/* Tags */}
           {availableTags.length > 0 && (
             <div>
@@ -159,8 +159,8 @@ export default function BookingFilters({ onFilterChange, availableTags = [] }: B
                     onClick={() => toggleTag(tag)}
                     className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                       filters.tags.includes(tag)
-                        ? 'bg-cyan-500/30 text-cyan-300 ring-1 ring-cyan-500'
-                        : 'bg-slate-700/50 text-slate-400 hover:bg-slate-700'
+                        ? 'bg-cyan-500/30 text-cyan-600 ring-1 ring-cyan-500'
+                        : 'bg-slate-100 text-slate-400 hover:bg-slate-100'
                     }`}
                   >
                     {tag}
@@ -183,8 +183,8 @@ export default function BookingFilters({ onFilterChange, availableTags = [] }: B
                   onClick={() => toggleStatus(option.value)}
                   className={`rounded px-3 py-1 text-xs font-medium transition-colors ${
                     filters.statuses.includes(option.value)
-                      ? 'bg-slate-700 text-slate-200 ring-1 ring-slate-500'
-                      : `bg-slate-700/30 ${option.color} hover:bg-slate-700/50`
+                      ? 'bg-slate-100 text-slate-700 ring-1 ring-slate-500'
+                      : `bg-slate-50 ${option.color} hover:bg-slate-100`
                   }`}
                 >
                   {option.label}
@@ -206,8 +206,8 @@ export default function BookingFilters({ onFilterChange, availableTags = [] }: B
                   onClick={() => togglePaymentStatus(option.value)}
                   className={`rounded px-3 py-1 text-xs font-medium transition-colors ${
                     filters.paymentStatus.includes(option.value)
-                      ? 'bg-slate-700 text-slate-200 ring-1 ring-slate-500'
-                      : 'bg-slate-700/30 text-slate-400 hover:bg-slate-700/50'
+                      ? 'bg-slate-100 text-slate-700 ring-1 ring-slate-500'
+                      : 'bg-slate-50 text-slate-400 hover:bg-slate-100'
                   }`}
                 >
                   {option.label}
@@ -231,7 +231,7 @@ export default function BookingFilters({ onFilterChange, availableTags = [] }: B
                     dateRange: { ...filters.dateRange, start: e.target.value || null },
                   })
                 }
-                className="rounded border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm text-slate-200 focus:border-cyan-500 focus:outline-none"
+                className="rounded border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-cyan-500 focus:outline-none"
               />
               <input
                 type="date"
@@ -241,7 +241,7 @@ export default function BookingFilters({ onFilterChange, availableTags = [] }: B
                     dateRange: { ...filters.dateRange, end: e.target.value || null },
                   })
                 }
-                className="rounded border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm text-slate-200 focus:border-cyan-500 focus:outline-none"
+                className="rounded border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-cyan-500 focus:outline-none"
               />
             </div>
           </div>
@@ -254,7 +254,7 @@ export default function BookingFilters({ onFilterChange, availableTags = [] }: B
           {filters.tags.map((tag) => (
             <span
               key={tag}
-              className="flex items-center gap-1 rounded-full bg-cyan-500/20 px-3 py-1 text-xs font-medium text-cyan-300"
+              className="flex items-center gap-1 rounded-full bg-cyan-50 px-3 py-1 text-xs font-medium text-cyan-600"
             >
               <Tag className="h-3 w-3" />
               {tag}
@@ -268,7 +268,7 @@ export default function BookingFilters({ onFilterChange, availableTags = [] }: B
             return (
               <span
                 key={status}
-                className={`flex items-center gap-1 rounded bg-slate-700/50 px-3 py-1 text-xs font-medium ${option?.color}`}
+                className={`flex items-center gap-1 rounded bg-slate-100 px-3 py-1 text-xs font-medium ${option?.color}`}
               >
                 {option?.label}
                 <button onClick={() => toggleStatus(status)} className="ml-1 hover:opacity-70">

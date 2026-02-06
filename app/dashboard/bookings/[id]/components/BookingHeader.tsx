@@ -127,11 +127,11 @@ export function BookingHeader({ booking, onRefresh }: BookingHeaderProps) {
   return (
     <section
       aria-label="Booking Header"
-      className="rounded-lg border border-slate-700 bg-gradient-to-br from-slate-800/80 to-slate-900/80 p-6 print:border-slate-300 print:bg-white"
+      className="rounded-lg border border-slate-200 bg-gradient-to-br from-slate-800/80 to-slate-900/80 p-6 print:border-slate-300 print:bg-white"
     >
       {/* Error Alert */}
       {actionError && (
-        <div className="mb-4 flex items-center gap-2 rounded border border-rose-500/50 bg-rose-500/10 p-3 text-sm text-rose-400">
+        <div className="mb-4 flex items-center gap-2 rounded border border-rose-500/50 bg-rose-50 p-3 text-sm text-rose-600">
           <XCircle className="h-4 w-4" />
           {actionError}
           <button
@@ -151,7 +151,7 @@ export function BookingHeader({ booking, onRefresh }: BookingHeaderProps) {
             <StatusBadge status={booking.status} size="lg" />
             <PaymentBadge status={booking.payment_status} size="lg" />
             {booking.weather_hold_reason && (
-              <span className="flex items-center gap-1 rounded-full bg-amber-500/20 px-3 py-1 text-sm text-amber-300">
+              <span className="flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-sm text-amber-600">
                 <CloudRain className="h-4 w-4" />
                 Weather Hold
               </span>
@@ -160,7 +160,7 @@ export function BookingHeader({ booking, onRefresh }: BookingHeaderProps) {
 
           {/* Trip Type */}
           <div>
-            <h1 className="text-2xl font-bold text-slate-100 print:text-black">
+            <h1 className="text-2xl font-bold text-slate-800 print:text-black">
               {booking.trip_type?.title || 'Charter Trip'}
             </h1>
             {booking.vessel && (
@@ -173,20 +173,20 @@ export function BookingHeader({ booking, onRefresh }: BookingHeaderProps) {
 
           {/* Date/Time and Party Size */}
           <div className="flex flex-wrap gap-4 text-sm">
-            <div className="flex items-center gap-2 text-slate-300 print:text-slate-700">
-              <Calendar className="h-4 w-4 text-cyan-400 print:text-cyan-600" />
+            <div className="flex items-center gap-2 text-slate-600 print:text-slate-700">
+              <Calendar className="h-4 w-4 text-cyan-600 print:text-cyan-600" />
               <span className="font-medium">
                 {format(scheduledDate, 'EEEE, MMMM d, yyyy')}
               </span>
             </div>
-            <div className="flex items-center gap-2 text-slate-300 print:text-slate-700">
-              <Clock className="h-4 w-4 text-cyan-400 print:text-cyan-600" />
+            <div className="flex items-center gap-2 text-slate-600 print:text-slate-700">
+              <Clock className="h-4 w-4 text-cyan-600 print:text-cyan-600" />
               <span>
                 {format(scheduledDate, 'h:mm a')} - {format(scheduledEndDate, 'h:mm a')}
               </span>
             </div>
-            <div className="flex items-center gap-2 text-slate-300 print:text-slate-700">
-              <Users className="h-4 w-4 text-cyan-400 print:text-cyan-600" />
+            <div className="flex items-center gap-2 text-slate-600 print:text-slate-700">
+              <Users className="h-4 w-4 text-cyan-600 print:text-cyan-600" />
               <span>{booking.party_size} {booking.party_size === 1 ? 'guest' : 'guests'}</span>
             </div>
           </div>
@@ -203,7 +203,7 @@ export function BookingHeader({ booking, onRefresh }: BookingHeaderProps) {
 
           {/* Weather Hold Reason */}
           {booking.weather_hold_reason && (
-            <div className="flex items-center gap-2 rounded bg-amber-500/10 px-3 py-2 text-sm text-amber-300">
+            <div className="flex items-center gap-2 rounded bg-amber-50 px-3 py-2 text-sm text-amber-600">
               <CloudRain className="h-4 w-4" />
               <span>{booking.weather_hold_reason}</span>
             </div>
@@ -217,7 +217,7 @@ export function BookingHeader({ booking, onRefresh }: BookingHeaderProps) {
             <>
               <button
                 onClick={() => router.push(`/dashboard/schedule?booking=${booking.id}`)}
-                className="flex items-center gap-2 rounded-lg border border-slate-600 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-700"
+                className="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100"
               >
                 <Edit2 className="h-4 w-4" />
                 Edit
@@ -227,7 +227,7 @@ export function BookingHeader({ booking, onRefresh }: BookingHeaderProps) {
                 <button
                   onClick={handleWeatherHold}
                   disabled={isProcessing}
-                  className="flex items-center gap-2 rounded-lg border border-amber-500/50 bg-amber-500/10 px-4 py-2 text-sm font-medium text-amber-300 transition-colors hover:bg-amber-500/20 disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-lg border border-amber-500/50 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-600 transition-colors hover:bg-amber-50 disabled:opacity-50"
                 >
                   <CloudRain className="h-4 w-4" />
                   Weather Hold
@@ -238,7 +238,7 @@ export function BookingHeader({ booking, onRefresh }: BookingHeaderProps) {
                 <button
                   onClick={handleComplete}
                   disabled={isProcessing}
-                  className="flex items-center gap-2 rounded-lg border border-emerald-500/50 bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-300 transition-colors hover:bg-emerald-500/20 disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-lg border border-emerald-500/50 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-600 transition-colors hover:bg-emerald-50 disabled:opacity-50"
                 >
                   <CheckCircle className="h-4 w-4" />
                   Complete
@@ -251,7 +251,7 @@ export function BookingHeader({ booking, onRefresh }: BookingHeaderProps) {
           <div className="relative">
             <button
               onClick={() => setShowActions(!showActions)}
-              className="flex items-center gap-2 rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-700"
+              className="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100"
             >
               <MoreHorizontal className="h-4 w-4" />
             </button>
@@ -262,17 +262,17 @@ export function BookingHeader({ booking, onRefresh }: BookingHeaderProps) {
                   className="fixed inset-0 z-40"
                   onClick={() => setShowActions(false)}
                 />
-                <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-lg border border-slate-700 bg-slate-900 py-2 shadow-xl">
+                <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-lg border border-slate-200 bg-white py-2 shadow-xl">
                   <button
                     onClick={handleDuplicate}
-                    className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-slate-300 hover:bg-slate-800"
+                    className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-slate-600 hover:bg-white"
                   >
                     <Copy className="h-4 w-4" />
                     Duplicate Booking
                   </button>
                   <button
                     onClick={() => router.push(`/dashboard/bookings/${booking.id}/refund`)}
-                    className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-slate-300 hover:bg-slate-800"
+                    className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-slate-600 hover:bg-white"
                     disabled={booking.deposit_paid_cents === 0}
                   >
                     <DollarSign className="h-4 w-4" />
@@ -280,18 +280,18 @@ export function BookingHeader({ booking, onRefresh }: BookingHeaderProps) {
                   </button>
                   <a
                     href={`/dashboard/schedule?date=${format(scheduledDate, 'yyyy-MM-dd')}`}
-                    className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-slate-300 hover:bg-slate-800"
+                    className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-slate-600 hover:bg-white"
                   >
                     <ExternalLink className="h-4 w-4" />
                     View on Calendar
                   </a>
                   {canModify && (
                     <>
-                      <div className="my-2 border-t border-slate-700" />
+                      <div className="my-2 border-t border-slate-200" />
                       <button
                         onClick={handleCancel}
                         disabled={isProcessing}
-                        className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-rose-400 hover:bg-slate-800 disabled:opacity-50"
+                        className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-rose-600 hover:bg-white disabled:opacity-50"
                       >
                         <XCircle className="h-4 w-4" />
                         Cancel Booking
@@ -306,17 +306,17 @@ export function BookingHeader({ booking, onRefresh }: BookingHeaderProps) {
       </div>
 
       {/* Price Summary Bar */}
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-slate-700 pt-4 print:border-slate-300">
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 pt-4 print:border-slate-300">
         <div className="flex flex-wrap gap-6 text-sm">
           <div>
             <span className="text-slate-500">Total</span>
-            <div className="font-mono text-lg font-semibold text-slate-200 print:text-black">
+            <div className="font-mono text-lg font-semibold text-slate-700 print:text-black">
               ${(booking.total_price_cents / 100).toFixed(2)}
             </div>
           </div>
           <div>
             <span className="text-slate-500">Deposit Paid</span>
-            <div className="font-mono text-lg font-semibold text-emerald-400 print:text-emerald-600">
+            <div className="font-mono text-lg font-semibold text-emerald-600 print:text-emerald-600">
               ${(booking.deposit_paid_cents / 100).toFixed(2)}
             </div>
           </div>
@@ -324,8 +324,8 @@ export function BookingHeader({ booking, onRefresh }: BookingHeaderProps) {
             <span className="text-slate-500">Balance Due</span>
             <div className={`font-mono text-lg font-semibold ${
               booking.balance_due_cents > 0
-                ? 'text-amber-400 print:text-amber-600'
-                : 'text-emerald-400 print:text-emerald-600'
+                ? 'text-amber-600 print:text-amber-600'
+                : 'text-emerald-600 print:text-emerald-600'
             }`}>
               ${(booking.balance_due_cents / 100).toFixed(2)}
             </div>
@@ -335,17 +335,17 @@ export function BookingHeader({ booking, onRefresh }: BookingHeaderProps) {
         {/* Balance Status Badge */}
         <div className="print:hidden">
           {booking.payment_status === 'fully_paid' ? (
-            <span className="flex items-center gap-2 rounded-full bg-emerald-500/20 px-4 py-2 text-sm font-medium text-emerald-300">
+            <span className="flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-600">
               <CheckCircle className="h-4 w-4" />
               Paid in Full
             </span>
           ) : booking.payment_status === 'deposit_paid' ? (
-            <span className="flex items-center gap-2 rounded-full bg-amber-500/20 px-4 py-2 text-sm font-medium text-amber-300">
+            <span className="flex items-center gap-2 rounded-full bg-amber-50 px-4 py-2 text-sm font-medium text-amber-600">
               <DollarSign className="h-4 w-4" />
               ${(booking.balance_due_cents / 100).toFixed(2)} balance due
             </span>
           ) : (
-            <span className="flex items-center gap-2 rounded-full bg-rose-500/20 px-4 py-2 text-sm font-medium text-rose-300">
+            <span className="flex items-center gap-2 rounded-full bg-rose-50 px-4 py-2 text-sm font-medium text-rose-600">
               <DollarSign className="h-4 w-4" />
               Deposit pending
             </span>

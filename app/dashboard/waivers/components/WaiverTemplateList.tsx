@@ -79,15 +79,15 @@ export function WaiverTemplateList({ templates: initialTemplates }: Props) {
 
   if (templates.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed border-slate-700 bg-slate-900/50 p-12 text-center">
+      <div className="rounded-lg border border-dashed border-slate-200 bg-white p-12 text-center">
         <FileSignature className="mx-auto h-12 w-12 text-slate-500" />
-        <h3 className="mt-4 text-lg font-medium text-white">No waiver templates yet</h3>
+        <h3 className="mt-4 text-lg font-medium text-slate-900">No waiver templates yet</h3>
         <p className="mt-2 text-sm text-slate-400">
           Create your first waiver template to require passengers to sign before their trip.
         </p>
         <Link
           href="/dashboard/waivers/new"
-          className="mt-6 inline-flex items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-medium text-slate-900 transition-colors hover:bg-cyan-400"
+          className="mt-6 inline-flex items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-cyan-400"
         >
           <FileSignature className="h-4 w-4" />
           Create Waiver Template
@@ -104,7 +104,7 @@ export function WaiverTemplateList({ templates: initialTemplates }: Props) {
           className={`rounded-lg border transition-colors ${
             template.is_active
               ? 'border-cyan-500/30 bg-cyan-500/5'
-              : 'border-slate-700 bg-slate-800'
+              : 'border-slate-200 bg-white'
           }`}
         >
           <div className="p-4">
@@ -112,7 +112,7 @@ export function WaiverTemplateList({ templates: initialTemplates }: Props) {
               {/* Template Info */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-semibold text-white truncate">
+                  <h3 className="text-lg font-semibold text-slate-900 truncate">
                     {template.title}
                   </h3>
                   {template.is_active && (
@@ -145,7 +145,7 @@ export function WaiverTemplateList({ templates: initialTemplates }: Props) {
                 <button
                   onClick={() => handleToggle(template.id)}
                   disabled={isPendingFor(template.id, 'toggle')}
-                  className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors hover:bg-slate-700 disabled:opacity-50"
+                  className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors hover:bg-slate-100 disabled:opacity-50"
                   title={template.is_active ? 'Deactivate' : 'Activate'}
                 >
                   {isPendingFor(template.id, 'toggle') ? (
@@ -160,7 +160,7 @@ export function WaiverTemplateList({ templates: initialTemplates }: Props) {
                 {/* Preview */}
                 <Link
                   href={`/dashboard/waivers/${template.id}/preview`}
-                  className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-700 hover:text-white"
+                  className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900"
                 >
                   <Eye className="h-4 w-4" />
                 </Link>
@@ -168,7 +168,7 @@ export function WaiverTemplateList({ templates: initialTemplates }: Props) {
                 {/* Edit */}
                 <Link
                   href={`/dashboard/waivers/${template.id}/edit`}
-                  className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-700 hover:text-white"
+                  className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900"
                 >
                   <Edit className="h-4 w-4" />
                 </Link>
@@ -177,7 +177,7 @@ export function WaiverTemplateList({ templates: initialTemplates }: Props) {
                 <button
                   onClick={() => handleDelete(template.id)}
                   disabled={isPendingFor(template.id, 'delete')}
-                  className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-700 hover:text-rose-400 disabled:opacity-50"
+                  className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-100 hover:text-rose-600 disabled:opacity-50"
                 >
                   {isPendingFor(template.id, 'delete') ? (
                     <Loader2 className="h-4 w-4 animate-spin" />

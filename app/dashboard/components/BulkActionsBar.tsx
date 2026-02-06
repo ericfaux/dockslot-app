@@ -90,15 +90,15 @@ export default function BulkActionsBar({
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-700 bg-slate-900 p-4 shadow-2xl">
+    <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white p-4 shadow-2xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
         {/* Left: Selection count */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-cyan-500/20">
-              <Check className="h-4 w-4 text-cyan-400" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-cyan-50">
+              <Check className="h-4 w-4 text-cyan-600" />
             </div>
-            <span className="font-medium text-slate-200">
+            <span className="font-medium text-slate-700">
               {selectedCount} selected
             </span>
           </div>
@@ -107,8 +107,8 @@ export default function BulkActionsBar({
             <div
               className={`rounded px-3 py-1 text-sm ${
                 result.type === 'success'
-                  ? 'bg-emerald-500/20 text-emerald-400'
-                  : 'bg-rose-500/20 text-rose-400'
+                  ? 'bg-emerald-50 text-emerald-600'
+                  : 'bg-rose-50 text-rose-600'
               }`}
             >
               {result.message}
@@ -123,7 +123,7 @@ export default function BulkActionsBar({
             <button
               onClick={() => setShowTagMenu(!showTagMenu)}
               disabled={isProcessing}
-              className="flex items-center gap-2 rounded border border-slate-600 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-700 disabled:opacity-50"
+              className="flex items-center gap-2 rounded border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 disabled:opacity-50"
             >
               <Tag className="h-4 w-4" />
               Add Tag
@@ -135,7 +135,7 @@ export default function BulkActionsBar({
                   className="fixed inset-0"
                   onClick={() => setShowTagMenu(false)}
                 />
-                <div className="absolute bottom-full right-0 mb-2 w-64 rounded-lg border border-slate-700 bg-slate-800 p-3 shadow-xl">
+                <div className="absolute bottom-full right-0 mb-2 w-64 rounded-lg border border-slate-200 bg-white p-3 shadow-xl">
                   <div className="mb-2 text-xs font-medium text-slate-400">
                     Select tag to add
                   </div>
@@ -144,13 +144,13 @@ export default function BulkActionsBar({
                       <button
                         key={tag}
                         onClick={() => handleAddTag(tag)}
-                        className="rounded px-2 py-1 text-left text-sm text-slate-300 hover:bg-slate-700"
+                        className="rounded px-2 py-1 text-left text-sm text-slate-600 hover:bg-slate-100"
                       >
                         {tag}
                       </button>
                     ))}
                   </div>
-                  <div className="flex gap-2 border-t border-slate-700 pt-2">
+                  <div className="flex gap-2 border-t border-slate-200 pt-2">
                     <input
                       type="text"
                       value={customTag}
@@ -159,7 +159,7 @@ export default function BulkActionsBar({
                         if (e.key === 'Enter') handleAddCustomTag()
                       }}
                       placeholder="Custom tag..."
-                      className="flex-1 rounded border border-slate-600 bg-slate-900 px-2 py-1 text-sm text-slate-200 placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+                      className="flex-1 rounded border border-slate-300 bg-white px-2 py-1 text-sm text-slate-700 placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
                     />
                     <button
                       onClick={handleAddCustomTag}
@@ -187,7 +187,7 @@ export default function BulkActionsBar({
               }
             }}
             disabled={isProcessing}
-            className="flex items-center gap-2 rounded border border-rose-600 bg-rose-500/10 px-4 py-2 text-sm font-medium text-rose-400 transition-colors hover:bg-rose-500/20 disabled:opacity-50"
+            className="flex items-center gap-2 rounded border border-rose-600 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-600 transition-colors hover:bg-rose-50 disabled:opacity-50"
           >
             <XCircle className="h-4 w-4" />
             Cancel All
@@ -197,7 +197,7 @@ export default function BulkActionsBar({
           <button
             onClick={onClearSelection}
             disabled={isProcessing}
-            className="flex items-center gap-2 rounded border border-slate-600 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-700 disabled:opacity-50"
+            className="flex items-center gap-2 rounded border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 disabled:opacity-50"
           >
             <X className="h-4 w-4" />
             Clear

@@ -114,20 +114,20 @@ export default function WeatherAlertWidget({
   // No coordinates set - show setup message
   if (!lat || !lon) {
     return (
-      <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-4">
+      <div className="rounded-lg border border-slate-200 bg-white p-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-700">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
             <CloudRain className="h-5 w-5 text-slate-400" />
           </div>
           <div className="flex-1">
-            <h3 className="font-medium text-slate-300">Weather Alerts</h3>
+            <h3 className="font-medium text-slate-700">Weather Alerts</h3>
             <p className="text-sm text-slate-500">
               Set your meeting spot location in Settings to enable weather monitoring
             </p>
           </div>
           <Link
             href="/dashboard/settings"
-            className="rounded-lg bg-slate-700 px-3 py-2 text-sm font-medium text-slate-300 hover:bg-slate-600 transition-colors"
+            className="rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 transition-colors"
           >
             Settings
           </Link>
@@ -139,10 +139,10 @@ export default function WeatherAlertWidget({
   // Loading state
   if (isLoading && !conditions) {
     return (
-      <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-4">
+      <div className="rounded-lg border border-slate-200 bg-white p-4">
         <div className="flex items-center gap-3">
-          <Loader2 className="h-5 w-5 animate-spin text-cyan-400" />
-          <span className="text-sm text-slate-400">Checking marine conditions...</span>
+          <Loader2 className="h-5 w-5 animate-spin text-cyan-600" />
+          <span className="text-sm text-slate-500">Checking marine conditions...</span>
         </div>
       </div>
     );
@@ -151,15 +151,15 @@ export default function WeatherAlertWidget({
   // Error state
   if (error) {
     return (
-      <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-4">
+      <div className="rounded-lg border border-rose-200 bg-rose-50 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <AlertTriangle className="h-5 w-5 text-rose-400" />
-            <span className="text-sm text-rose-300">{error}</span>
+            <AlertTriangle className="h-5 w-5 text-rose-600" />
+            <span className="text-sm text-rose-700">{error}</span>
           </div>
           <button
             onClick={fetchWeather}
-            className="rounded-lg p-2 text-slate-400 hover:bg-slate-700 hover:text-white transition-colors"
+            className="rounded-lg p-2 text-slate-400 hover:bg-white hover:text-slate-600 transition-colors"
           >
             <RefreshCw className="h-4 w-4" />
           </button>
@@ -171,31 +171,31 @@ export default function WeatherAlertWidget({
   // Dangerous conditions - prominent red alert
   if (conditions?.recommendation === 'dangerous') {
     return (
-      <div className="rounded-lg border-2 border-rose-500/50 bg-gradient-to-r from-rose-500/20 to-rose-600/10 p-4 shadow-lg shadow-rose-500/10">
+      <div className="rounded-lg border-2 border-rose-300 bg-gradient-to-r from-rose-50 to-rose-50/50 p-4 shadow-sm">
         <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-rose-500/20 animate-pulse">
-            <AlertTriangle className="h-6 w-6 text-rose-400" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-rose-100 animate-pulse">
+            <AlertTriangle className="h-6 w-6 text-rose-600" />
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="font-bold text-rose-300 text-lg">Dangerous Weather Alert</h3>
+              <h3 className="font-bold text-rose-800 text-lg">Dangerous Weather Alert</h3>
             </div>
-            <p className="text-rose-200/80 text-sm mb-3">
+            <p className="text-rose-700 text-sm mb-3">
               {conditions.alerts[0]?.headline || conditions.reason || 'Unsafe conditions detected'}
             </p>
 
             {/* Quick Stats */}
             <div className="flex flex-wrap items-center gap-4 mb-4">
               {conditions.windSpeed && (
-                <div className="flex items-center gap-2 rounded-lg bg-rose-500/20 px-3 py-1.5">
-                  <Wind className="h-4 w-4 text-rose-300" />
-                  <span className="text-sm font-medium text-rose-200">{conditions.windSpeed}</span>
+                <div className="flex items-center gap-2 rounded-lg bg-rose-100 px-3 py-1.5">
+                  <Wind className="h-4 w-4 text-rose-700" />
+                  <span className="text-sm font-medium text-rose-800">{conditions.windSpeed}</span>
                 </div>
               )}
               {conditions.alerts.length > 0 && (
-                <div className="flex items-center gap-2 rounded-lg bg-rose-500/20 px-3 py-1.5">
-                  <AlertTriangle className="h-4 w-4 text-rose-300" />
-                  <span className="text-sm font-medium text-rose-200">
+                <div className="flex items-center gap-2 rounded-lg bg-rose-100 px-3 py-1.5">
+                  <AlertTriangle className="h-4 w-4 text-rose-700" />
+                  <span className="text-sm font-medium text-rose-800">
                     {conditions.alerts.length} Active Alert{conditions.alerts.length !== 1 ? 's' : ''}
                   </span>
                 </div>
@@ -206,7 +206,7 @@ export default function WeatherAlertWidget({
             {upcomingBookingsCount > 0 && (
               <Link
                 href={get48hBookingsUrl()}
-                className="inline-flex items-center gap-2 rounded-lg bg-rose-500 px-4 py-2.5 font-semibold text-white hover:bg-rose-600 transition-colors"
+                className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2.5 font-semibold text-white hover:bg-rose-700 transition-colors"
               >
                 <Calendar className="h-4 w-4" />
                 Review {upcomingBookingsCount} Upcoming Booking{upcomingBookingsCount !== 1 ? 's' : ''}
@@ -217,7 +217,7 @@ export default function WeatherAlertWidget({
           <button
             onClick={fetchWeather}
             disabled={isLoading}
-            className="rounded-lg p-2 text-rose-300 hover:bg-rose-500/20 transition-colors disabled:opacity-50"
+            className="rounded-lg p-2 text-rose-400 hover:bg-rose-100 transition-colors disabled:opacity-50"
           >
             <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
           </button>
@@ -229,19 +229,19 @@ export default function WeatherAlertWidget({
   // Caution conditions - amber warning
   if (conditions?.recommendation === 'caution' || isWindConcerning) {
     return (
-      <div className="rounded-lg border border-amber-500/30 bg-gradient-to-r from-amber-500/15 to-amber-600/5 p-4">
+      <div className="rounded-lg border border-amber-200 bg-gradient-to-r from-amber-50 to-amber-50/50 p-4">
         <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/20">
-            <CloudRain className="h-6 w-6 text-amber-400" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100">
+            <CloudRain className="h-6 w-6 text-amber-600" />
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="font-bold text-amber-300">Weather Advisory</h3>
-              <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs font-medium text-amber-400">
+              <h3 className="font-bold text-amber-800">Weather Advisory</h3>
+              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
                 Review Recommended
               </span>
             </div>
-            <p className="text-amber-200/70 text-sm mb-3">
+            <p className="text-amber-700 text-sm mb-3">
               {conditions?.alerts[0]?.headline ||
                conditions?.reason ||
                (isWindConcerning ? `Winds ${conditions?.windSpeed} - consider weather holds for affected trips` : 'Weather conditions may affect trips')}
@@ -250,15 +250,15 @@ export default function WeatherAlertWidget({
             {/* Quick Stats */}
             <div className="flex flex-wrap items-center gap-3 mb-4">
               {conditions?.windSpeed && (
-                <div className="flex items-center gap-2 rounded-lg bg-amber-500/10 border border-amber-500/20 px-3 py-1.5">
-                  <Wind className="h-4 w-4 text-amber-400" />
-                  <span className="text-sm font-medium text-amber-300">{conditions.windSpeed}</span>
+                <div className="flex items-center gap-2 rounded-lg bg-amber-100 border border-amber-200 px-3 py-1.5">
+                  <Wind className="h-4 w-4 text-amber-700" />
+                  <span className="text-sm font-medium text-amber-800">{conditions.windSpeed}</span>
                 </div>
               )}
               {conditions?.forecast?.periods[0] && (
-                <div className="flex items-center gap-2 rounded-lg bg-slate-700/50 px-3 py-1.5">
-                  <Cloud className="h-4 w-4 text-slate-400" />
-                  <span className="text-sm text-slate-300">{conditions.forecast.periods[0].shortForecast}</span>
+                <div className="flex items-center gap-2 rounded-lg bg-white border border-slate-200 px-3 py-1.5">
+                  <Cloud className="h-4 w-4 text-slate-500" />
+                  <span className="text-sm text-slate-600">{conditions.forecast.periods[0].shortForecast}</span>
                 </div>
               )}
             </div>
@@ -267,7 +267,7 @@ export default function WeatherAlertWidget({
             {upcomingBookingsCount > 0 && (
               <Link
                 href={get48hBookingsUrl()}
-                className="inline-flex items-center gap-2 rounded-lg bg-amber-500/20 px-4 py-2 font-medium text-amber-300 hover:bg-amber-500/30 transition-colors"
+                className="inline-flex items-center gap-2 rounded-lg bg-amber-100 px-4 py-2 font-medium text-amber-800 hover:bg-amber-200 transition-colors"
               >
                 <Calendar className="h-4 w-4" />
                 Review {upcomingBookingsCount} Booking{upcomingBookingsCount !== 1 ? 's' : ''} in Next 48h
@@ -278,7 +278,7 @@ export default function WeatherAlertWidget({
           <button
             onClick={fetchWeather}
             disabled={isLoading}
-            className="rounded-lg p-2 text-amber-400 hover:bg-amber-500/20 transition-colors disabled:opacity-50"
+            className="rounded-lg p-2 text-amber-500 hover:bg-amber-100 transition-colors disabled:opacity-50"
           >
             <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
           </button>
@@ -289,15 +289,15 @@ export default function WeatherAlertWidget({
 
   // Safe conditions - compact green indicator
   return (
-    <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4">
+    <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/20">
-            <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100">
+            <CheckCircle2 className="h-5 w-5 text-emerald-600" />
           </div>
           <div>
-            <h3 className="font-medium text-emerald-300">Good Conditions</h3>
-            <div className="flex items-center gap-3 text-sm text-slate-400">
+            <h3 className="font-medium text-emerald-800">Good Conditions</h3>
+            <div className="flex items-center gap-3 text-sm text-slate-500">
               {conditions?.windSpeed && (
                 <span className="flex items-center gap-1">
                   <Wind className="h-3.5 w-3.5" />
@@ -315,14 +315,14 @@ export default function WeatherAlertWidget({
         </div>
         <div className="flex items-center gap-2">
           {lastChecked && (
-            <span className="text-xs text-slate-500">
+            <span className="text-xs text-slate-400">
               Updated {format(lastChecked, 'h:mm a')}
             </span>
           )}
           <button
             onClick={fetchWeather}
             disabled={isLoading}
-            className="rounded-lg p-2 text-slate-400 hover:bg-slate-700 hover:text-white transition-colors disabled:opacity-50"
+            className="rounded-lg p-2 text-slate-400 hover:bg-white hover:text-slate-600 transition-colors disabled:opacity-50"
           >
             <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
           </button>

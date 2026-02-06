@@ -86,26 +86,26 @@ export function TripReportForm({ vessels, booking }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <div className="flex items-center gap-2 rounded-lg bg-rose-500/10 p-4 text-rose-400">
+        <div className="flex items-center gap-2 rounded-lg bg-rose-50 p-4 text-rose-600">
           <AlertCircle className="h-5 w-5" />
           {error}
         </div>
       )}
 
-      <div className="rounded-lg border border-slate-700 bg-slate-800 p-6">
-        <h2 className="mb-4 text-lg font-semibold text-white">Trip Details</h2>
+      <div className="rounded-lg border border-slate-200 bg-white p-6">
+        <h2 className="mb-4 text-lg font-semibold text-slate-900">Trip Details</h2>
 
         <div className="grid gap-4 sm:grid-cols-2">
           {/* Vessel */}
           <div>
-            <label className="block text-sm font-medium text-slate-300">Vessel</label>
+            <label className="block text-sm font-medium text-slate-600">Vessel</label>
             <select
               value={formData.vesselId}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, vesselId: e.target.value }))
               }
               required
-              className="mt-1 w-full rounded-lg border border-slate-600 bg-slate-700 px-4 py-2 text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+              className="mt-1 w-full rounded-lg border border-slate-300 bg-slate-100 px-4 py-2 text-slate-900 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
             >
               {vessels.map((vessel) => (
                 <option key={vessel.id} value={vessel.id}>
@@ -117,7 +117,7 @@ export function TripReportForm({ vessels, booking }: Props) {
 
           {/* Passengers */}
           <div>
-            <label className="block text-sm font-medium text-slate-300">
+            <label className="block text-sm font-medium text-slate-600">
               Actual Passengers
             </label>
             <input
@@ -132,13 +132,13 @@ export function TripReportForm({ vessels, booking }: Props) {
                 }))
               }
               required
-              className="mt-1 w-full rounded-lg border border-slate-600 bg-slate-700 px-4 py-2 text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+              className="mt-1 w-full rounded-lg border border-slate-300 bg-slate-100 px-4 py-2 text-slate-900 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
             />
           </div>
 
           {/* Departure Time */}
           <div>
-            <label className="block text-sm font-medium text-slate-300">
+            <label className="block text-sm font-medium text-slate-600">
               Departure Time
             </label>
             <input
@@ -148,13 +148,13 @@ export function TripReportForm({ vessels, booking }: Props) {
                 setFormData((prev) => ({ ...prev, departureTime: e.target.value }))
               }
               required
-              className="mt-1 w-full rounded-lg border border-slate-600 bg-slate-700 px-4 py-2 text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+              className="mt-1 w-full rounded-lg border border-slate-300 bg-slate-100 px-4 py-2 text-slate-900 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
             />
           </div>
 
           {/* Arrival Time */}
           <div>
-            <label className="block text-sm font-medium text-slate-300">
+            <label className="block text-sm font-medium text-slate-600">
               Arrival Time
             </label>
             <input
@@ -164,20 +164,20 @@ export function TripReportForm({ vessels, booking }: Props) {
                 setFormData((prev) => ({ ...prev, arrivalTime: e.target.value }))
               }
               required
-              className="mt-1 w-full rounded-lg border border-slate-600 bg-slate-700 px-4 py-2 text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+              className="mt-1 w-full rounded-lg border border-slate-300 bg-slate-100 px-4 py-2 text-slate-900 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
             />
           </div>
         </div>
       </div>
 
       {/* Conditions */}
-      <div className="rounded-lg border border-slate-700 bg-slate-800 p-6">
-        <h2 className="mb-4 text-lg font-semibold text-white">Conditions</h2>
+      <div className="rounded-lg border border-slate-200 bg-white p-6">
+        <h2 className="mb-4 text-lg font-semibold text-slate-900">Conditions</h2>
 
         <div className="space-y-4">
           {/* Conditions Summary */}
           <div>
-            <label className="block text-sm font-medium text-slate-300">
+            <label className="block text-sm font-medium text-slate-600">
               Sea Conditions
             </label>
             <select
@@ -186,7 +186,7 @@ export function TripReportForm({ vessels, booking }: Props) {
                 setFormData((prev) => ({ ...prev, conditionsSummary: e.target.value }))
               }
               required
-              className="mt-1 w-full rounded-lg border border-slate-600 bg-slate-700 px-4 py-2 text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+              className="mt-1 w-full rounded-lg border border-slate-300 bg-slate-100 px-4 py-2 text-slate-900 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
             >
               <option value="Calm">Calm (&lt; 1 ft seas)</option>
               <option value="Moderate">Moderate (1-3 ft seas)</option>
@@ -198,8 +198,8 @@ export function TripReportForm({ vessels, booking }: Props) {
       </div>
 
       {/* Safety & Incidents */}
-      <div className="rounded-lg border border-slate-700 bg-slate-800 p-6">
-        <h2 className="mb-4 text-lg font-semibold text-white">Safety & Incidents</h2>
+      <div className="rounded-lg border border-slate-200 bg-white p-6">
+        <h2 className="mb-4 text-lg font-semibold text-slate-900">Safety & Incidents</h2>
 
         <div className="space-y-4">
           {/* Safety Equipment */}
@@ -214,16 +214,16 @@ export function TripReportForm({ vessels, booking }: Props) {
                   safetyEquipmentChecked: e.target.checked,
                 }))
               }
-              className="h-4 w-4 rounded border-slate-600 bg-slate-700 text-cyan-600 focus:ring-2 focus:ring-cyan-500 focus:ring-offset-slate-800"
+              className="h-4 w-4 rounded border-slate-300 bg-slate-100 text-cyan-600 focus:ring-2 focus:ring-cyan-500 focus:ring-offset-slate-800"
             />
-            <label htmlFor="safetyCheck" className="text-sm text-slate-300">
+            <label htmlFor="safetyCheck" className="text-sm text-slate-600">
               Safety equipment checked and accounted for
             </label>
           </div>
 
           {/* Incidents */}
           <div>
-            <label className="block text-sm font-medium text-slate-300">
+            <label className="block text-sm font-medium text-slate-600">
               Incidents / Issues (if any)
             </label>
             <textarea
@@ -233,20 +233,20 @@ export function TripReportForm({ vessels, booking }: Props) {
               }
               rows={3}
               placeholder="Any injuries, equipment failures, near-misses, or other incidents..."
-              className="mt-1 w-full rounded-lg border border-slate-600 bg-slate-700 px-4 py-2 text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+              className="mt-1 w-full rounded-lg border border-slate-300 bg-slate-100 px-4 py-2 text-slate-900 placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
             />
           </div>
         </div>
       </div>
 
       {/* Operational */}
-      <div className="rounded-lg border border-slate-700 bg-slate-800 p-6">
-        <h2 className="mb-4 text-lg font-semibold text-white">Operational Notes</h2>
+      <div className="rounded-lg border border-slate-200 bg-white p-6">
+        <h2 className="mb-4 text-lg font-semibold text-slate-900">Operational Notes</h2>
 
         <div className="grid gap-4 sm:grid-cols-2">
           {/* Fuel Used */}
           <div>
-            <label className="block text-sm font-medium text-slate-300">
+            <label className="block text-sm font-medium text-slate-600">
               Fuel Used (gallons, optional)
             </label>
             <input
@@ -258,13 +258,13 @@ export function TripReportForm({ vessels, booking }: Props) {
                 setFormData((prev) => ({ ...prev, fuelUsed: e.target.value }))
               }
               placeholder="0.0"
-              className="mt-1 w-full rounded-lg border border-slate-600 bg-slate-700 px-4 py-2 text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+              className="mt-1 w-full rounded-lg border border-slate-300 bg-slate-100 px-4 py-2 text-slate-900 placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
             />
           </div>
 
           {/* Engine Hours */}
           <div>
-            <label className="block text-sm font-medium text-slate-300">
+            <label className="block text-sm font-medium text-slate-600">
               Engine Hours (optional)
             </label>
             <input
@@ -276,14 +276,14 @@ export function TripReportForm({ vessels, booking }: Props) {
                 setFormData((prev) => ({ ...prev, hoursOperated: e.target.value }))
               }
               placeholder="0.0"
-              className="mt-1 w-full rounded-lg border border-slate-600 bg-slate-700 px-4 py-2 text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+              className="mt-1 w-full rounded-lg border border-slate-300 bg-slate-100 px-4 py-2 text-slate-900 placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
             />
           </div>
         </div>
 
         {/* General Notes */}
         <div className="mt-4">
-          <label className="block text-sm font-medium text-slate-300">
+          <label className="block text-sm font-medium text-slate-600">
             General Notes
           </label>
           <textarea
@@ -293,7 +293,7 @@ export function TripReportForm({ vessels, booking }: Props) {
             }
             rows={4}
             placeholder="Guest experience, route taken, wildlife sightings, maintenance needed..."
-            className="mt-1 w-full rounded-lg border border-slate-600 bg-slate-700 px-4 py-2 text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            className="mt-1 w-full rounded-lg border border-slate-300 bg-slate-100 px-4 py-2 text-slate-900 placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
           />
         </div>
       </div>
@@ -303,7 +303,7 @@ export function TripReportForm({ vessels, booking }: Props) {
         <button
           type="button"
           onClick={() => router.back()}
-          className="flex-1 rounded-lg border border-slate-600 bg-slate-700 px-6 py-3 font-medium text-white transition-colors hover:bg-slate-600"
+          className="flex-1 rounded-lg border border-slate-300 bg-slate-100 px-6 py-3 font-medium text-slate-900 transition-colors hover:bg-slate-200"
         >
           Cancel
         </button>

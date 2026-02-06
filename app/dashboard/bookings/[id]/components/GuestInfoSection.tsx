@@ -56,16 +56,16 @@ export function GuestInfoSection({ booking, guestToken }: GuestInfoSectionProps)
   return (
     <section
       aria-label="Guest Information"
-      className="rounded-lg border border-slate-700 bg-slate-800/50 p-6 print:border-slate-300 print:bg-white"
+      className="rounded-lg border border-slate-200 bg-white p-6 print:border-slate-300 print:bg-white"
     >
-      <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-cyan-400 print:text-cyan-600">
+      <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-cyan-600 print:text-cyan-600">
         <User className="h-5 w-5" />
         Guest Information
       </h2>
 
       <div className="space-y-4">
         {/* Primary Contact */}
-        <div className="rounded-lg border border-slate-700 bg-slate-900/50 p-4 print:border-slate-300 print:bg-slate-50">
+        <div className="rounded-lg border border-slate-200 bg-white p-4 print:border-slate-300 print:bg-slate-50">
           <div className="mb-3 flex items-center justify-between">
             <span className="text-xs font-medium uppercase tracking-wider text-slate-500">
               Primary Contact
@@ -75,7 +75,7 @@ export function GuestInfoSection({ booking, guestToken }: GuestInfoSectionProps)
                 href={guestPortalUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 text-xs text-cyan-400 hover:underline print:hidden"
+                className="flex items-center gap-1 text-xs text-cyan-600 hover:underline print:hidden"
               >
                 <ExternalLink className="h-3 w-3" />
                 Guest Portal
@@ -85,7 +85,7 @@ export function GuestInfoSection({ booking, guestToken }: GuestInfoSectionProps)
 
           {/* Guest Name */}
           <div className="mb-4">
-            <h3 className="text-xl font-semibold text-slate-100 print:text-black">
+            <h3 className="text-xl font-semibold text-slate-800 print:text-black">
               {booking.guest_name}
             </h3>
           </div>
@@ -98,7 +98,7 @@ export function GuestInfoSection({ booking, guestToken }: GuestInfoSectionProps)
                 <Mail className="h-4 w-4 text-slate-500" />
                 <a
                   href={`mailto:${booking.guest_email}`}
-                  className="text-slate-300 hover:text-cyan-400 hover:underline print:text-slate-700"
+                  className="text-slate-600 hover:text-cyan-600 hover:underline print:text-slate-700"
                 >
                   {booking.guest_email}
                 </a>
@@ -106,18 +106,18 @@ export function GuestInfoSection({ booking, guestToken }: GuestInfoSectionProps)
               <div className="flex items-center gap-1 print:hidden">
                 <button
                   onClick={() => handleCopy(booking.guest_email, 'email')}
-                  className="rounded p-1.5 text-slate-500 hover:bg-slate-800 hover:text-slate-300"
+                  className="rounded p-1.5 text-slate-500 hover:bg-white hover:text-slate-700"
                   title="Copy email"
                 >
                   {copiedField === 'email' ? (
-                    <Check className="h-4 w-4 text-emerald-400" />
+                    <Check className="h-4 w-4 text-emerald-600" />
                   ) : (
                     <Copy className="h-4 w-4" />
                   )}
                 </button>
                 <button
                   onClick={handleEmail}
-                  className="rounded p-1.5 text-slate-500 hover:bg-slate-800 hover:text-cyan-400"
+                  className="rounded p-1.5 text-slate-500 hover:bg-white hover:text-cyan-600"
                   title="Send email"
                 >
                   <Mail className="h-4 w-4" />
@@ -132,7 +132,7 @@ export function GuestInfoSection({ booking, guestToken }: GuestInfoSectionProps)
                   <Phone className="h-4 w-4 text-slate-500" />
                   <a
                     href={`tel:${booking.guest_phone}`}
-                    className="text-slate-300 hover:text-cyan-400 hover:underline print:text-slate-700"
+                    className="text-slate-600 hover:text-cyan-600 hover:underline print:text-slate-700"
                   >
                     {booking.guest_phone}
                   </a>
@@ -140,25 +140,25 @@ export function GuestInfoSection({ booking, guestToken }: GuestInfoSectionProps)
                 <div className="flex items-center gap-1 print:hidden">
                   <button
                     onClick={() => handleCopy(booking.guest_phone!, 'phone')}
-                    className="rounded p-1.5 text-slate-500 hover:bg-slate-800 hover:text-slate-300"
+                    className="rounded p-1.5 text-slate-500 hover:bg-white hover:text-slate-700"
                     title="Copy phone"
                   >
                     {copiedField === 'phone' ? (
-                      <Check className="h-4 w-4 text-emerald-400" />
+                      <Check className="h-4 w-4 text-emerald-600" />
                     ) : (
                       <Copy className="h-4 w-4" />
                     )}
                   </button>
                   <button
                     onClick={handleCall}
-                    className="rounded p-1.5 text-slate-500 hover:bg-slate-800 hover:text-emerald-400"
+                    className="rounded p-1.5 text-slate-500 hover:bg-white hover:text-emerald-600"
                     title="Call"
                   >
                     <Phone className="h-4 w-4" />
                   </button>
                   <button
                     onClick={handleSMS}
-                    className="rounded p-1.5 text-slate-500 hover:bg-slate-800 hover:text-blue-400"
+                    className="rounded p-1.5 text-slate-500 hover:bg-white hover:text-blue-600"
                     title="Send SMS"
                   >
                     <MessageSquare className="h-4 w-4" />
@@ -172,12 +172,12 @@ export function GuestInfoSection({ booking, guestToken }: GuestInfoSectionProps)
         {/* Booking Details */}
         <div className="grid gap-4 sm:grid-cols-2">
           {/* Booking Created */}
-          <div className="rounded-lg border border-slate-700 bg-slate-900/30 p-4 print:border-slate-300 print:bg-slate-50">
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 print:border-slate-300 print:bg-slate-50">
             <div className="mb-1 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-slate-500">
               <Calendar className="h-3 w-3" />
               Booked On
             </div>
-            <div className="text-slate-200 print:text-slate-800">
+            <div className="text-slate-700 print:text-slate-800">
               {format(parseISO(booking.created_at), 'MMMM d, yyyy')}
             </div>
             <div className="text-sm text-slate-400">
@@ -186,16 +186,16 @@ export function GuestInfoSection({ booking, guestToken }: GuestInfoSectionProps)
           </div>
 
           {/* Party Size */}
-          <div className="rounded-lg border border-slate-700 bg-slate-900/30 p-4 print:border-slate-300 print:bg-slate-50">
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 print:border-slate-300 print:bg-slate-50">
             <div className="mb-1 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-slate-500">
               <User className="h-3 w-3" />
               Party Size
             </div>
-            <div className="text-slate-200 print:text-slate-800">
+            <div className="text-slate-700 print:text-slate-800">
               {booking.party_size} {booking.party_size === 1 ? 'guest' : 'guests'}
             </div>
             {booking.guest_count_confirmed && booking.guest_count_confirmed !== booking.party_size && (
-              <div className="text-sm text-amber-400">
+              <div className="text-sm text-amber-600">
                 Confirmed: {booking.guest_count_confirmed}
               </div>
             )}
@@ -204,11 +204,11 @@ export function GuestInfoSection({ booking, guestToken }: GuestInfoSectionProps)
 
         {/* Special Requests */}
         {booking.special_requests && (
-          <div className="rounded-lg border border-slate-700 bg-slate-900/30 p-4 print:border-slate-300 print:bg-slate-50">
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 print:border-slate-300 print:bg-slate-50">
             <div className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">
               Special Requests
             </div>
-            <p className="whitespace-pre-wrap text-slate-300 print:text-slate-700">
+            <p className="whitespace-pre-wrap text-slate-600 print:text-slate-700">
               {booking.special_requests}
             </p>
           </div>
@@ -216,8 +216,8 @@ export function GuestInfoSection({ booking, guestToken }: GuestInfoSectionProps)
 
         {/* Captain Instructions */}
         {booking.captain_instructions && (
-          <div className="rounded-lg border border-cyan-500/30 bg-cyan-500/10 p-4 print:border-cyan-300 print:bg-cyan-50">
-            <div className="mb-2 text-xs font-medium uppercase tracking-wider text-cyan-400">
+          <div className="rounded-lg border border-cyan-500/30 bg-cyan-50 p-4 print:border-cyan-300 print:bg-cyan-50">
+            <div className="mb-2 text-xs font-medium uppercase tracking-wider text-cyan-600">
               Captain Instructions
             </div>
             <p className="whitespace-pre-wrap text-cyan-200 print:text-cyan-800">

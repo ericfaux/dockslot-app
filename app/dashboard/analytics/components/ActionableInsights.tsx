@@ -15,11 +15,11 @@ export function ActionableInsights({ insights }: Props) {
   const getIcon = (type: ActionableInsight['type']) => {
     switch (type) {
       case 'tip':
-        return <Lightbulb className="h-4 w-4 text-cyan-400" />;
+        return <Lightbulb className="h-4 w-4 text-cyan-600" />;
       case 'opportunity':
         return <TrendingUp className="h-4 w-4 text-green-400" />;
       case 'alert':
-        return <AlertTriangle className="h-4 w-4 text-amber-400" />;
+        return <AlertTriangle className="h-4 w-4 text-amber-600" />;
     }
   };
 
@@ -35,10 +35,10 @@ export function ActionableInsights({ insights }: Props) {
   };
 
   return (
-    <div className="rounded-lg border border-slate-700 bg-slate-800 p-4 sm:p-6">
+    <div className="rounded-lg border border-slate-200 bg-white p-4 sm:p-6">
       <div className="mb-4 flex items-center gap-2">
-        <Sparkles className="h-5 w-5 text-purple-400" />
-        <h3 className="text-base sm:text-lg font-semibold text-white">Insights</h3>
+        <Sparkles className="h-5 w-5 text-purple-600" />
+        <h3 className="text-base sm:text-lg font-semibold text-slate-900">Insights</h3>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
@@ -52,7 +52,7 @@ export function ActionableInsights({ insights }: Props) {
                 {getIcon(insight.type)}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm text-slate-200">{insight.message}</p>
+                <p className="text-sm text-slate-700">{insight.message}</p>
                 {insight.metric && (
                   <p className="text-xs text-slate-400 mt-1">{insight.metric}</p>
                 )}

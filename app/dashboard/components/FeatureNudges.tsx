@@ -107,17 +107,17 @@ export function FeatureNudges({ hasVessel, hasTripType, hasBooking, dockModeEnab
   };
 
   return (
-    <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-4">
+    <div className="rounded-lg border border-slate-200 bg-white p-4">
       <div className="flex items-start gap-3">
-        <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-amber-500/15">
-          <Lightbulb className="h-4 w-4 text-amber-400" />
+        <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-amber-50">
+          <Lightbulb className="h-4 w-4 text-amber-600" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-slate-200">{nudge.title}</p>
-          <p className="text-xs text-slate-400 mt-0.5">{nudge.description}</p>
+          <p className="text-sm font-medium text-slate-700">{nudge.title}</p>
+          <p className="text-xs text-slate-500 mt-0.5">{nudge.description}</p>
           <Link
             href={nudge.href}
-            className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-slate-700 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-600 transition-colors"
+            className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200 transition-colors"
           >
             <Icon className="h-3.5 w-3.5" />
             {nudge.ctaLabel}
@@ -125,7 +125,7 @@ export function FeatureNudges({ hasVessel, hasTripType, hasBooking, dockModeEnab
         </div>
         <button
           onClick={handleDismiss}
-          className="rounded p-1 text-slate-600 hover:text-slate-400 transition-colors"
+          className="rounded p-1 text-slate-300 hover:text-slate-500 transition-colors"
           aria-label="Dismiss suggestion"
         >
           <X className="h-3.5 w-3.5" />

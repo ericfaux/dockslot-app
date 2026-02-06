@@ -62,24 +62,24 @@ function FuelGauge({ value, maxValue, label, unit, color }: FuelGaugeProps) {
 
   const colorMap = {
     emerald: {
-      stroke: "#34d399",
-      glow: "drop-shadow(0 0 8px rgba(52, 211, 153, 0.6))",
-      text: "text-emerald-400",
+      stroke: "#059669",
+      glow: "drop-shadow(0 0 6px rgba(5, 150, 105, 0.4))",
+      text: "text-emerald-600",
     },
     blue: {
-      stroke: "#60a5fa",
-      glow: "drop-shadow(0 0 8px rgba(96, 165, 250, 0.6))",
-      text: "text-blue-400",
+      stroke: "#2563eb",
+      glow: "drop-shadow(0 0 6px rgba(37, 99, 235, 0.4))",
+      text: "text-blue-600",
     },
     amber: {
-      stroke: "#fbbf24",
-      glow: "drop-shadow(0 0 8px rgba(251, 191, 36, 0.6))",
-      text: "text-amber-400",
+      stroke: "#d97706",
+      glow: "drop-shadow(0 0 6px rgba(217, 119, 6, 0.4))",
+      text: "text-amber-600",
     },
     cyan: {
-      stroke: "#22d3ee",
-      glow: "drop-shadow(0 0 8px rgba(34, 211, 238, 0.6))",
-      text: "text-cyan-400",
+      stroke: "#0891b2",
+      glow: "drop-shadow(0 0 6px rgba(8, 145, 178, 0.4))",
+      text: "text-cyan-600",
     },
   };
 
@@ -89,10 +89,10 @@ function FuelGauge({ value, maxValue, label, unit, color }: FuelGaugeProps) {
     <div className="flex flex-col items-center">
       {/* Gauge Container */}
       <div
-        className="relative h-24 w-24 sm:h-28 sm:w-28 rounded-full bg-slate-800"
+        className="relative h-24 w-24 sm:h-28 sm:w-28 rounded-full bg-slate-100"
         style={{
           boxShadow:
-            "inset 0 2px 4px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.05)",
+            "inset 0 2px 4px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05)",
         }}
       >
         <svg
@@ -106,7 +106,7 @@ function FuelGauge({ value, maxValue, label, unit, color }: FuelGaugeProps) {
             cy="50"
             r={radius}
             fill="none"
-            stroke="#334155"
+            stroke="#e2e8f0"
             strokeWidth={strokeWidth}
             strokeDasharray={`${arcLength} ${circumference}`}
             strokeLinecap="round"
@@ -133,7 +133,7 @@ function FuelGauge({ value, maxValue, label, unit, color }: FuelGaugeProps) {
             {value}
           </span>
           {unit && (
-            <span className="font-mono text-[10px] text-slate-500">{unit}</span>
+            <span className="font-mono text-[10px] text-slate-400">{unit}</span>
           )}
         </div>
       </div>
@@ -168,7 +168,7 @@ function HorizonWidget({ captainName = "Captain", timezone = "America/New_York",
       className="relative h-48 w-full overflow-hidden rounded-lg bg-slate-900 sm:h-72 md:h-80"
       style={{
         boxShadow:
-          "inset 0 2px 4px rgba(0,0,0,0.3), 0 4px 20px rgba(0,0,0,0.4)",
+          "inset 0 2px 4px rgba(0,0,0,0.3), 0 4px 20px rgba(0,0,0,0.15)",
       }}
     >
       {/* Grid Pattern Background */}
@@ -212,8 +212,8 @@ function HorizonWidget({ captainName = "Captain", timezone = "America/New_York",
 
       {/* Branding - Top Left (hidden on small mobile) */}
       <div className="absolute left-4 top-4 hidden sm:flex items-center gap-2">
-        <Anchor className="h-4 w-4 text-slate-600" />
-        <span className="font-mono text-sm tracking-widest text-slate-600">
+        <Anchor className="h-4 w-4 text-slate-400" />
+        <span className="font-mono text-sm tracking-widest text-slate-400">
           DOCKSLOT HELM
         </span>
       </div>
@@ -277,7 +277,7 @@ function HorizonWidget({ captainName = "Captain", timezone = "America/New_York",
           </>
         ) : (
           /* Show helpful message if no weather data */
-          <div className="rounded-lg bg-slate-800/80 px-4 py-2 backdrop-blur-sm">
+          <div className="rounded-lg bg-white/90 px-4 py-2 backdrop-blur-sm">
             <p className="text-xs text-slate-400">
               Set meeting spot in Settings to see weather
             </p>
@@ -362,7 +362,7 @@ function HorizonWidget({ captainName = "Captain", timezone = "America/New_York",
       {/* Time Scale - Bottom (hidden on small mobile) */}
       <div className="absolute bottom-3 left-4 right-4 hidden sm:flex justify-between">
         {["6AM", "9AM", "12PM", "3PM", "6PM", "9PM"].map((time) => (
-          <span key={time} className="font-mono text-[10px] text-slate-600">
+          <span key={time} className="font-mono text-[10px] text-slate-500">
             {time}
           </span>
         ))}
@@ -759,21 +759,21 @@ export default async function DashboardPage() {
         <section aria-label="Dock Mode">
           <a
             href="/dock"
-            className="group flex w-full items-center justify-between gap-4 rounded-xl border-2 border-cyan-500/50 bg-gradient-to-r from-slate-900 via-cyan-950/30 to-slate-900 px-6 py-4 transition-all hover:border-cyan-400 hover:shadow-[0_0_20px_rgba(34,211,238,0.3)]"
+            className="group flex w-full items-center justify-between gap-4 rounded-xl border-2 border-cyan-200 bg-gradient-to-r from-white via-cyan-50 to-white px-6 py-4 transition-all hover:border-cyan-400 hover:shadow-lg hover:shadow-cyan-100"
           >
             <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500/20">
-                <Anchor className="h-6 w-6 text-cyan-400" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-50">
+                <Anchor className="h-6 w-6 text-cyan-600" />
               </div>
               <div>
-                <span className="inline-flex items-center text-lg font-bold text-white">
+                <span className="inline-flex items-center text-lg font-bold text-slate-900">
                   Enter Dock Mode
                   <HelpTooltip text="A simplified, high-contrast view designed for use on the water — large text, big buttons, essential info only." />
                 </span>
-                <p className="text-sm text-slate-400">Simplified view for on-water use</p>
+                <p className="text-sm text-slate-500">Simplified view for on-water use</p>
               </div>
             </div>
-            <Navigation className="h-6 w-6 text-cyan-400 transition-transform group-hover:translate-x-1" />
+            <Navigation className="h-6 w-6 text-cyan-600 transition-transform group-hover:translate-x-1" />
           </a>
         </section>
       )}
@@ -785,7 +785,7 @@ export default async function DashboardPage() {
             Weather Alerts
           </span>
           <HelpTooltip text="DockSlot monitors NOAA marine weather for your location and alerts you about dangerous conditions before upcoming trips." />
-          <div className="h-px flex-1 bg-slate-800" />
+          <div className="h-px flex-1 bg-slate-200" />
         </div>
         <WeatherAlertWidget
           lat={captainProfile?.meeting_spot_latitude ?? null}
@@ -853,7 +853,7 @@ export default async function DashboardPage() {
             Float Plan
           </span>
           <HelpTooltip text="Your Float Plan shows today's trips at a glance — guest names, times, party sizes, waiver status, and weather conditions." />
-          <div className="h-px flex-1 bg-slate-800" />
+          <div className="h-px flex-1 bg-slate-200" />
         </div>
         <FloatPlanWidget
           todayTrips={todayTrips}
@@ -870,7 +870,7 @@ export default async function DashboardPage() {
           <span className="font-mono text-xs uppercase tracking-widest text-slate-500">
             Attention
           </span>
-          <div className="h-px flex-1 bg-slate-800" />
+          <div className="h-px flex-1 bg-slate-200" />
         </div>
         <ActionItemsWidget items={actionItems} />
       </section>
@@ -882,7 +882,7 @@ export default async function DashboardPage() {
             <span className="font-mono text-xs uppercase tracking-widest text-slate-500">
               Share
             </span>
-            <div className="h-px flex-1 bg-slate-800" />
+            <div className="h-px flex-1 bg-slate-200" />
           </div>
           <BookingLinkCard captainId={user.id} compact />
         </section>
@@ -901,7 +901,7 @@ export default async function DashboardPage() {
         className="mx-auto h-1 w-32 rounded-full"
         style={{
           background:
-            "linear-gradient(90deg, transparent, rgba(34,211,238,0.5), transparent)",
+            "linear-gradient(90deg, transparent, rgba(8,145,178,0.3), transparent)",
         }}
       />
     </div>

@@ -54,7 +54,7 @@ export default async function RefundPage({ params }: RefundPageProps) {
           <span className="font-mono text-xs uppercase tracking-widest text-slate-500">
             Issue Refund
           </span>
-          <div className="h-px flex-1 bg-slate-800" />
+          <div className="h-px flex-1 bg-white" />
         </div>
         <p className="mt-2 text-sm text-slate-400">
           Process a refund for booking #{booking.id.slice(0, 8)}

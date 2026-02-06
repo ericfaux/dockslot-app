@@ -77,13 +77,13 @@ export function ExportButton({
       <button
         onClick={handleExport}
         disabled={isExporting || totalCount === 0}
-        className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800/50 px-4 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-700/50 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <Download className="h-4 w-4" />
         {isExporting ? 'Exporting...' : `Export${totalCount > 0 ? ` (${totalCount})` : ''}`}
       </button>
       {error && (
-        <p className="mt-2 text-sm text-rose-400">{error}</p>
+        <p className="mt-2 text-sm text-rose-600">{error}</p>
       )}
     </div>
   )

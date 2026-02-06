@@ -27,9 +27,9 @@ function formatCurrency(value: number): string {
 function RevenueTooltip({ active, payload, label }: any) {
   if (active && payload && payload.length) {
     return (
-      <div className="rounded-lg border border-slate-700 bg-slate-800 p-3 shadow-xl">
-        <p className="text-sm font-medium text-white mb-1">{label}</p>
-        <p className="text-sm text-cyan-400">${payload[0].value?.toLocaleString()}</p>
+      <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-xl">
+        <p className="text-sm font-medium text-slate-900 mb-1">{label}</p>
+        <p className="text-sm text-cyan-600">${payload[0].value?.toLocaleString()}</p>
       </div>
     );
   }
@@ -41,9 +41,9 @@ export function RevenueTab({ data }: Props) {
 
   if (!hasData) {
     return (
-      <div className="rounded-lg border border-slate-700 bg-slate-800 p-12 text-center">
+      <div className="rounded-lg border border-slate-200 bg-white p-12 text-center">
         <DollarSign className="mx-auto h-12 w-12 text-slate-600" />
-        <h3 className="mt-4 text-lg font-medium text-white">No revenue data yet</h3>
+        <h3 className="mt-4 text-lg font-medium text-slate-900">No revenue data yet</h3>
         <p className="mt-2 text-sm text-slate-400">
           Revenue metrics will appear once you start receiving payments for bookings.
         </p>
@@ -55,15 +55,15 @@ export function RevenueTab({ data }: Props) {
     <div className="space-y-6">
       {/* Revenue Summary Cards */}
       <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-lg border border-slate-700 bg-slate-800 p-4">
+        <div className="rounded-lg border border-slate-200 bg-white p-4">
           <p className="text-xs text-slate-400 mb-1">This Month</p>
           <div className="flex items-baseline gap-2">
-            <p className="text-2xl font-bold text-white">
+            <p className="text-2xl font-bold text-slate-900">
               ${data.thisMonthRevenue.toLocaleString()}
             </p>
             {data.thisMonthChange !== 0 && (
               <span className={`flex items-center text-xs font-medium ${
-                data.thisMonthChange > 0 ? 'text-green-400' : 'text-rose-400'
+                data.thisMonthChange > 0 ? 'text-green-400' : 'text-rose-600'
               }`}>
                 {data.thisMonthChange > 0 ? (
                   <TrendingUp className="h-3 w-3 mr-0.5" />
@@ -76,23 +76,23 @@ export function RevenueTab({ data }: Props) {
           </div>
         </div>
 
-        <div className="rounded-lg border border-slate-700 bg-slate-800 p-4">
+        <div className="rounded-lg border border-slate-200 bg-white p-4">
           <p className="text-xs text-slate-400 mb-1">This Season</p>
-          <p className="text-2xl font-bold text-white">
+          <p className="text-2xl font-bold text-slate-900">
             ${data.thisSeasonRevenue.toLocaleString()}
           </p>
         </div>
 
-        <div className="rounded-lg border border-slate-700 bg-slate-800 p-4">
+        <div className="rounded-lg border border-slate-200 bg-white p-4">
           <p className="text-xs text-slate-400 mb-1">All Time</p>
-          <p className="text-2xl font-bold text-white">
+          <p className="text-2xl font-bold text-slate-900">
             ${data.allTimeRevenue.toLocaleString()}
           </p>
         </div>
 
-        <div className="rounded-lg border border-slate-700 bg-slate-800 p-4">
+        <div className="rounded-lg border border-slate-200 bg-white p-4">
           <p className="text-xs text-slate-400 mb-1">Avg Booking</p>
-          <p className="text-2xl font-bold text-white">
+          <p className="text-2xl font-bold text-slate-900">
             ${data.averageBookingValue.toFixed(0)}
           </p>
         </div>
@@ -100,23 +100,23 @@ export function RevenueTab({ data }: Props) {
 
       {/* Outstanding Balance Alert */}
       {data.outstandingBalance > 0 && (
-        <div className="flex items-center justify-between rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
+        <div className="flex items-center justify-between rounded-lg border border-amber-500/30 bg-amber-50 p-4">
           <div className="flex items-center gap-3">
-            <AlertCircle className="h-5 w-5 text-amber-400" />
+            <AlertCircle className="h-5 w-5 text-amber-600" />
             <div>
-              <p className="text-sm font-medium text-amber-300">Outstanding Balances</p>
-              <p className="text-xs text-amber-400/70">Unpaid balances across active bookings</p>
+              <p className="text-sm font-medium text-amber-600">Outstanding Balances</p>
+              <p className="text-xs text-amber-600/70">Unpaid balances across active bookings</p>
             </div>
           </div>
-          <span className="text-xl font-bold text-amber-400">
+          <span className="text-xl font-bold text-amber-600">
             ${data.outstandingBalance.toLocaleString()}
           </span>
         </div>
       )}
 
       {/* Revenue by Month Chart */}
-      <div className="rounded-lg border border-slate-700 bg-slate-800 p-4 sm:p-6">
-        <h3 className="text-base font-semibold text-white mb-4">Revenue by Month</h3>
+      <div className="rounded-lg border border-slate-200 bg-white p-4 sm:p-6">
+        <h3 className="text-base font-semibold text-slate-900 mb-4">Revenue by Month</h3>
         <div className="h-64 sm:h-72 -mx-2 sm:mx-0">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
@@ -158,8 +158,8 @@ export function RevenueTab({ data }: Props) {
 
       {/* Revenue by Trip Type */}
       {data.revenueByTripType.length > 0 && (
-        <div className="rounded-lg border border-slate-700 bg-slate-800 p-4 sm:p-6">
-          <h3 className="text-base font-semibold text-white mb-4">Revenue by Trip Type</h3>
+        <div className="rounded-lg border border-slate-200 bg-white p-4 sm:p-6">
+          <h3 className="text-base font-semibold text-slate-900 mb-4">Revenue by Trip Type</h3>
           {data.revenueByTripType.length <= 6 ? (
             <div className="h-48 -mx-2 sm:mx-0">
               <ResponsiveContainer width="100%" height="100%">
@@ -197,12 +197,12 @@ export function RevenueTab({ data }: Props) {
                 return (
                   <div key={t.name} className="space-y-1">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-slate-300 truncate max-w-[50%]">{t.name}</span>
+                      <span className="text-slate-600 truncate max-w-[50%]">{t.name}</span>
                       <span className="text-slate-400">
                         ${t.revenue.toLocaleString()} ({t.count} trips)
                       </span>
                     </div>
-                    <div className="h-2 rounded-full bg-slate-700 overflow-hidden">
+                    <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
                       <div
                         className="h-full bg-gradient-to-r from-cyan-500 to-cyan-400"
                         style={{ width: `${pct}%` }}

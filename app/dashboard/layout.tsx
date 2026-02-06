@@ -37,7 +37,7 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-950">
+    <div className="min-h-screen bg-slate-50">
       {/* Desktop Sidebar */}
       <SideNav userEmail={userEmail} signOutAction={signOutAction} />
 
@@ -47,11 +47,11 @@ export default async function DashboardLayout({
       {/* Mobile Bottom Tab Bar */}
       <MobileTabBar />
 
-      {/* Main Content Area - Maritime Helm Theme */}
+      {/* Main Content Area */}
       {/* pb-20 on mobile for bottom tab bar clearance, pt-16 on mobile for header */}
       {/* md:pl-16 for collapsed tablet sidebar, lg:pl-64 for full desktop sidebar */}
       <main className="md:pl-16 lg:pl-64 pt-16 md:pt-0 pb-20 md:pb-0">
-        <div className="min-h-screen bg-gray-950">
+        <div className="min-h-screen bg-slate-50">
           <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4">
             <QuickActionsProvider>
               {children}

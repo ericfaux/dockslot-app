@@ -31,7 +31,7 @@ export default async function CancellationPoliciesPage() {
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">
+        <h1 className="text-3xl font-bold text-slate-900 mb-2">
           Cancellation Policies
         </h1>
         <p className="text-slate-400">
@@ -42,7 +42,7 @@ export default async function CancellationPoliciesPage() {
       {tripTypes && tripTypes.length > 0 ? (
         <CancellationPolicyEditor tripTypes={tripTypes} />
       ) : (
-        <div className="p-8 text-center bg-slate-800/50 rounded-lg border border-slate-700">
+        <div className="p-8 text-center bg-white rounded-lg border border-slate-200">
           <p className="text-slate-400">
             No trip types found. Create a trip type first to configure cancellation policies.
           </p>

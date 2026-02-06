@@ -135,15 +135,15 @@ export default function SendMessageModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-slate-800 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-hidden border border-slate-700 shadow-2xl">
+      <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-hidden border border-slate-200 shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-700 bg-gradient-to-r from-cyan-900/20 to-blue-900/20">
+        <div className="flex items-center justify-between p-6 border-b border-slate-200 bg-gradient-to-r from-cyan-900/20 to-blue-900/20">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-cyan-500/10 rounded-lg">
-              <Mail className="w-5 h-5 text-cyan-400" />
+            <div className="p-2 bg-cyan-50 rounded-lg">
+              <Mail className="w-5 h-5 text-cyan-600" />
             </div>
             <div>
-              <h2 className="text-xl font-semibold text-white">
+              <h2 className="text-xl font-semibold text-slate-900">
                 Send Message
               </h2>
               <p className="text-sm text-slate-400">
@@ -153,7 +153,7 @@ export default function SendMessageModal({
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+            className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
           >
             <X className="w-5 h-5 text-slate-400" />
           </button>
@@ -162,13 +162,13 @@ export default function SendMessageModal({
         {/* Content */}
         <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-180px)]">
           {/* Method Selector (Email/SMS) */}
-          <div className="flex gap-2 p-1 bg-slate-900 rounded-lg">
+          <div className="flex gap-2 p-1 bg-white rounded-lg">
             <button
               onClick={() => setMethod('email')}
               className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-medium transition-colors ${
                 method === 'email'
                   ? 'bg-cyan-600 text-white'
-                  : 'text-slate-400 hover:text-slate-300'
+                  : 'text-slate-400 hover:text-slate-700'
               }`}
             >
               <Mail className="w-4 h-4" />
@@ -181,7 +181,7 @@ export default function SendMessageModal({
                 method === 'sms'
                   ? 'bg-cyan-600 text-white'
                   : hasPhone 
-                    ? 'text-slate-400 hover:text-slate-300'
+                    ? 'text-slate-400 hover:text-slate-700'
                     : 'text-slate-600 cursor-not-allowed'
               }`}
             >
@@ -193,14 +193,14 @@ export default function SendMessageModal({
           {/* Template Selector */}
           {templates.length > 0 && (
             <div>
-              <label className="flex items-center gap-2 text-sm font-medium text-slate-300 mb-2">
+              <label className="flex items-center gap-2 text-sm font-medium text-slate-600 mb-2">
                 <FileText className="w-4 h-4" />
                 Use Template (optional)
               </label>
               <select
                 value={selectedTemplate || ''}
                 onChange={(e) => e.target.value && applyTemplate(e.target.value)}
-                className="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
               >
                 <option value="">-- Select a template --</option>
                 {templates.map((template) => (
@@ -218,23 +218,23 @@ export default function SendMessageModal({
           {/* Subject (Email only) */}
           {method === 'email' && (
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                Subject <span className="text-rose-400">*</span>
+              <label className="block text-sm font-medium text-slate-600 mb-2">
+                Subject <span className="text-rose-600">*</span>
               </label>
               <input
                 type="text"
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 placeholder="Email subject line"
-                className="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
               />
             </div>
           )}
 
           {/* Message */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Message <span className="text-rose-400">*</span>
+            <label className="block text-sm font-medium text-slate-600 mb-2">
+              Message <span className="text-rose-600">*</span>
             </label>
             <textarea
               value={message}
@@ -243,12 +243,12 @@ export default function SendMessageModal({
                 ? "Type your message to the guest..." 
                 : "Type your SMS message..."}
               rows={method === 'sms' ? 6 : 10}
-              className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 resize-none font-mono text-sm"
+              className="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 resize-none font-mono text-sm"
             />
             <div className="mt-2 flex items-center justify-between text-xs">
               <span className={
                 method === 'sms' && message.length > 160
-                  ? 'text-amber-400'
+                  ? 'text-amber-600'
                   : 'text-slate-500'
               }>
                 {message.length} characters
@@ -265,7 +265,7 @@ export default function SendMessageModal({
               )}
             </div>
             {method === 'sms' && message.length > 160 && (
-              <p className="mt-1 text-xs text-amber-400">
+              <p className="mt-1 text-xs text-amber-600">
                 ⚠ Messages over 160 chars may be split into multiple SMS
               </p>
             )}
@@ -273,18 +273,18 @@ export default function SendMessageModal({
 
           {/* Error */}
           {error && (
-            <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-lg">
-              <p className="text-sm text-rose-400">{error}</p>
+            <div className="p-4 bg-rose-50 border border-rose-500/20 rounded-lg">
+              <p className="text-sm text-rose-600">{error}</p>
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-700 bg-slate-900/50">
+        <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-200 bg-white">
           <button
             onClick={onClose}
             disabled={isSending}
-            className="px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors disabled:opacity-50"
+            className="px-4 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50"
           >
             Cancel
           </button>

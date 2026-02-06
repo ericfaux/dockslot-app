@@ -30,9 +30,9 @@ const statusColors: Record<string, string> = {
 function DayTooltip({ active, payload, label }: any) {
   if (active && payload && payload.length) {
     return (
-      <div className="rounded-lg border border-slate-700 bg-slate-800 p-3 shadow-xl">
-        <p className="text-sm font-medium text-white mb-1">{label}</p>
-        <p className="text-sm text-blue-400">{payload[0].value} bookings</p>
+      <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-xl">
+        <p className="text-sm font-medium text-slate-900 mb-1">{label}</p>
+        <p className="text-sm text-blue-600">{payload[0].value} bookings</p>
       </div>
     );
   }
@@ -42,9 +42,9 @@ function DayTooltip({ active, payload, label }: any) {
 export function BookingInsightsTab({ data }: Props) {
   if (data.totalBookings === 0) {
     return (
-      <div className="rounded-lg border border-slate-700 bg-slate-800 p-12 text-center">
+      <div className="rounded-lg border border-slate-200 bg-white p-12 text-center">
         <CalendarDays className="mx-auto h-12 w-12 text-slate-600" />
-        <h3 className="mt-4 text-lg font-medium text-white">No booking data yet</h3>
+        <h3 className="mt-4 text-lg font-medium text-slate-900">No booking data yet</h3>
         <p className="mt-2 text-sm text-slate-400">
           Booking insights will appear once you have bookings in the system.
         </p>
@@ -56,28 +56,28 @@ export function BookingInsightsTab({ data }: Props) {
     <div className="space-y-6">
       {/* Quick Metrics */}
       <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-lg border border-slate-700 bg-slate-800 p-4">
+        <div className="rounded-lg border border-slate-200 bg-white p-4">
           <p className="text-xs text-slate-400 mb-1">Total Bookings</p>
-          <p className="text-2xl font-bold text-white">{data.totalBookings}</p>
+          <p className="text-2xl font-bold text-slate-900">{data.totalBookings}</p>
         </div>
-        <div className="rounded-lg border border-slate-700 bg-slate-800 p-4">
+        <div className="rounded-lg border border-slate-200 bg-white p-4">
           <p className="text-xs text-slate-400 mb-1">Avg Party Size</p>
-          <p className="text-2xl font-bold text-white">{data.averagePartySize.toFixed(1)}</p>
+          <p className="text-2xl font-bold text-slate-900">{data.averagePartySize.toFixed(1)}</p>
         </div>
-        <div className="rounded-lg border border-slate-700 bg-slate-800 p-4">
+        <div className="rounded-lg border border-slate-200 bg-white p-4">
           <p className="text-xs text-slate-400 mb-1">Cancellation Rate</p>
           <p className={`text-2xl font-bold ${
-            data.cancellationRate > 20 ? 'text-rose-400' : 'text-white'
+            data.cancellationRate > 20 ? 'text-rose-600' : 'text-slate-900'
           }`}>
             {data.cancellationRate.toFixed(1)}%
           </p>
         </div>
-        <div className="rounded-lg border border-slate-700 bg-slate-800 p-4">
+        <div className="rounded-lg border border-slate-200 bg-white p-4">
           <div className="flex items-center gap-1 mb-1">
             <Clock className="h-3 w-3 text-slate-400" />
             <p className="text-xs text-slate-400">Avg Lead Time</p>
           </div>
-          <p className="text-2xl font-bold text-white">
+          <p className="text-2xl font-bold text-slate-900">
             {data.averageLeadTimeDays.toFixed(0)}
             <span className="text-sm font-normal text-slate-400 ml-1">days</span>
           </p>
@@ -85,8 +85,8 @@ export function BookingInsightsTab({ data }: Props) {
       </div>
 
       {/* Status Breakdown */}
-      <div className="rounded-lg border border-slate-700 bg-slate-800 p-4 sm:p-6">
-        <h3 className="text-base font-semibold text-white mb-4">Bookings by Status</h3>
+      <div className="rounded-lg border border-slate-200 bg-white p-4 sm:p-6">
+        <h3 className="text-base font-semibold text-slate-900 mb-4">Bookings by Status</h3>
         <div className="space-y-3">
           {data.statusBreakdown.map((s) => {
             const pct = data.totalBookings > 0 ? (s.count / data.totalBookings) * 100 : 0;
@@ -95,13 +95,13 @@ export function BookingInsightsTab({ data }: Props) {
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2">
                     <div className={`h-2.5 w-2.5 rounded-full ${statusColors[s.status] || 'bg-slate-500'}`} />
-                    <span className="text-slate-300">{s.label}</span>
+                    <span className="text-slate-600">{s.label}</span>
                   </div>
                   <span className="text-slate-400">
                     {s.count} ({pct.toFixed(0)}%)
                   </span>
                 </div>
-                <div className="h-1.5 rounded-full bg-slate-700 overflow-hidden">
+                <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
                   <div
                     className={`h-full ${statusColors[s.status] || 'bg-slate-500'} transition-all`}
                     style={{ width: `${pct}%` }}
@@ -115,8 +115,8 @@ export function BookingInsightsTab({ data }: Props) {
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Bookings by Day of Week */}
-        <div className="rounded-lg border border-slate-700 bg-slate-800 p-4 sm:p-6">
-          <h3 className="text-base font-semibold text-white mb-4">Busiest Days</h3>
+        <div className="rounded-lg border border-slate-200 bg-white p-4 sm:p-6">
+          <h3 className="text-base font-semibold text-slate-900 mb-4">Busiest Days</h3>
           <div className="h-48 -mx-2 sm:mx-0">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
@@ -150,8 +150,8 @@ export function BookingInsightsTab({ data }: Props) {
         </div>
 
         {/* Bookings by Trip Type */}
-        <div className="rounded-lg border border-slate-700 bg-slate-800 p-4 sm:p-6">
-          <h3 className="text-base font-semibold text-white mb-4">Most Popular Trips</h3>
+        <div className="rounded-lg border border-slate-200 bg-white p-4 sm:p-6">
+          <h3 className="text-base font-semibold text-slate-900 mb-4">Most Popular Trips</h3>
           {data.byTripType.length === 0 ? (
             <p className="text-sm text-slate-400 text-center py-6">No trip type data</p>
           ) : (
@@ -161,13 +161,13 @@ export function BookingInsightsTab({ data }: Props) {
                   <div className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-mono text-slate-500 w-4">#{idx + 1}</span>
-                      <span className="text-slate-300 truncate max-w-[60%]">{t.name}</span>
+                      <span className="text-slate-600 truncate max-w-[60%]">{t.name}</span>
                     </div>
                     <span className="text-slate-400">
                       {t.count} ({t.percentage.toFixed(0)}%)
                     </span>
                   </div>
-                  <div className="h-1.5 rounded-full bg-slate-700 overflow-hidden ml-6">
+                  <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden ml-6">
                     <div
                       className="h-full bg-gradient-to-r from-purple-500 to-purple-400"
                       style={{ width: `${t.percentage}%` }}
@@ -182,13 +182,13 @@ export function BookingInsightsTab({ data }: Props) {
 
       {/* Weather Hold Rate */}
       {data.weatherHoldRate > 0 && (
-        <div className="rounded-lg border border-slate-700 bg-slate-800 p-4">
+        <div className="rounded-lg border border-slate-200 bg-white p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="h-2.5 w-2.5 rounded-full bg-purple-500" />
-              <span className="text-sm text-slate-300">Weather Hold Rate</span>
+              <span className="text-sm text-slate-600">Weather Hold Rate</span>
             </div>
-            <span className="text-sm font-medium text-purple-400">
+            <span className="text-sm font-medium text-purple-600">
               {data.weatherHoldRate.toFixed(1)}%
             </span>
           </div>

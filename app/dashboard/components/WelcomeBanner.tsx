@@ -30,20 +30,20 @@ export function WelcomeBanner() {
   ];
 
   return (
-    <div className="rounded-lg border border-cyan-500/30 bg-gradient-to-r from-cyan-500/10 to-slate-800/50 p-5">
+    <div className="rounded-lg border border-cyan-200 bg-gradient-to-r from-cyan-50 to-white p-5">
       <div className="flex items-start justify-between gap-3 mb-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-500/20">
-            <Compass className="h-5 w-5 text-cyan-400" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-100">
+            <Compass className="h-5 w-5 text-cyan-600" />
           </div>
           <div>
-            <h3 className="font-semibold text-white">Welcome to DockSlot</h3>
-            <p className="text-sm text-slate-400">Here's what you'll find on your dashboard</p>
+            <h3 className="font-semibold text-slate-900">Welcome to DockSlot</h3>
+            <p className="text-sm text-slate-500">Here's what you'll find on your dashboard</p>
           </div>
         </div>
         <button
           onClick={handleDismiss}
-          className="rounded p-1 text-slate-500 hover:bg-slate-700 hover:text-slate-300 transition-colors"
+          className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
           aria-label="Dismiss welcome banner"
         >
           <X className="h-4 w-4" />
@@ -52,9 +52,9 @@ export function WelcomeBanner() {
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {sections.map((section) => (
-          <div key={section.label} className="rounded-lg bg-slate-800/60 p-3">
-            <section.icon className="h-4 w-4 text-cyan-400 mb-1.5" />
-            <p className="text-sm font-medium text-slate-200">{section.label}</p>
+          <div key={section.label} className="rounded-lg bg-white border border-slate-100 p-3">
+            <section.icon className="h-4 w-4 text-cyan-600 mb-1.5" />
+            <p className="text-sm font-medium text-slate-700">{section.label}</p>
             <p className="text-xs text-slate-500 mt-0.5">{section.desc}</p>
           </div>
         ))}

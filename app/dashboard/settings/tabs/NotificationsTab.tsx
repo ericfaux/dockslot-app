@@ -110,14 +110,14 @@ export function NotificationsTab() {
     });
   };
 
-  const sectionClassName = 'rounded-xl border border-slate-800 bg-slate-900/50 p-6';
-  const inputClassName = 'w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-white placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500';
-  const labelClassName = 'block text-sm font-medium text-slate-300 mb-1.5';
+  const sectionClassName = 'rounded-xl border border-slate-200 bg-white p-6';
+  const inputClassName = 'w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-slate-900 placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500';
+  const labelClassName = 'block text-sm font-medium text-slate-600 mb-1.5';
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-cyan-400" />
+        <Loader2 className="h-6 w-6 animate-spin text-cyan-600" />
         <span className="ml-2 text-slate-400">Loading preferences...</span>
       </div>
     );
@@ -128,8 +128,8 @@ export function NotificationsTab() {
       {/* Email Notifications */}
       <div className={sectionClassName}>
         <div className="flex items-center gap-2 mb-4">
-          <Mail className="h-5 w-5 text-cyan-400" />
-          <h3 className="text-lg font-semibold text-white">Email Notifications</h3>
+          <Mail className="h-5 w-5 text-cyan-600" />
+          <h3 className="text-lg font-semibold text-slate-900">Email Notifications</h3>
         </div>
         <p className="text-sm text-slate-400 mb-6">
           Choose which automated emails are sent to your guests.
@@ -194,8 +194,8 @@ export function NotificationsTab() {
       {/* SMS Notifications */}
       <div className={sectionClassName}>
         <div className="flex items-center gap-2 mb-4">
-          <MessageSquare className="h-5 w-5 text-cyan-400" />
-          <h3 className="text-lg font-semibold text-white">SMS Notifications</h3>
+          <MessageSquare className="h-5 w-5 text-cyan-600" />
+          <h3 className="text-lg font-semibold text-slate-900">SMS Notifications</h3>
         </div>
         <p className="text-sm text-slate-400 mb-6">
           Critical text messages sent to guests who provide a phone number. Messages are kept short with a link to full details.
@@ -226,8 +226,8 @@ export function NotificationsTab() {
       {/* Branding & Customization */}
       <div className={sectionClassName}>
         <div className="flex items-center gap-2 mb-4">
-          <Palette className="h-5 w-5 text-cyan-400" />
-          <h3 className="text-lg font-semibold text-white">Email Branding</h3>
+          <Palette className="h-5 w-5 text-cyan-600" />
+          <h3 className="text-lg font-semibold text-slate-900">Email Branding</h3>
         </div>
         <p className="text-sm text-slate-400 mb-6">
           Customize the content and branding of automated emails.
@@ -308,7 +308,7 @@ export function NotificationsTab() {
       {/* Status Messages */}
       {error && (
         <div className="rounded-lg border border-red-800 bg-red-900/20 px-4 py-3">
-          <p className="text-sm text-red-400">{error}</p>
+          <p className="text-sm text-red-600">{error}</p>
         </div>
       )}
       {success && (
@@ -350,7 +350,7 @@ function ToggleRow({
   return (
     <div className="flex items-start justify-between gap-4">
       <div>
-        <p className="text-sm font-medium text-white">{label}</p>
+        <p className="text-sm font-medium text-slate-900">{label}</p>
         <p className="text-xs text-slate-400">{description}</p>
       </div>
       <button
@@ -359,7 +359,7 @@ function ToggleRow({
         aria-checked={checked}
         onClick={() => onChange(!checked)}
         className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${
-          checked ? 'bg-cyan-600' : 'bg-slate-700'
+          checked ? 'bg-cyan-600' : 'bg-slate-100'
         }`}
       >
         <span
@@ -389,8 +389,8 @@ function TimingButton({
       onClick={() => onToggle(value)}
       className={`rounded-md border px-3 py-1.5 text-xs font-medium transition-colors ${
         active
-          ? 'border-cyan-600 bg-cyan-900/30 text-cyan-300'
-          : 'border-slate-700 bg-slate-800 text-slate-400 hover:text-slate-300'
+          ? 'border-cyan-600 bg-cyan-900/30 text-cyan-600'
+          : 'border-slate-200 bg-white text-slate-400 hover:text-slate-700'
       }`}
     >
       {label}

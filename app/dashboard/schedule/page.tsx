@@ -38,9 +38,9 @@ export default async function SchedulePage() {
     <div className="flex h-[calc(100vh-4rem)] flex-col md:h-screen">
       {/* Hibernation Banner */}
       {isHibernating && (
-        <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
+        <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-50 p-4">
           <div className="flex items-start gap-3">
-            <Moon className="h-5 w-5 text-amber-400 flex-shrink-0 mt-0.5" />
+            <Moon className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
               <p className="inline-flex items-center text-sm font-medium text-amber-200">
                 Hibernation Mode Active
@@ -63,7 +63,7 @@ export default async function SchedulePage() {
               </p>
               <Link
                 href="/dashboard/settings"
-                className="inline-flex items-center gap-1.5 text-sm text-amber-400 hover:text-amber-300 mt-2 transition-colors"
+                className="inline-flex items-center gap-1.5 text-sm text-amber-600 hover:text-amber-600 mt-2 transition-colors"
               >
                 <Calendar className="h-4 w-4" />
                 Manage hibernation settings
@@ -79,7 +79,7 @@ export default async function SchedulePage() {
           <span className="font-mono text-xs uppercase tracking-widest text-slate-500">
             Schedule
           </span>
-          <div className="h-px flex-1 bg-slate-800 sm:w-32" />
+          <div className="h-px flex-1 bg-white sm:w-32" />
         </div>
         <ExportBookingsButton captainId={captainId} />
       </div>

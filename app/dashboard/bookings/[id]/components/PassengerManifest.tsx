@@ -208,11 +208,11 @@ export function PassengerManifest({
     <>
       <section
         aria-label="Passenger Manifest"
-        className="rounded-lg border border-slate-700 bg-slate-800/50 p-6 print:border-slate-300 print:bg-white"
+        className="rounded-lg border border-slate-200 bg-white p-6 print:border-slate-300 print:bg-white"
       >
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h2 className="flex items-center gap-2 text-lg font-semibold text-cyan-400 print:text-cyan-600">
+            <h2 className="flex items-center gap-2 text-lg font-semibold text-cyan-600 print:text-cyan-600">
               <Users className="h-5 w-5" />
               Passenger Manifest
             </h2>
@@ -227,9 +227,9 @@ export function PassengerManifest({
               <span
                 className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium ${
                   signedCount === totalNeeded
-                    ? 'bg-emerald-500/20 text-emerald-300'
+                    ? 'bg-emerald-50 text-emerald-600'
                     : signedCount > 0
-                    ? 'bg-amber-500/20 text-amber-300'
+                    ? 'bg-amber-50 text-amber-600'
                     : 'bg-slate-500/20 text-slate-400'
                 }`}
               >
@@ -242,7 +242,7 @@ export function PassengerManifest({
 
         {/* Alerts */}
         {error && (
-          <div className="mb-4 flex items-center gap-2 rounded border border-rose-500/50 bg-rose-500/10 p-3 text-sm text-rose-400">
+          <div className="mb-4 flex items-center gap-2 rounded border border-rose-500/50 bg-rose-50 p-3 text-sm text-rose-600">
             <AlertCircle className="h-4 w-4" />
             {error}
             <button onClick={() => setError(null)} className="ml-auto hover:underline">
@@ -251,7 +251,7 @@ export function PassengerManifest({
           </div>
         )}
         {success && (
-          <div className="mb-4 flex items-center gap-2 rounded border border-emerald-500/50 bg-emerald-500/10 p-3 text-sm text-emerald-400">
+          <div className="mb-4 flex items-center gap-2 rounded border border-emerald-500/50 bg-emerald-50 p-3 text-sm text-emerald-600">
             <CheckCircle className="h-4 w-4" />
             {success}
             <button onClick={() => setSuccess(null)} className="ml-auto hover:underline">
@@ -270,7 +270,7 @@ export function PassengerManifest({
             {/* Passenger List */}
             <div className="space-y-3">
               {passengers.length === 0 ? (
-                <div className="rounded-lg border border-dashed border-slate-600 p-6 text-center">
+                <div className="rounded-lg border border-dashed border-slate-300 p-6 text-center">
                   <Users className="mx-auto mb-2 h-8 w-8 text-slate-500" />
                   <p className="text-slate-400">No passengers registered yet</p>
                   <p className="mt-1 text-sm text-slate-500">
@@ -285,7 +285,7 @@ export function PassengerManifest({
                   return (
                     <div
                       key={passenger.id}
-                      className="rounded-lg border border-slate-700 bg-slate-900/50 print:border-slate-300 print:bg-white"
+                      className="rounded-lg border border-slate-200 bg-white print:border-slate-300 print:bg-white"
                     >
                       {/* Passenger Header */}
                       <div
@@ -293,16 +293,16 @@ export function PassengerManifest({
                         onClick={() => setExpandedPassenger(isExpanded ? null : passenger.id)}
                       >
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-800 text-slate-400 print:bg-slate-200">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-400 print:bg-slate-200">
                             <Users className="h-5 w-5" />
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="font-medium text-slate-200 print:text-black">
+                              <span className="font-medium text-slate-700 print:text-black">
                                 {passenger.full_name}
                               </span>
                               {passenger.is_primary_contact && (
-                                <span className="rounded bg-cyan-500/20 px-1.5 py-0.5 text-xs text-cyan-300">
+                                <span className="rounded bg-cyan-50 px-1.5 py-0.5 text-xs text-cyan-600">
                                   Primary
                                 </span>
                               )}
@@ -319,7 +319,7 @@ export function PassengerManifest({
                             <span
                               className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
                                 waiverStatus.status === 'signed'
-                                  ? 'bg-emerald-500/20 text-emerald-300'
+                                  ? 'bg-emerald-50 text-emerald-600'
                                   : 'bg-slate-500/20 text-slate-400'
                               }`}
                             >
@@ -350,7 +350,7 @@ export function PassengerManifest({
 
                       {/* Expanded Details */}
                       {isExpanded && (
-                        <div className="border-t border-slate-700 p-4 print:border-slate-300">
+                        <div className="border-t border-slate-200 p-4 print:border-slate-300">
                           <div className="grid gap-4 sm:grid-cols-2">
                             {/* Contact Info */}
                             <div className="space-y-2">
@@ -359,7 +359,7 @@ export function PassengerManifest({
                                   <Mail className="h-4 w-4 text-slate-500" />
                                   <a
                                     href={`mailto:${passenger.email}`}
-                                    className="text-slate-300 hover:text-cyan-400"
+                                    className="text-slate-600 hover:text-cyan-600"
                                   >
                                     {passenger.email}
                                   </a>
@@ -370,7 +370,7 @@ export function PassengerManifest({
                                   <Phone className="h-4 w-4 text-slate-500" />
                                   <a
                                     href={`tel:${passenger.phone}`}
-                                    className="text-slate-300 hover:text-cyan-400"
+                                    className="text-slate-600 hover:text-cyan-600"
                                   >
                                     {passenger.phone}
                                   </a>
@@ -380,9 +380,9 @@ export function PassengerManifest({
 
                             {/* Waiver Details with Signature Preview */}
                             {activeWaiverTemplate && waiverStatus.status === 'signed' && waiverStatus.signature && (
-                              <div className="rounded bg-emerald-500/10 p-3 space-y-2">
+                              <div className="rounded bg-emerald-50 p-3 space-y-2">
                                 <div className="flex items-center justify-between">
-                                  <div className="text-xs font-medium text-emerald-400">
+                                  <div className="text-xs font-medium text-emerald-600">
                                     Waiver Signed
                                   </div>
                                   <button
@@ -390,7 +390,7 @@ export function PassengerManifest({
                                       e.stopPropagation();
                                       setViewingSignature(waiverStatus.signature);
                                     }}
-                                    className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
+                                    className="text-xs text-cyan-600 hover:text-cyan-600 flex items-center gap-1"
                                   >
                                     <Eye className="h-3 w-3" />
                                     View
@@ -398,7 +398,7 @@ export function PassengerManifest({
                                 </div>
                                 {/* Signature Thumbnail */}
                                 {waiverStatus.signature.signature_data && (
-                                  <div className="rounded bg-white p-2 border border-slate-600">
+                                  <div className="rounded bg-white p-2 border border-slate-300">
                                     <img
                                       src={waiverStatus.signature.signature_data}
                                       alt={`Signature of ${passenger.full_name}`}
@@ -406,7 +406,7 @@ export function PassengerManifest({
                                     />
                                   </div>
                                 )}
-                                <div className="text-sm text-slate-300">
+                                <div className="text-sm text-slate-600">
                                   {format(parseISO(waiverStatus.signedAt!), 'MMM d, yyyy • h:mm a')}
                                 </div>
                                 <div className="text-xs text-slate-500">
@@ -418,9 +418,9 @@ export function PassengerManifest({
 
                           {/* Notes */}
                           {passenger.notes && (
-                            <div className="mt-3 rounded bg-slate-800 p-3 print:bg-slate-100">
+                            <div className="mt-3 rounded bg-white p-3 print:bg-slate-100">
                               <div className="mb-1 text-xs font-medium text-slate-500">Notes</div>
-                              <p className="text-sm text-slate-300 print:text-slate-700">
+                              <p className="text-sm text-slate-600 print:text-slate-700">
                                 {passenger.notes}
                               </p>
                             </div>
@@ -432,7 +432,7 @@ export function PassengerManifest({
                               <>
                                 <button
                                   onClick={() => setViewingSignature(waiverStatus.signature)}
-                                  className="flex items-center gap-1.5 rounded border border-slate-600 px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800"
+                                  className="flex items-center gap-1.5 rounded border border-slate-300 px-3 py-1.5 text-sm text-slate-600 hover:bg-white"
                                 >
                                   <Eye className="h-4 w-4" />
                                   View Full Waiver
@@ -441,7 +441,7 @@ export function PassengerManifest({
                                   href={`/api/waivers/${waiverStatus.signature.id}/pdf`}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="flex items-center gap-1.5 rounded border border-slate-600 px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800"
+                                  className="flex items-center gap-1.5 rounded border border-slate-300 px-3 py-1.5 text-sm text-slate-600 hover:bg-white"
                                 >
                                   <Download className="h-4 w-4" />
                                   Download PDF
@@ -452,7 +452,7 @@ export function PassengerManifest({
                               <button
                                 onClick={() => handleSendIndividualReminder(passenger.id)}
                                 disabled={sendingReminderId === passenger.id}
-                                className="flex items-center gap-1.5 rounded border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-sm text-amber-300 hover:bg-amber-500/20 disabled:opacity-50"
+                                className="flex items-center gap-1.5 rounded border border-amber-500/30 bg-amber-50 px-3 py-1.5 text-sm text-amber-600 hover:bg-amber-50 disabled:opacity-50"
                               >
                                 {sendingReminderId === passenger.id ? (
                                   <>
@@ -469,7 +469,7 @@ export function PassengerManifest({
                             )}
                             <button
                               onClick={() => handleDeletePassenger(passenger.id)}
-                              className="flex items-center gap-1.5 rounded border border-rose-500/30 px-3 py-1.5 text-sm text-rose-400 hover:bg-rose-500/10"
+                              className="flex items-center gap-1.5 rounded border border-rose-500/30 px-3 py-1.5 text-sm text-rose-600 hover:bg-rose-50"
                             >
                               <Trash2 className="h-4 w-4" />
                               Remove
@@ -485,36 +485,36 @@ export function PassengerManifest({
 
             {/* Add Passenger Form */}
             {isAddingPassenger ? (
-              <div className="mt-4 rounded-lg border border-slate-700 bg-slate-900/50 p-4 print:hidden">
-                <h4 className="mb-3 font-medium text-slate-200">Add Passenger</h4>
+              <div className="mt-4 rounded-lg border border-slate-200 bg-white p-4 print:hidden">
+                <h4 className="mb-3 font-medium text-slate-700">Add Passenger</h4>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <input
                     type="text"
                     value={newPassenger.full_name}
                     onChange={(e) => setNewPassenger({ ...newPassenger, full_name: e.target.value })}
                     placeholder="Full Name *"
-                    className="rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-slate-200 placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+                    className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-700 placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
                   />
                   <input
                     type="email"
                     value={newPassenger.email}
                     onChange={(e) => setNewPassenger({ ...newPassenger, email: e.target.value })}
                     placeholder="Email"
-                    className="rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-slate-200 placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+                    className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-700 placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
                   />
                   <input
                     type="tel"
                     value={newPassenger.phone}
                     onChange={(e) => setNewPassenger({ ...newPassenger, phone: e.target.value })}
                     placeholder="Phone"
-                    className="rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-slate-200 placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+                    className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-700 placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
                   />
                   <input
                     type="text"
                     value={newPassenger.notes}
                     onChange={(e) => setNewPassenger({ ...newPassenger, notes: e.target.value })}
                     placeholder="Notes (allergies, accessibility, etc.)"
-                    className="rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-slate-200 placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+                    className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-700 placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
                   />
                 </div>
                 <div className="mt-3 flex gap-2">
@@ -530,7 +530,7 @@ export function PassengerManifest({
                       setIsAddingPassenger(false);
                       setNewPassenger({ full_name: '', email: '', phone: '', notes: '' });
                     }}
-                    className="rounded-lg border border-slate-600 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800"
+                    className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-600 hover:bg-white"
                   >
                     Cancel
                   </button>
@@ -540,7 +540,7 @@ export function PassengerManifest({
               <div className="mt-4 flex flex-wrap gap-3 print:hidden">
                 <button
                   onClick={() => setIsAddingPassenger(true)}
-                  className="flex items-center gap-2 rounded-lg border border-slate-600 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-slate-700"
+                  className="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
                 >
                   <UserPlus className="h-4 w-4" />
                   Add Passenger
@@ -550,7 +550,7 @@ export function PassengerManifest({
                   <button
                     onClick={handleSendWaiverReminders}
                     disabled={isSendingReminders}
-                    className="flex items-center gap-2 rounded-lg border border-amber-500/50 bg-amber-500/10 px-4 py-2 text-sm font-medium text-amber-300 hover:bg-amber-500/20 disabled:opacity-50"
+                    className="flex items-center gap-2 rounded-lg border border-amber-500/50 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-600 hover:bg-amber-50 disabled:opacity-50"
                   >
                     <Send className="h-4 w-4" />
                     {isSendingReminders ? 'Sending...' : 'Send All Reminders'}
@@ -562,7 +562,7 @@ export function PassengerManifest({
                     href={waiverUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 rounded-lg border border-slate-600 px-4 py-2 text-sm text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                    className="flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-400 hover:bg-white hover:text-slate-700"
                   >
                     <ExternalLink className="h-4 w-4" />
                     Waiver Link
@@ -573,9 +573,9 @@ export function PassengerManifest({
 
             {/* Waiver Template Info */}
             {activeWaiverTemplate && (
-              <div className="mt-4 rounded bg-slate-900/30 p-3 text-sm print:bg-slate-100">
+              <div className="mt-4 rounded bg-slate-50 p-3 text-sm print:bg-slate-100">
                 <span className="text-slate-500">Active waiver: </span>
-                <span className="text-slate-300 print:text-slate-700">
+                <span className="text-slate-600 print:text-slate-700">
                   {activeWaiverTemplate.title} (v{activeWaiverTemplate.version})
                 </span>
               </div>
@@ -587,10 +587,10 @@ export function PassengerManifest({
       {/* Full Waiver View Modal */}
       {viewingSignature && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="max-w-2xl w-full max-h-[90vh] overflow-y-auto rounded-lg border border-slate-700 bg-slate-900">
-            <div className="sticky top-0 flex items-center justify-between px-6 py-4 border-b border-slate-700 bg-slate-900">
+          <div className="max-w-2xl w-full max-h-[90vh] overflow-y-auto rounded-lg border border-slate-200 bg-white">
+            <div className="sticky top-0 flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-white">
               <div>
-                <h3 className="text-lg font-semibold text-white">
+                <h3 className="text-lg font-semibold text-slate-900">
                   {viewingSignature.waiver_template?.title || 'Signed Waiver'}
                 </h3>
                 <p className="text-sm text-slate-400">
@@ -600,7 +600,7 @@ export function PassengerManifest({
               </div>
               <button
                 onClick={() => setViewingSignature(null)}
-                className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+                className="p-2 text-slate-400 hover:text-slate-900 rounded-lg hover:bg-white"
               >
                 <ChevronUp className="h-5 w-5" />
               </button>
@@ -610,31 +610,31 @@ export function PassengerManifest({
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-1">
                   <div className="text-xs text-slate-500">Signer Name</div>
-                  <div className="text-slate-200">{viewingSignature.signer_name}</div>
+                  <div className="text-slate-700">{viewingSignature.signer_name}</div>
                 </div>
                 {viewingSignature.signer_email && (
                   <div className="space-y-1">
                     <div className="text-xs text-slate-500">Email</div>
-                    <div className="text-slate-200">{viewingSignature.signer_email}</div>
+                    <div className="text-slate-700">{viewingSignature.signer_email}</div>
                   </div>
                 )}
                 <div className="space-y-1">
                   <div className="text-xs text-slate-500">Signed At</div>
-                  <div className="text-slate-200">
+                  <div className="text-slate-700">
                     {format(parseISO(viewingSignature.signed_at), 'PPpp')}
                   </div>
                 </div>
                 {viewingSignature.ip_address && (
                   <div className="space-y-1">
                     <div className="text-xs text-slate-500">IP Address</div>
-                    <div className="text-slate-200 font-mono text-sm">
+                    <div className="text-slate-700 font-mono text-sm">
                       {viewingSignature.ip_address}
                     </div>
                   </div>
                 )}
                 <div className="space-y-1">
                   <div className="text-xs text-slate-500">Template Version</div>
-                  <div className="text-slate-200">v{viewingSignature.template_version}</div>
+                  <div className="text-slate-700">v{viewingSignature.template_version}</div>
                 </div>
               </div>
 
@@ -642,7 +642,7 @@ export function PassengerManifest({
               {viewingSignature.signature_data && (
                 <div className="space-y-2">
                   <div className="text-xs text-slate-500">Signature</div>
-                  <div className="rounded-lg bg-white p-4 border border-slate-600">
+                  <div className="rounded-lg bg-white p-4 border border-slate-300">
                     <img
                       src={viewingSignature.signature_data}
                       alt={`Signature of ${viewingSignature.signer_name}`}
@@ -656,7 +656,7 @@ export function PassengerManifest({
               {viewingSignature.device_info && (
                 <div className="space-y-2">
                   <div className="text-xs text-slate-500">Device Information</div>
-                  <div className="rounded bg-slate-800 p-3 text-xs font-mono text-slate-400 space-y-1">
+                  <div className="rounded bg-white p-3 text-xs font-mono text-slate-400 space-y-1">
                     <div>Platform: {viewingSignature.device_info.platform}</div>
                     <div>Screen: {viewingSignature.device_info.screen_width}x{viewingSignature.device_info.screen_height}</div>
                     <div>Language: {viewingSignature.device_info.language}</div>
@@ -666,19 +666,19 @@ export function PassengerManifest({
               )}
 
               {/* Actions */}
-              <div className="flex gap-3 pt-4 border-t border-slate-700">
+              <div className="flex gap-3 pt-4 border-t border-slate-200">
                 <a
                   href={`/api/waivers/${viewingSignature.id}/pdf`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-cyan-400"
+                  className="flex items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-400"
                 >
                   <Download className="h-4 w-4" />
                   Download PDF
                 </a>
                 <button
                   onClick={() => setViewingSignature(null)}
-                  className="flex items-center gap-2 rounded-lg border border-slate-600 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800"
+                  className="flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-600 hover:bg-white"
                 >
                   Close
                 </button>

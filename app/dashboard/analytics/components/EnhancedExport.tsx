@@ -118,21 +118,21 @@ export function EnhancedExport({ captainId }: Props) {
       label: 'This Month',
       sublabel: format(new Date(), 'MMMM yyyy'),
       icon: Calendar,
-      color: 'text-cyan-400',
+      color: 'text-cyan-600',
     },
     {
       id: 'last-month' as const,
       label: 'Last Month',
       sublabel: format(subMonths(new Date(), 1), 'MMMM yyyy'),
       icon: Calendar,
-      color: 'text-blue-400',
+      color: 'text-blue-600',
     },
     {
       id: 'this-quarter' as const,
       label: 'Last 3 Months',
       sublabel: 'Quarterly report',
       icon: FileSpreadsheet,
-      color: 'text-purple-400',
+      color: 'text-purple-600',
     },
     {
       id: 'year' as const,
@@ -146,7 +146,7 @@ export function EnhancedExport({ captainId }: Props) {
       label: 'All Time',
       sublabel: 'Complete history',
       icon: FileSpreadsheet,
-      color: 'text-amber-400',
+      color: 'text-amber-600',
     },
     {
       id: 'custom' as const,
@@ -161,7 +161,7 @@ export function EnhancedExport({ captainId }: Props) {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 rounded-lg border border-slate-600 bg-slate-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-600"
+        className="flex items-center gap-2 rounded-lg border border-slate-300 bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 transition-colors hover:bg-slate-200"
       >
         <Download className="h-4 w-4" />
         <span className="hidden sm:inline">Export</span>
@@ -180,14 +180,14 @@ export function EnhancedExport({ captainId }: Props) {
           />
 
           {/* Dropdown Menu */}
-          <div className="absolute right-0 top-12 z-20 w-72 rounded-lg border border-slate-700 bg-slate-800 shadow-xl">
+          <div className="absolute right-0 top-12 z-20 w-72 rounded-lg border border-slate-200 bg-white shadow-xl">
             <div className="p-4">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-white">Export Bookings</h3>
+                <h3 className="text-sm font-semibold text-slate-900">Export Bookings</h3>
                 {showCustomRange && (
                   <button
                     onClick={() => setShowCustomRange(false)}
-                    className="text-slate-400 hover:text-white"
+                    className="text-slate-400 hover:text-slate-900"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -202,7 +202,7 @@ export function EnhancedExport({ captainId }: Props) {
                       type="date"
                       value={customStart}
                       onChange={(e) => setCustomStart(e.target.value)}
-                      className="w-full rounded-lg border border-slate-600 bg-slate-700 px-3 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
+                      className="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900 focus:border-cyan-500 focus:outline-none"
                     />
                   </div>
                   <div>
@@ -211,7 +211,7 @@ export function EnhancedExport({ captainId }: Props) {
                       type="date"
                       value={customEnd}
                       onChange={(e) => setCustomEnd(e.target.value)}
-                      className="w-full rounded-lg border border-slate-600 bg-slate-700 px-3 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
+                      className="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900 focus:border-cyan-500 focus:outline-none"
                     />
                   </div>
                   <button
@@ -230,7 +230,7 @@ export function EnhancedExport({ captainId }: Props) {
                       key={preset.id}
                       onClick={() => handleExport(preset.id)}
                       disabled={exporting}
-                      className="flex w-full items-center gap-3 rounded-lg bg-slate-700/50 px-3 py-2.5 text-left text-sm text-white transition-colors hover:bg-slate-700 disabled:opacity-50"
+                      className="flex w-full items-center gap-3 rounded-lg bg-slate-100 px-3 py-2.5 text-left text-sm text-slate-900 transition-colors hover:bg-slate-100 disabled:opacity-50"
                     >
                       <preset.icon className={`h-4 w-4 ${preset.color}`} />
                       <div className="flex-1 min-w-0">
@@ -246,10 +246,10 @@ export function EnhancedExport({ captainId }: Props) {
                 <div
                   className={`mt-3 text-center text-xs font-medium ${
                     exportStatus.includes('failed')
-                      ? 'text-rose-400'
+                      ? 'text-rose-600'
                       : exportStatus.includes('complete')
                         ? 'text-green-400'
-                        : 'text-cyan-400'
+                        : 'text-cyan-600'
                   }`}
                 >
                   {exportStatus}

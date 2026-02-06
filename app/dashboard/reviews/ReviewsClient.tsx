@@ -127,7 +127,7 @@ export default function ReviewsClient({ captainId }: ReviewsClientProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
+        <Loader2 className="w-8 h-8 text-cyan-600 animate-spin" />
       </div>
     )
   }
@@ -137,56 +137,56 @@ export default function ReviewsClient({ captainId }: ReviewsClientProps) {
       {/* Ratings Summary */}
       {ratings && ratings.total_reviews > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="p-6 bg-slate-800 rounded-xl border border-slate-700">
+          <div className="p-6 bg-white rounded-xl border border-slate-200">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-amber-500/10 rounded-lg">
-                <Star className="w-6 h-6 text-amber-400" />
+              <div className="p-3 bg-amber-50 rounded-lg">
+                <Star className="w-6 h-6 text-amber-600" />
               </div>
               <div>
                 <p className="text-sm text-slate-400">Average Rating</p>
-                <p className="text-2xl font-bold text-white mt-1">
+                <p className="text-2xl font-bold text-slate-900 mt-1">
                   {ratings.average_overall.toFixed(1)} / 5.0
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="p-6 bg-slate-800 rounded-xl border border-slate-700">
+          <div className="p-6 bg-white rounded-xl border border-slate-200">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-cyan-500/10 rounded-lg">
-                <MessageSquare className="w-6 h-6 text-cyan-400" />
+              <div className="p-3 bg-cyan-50 rounded-lg">
+                <MessageSquare className="w-6 h-6 text-cyan-600" />
               </div>
               <div>
                 <p className="text-sm text-slate-400">Total Reviews</p>
-                <p className="text-2xl font-bold text-white mt-1">
+                <p className="text-2xl font-bold text-slate-900 mt-1">
                   {ratings.total_reviews}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="p-6 bg-slate-800 rounded-xl border border-slate-700">
+          <div className="p-6 bg-white rounded-xl border border-slate-200">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-emerald-500/10 rounded-lg">
-                <Star className="w-6 h-6 text-emerald-400" />
+              <div className="p-3 bg-emerald-50 rounded-lg">
+                <Star className="w-6 h-6 text-emerald-600" />
               </div>
               <div>
                 <p className="text-sm text-slate-400">Vessel Rating</p>
-                <p className="text-2xl font-bold text-white mt-1">
+                <p className="text-2xl font-bold text-slate-900 mt-1">
                   {ratings.average_vessel ? ratings.average_vessel.toFixed(1) : 'N/A'}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="p-6 bg-slate-800 rounded-xl border border-slate-700">
+          <div className="p-6 bg-white rounded-xl border border-slate-200">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-blue-500/10 rounded-lg">
-                <Star className="w-6 h-6 text-blue-400" />
+                <Star className="w-6 h-6 text-blue-600" />
               </div>
               <div>
                 <p className="text-sm text-slate-400">Captain Rating</p>
-                <p className="text-2xl font-bold text-white mt-1">
+                <p className="text-2xl font-bold text-slate-900 mt-1">
                   {ratings.average_captain ? ratings.average_captain.toFixed(1) : 'N/A'}
                 </p>
               </div>
@@ -210,10 +210,10 @@ export default function ReviewsClient({ captainId }: ReviewsClientProps) {
           reviews.map((review) => (
             <div
               key={review.id}
-              className={`p-6 bg-slate-800 rounded-xl border ${
+              className={`p-6 bg-white rounded-xl border ${
                 review.is_featured
                   ? 'border-amber-500/50 shadow-lg shadow-amber-500/10'
-                  : 'border-slate-700'
+                  : 'border-slate-200'
               }`}
             >
               {/* Header */}
@@ -226,22 +226,22 @@ export default function ReviewsClient({ captainId }: ReviewsClientProps) {
                           key={star}
                           className={`w-5 h-5 ${
                             star <= review.overall_rating
-                              ? 'fill-amber-400 text-amber-400'
+                              ? 'fill-amber-400 text-amber-600'
                               : 'text-slate-600'
                           }`}
                         />
                       ))}
                     </div>
                     {review.is_featured && (
-                      <Award className="w-5 h-5 text-amber-400" />
+                      <Award className="w-5 h-5 text-amber-600" />
                     )}
                     {!review.is_public && (
-                      <span className="px-2 py-1 bg-slate-700 rounded text-xs text-slate-400">
+                      <span className="px-2 py-1 bg-slate-100 rounded text-xs text-slate-400">
                         Hidden
                       </span>
                     )}
                   </div>
-                  <p className="font-semibold text-white">{review.guest_name}</p>
+                  <p className="font-semibold text-slate-900">{review.guest_name}</p>
                   <p className="text-sm text-slate-400">
                     {new Date(review.created_at).toLocaleDateString()}
                   </p>
@@ -253,8 +253,8 @@ export default function ReviewsClient({ captainId }: ReviewsClientProps) {
                     onClick={() => toggleFeatured(review.id, review.is_featured)}
                     className={`p-2 rounded-lg transition-colors ${
                       review.is_featured
-                        ? 'bg-amber-500/20 text-amber-400'
-                        : 'bg-slate-700 text-slate-400 hover:text-white'
+                        ? 'bg-amber-50 text-amber-600'
+                        : 'bg-slate-100 text-slate-400 hover:text-slate-900'
                     }`}
                     title={review.is_featured ? 'Remove from featured' : 'Mark as featured'}
                   >
@@ -264,8 +264,8 @@ export default function ReviewsClient({ captainId }: ReviewsClientProps) {
                     onClick={() => togglePublic(review.id, review.is_public)}
                     className={`p-2 rounded-lg transition-colors ${
                       review.is_public
-                        ? 'bg-emerald-500/20 text-emerald-400'
-                        : 'bg-slate-700 text-slate-400 hover:text-white'
+                        ? 'bg-emerald-50 text-emerald-600'
+                        : 'bg-slate-100 text-slate-400 hover:text-slate-900'
                     }`}
                     title={review.is_public ? 'Hide from public' : 'Show publicly'}
                   >
@@ -273,7 +273,7 @@ export default function ReviewsClient({ captainId }: ReviewsClientProps) {
                   </button>
                   <button
                     onClick={() => deleteReview(review.id)}
-                    className="p-2 bg-slate-700 text-slate-400 hover:text-rose-400 rounded-lg transition-colors"
+                    className="p-2 bg-slate-100 text-slate-400 hover:text-rose-600 rounded-lg transition-colors"
                     title="Delete review"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -283,12 +283,12 @@ export default function ReviewsClient({ captainId }: ReviewsClientProps) {
 
               {/* Review Content */}
               {review.review_title && (
-                <h3 className="text-lg font-semibold text-white mb-2">
+                <h3 className="text-lg font-semibold text-slate-900 mb-2">
                   {review.review_title}
                 </h3>
               )}
               {review.review_text && (
-                <p className="text-slate-300 mb-4 whitespace-pre-wrap">
+                <p className="text-slate-600 mb-4 whitespace-pre-wrap">
                   {review.review_text}
                 </p>
               )}
@@ -299,19 +299,19 @@ export default function ReviewsClient({ captainId }: ReviewsClientProps) {
                   {review.vessel_rating && (
                     <div>
                       <span className="text-slate-500">Vessel: </span>
-                      <span className="text-white">{review.vessel_rating}/5</span>
+                      <span className="text-slate-900">{review.vessel_rating}/5</span>
                     </div>
                   )}
                   {review.captain_rating && (
                     <div>
                       <span className="text-slate-500">Captain: </span>
-                      <span className="text-white">{review.captain_rating}/5</span>
+                      <span className="text-slate-900">{review.captain_rating}/5</span>
                     </div>
                   )}
                   {review.experience_rating && (
                     <div>
                       <span className="text-slate-500">Experience: </span>
-                      <span className="text-white">{review.experience_rating}/5</span>
+                      <span className="text-slate-900">{review.experience_rating}/5</span>
                     </div>
                   )}
                 </div>
@@ -319,9 +319,9 @@ export default function ReviewsClient({ captainId }: ReviewsClientProps) {
 
               {/* Captain Response */}
               {review.captain_response ? (
-                <div className="mt-4 p-4 bg-slate-900/50 rounded-lg border-l-4 border-cyan-500">
-                  <p className="text-sm font-medium text-cyan-400 mb-1">Your Response</p>
-                  <p className="text-slate-300 whitespace-pre-wrap">
+                <div className="mt-4 p-4 bg-white rounded-lg border-l-4 border-cyan-500">
+                  <p className="text-sm font-medium text-cyan-600 mb-1">Your Response</p>
+                  <p className="text-slate-600 whitespace-pre-wrap">
                     {review.captain_response}
                   </p>
                   <p className="text-xs text-slate-500 mt-2">
@@ -335,7 +335,7 @@ export default function ReviewsClient({ captainId }: ReviewsClientProps) {
                     onChange={(e) => setResponseText(e.target.value)}
                     placeholder="Write your response..."
                     rows={4}
-                    className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 resize-none"
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 resize-none"
                   />
                   <div className="flex gap-2">
                     <button
@@ -349,7 +349,7 @@ export default function ReviewsClient({ captainId }: ReviewsClientProps) {
                         setRespondingTo(null)
                         setResponseText('')
                       }}
-                      className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+                      className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-900 rounded-lg transition-colors"
                     >
                       Cancel
                     </button>
@@ -358,7 +358,7 @@ export default function ReviewsClient({ captainId }: ReviewsClientProps) {
               ) : (
                 <button
                   onClick={() => setRespondingTo(review.id)}
-                  className="mt-4 px-4 py-2 text-sm text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-2"
+                  className="mt-4 px-4 py-2 text-sm text-cyan-600 hover:text-cyan-600 transition-colors flex items-center gap-2"
                 >
                   <MessageSquare className="w-4 h-4" />
                   Respond to Review

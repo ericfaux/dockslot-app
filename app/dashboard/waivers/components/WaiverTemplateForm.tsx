@@ -106,10 +106,10 @@ export function WaiverTemplateForm({ template }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Title Field */}
-      <div className="rounded-lg border border-slate-700 bg-slate-800 p-6 space-y-6">
+      <div className="rounded-lg border border-slate-200 bg-white p-6 space-y-6">
         <div className="space-y-2">
-          <label htmlFor="title" className="block text-sm font-medium text-slate-300">
-            Template Title <span className="text-rose-400">*</span>
+          <label htmlFor="title" className="block text-sm font-medium text-slate-600">
+            Template Title <span className="text-rose-600">*</span>
           </label>
           <input
             type="text"
@@ -117,7 +117,7 @@ export function WaiverTemplateForm({ template }: Props) {
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
             placeholder="e.g., Standard Liability Waiver"
-            className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-slate-900 placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
             required
           />
         </div>
@@ -125,8 +125,8 @@ export function WaiverTemplateForm({ template }: Props) {
         {/* Content Editor */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <label htmlFor="content" className="block text-sm font-medium text-slate-300">
-              Waiver Content <span className="text-rose-400">*</span>
+            <label htmlFor="content" className="block text-sm font-medium text-slate-600">
+              Waiver Content <span className="text-rose-600">*</span>
             </label>
             <div className="flex items-center gap-2">
               <button
@@ -134,8 +134,8 @@ export function WaiverTemplateForm({ template }: Props) {
                 onClick={() => setShowVariables(!showVariables)}
                 className={`flex items-center gap-1 px-2 py-1 text-xs rounded transition-colors ${
                   showVariables
-                    ? 'bg-cyan-500/20 text-cyan-300'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                    ? 'bg-cyan-50 text-cyan-600'
+                    : 'text-slate-400 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
                 <Plus className="h-3 w-3" />
@@ -151,8 +151,8 @@ export function WaiverTemplateForm({ template }: Props) {
                 onClick={() => setShowFormattingHelp(!showFormattingHelp)}
                 className={`flex items-center gap-1 px-2 py-1 text-xs rounded transition-colors ${
                   showFormattingHelp
-                    ? 'bg-cyan-500/20 text-cyan-300'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                    ? 'bg-cyan-50 text-cyan-600'
+                    : 'text-slate-400 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
                 <HelpCircle className="h-3 w-3" />
@@ -163,8 +163,8 @@ export function WaiverTemplateForm({ template }: Props) {
                 onClick={() => setShowPreview(!showPreview)}
                 className={`flex items-center gap-1 px-2 py-1 text-xs rounded transition-colors ${
                   showPreview
-                    ? 'bg-cyan-500/20 text-cyan-300'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                    ? 'bg-cyan-50 text-cyan-600'
+                    : 'text-slate-400 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
                 {showPreview ? (
@@ -184,7 +184,7 @@ export function WaiverTemplateForm({ template }: Props) {
 
           {/* Variables Panel */}
           {showVariables && (
-            <div className="p-3 rounded-lg bg-slate-900/50 border border-slate-700 space-y-2">
+            <div className="p-3 rounded-lg bg-white border border-slate-200 space-y-2">
               <p className="text-xs text-slate-400">
                 Click to insert variables that will be replaced with actual values when guests view the waiver:
               </p>
@@ -194,11 +194,11 @@ export function WaiverTemplateForm({ template }: Props) {
                     key={v.key}
                     type="button"
                     onClick={() => insertVariable(v.key)}
-                    className="group relative px-2 py-1 text-xs font-mono bg-slate-800 text-cyan-400 rounded border border-slate-600 hover:border-cyan-500 hover:bg-slate-700 transition-colors"
+                    className="group relative px-2 py-1 text-xs font-mono bg-white text-cyan-600 rounded border border-slate-300 hover:border-cyan-500 hover:bg-slate-100 transition-colors"
                     title={`${v.description} - Example: ${v.example}`}
                   >
                     {v.key}
-                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs bg-slate-700 text-slate-300 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs bg-slate-100 text-slate-600 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
                       {v.description}
                     </span>
                   </button>
@@ -209,16 +209,16 @@ export function WaiverTemplateForm({ template }: Props) {
 
           {/* Formatting Help */}
           {showFormattingHelp && (
-            <div className="p-3 rounded-lg bg-slate-900/50 border border-slate-700 space-y-2 text-xs text-slate-400">
-              <p className="font-medium text-slate-300">Formatting Tips:</p>
+            <div className="p-3 rounded-lg bg-white border border-slate-200 space-y-2 text-xs text-slate-400">
+              <p className="font-medium text-slate-600">Formatting Tips:</p>
               <ul className="space-y-1 ml-4 list-disc">
-                <li><code className="text-cyan-400"># Heading</code> - Main heading</li>
-                <li><code className="text-cyan-400">## Subheading</code> - Secondary heading</li>
-                <li><code className="text-cyan-400">### Section</code> - Section heading</li>
-                <li><code className="text-cyan-400">- Item</code> - Bullet point</li>
-                <li><code className="text-cyan-400">1. Item</code> - Numbered list</li>
-                <li><code className="text-cyan-400">**bold**</code> - <strong>Bold text</strong></li>
-                <li><code className="text-cyan-400">*italic*</code> - <em>Italic text</em></li>
+                <li><code className="text-cyan-600"># Heading</code> - Main heading</li>
+                <li><code className="text-cyan-600">## Subheading</code> - Secondary heading</li>
+                <li><code className="text-cyan-600">### Section</code> - Section heading</li>
+                <li><code className="text-cyan-600">- Item</code> - Bullet point</li>
+                <li><code className="text-cyan-600">1. Item</code> - Numbered list</li>
+                <li><code className="text-cyan-600">**bold**</code> - <strong>Bold text</strong></li>
+                <li><code className="text-cyan-600">*italic*</code> - <em>Italic text</em></li>
                 <li>Use blank lines to separate paragraphs</li>
               </ul>
             </div>
@@ -226,24 +226,24 @@ export function WaiverTemplateForm({ template }: Props) {
 
           {/* Variable Validation Warning */}
           {!variableValidation.valid && (
-            <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30">
-              <AlertCircle className="h-4 w-4 text-amber-400 flex-shrink-0 mt-0.5" />
-              <div className="text-xs text-amber-400">
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 border border-amber-500/30">
+              <AlertCircle className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div className="text-xs text-amber-600">
                 <p className="font-medium">Unknown variables detected:</p>
                 <p className="font-mono">{variableValidation.unknown.join(', ')}</p>
-                <p className="mt-1 text-amber-400/80">These will appear as-is in the signed waiver.</p>
+                <p className="mt-1 text-amber-600/80">These will appear as-is in the signed waiver.</p>
               </div>
             </div>
           )}
 
           {/* Editor / Preview Toggle */}
           {showPreview ? (
-            <div className="rounded-lg border border-slate-700 overflow-hidden">
-              <div className="px-3 py-2 bg-slate-700/50 border-b border-slate-700">
+            <div className="rounded-lg border border-slate-200 overflow-hidden">
+              <div className="px-3 py-2 bg-slate-100 border-b border-slate-200">
                 <span className="text-xs font-medium text-slate-400">Preview Mode</span>
                 <span className="ml-2 text-xs text-slate-500">(with sample data)</span>
               </div>
-              <div className="bg-slate-900">
+              <div className="bg-white">
                 <WaiverDocument
                   title={formData.title || 'Untitled Waiver'}
                   content={formData.content || 'Enter waiver content to preview...'}
@@ -259,14 +259,14 @@ export function WaiverTemplateForm({ template }: Props) {
               value={formData.content}
               onChange={(e) => setFormData({ ...formData, content: e.target.value })}
               placeholder="Enter the full waiver text that passengers will read and sign..."
-              className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-3 text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 font-mono text-sm"
+              className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 font-mono text-sm"
               rows={16}
               required
             />
           )}
           <p className="text-xs text-slate-500">
             This text will be displayed to passengers before they sign. Use variables like{' '}
-            <code className="text-cyan-400">{'{{guest_name}}'}</code> to personalize the waiver.
+            <code className="text-cyan-600">{'{{guest_name}}'}</code> to personalize the waiver.
           </p>
         </div>
 
@@ -277,9 +277,9 @@ export function WaiverTemplateForm({ template }: Props) {
               type="checkbox"
               checked={formData.is_active}
               onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-              className="h-4 w-4 rounded border-slate-700 bg-slate-900 text-cyan-500 focus:ring-cyan-500"
+              className="h-4 w-4 rounded border-slate-200 bg-white text-cyan-500 focus:ring-cyan-500"
             />
-            <span className="text-sm font-medium text-slate-300">
+            <span className="text-sm font-medium text-slate-600">
               Active (require for all new bookings)
             </span>
           </label>
@@ -287,7 +287,7 @@ export function WaiverTemplateForm({ template }: Props) {
 
         {/* Version Info */}
         {template && (
-          <div className="pt-4 border-t border-slate-700">
+          <div className="pt-4 border-t border-slate-200">
             <p className="text-xs text-slate-500">
               Current version: <span className="text-slate-400 font-mono">v{template.version}</span>
               <span className="ml-2">• Saving will create a new version</span>
@@ -297,7 +297,7 @@ export function WaiverTemplateForm({ template }: Props) {
 
         {/* Error */}
         {error && (
-          <div className="rounded-lg bg-rose-500/10 border border-rose-500/30 p-4 text-sm text-rose-400">
+          <div className="rounded-lg bg-rose-50 border border-rose-500/30 p-4 text-sm text-rose-600">
             {error}
           </div>
         )}
@@ -308,7 +308,7 @@ export function WaiverTemplateForm({ template }: Props) {
         <button
           type="submit"
           disabled={isPending}
-          className="flex items-center gap-2 rounded-lg bg-cyan-500 px-6 py-2 font-medium text-slate-900 transition-colors hover:bg-cyan-400 disabled:opacity-50"
+          className="flex items-center gap-2 rounded-lg bg-cyan-500 px-6 py-2 font-medium text-white transition-colors hover:bg-cyan-400 disabled:opacity-50"
         >
           {isPending ? (
             <>
@@ -326,7 +326,7 @@ export function WaiverTemplateForm({ template }: Props) {
           type="button"
           onClick={() => router.push('/dashboard/waivers')}
           disabled={isPending}
-          className="flex items-center gap-2 rounded-lg border border-slate-700 px-6 py-2 font-medium text-slate-400 transition-colors hover:bg-slate-800 hover:text-white disabled:opacity-50"
+          className="flex items-center gap-2 rounded-lg border border-slate-200 px-6 py-2 font-medium text-slate-400 transition-colors hover:bg-white hover:text-slate-900 disabled:opacity-50"
         >
           <X className="h-4 w-4" />
           Cancel

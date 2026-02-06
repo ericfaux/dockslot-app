@@ -236,22 +236,22 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
     }
   };
 
-  const inputClassName = "w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-white placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500";
-  const labelClassName = "block text-sm font-medium text-slate-300 mb-1.5";
-  const sectionClassName = "rounded-xl border border-slate-800 bg-slate-900/50 p-6";
+  const inputClassName = "w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-slate-900 placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500";
+  const labelClassName = "block text-sm font-medium text-slate-600 mb-1.5";
+  const sectionClassName = "rounded-xl border border-slate-200 bg-white p-6";
 
   return (
     <div className="space-y-6">
       {/* Error Message */}
       {error && (
-        <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
+        <div className="rounded-lg border border-rose-500/30 bg-rose-50 px-4 py-3 text-sm text-rose-600">
           {error}
         </div>
       )}
 
       {/* Success Message */}
       {success && (
-        <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
+        <div className="rounded-lg border border-emerald-500/30 bg-emerald-50 px-4 py-3 text-sm text-emerald-600">
           {success}
         </div>
       )}
@@ -264,8 +264,8 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
       {/* Profile Information */}
       <section className={sectionClassName}>
         <div className="mb-4 flex items-center gap-2">
-          <User className="h-5 w-5 text-cyan-400" />
-          <h2 className="text-lg font-semibold text-white">Profile Information</h2>
+          <User className="h-5 w-5 text-cyan-600" />
+          <h2 className="text-lg font-semibold text-slate-900">Profile Information</h2>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
@@ -333,8 +333,8 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
       {/* Business Information */}
       <section className={sectionClassName}>
         <div className="mb-4 flex items-center gap-2">
-          <Building2 className="h-5 w-5 text-cyan-400" />
-          <h2 className="text-lg font-semibold text-white">Business Information</h2>
+          <Building2 className="h-5 w-5 text-cyan-600" />
+          <h2 className="text-lg font-semibold text-slate-900">Business Information</h2>
         </div>
         <div>
           <label htmlFor="businessName" className={labelClassName}>
@@ -357,8 +357,8 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
       {/* Meeting Spot */}
       <section className={sectionClassName}>
         <div className="mb-4 flex items-center gap-2">
-          <MapPin className="h-5 w-5 text-cyan-400" />
-          <h2 className="text-lg font-semibold text-white">Meeting Spot</h2>
+          <MapPin className="h-5 w-5 text-cyan-600" />
+          <h2 className="text-lg font-semibold text-slate-900">Meeting Spot</h2>
         </div>
         <p className="mb-4 text-sm text-slate-400">
           Where should guests meet you for trips? This information is shared after booking.
@@ -405,11 +405,11 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
           </div>
 
           {/* Coordinate Status & Weather Location */}
-          <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-4 space-y-3">
+          <div className="rounded-lg border border-slate-200 bg-white p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-slate-300">Weather Location</span>
+              <span className="text-sm font-medium text-slate-600">Weather Location</span>
               {geocodeStatus === 'loading' && (
-                <span className="flex items-center gap-1.5 text-xs text-cyan-400">
+                <span className="flex items-center gap-1.5 text-xs text-cyan-600">
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
                   Geocoding...
                 </span>
@@ -418,24 +418,24 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
 
             {meetingSpotLat !== null && meetingSpotLon !== null ? (
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-emerald-400" />
-                <span className="text-sm text-emerald-300">
+                <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-emerald-600" />
+                <span className="text-sm text-emerald-600">
                   {meetingSpotLat.toFixed(4)}, {meetingSpotLon.toFixed(4)} — Location verified
                 </span>
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 flex-shrink-0 text-amber-400" />
-                <span className="text-sm text-amber-300">
+                <AlertTriangle className="h-4 w-4 flex-shrink-0 text-amber-600" />
+                <span className="text-sm text-amber-600">
                   No coordinates set — save with an address to auto-detect, or enter manually below
                 </span>
               </div>
             )}
 
             {geocodeStatus === 'error' && geocodeMessage && (
-              <div className="flex items-start gap-2 rounded-md bg-rose-500/10 border border-rose-500/20 px-3 py-2">
-                <AlertTriangle className="h-4 w-4 flex-shrink-0 text-rose-400 mt-0.5" />
-                <span className="text-xs text-rose-300">{geocodeMessage}</span>
+              <div className="flex items-start gap-2 rounded-md bg-rose-50 border border-rose-500/20 px-3 py-2">
+                <AlertTriangle className="h-4 w-4 flex-shrink-0 text-rose-600 mt-0.5" />
+                <span className="text-xs text-rose-600">{geocodeMessage}</span>
               </div>
             )}
 
@@ -447,7 +447,7 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
             <button
               type="button"
               onClick={() => setShowManualCoords(!showManualCoords)}
-              className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
+              className="text-xs text-cyan-600 hover:text-cyan-600 transition-colors"
             >
               {showManualCoords ? 'Hide manual entry' : 'Enter coordinates manually'}
             </button>
@@ -487,7 +487,7 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
                 <button
                   type="button"
                   onClick={handleManualCoordsSubmit}
-                  className="rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-600 transition-colors"
+                  className="rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 transition-colors"
                 >
                   Set Coordinates
                 </button>
@@ -503,8 +503,8 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
       {/* Booking Settings */}
       <section className={sectionClassName}>
         <div className="mb-4 flex items-center gap-2">
-          <CalendarIcon className="h-5 w-5 text-cyan-400" />
-          <h2 className="text-lg font-semibold text-white">Booking Settings</h2>
+          <CalendarIcon className="h-5 w-5 text-cyan-600" />
+          <h2 className="text-lg font-semibold text-slate-900">Booking Settings</h2>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
@@ -565,8 +565,8 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
       {/* Dock Mode */}
       <section className={sectionClassName}>
         <div className="mb-4 flex items-center gap-2">
-          <Anchor className="h-5 w-5 text-cyan-400" />
-          <h2 className="text-lg font-semibold text-white">Dock Mode</h2>
+          <Anchor className="h-5 w-5 text-cyan-600" />
+          <h2 className="text-lg font-semibold text-slate-900">Dock Mode</h2>
         </div>
         <p className="mb-4 text-sm text-slate-400">
           A simplified, high-contrast interface for use while on the water. Large text, big buttons, and only essential trip info.
@@ -582,7 +582,7 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
               />
               <div
                 className={`h-6 w-11 rounded-full transition-colors ${
-                  dockModeEnabled ? 'bg-cyan-500' : 'bg-slate-700'
+                  dockModeEnabled ? 'bg-cyan-500' : 'bg-slate-100'
                 }`}
               >
                 <div
@@ -592,17 +592,17 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
                 />
               </div>
             </div>
-            <span className="text-sm text-slate-300">
+            <span className="text-sm text-slate-600">
               {dockModeEnabled ? 'Dock Mode is available' : 'Dock Mode is disabled'}
             </span>
           </label>
           {dockModeEnabled && (
-            <div className="rounded-lg border border-cyan-500/30 bg-cyan-500/10 p-4">
-              <p className="text-sm text-cyan-300 mb-3">
+            <div className="rounded-lg border border-cyan-500/30 bg-cyan-50 p-4">
+              <p className="text-sm text-cyan-600 mb-3">
                 When enabled, a &quot;Dock Mode&quot; button will appear on your dashboard. You can also access it directly at:
               </p>
               <div className="flex items-center gap-2">
-                <code className="flex-1 rounded bg-slate-800 px-3 py-2 text-sm text-slate-300 font-mono">
+                <code className="flex-1 rounded bg-white px-3 py-2 text-sm text-slate-600 font-mono">
                   /dock
                 </code>
                 <a
@@ -629,8 +629,8 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
       {/* Hibernation Mode */}
       <section className={sectionClassName}>
         <div className="mb-4 flex items-center gap-2">
-          <Moon className="h-5 w-5 text-cyan-400" />
-          <h2 className="text-lg font-semibold text-white">Hibernation Mode</h2>
+          <Moon className="h-5 w-5 text-cyan-600" />
+          <h2 className="text-lg font-semibold text-slate-900">Hibernation Mode</h2>
         </div>
         <p className="mb-4 text-sm text-slate-400">
           Temporarily pause new bookings during off-season. Set a return date to automatically resume accepting bookings.
@@ -646,7 +646,7 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
               />
               <div
                 className={`h-6 w-11 rounded-full transition-colors ${
-                  isHibernating ? 'bg-amber-500' : 'bg-slate-700'
+                  isHibernating ? 'bg-amber-500' : 'bg-slate-100'
                 }`}
               >
                 <div
@@ -656,13 +656,13 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
                 />
               </div>
             </div>
-            <span className="text-sm text-slate-300">
+            <span className="text-sm text-slate-600">
               {isHibernating ? 'Hibernation mode is ON' : 'Hibernation mode is OFF'}
             </span>
           </label>
 
           {isHibernating && (
-            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 space-y-4">
+            <div className="rounded-lg border border-amber-500/30 bg-amber-50 p-4 space-y-4">
               {/* Scheduled Resumption */}
               <div>
                 <label htmlFor="hibernationEndDate" className={labelClassName}>
@@ -698,9 +698,9 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
                     type="checkbox"
                     checked={hibernationShowReturnDate}
                     onChange={(e) => setHibernationShowReturnDate(e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-600 bg-slate-800 text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-900"
+                    className="h-4 w-4 rounded border-slate-300 bg-white text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-900"
                   />
-                  <span className="text-sm text-slate-300">
+                  <span className="text-sm text-slate-600">
                     Show return date to guests
                   </span>
                 </label>
@@ -710,9 +710,9 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
                     type="checkbox"
                     checked={hibernationAllowNotifications}
                     onChange={(e) => setHibernationAllowNotifications(e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-600 bg-slate-800 text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-900"
+                    className="h-4 w-4 rounded border-slate-300 bg-white text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-900"
                   />
-                  <span className="text-sm text-slate-300">
+                  <span className="text-sm text-slate-600">
                     Let guests sign up for &quot;We&apos;re Back!&quot; notifications
                   </span>
                 </label>
@@ -722,9 +722,9 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
                     type="checkbox"
                     checked={hibernationShowContactInfo}
                     onChange={(e) => setHibernationShowContactInfo(e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-600 bg-slate-800 text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-900"
+                    className="h-4 w-4 rounded border-slate-300 bg-white text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-900"
                   />
-                  <span className="text-sm text-slate-300">
+                  <span className="text-sm text-slate-600">
                     Show contact info during hibernation
                   </span>
                 </label>
@@ -754,7 +754,7 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
                   <button
                     type="button"
                     onClick={toggleSubscribers}
-                    className="flex w-full items-center justify-between text-sm text-slate-300 hover:text-white transition-colors"
+                    className="flex w-full items-center justify-between text-sm text-slate-600 hover:text-slate-900 transition-colors"
                   >
                     <span className="flex items-center gap-2">
                       <Users className="h-4 w-4" />
@@ -769,7 +769,7 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
                     <div className="mt-3 space-y-3">
                       {subscribersLoading ? (
                         <div className="flex items-center justify-center py-4">
-                          <Loader2 className="h-5 w-5 animate-spin text-amber-400" />
+                          <Loader2 className="h-5 w-5 animate-spin text-amber-600" />
                         </div>
                       ) : subscribers.length === 0 ? (
                         <p className="text-sm text-slate-500 py-2">
@@ -784,7 +784,7 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
                             <button
                               type="button"
                               onClick={handleExportSubscribers}
-                              className="flex items-center gap-1.5 text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
+                              className="flex items-center gap-1.5 text-xs text-cyan-600 hover:text-cyan-600 transition-colors"
                             >
                               <Download className="h-3.5 w-3.5" />
                               Export CSV
@@ -794,10 +794,10 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
                             {subscribers.map((sub) => (
                               <div
                                 key={sub.id}
-                                className="flex items-center justify-between rounded-md bg-slate-800/50 px-3 py-2"
+                                className="flex items-center justify-between rounded-md bg-white px-3 py-2"
                               >
                                 <div className="min-w-0 flex-1">
-                                  <p className="text-sm text-white truncate">
+                                  <p className="text-sm text-slate-900 truncate">
                                     {sub.email}
                                   </p>
                                   {sub.name && (
@@ -809,7 +809,7 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
                                 <button
                                   type="button"
                                   onClick={() => handleDeleteSubscriber(sub.id)}
-                                  className="ml-2 p-1.5 text-slate-500 hover:text-rose-400 transition-colors"
+                                  className="ml-2 p-1.5 text-slate-500 hover:text-rose-600 transition-colors"
                                   title="Remove subscriber"
                                 >
                                   <Trash2 className="h-4 w-4" />
@@ -831,8 +831,8 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
       {/* Cancellation Policy */}
       <section className={sectionClassName}>
         <div className="mb-4 flex items-center gap-2">
-          <FileText className="h-5 w-5 text-cyan-400" />
-          <h2 className="text-lg font-semibold text-white">Cancellation Policy</h2>
+          <FileText className="h-5 w-5 text-cyan-600" />
+          <h2 className="text-lg font-semibold text-slate-900">Cancellation Policy</h2>
         </div>
         <div>
           <label htmlFor="cancellationPolicy" className={labelClassName}>

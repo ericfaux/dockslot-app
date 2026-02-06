@@ -60,20 +60,20 @@ interface BookingTimelineProps {
 }
 
 const EVENT_ICONS: Record<string, { icon: React.ElementType; color: string }> = {
-  booking_created: { icon: Calendar, color: 'text-cyan-400' },
-  status_changed: { icon: Edit3, color: 'text-amber-400' },
-  payment_received: { icon: CreditCard, color: 'text-emerald-400' },
-  payment_refunded: { icon: RotateCcw, color: 'text-purple-400' },
-  waiver_signed: { icon: FileText, color: 'text-blue-400' },
-  passenger_added: { icon: User, color: 'text-cyan-400' },
+  booking_created: { icon: Calendar, color: 'text-cyan-600' },
+  status_changed: { icon: Edit3, color: 'text-amber-600' },
+  payment_received: { icon: CreditCard, color: 'text-emerald-600' },
+  payment_refunded: { icon: RotateCcw, color: 'text-purple-600' },
+  waiver_signed: { icon: FileText, color: 'text-blue-600' },
+  passenger_added: { icon: User, color: 'text-cyan-600' },
   passenger_updated: { icon: User, color: 'text-slate-400' },
-  rescheduled: { icon: Calendar, color: 'text-amber-400' },
-  weather_hold_set: { icon: CloudRain, color: 'text-amber-400' },
+  rescheduled: { icon: Calendar, color: 'text-amber-600' },
+  weather_hold_set: { icon: CloudRain, color: 'text-amber-600' },
   note_added: { icon: Edit3, color: 'text-slate-400' },
-  guest_communication: { icon: Mail, color: 'text-blue-400' },
-  completed: { icon: CheckCircle, color: 'text-emerald-400' },
-  cancelled: { icon: XCircle, color: 'text-rose-400' },
-  balance_requested: { icon: DollarSign, color: 'text-cyan-400' },
+  guest_communication: { icon: Mail, color: 'text-blue-600' },
+  completed: { icon: CheckCircle, color: 'text-emerald-600' },
+  cancelled: { icon: XCircle, color: 'text-rose-600' },
+  balance_requested: { icon: DollarSign, color: 'text-cyan-600' },
   default: { icon: Clock, color: 'text-slate-400' },
 }
 
@@ -213,9 +213,9 @@ export default function BookingTimeline({ bookingId }: BookingTimelineProps) {
   const hasMore = events.length > 5
 
   return (
-    <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-4">
+    <div className="rounded-lg border border-slate-200 bg-white p-4">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="flex items-center gap-2 text-sm font-semibold text-cyan-400">
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-cyan-600">
           <Clock className="h-4 w-4" />
           Booking Timeline
         </h3>
@@ -229,12 +229,12 @@ export default function BookingTimeline({ bookingId }: BookingTimelineProps) {
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-cyan-500 border-t-transparent" />
         </div>
       ) : error ? (
-        <div className="flex items-center gap-2 rounded bg-rose-500/10 p-3 text-sm text-rose-400">
+        <div className="flex items-center gap-2 rounded bg-rose-50 p-3 text-sm text-rose-600">
           <AlertCircle className="h-4 w-4 flex-shrink-0" />
           <span>{error}</span>
         </div>
       ) : events.length === 0 ? (
-        <div className="rounded bg-slate-900/30 p-6 text-center text-sm text-slate-500">
+        <div className="rounded bg-slate-50 p-6 text-center text-sm text-slate-500">
           No timeline events yet
         </div>
       ) : (
@@ -246,19 +246,19 @@ export default function BookingTimeline({ bookingId }: BookingTimelineProps) {
                 {/* Timeline Line */}
                 <div className="flex flex-col items-center">
                   <div
-                    className={`flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 ring-2 ring-slate-700 ${event.iconColor}`}
+                    className={`flex h-8 w-8 items-center justify-center rounded-full bg-white ring-2 ring-slate-700 ${event.iconColor}`}
                   >
                     {event.icon}
                   </div>
                   {index < displayedEvents.length - 1 && (
-                    <div className="h-full w-px bg-slate-700" />
+                    <div className="h-full w-px bg-slate-100" />
                   )}
                 </div>
 
                 {/* Event Content */}
                 <div className="flex-1 pb-4">
                   <div className="mb-1 flex items-start justify-between gap-2">
-                    <h4 className="font-medium text-slate-200">{event.title}</h4>
+                    <h4 className="font-medium text-slate-700">{event.title}</h4>
                     <time className="flex-shrink-0 text-xs text-slate-500">
                       {formatTimestamp(event.timestamp)}
                     </time>
@@ -273,7 +273,7 @@ export default function BookingTimeline({ bookingId }: BookingTimelineProps) {
           {hasMore && (
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded border border-slate-700 py-2 text-sm text-cyan-400 transition-colors hover:bg-slate-700/50"
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded border border-slate-200 py-2 text-sm text-cyan-600 transition-colors hover:bg-slate-100"
             >
               {isExpanded ? (
                 <>

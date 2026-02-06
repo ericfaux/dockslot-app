@@ -80,17 +80,17 @@ export function QuickBookingModal({
       {/* Modal */}
       <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
-          className="pointer-events-auto w-full max-w-md rounded-xl border border-slate-700 bg-slate-900 shadow-2xl"
+          className="pointer-events-auto w-full max-w-md rounded-xl border border-slate-200 bg-white shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-slate-700 p-4">
+          <div className="flex items-center justify-between border-b border-slate-200 p-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-500/20">
-                <CalendarPlus className="h-5 w-5 text-cyan-400" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-50">
+                <CalendarPlus className="h-5 w-5 text-cyan-600" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-white">
+                <h2 className="text-lg font-semibold text-slate-900">
                   {mode === 'choose' ? 'Book This Slot' : 'Quick Booking'}
                 </h2>
                 <p className="text-sm text-slate-400">
@@ -100,7 +100,7 @@ export function QuickBookingModal({
             </div>
             <button
               onClick={handleClose}
-              className="rounded-md p-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
+              className="rounded-md p-2 text-slate-400 transition-colors hover:bg-white hover:text-slate-900"
             >
               <X className="h-5 w-5" />
             </button>
@@ -108,16 +108,16 @@ export function QuickBookingModal({
 
           {/* Slot Info */}
           <div className="px-4 pt-4">
-            <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-3">
+            <div className="rounded-lg border border-slate-200 bg-white p-3">
               <div className="flex items-center gap-3 mb-1.5">
                 <Calendar className="h-4 w-4 text-slate-400" />
-                <span className="text-sm font-medium text-slate-200">
+                <span className="text-sm font-medium text-slate-700">
                   {formattedDate}
                 </span>
               </div>
               <div className="flex items-center gap-3">
                 <Clock className="h-4 w-4 text-slate-400" />
-                <span className="text-sm text-slate-300">
+                <span className="text-sm text-slate-600">
                   Starting at {formattedTime}
                 </span>
               </div>
@@ -131,13 +131,13 @@ export function QuickBookingModal({
                 {onQuickCreate && (
                   <button
                     onClick={() => setMode('quick')}
-                    className="flex w-full items-center gap-3 rounded-lg border border-slate-700 bg-slate-800/50 p-4 text-left transition-colors hover:border-cyan-500/50 hover:bg-slate-800"
+                    className="flex w-full items-center gap-3 rounded-lg border border-slate-200 bg-white p-4 text-left transition-colors hover:border-cyan-300 hover:bg-white"
                   >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/20">
-                      <Anchor className="h-5 w-5 text-emerald-400" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50">
+                      <Anchor className="h-5 w-5 text-emerald-600" />
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-white">Quick Book</div>
+                      <div className="text-sm font-medium text-slate-900">Quick Book</div>
                       <div className="text-xs text-slate-400">
                         Walk-up or phone — just name and party size
                       </div>
@@ -147,13 +147,13 @@ export function QuickBookingModal({
 
                 <button
                   onClick={onCreateBooking}
-                  className="flex w-full items-center gap-3 rounded-lg border border-slate-700 bg-slate-800/50 p-4 text-left transition-colors hover:border-cyan-500/50 hover:bg-slate-800"
+                  className="flex w-full items-center gap-3 rounded-lg border border-slate-200 bg-white p-4 text-left transition-colors hover:border-cyan-300 hover:bg-white"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-500/20">
-                    <CalendarPlus className="h-5 w-5 text-cyan-400" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-50">
+                    <CalendarPlus className="h-5 w-5 text-cyan-600" />
                   </div>
                   <div>
-                    <div className="text-sm font-medium text-white">Full Booking Form</div>
+                    <div className="text-sm font-medium text-slate-900">Full Booking Form</div>
                     <div className="text-xs text-slate-400">
                       Complete details, email, payment, and confirmation
                     </div>
@@ -162,10 +162,10 @@ export function QuickBookingModal({
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-end border-t border-slate-700 p-4">
+              <div className="flex items-center justify-end border-t border-slate-200 p-4">
                 <button
                   onClick={handleClose}
-                  className="rounded-lg px-4 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
+                  className="rounded-lg px-4 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-white hover:text-slate-900"
                 >
                   Cancel
                 </button>
@@ -187,8 +187,8 @@ export function QuickBookingModal({
                       onClick={() => setSource(value)}
                       className={`flex-1 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
                         source === value
-                          ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/50'
-                          : 'bg-slate-800/50 text-slate-400 border border-slate-700 hover:text-slate-300'
+                          ? 'bg-cyan-50 text-cyan-600 border border-cyan-500/50'
+                          : 'bg-white text-slate-400 border border-slate-200 hover:text-slate-700'
                       }`}
                     >
                       {label}
@@ -207,7 +207,7 @@ export function QuickBookingModal({
                     value={guestName}
                     onChange={(e) => setGuestName(e.target.value)}
                     placeholder="John Doe"
-                    className="w-full rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
                     autoFocus
                   />
                 </div>
@@ -223,7 +223,7 @@ export function QuickBookingModal({
                     value={guestPhone}
                     onChange={(e) => setGuestPhone(e.target.value)}
                     placeholder="(555) 123-4567"
-                    className="w-full rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
                   />
                 </div>
 
@@ -240,8 +240,8 @@ export function QuickBookingModal({
                         onClick={() => setPartySize(size)}
                         className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition-colors ${
                           partySize === size
-                            ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/50'
-                            : 'bg-slate-800/50 text-slate-400 border border-slate-700 hover:text-slate-300'
+                            ? 'bg-cyan-50 text-cyan-600 border border-cyan-500/50'
+                            : 'bg-white text-slate-400 border border-slate-200 hover:text-slate-700'
                         }`}
                       >
                         {size}
@@ -252,17 +252,17 @@ export function QuickBookingModal({
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-between border-t border-slate-700 p-4">
+              <div className="flex items-center justify-between border-t border-slate-200 p-4">
                 <button
                   onClick={() => setMode('choose')}
-                  className="rounded-lg px-4 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
+                  className="rounded-lg px-4 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-white hover:text-slate-900"
                 >
                   Back
                 </button>
                 <button
                   onClick={handleQuickCreate}
                   disabled={!guestName.trim() || isSubmitting}
-                  className="flex items-center gap-2 rounded-lg bg-cyan-500/20 px-6 py-2 font-medium text-cyan-400 transition-colors hover:bg-cyan-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 rounded-lg bg-cyan-50 px-6 py-2 font-medium text-cyan-600 transition-colors hover:bg-cyan-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <CalendarPlus className="h-4 w-4" />
                   {isSubmitting ? 'Creating...' : 'Create Booking'}

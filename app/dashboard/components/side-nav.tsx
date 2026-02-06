@@ -23,10 +23,10 @@ export function SideNav({ userEmail, signOutAction }: SideNavProps) {
   const showMore = moreOpen || isSecondaryActive;
 
   return (
-    <aside className="hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:w-16 lg:w-64 bg-slate-900 text-zinc-100 transition-all duration-200 group/sidebar hover:md:w-64 z-30">
+    <aside className="hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:w-16 lg:w-64 bg-white border-r border-slate-200 text-slate-900 transition-all duration-200 group/sidebar hover:md:w-64 z-30">
       <div className="flex flex-col h-full">
         {/* Logo / Brand */}
-        <div className="flex items-center h-16 px-4 lg:px-6 border-b border-white/10">
+        <div className="flex items-center h-16 px-4 lg:px-6 border-b border-slate-200">
           <span className="text-lg font-semibold tracking-tight whitespace-nowrap overflow-hidden">
             <span className="hidden lg:inline group-hover/sidebar:inline">DockSlot</span>
             <span className="lg:hidden group-hover/sidebar:hidden">DS</span>
@@ -51,10 +51,10 @@ export function SideNav({ userEmail, signOutAction }: SideNavProps) {
                   <Link
                     href={link.href}
                     title={link.label}
-                    className={`flex items-center gap-3 h-11 px-3 rounded-r-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 ${
+                    className={`flex items-center gap-3 h-11 px-3 rounded-r-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
                       isActive
-                        ? "bg-white/10 text-white border-l-4 border-amber-500 pl-2"
-                        : "text-zinc-300 hover:bg-white/5 hover:text-white border-l-4 border-transparent pl-2"
+                        ? "bg-cyan-50 text-cyan-700 border-l-4 border-cyan-600 pl-2"
+                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 border-l-4 border-transparent pl-2"
                     }`}
                   >
                     <Icon size={18} aria-hidden="true" className="flex-shrink-0" />
@@ -70,7 +70,7 @@ export function SideNav({ userEmail, signOutAction }: SideNavProps) {
             <button
               type="button"
               onClick={() => setMoreOpen((prev) => !prev)}
-              className="flex items-center justify-between w-full h-9 px-3 text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 rounded-md"
+              className="flex items-center justify-between w-full h-9 px-3 text-xs font-semibold uppercase tracking-wider text-slate-400 hover:text-slate-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white rounded-md"
               aria-expanded={showMore}
             >
               <span>More</span>
@@ -91,10 +91,10 @@ export function SideNav({ userEmail, signOutAction }: SideNavProps) {
                     <li key={link.href}>
                       <Link
                         href={link.href}
-                        className={`flex items-center gap-3 h-10 px-3 rounded-r-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 ${
+                        className={`flex items-center gap-3 h-10 px-3 rounded-r-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
                           isActive
-                            ? "bg-white/10 text-white border-l-4 border-amber-500 pl-2"
-                            : "text-zinc-400 hover:bg-white/5 hover:text-white border-l-4 border-transparent pl-2"
+                            ? "bg-cyan-50 text-cyan-700 border-l-4 border-cyan-600 pl-2"
+                            : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 border-l-4 border-transparent pl-2"
                         }`}
                       >
                         <Icon size={16} aria-hidden="true" className="flex-shrink-0" />
@@ -109,12 +109,12 @@ export function SideNav({ userEmail, signOutAction }: SideNavProps) {
         </nav>
 
         {/* User Profile Section */}
-        <div className="border-t border-white/10 p-2 lg:p-4">
+        <div className="border-t border-slate-200 p-2 lg:p-4">
           <div className="mb-3 hidden lg:block group-hover/sidebar:block">
-            <p className="text-xs text-zinc-400 uppercase tracking-wide mb-1">
+            <p className="text-xs text-slate-400 uppercase tracking-wide mb-1">
               Signed in as
             </p>
-            <p className="text-sm text-zinc-100 truncate" title={userEmail}>
+            <p className="text-sm text-slate-700 truncate" title={userEmail}>
               {userEmail}
             </p>
           </div>
@@ -122,7 +122,7 @@ export function SideNav({ userEmail, signOutAction }: SideNavProps) {
             <Link
               href="/docs"
               title="Help & Documentation"
-              className="flex items-center justify-center gap-2 w-full h-11 px-3 bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white text-sm font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+              className="flex items-center justify-center gap-2 w-full h-11 px-3 bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-700 text-sm font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
             >
               <HelpCircle size={18} aria-hidden="true" className="flex-shrink-0" />
               <span className="hidden lg:inline group-hover/sidebar:inline whitespace-nowrap">Help</span>
@@ -131,7 +131,7 @@ export function SideNav({ userEmail, signOutAction }: SideNavProps) {
               <button
                 type="submit"
                 title="Sign Out"
-                className="flex items-center justify-center gap-2 w-full h-11 px-3 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white text-sm font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+                className="flex items-center justify-center gap-2 w-full h-11 px-3 bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-700 text-sm font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
               >
                 <LogOut size={18} aria-hidden="true" className="flex-shrink-0" />
                 <span className="hidden lg:inline group-hover/sidebar:inline whitespace-nowrap">Sign Out</span>

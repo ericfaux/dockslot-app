@@ -24,11 +24,11 @@ interface BookingCardProps {
 const STATUS_CONFIG: Record<BookingStatus, { label: string; className: string }> = {
   pending_deposit: {
     label: 'Pending Deposit',
-    className: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+    className: 'bg-amber-50 text-amber-600 border-amber-500/30',
   },
   confirmed: {
     label: 'Confirmed',
-    className: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+    className: 'bg-emerald-50 text-emerald-600 border-emerald-500/30',
   },
   weather_hold: {
     label: 'Weather Hold',
@@ -36,7 +36,7 @@ const STATUS_CONFIG: Record<BookingStatus, { label: string; className: string }>
   },
   rescheduled: {
     label: 'Rescheduled',
-    className: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+    className: 'bg-blue-50 text-blue-600 border-blue-500/30',
   },
   completed: {
     label: 'Completed',
@@ -44,26 +44,26 @@ const STATUS_CONFIG: Record<BookingStatus, { label: string; className: string }>
   },
   cancelled: {
     label: 'Cancelled',
-    className: 'bg-rose-500/20 text-rose-400 border-rose-500/30',
+    className: 'bg-rose-50 text-rose-600 border-rose-500/30',
   },
   no_show: {
     label: 'No Show',
-    className: 'bg-rose-500/20 text-rose-400 border-rose-500/30',
+    className: 'bg-rose-50 text-rose-600 border-rose-500/30',
   },
 };
 
 const PAYMENT_CONFIG: Record<PaymentStatus, { label: string; className: string }> = {
   unpaid: {
     label: 'Unpaid',
-    className: 'bg-rose-500/20 text-rose-400 border-rose-500/30',
+    className: 'bg-rose-50 text-rose-600 border-rose-500/30',
   },
   deposit_paid: {
     label: 'Deposit Paid',
-    className: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+    className: 'bg-amber-50 text-amber-600 border-amber-500/30',
   },
   fully_paid: {
     label: 'Paid',
-    className: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+    className: 'bg-emerald-50 text-emerald-600 border-emerald-500/30',
   },
   partially_refunded: {
     label: 'Partially Refunded',
@@ -98,15 +98,15 @@ export function BookingCard({ booking }: BookingCardProps) {
 
   return (
     <div
-      className="group relative flex flex-col rounded-lg border border-slate-700 bg-slate-900 transition-all hover:border-cyan-500/50"
+      className="group relative flex flex-col rounded-lg border border-slate-200 bg-white transition-all hover:border-cyan-300"
       style={{
         boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03), 0 4px 20px rgba(0,0,0,0.3)',
       }}
     >
       {/* Card Header */}
-      <div className="flex items-start justify-between border-b border-slate-800 p-4">
+      <div className="flex items-start justify-between border-b border-slate-200 p-4">
         <div className="flex-1 pr-2">
-          <h3 className="font-medium text-white">{booking.guest_name}</h3>
+          <h3 className="font-medium text-slate-900">{booking.guest_name}</h3>
           <div className="mt-1 flex flex-wrap gap-2 text-sm text-slate-400">
             {booking.guest_email && (
               <span className="inline-flex items-center gap-1">
@@ -137,7 +137,7 @@ export function BookingCard({ booking }: BookingCardProps) {
           </span>
           <button
             onClick={handlePrintManifest}
-            className="mt-2 flex items-center gap-1.5 rounded-lg border border-slate-600 bg-slate-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-slate-600"
+            className="mt-2 flex items-center gap-1.5 rounded-lg border border-slate-300 bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-900 transition-colors hover:bg-slate-200"
             title="Print passenger manifest for Coast Guard compliance"
             aria-label={`Print passenger manifest for ${booking.guest_name}'s trip`}
           >
@@ -151,12 +151,12 @@ export function BookingCard({ booking }: BookingCardProps) {
       <div className="flex flex-1 flex-col gap-3 p-4">
         {/* Date & Time */}
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800">
-            <Calendar className="h-4 w-4 text-cyan-400" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white">
+            <Calendar className="h-4 w-4 text-cyan-600" />
           </div>
           <div>
             <div className="text-sm text-slate-500">Scheduled</div>
-            <div className="font-mono text-white">
+            <div className="font-mono text-slate-900">
               {formatDate(booking.scheduled_start)}
             </div>
           </div>
@@ -164,12 +164,12 @@ export function BookingCard({ booking }: BookingCardProps) {
 
         {/* Time */}
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800">
-            <Clock className="h-4 w-4 text-cyan-400" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white">
+            <Clock className="h-4 w-4 text-cyan-600" />
           </div>
           <div>
             <div className="text-sm text-slate-500">Time</div>
-            <div className="font-mono text-white">
+            <div className="font-mono text-slate-900">
               {formatTime(booking.scheduled_start)} - {formatTime(booking.scheduled_end)}
             </div>
           </div>
@@ -178,12 +178,12 @@ export function BookingCard({ booking }: BookingCardProps) {
         {/* Trip Type */}
         {booking.trip_type && (
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800">
-              <Anchor className="h-4 w-4 text-amber-400" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white">
+              <Anchor className="h-4 w-4 text-amber-600" />
             </div>
             <div>
               <div className="text-sm text-slate-500">Trip Type</div>
-              <div className="font-medium text-white">{booking.trip_type.title}</div>
+              <div className="font-medium text-slate-900">{booking.trip_type.title}</div>
             </div>
           </div>
         )}
@@ -191,24 +191,24 @@ export function BookingCard({ booking }: BookingCardProps) {
         {/* Vessel */}
         {booking.vessel && (
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800">
-              <Ship className="h-4 w-4 text-blue-400" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white">
+              <Ship className="h-4 w-4 text-blue-600" />
             </div>
             <div>
               <div className="text-sm text-slate-500">Vessel</div>
-              <div className="font-medium text-white">{booking.vessel.name}</div>
+              <div className="font-medium text-slate-900">{booking.vessel.name}</div>
             </div>
           </div>
         )}
 
         {/* Party Size */}
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800">
-            <Users className="h-4 w-4 text-emerald-400" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white">
+            <Users className="h-4 w-4 text-emerald-600" />
           </div>
           <div>
             <div className="text-sm text-slate-500">Party Size</div>
-            <div className="font-mono text-lg text-emerald-400">
+            <div className="font-mono text-lg text-emerald-600">
               {booking.party_size} {booking.party_size === 1 ? 'guest' : 'guests'}
             </div>
           </div>
@@ -219,7 +219,7 @@ export function BookingCard({ booking }: BookingCardProps) {
       {hasPassengers && (
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="flex items-center justify-center gap-2 border-t border-slate-800 py-3 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-800/50 hover:text-cyan-400"
+          className="flex items-center justify-center gap-2 border-t border-slate-200 py-3 text-sm font-medium text-slate-400 transition-colors hover:bg-white hover:text-cyan-600"
         >
           {isExpanded ? (
             <>

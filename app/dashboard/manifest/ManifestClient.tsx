@@ -90,14 +90,14 @@ export function ManifestClient({ initialBookings }: ManifestClientProps) {
             placeholder="Search by name or email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-slate-700 bg-slate-800 py-2.5 pl-10 pr-4 text-sm text-white placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-900 placeholder-slate-500 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
           />
         </div>
 
         {/* Date Filter */}
         <div className="flex items-center gap-2">
           <Calendar className="h-4 w-4 text-slate-500" />
-          <div className="flex rounded-lg border border-slate-700 bg-slate-800 p-1">
+          <div className="flex rounded-lg border border-slate-200 bg-white p-1">
             {DATE_FILTERS.map((filter) => (
               <button
                 key={filter.value}
@@ -105,7 +105,7 @@ export function ManifestClient({ initialBookings }: ManifestClientProps) {
                 className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
                   dateFilter === filter.value
                     ? 'bg-cyan-600 text-white'
-                    : 'text-slate-400 hover:bg-slate-700 hover:text-white'
+                    : 'text-slate-400 hover:bg-slate-100 hover:text-slate-900'
                 }`}
               >
                 {filter.label}
@@ -125,11 +125,11 @@ export function ManifestClient({ initialBookings }: ManifestClientProps) {
 
       {/* Bookings Grid */}
       {filteredBookings.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-slate-700 bg-slate-900/50 py-16">
-          <div className="mb-4 rounded-full bg-slate-800 p-4">
+        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-slate-200 bg-white py-16">
+          <div className="mb-4 rounded-full bg-white p-4">
             <ClipboardList className="h-8 w-8 text-slate-500" />
           </div>
-          <h3 className="mb-2 text-lg font-medium text-slate-300">No bookings found</h3>
+          <h3 className="mb-2 text-lg font-medium text-slate-600">No bookings found</h3>
           <p className="mb-4 max-w-sm text-center text-sm text-slate-500">
             {searchQuery || dateFilter !== 'all'
               ? 'Try adjusting your filters to see more bookings.'
@@ -141,7 +141,7 @@ export function ManifestClient({ initialBookings }: ManifestClientProps) {
                 setSearchQuery('');
                 setDateFilter('all');
               }}
-              className="text-sm font-medium text-cyan-400 hover:text-cyan-300"
+              className="text-sm font-medium text-cyan-600 hover:text-cyan-600"
             >
               Clear all filters
             </button>

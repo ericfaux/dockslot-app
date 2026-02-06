@@ -124,17 +124,17 @@ export function QuickNoteModal({ isOpen, onClose }: QuickNoteModalProps) {
       {/* Modal */}
       <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
-          className="pointer-events-auto w-full max-w-md rounded-xl border border-slate-700 bg-slate-900 shadow-2xl"
+          className="pointer-events-auto w-full max-w-md rounded-xl border border-slate-200 bg-white shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-slate-700 p-4">
+          <div className="flex items-center justify-between border-b border-slate-200 p-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-500/20">
-                <StickyNote className="h-5 w-5 text-amber-400" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-50">
+                <StickyNote className="h-5 w-5 text-amber-600" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-white">Quick Note</h2>
+                <h2 className="text-lg font-semibold text-slate-900">Quick Note</h2>
                 <p className="text-sm text-slate-400">
                   Add a note to today&apos;s trip
                 </p>
@@ -142,7 +142,7 @@ export function QuickNoteModal({ isOpen, onClose }: QuickNoteModalProps) {
             </div>
             <button
               onClick={onClose}
-              className="rounded-md p-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
+              className="rounded-md p-2 text-slate-400 transition-colors hover:bg-white hover:text-slate-900"
             >
               <X className="h-5 w-5" />
             </button>
@@ -152,15 +152,15 @@ export function QuickNoteModal({ isOpen, onClose }: QuickNoteModalProps) {
           <div className="space-y-4 p-4">
             {/* Trip Selection */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-slate-300">
+              <label className="block text-sm font-medium text-slate-600">
                 Select Trip
               </label>
               {isLoadingTrips ? (
                 <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-cyan-400" />
+                  <Loader2 className="h-6 w-6 animate-spin text-cyan-600" />
                 </div>
               ) : todayTrips.length === 0 ? (
-                <div className="rounded-lg border border-slate-700 bg-slate-800/50 px-4 py-8 text-center">
+                <div className="rounded-lg border border-slate-200 bg-white px-4 py-8 text-center">
                   <p className="text-slate-400">No trips scheduled for today</p>
                 </div>
               ) : (
@@ -171,12 +171,12 @@ export function QuickNoteModal({ isOpen, onClose }: QuickNoteModalProps) {
                       onClick={() => setSelectedTrip(trip.id)}
                       className={`w-full rounded-lg border p-3 text-left transition-all ${
                         selectedTrip === trip.id
-                          ? 'border-cyan-500 bg-cyan-500/10'
-                          : 'border-slate-700 bg-slate-800/50 hover:border-slate-600'
+                          ? 'border-cyan-500 bg-cyan-50'
+                          : 'border-slate-200 bg-white hover:border-slate-300'
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-medium text-slate-200">
+                        <span className="font-medium text-slate-700">
                           {trip.guestName}
                         </span>
                         <span className="text-sm text-slate-400">
@@ -193,14 +193,14 @@ export function QuickNoteModal({ isOpen, onClose }: QuickNoteModalProps) {
             {/* Note Input */}
             {selectedTrip && (
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-slate-300">
+                <label className="block text-sm font-medium text-slate-600">
                   Note
                 </label>
                 <textarea
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   placeholder="e.g., Caught 3 snook, weather was perfect..."
-                  className="w-full resize-none rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                  className="w-full resize-none rounded-lg border border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
                   rows={3}
                   maxLength={1000}
                   autoFocus
@@ -210,14 +210,14 @@ export function QuickNoteModal({ isOpen, onClose }: QuickNoteModalProps) {
 
             {/* Error */}
             {error && (
-              <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-400">
+              <div className="rounded-lg border border-rose-500/30 bg-rose-50 px-4 py-3 text-sm text-rose-600">
                 {error}
               </div>
             )}
 
             {/* Success */}
             {success && (
-              <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-400">
+              <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-50 px-4 py-3 text-sm text-emerald-600">
                 <Check className="h-4 w-4" />
                 Note saved successfully!
               </div>
@@ -225,18 +225,18 @@ export function QuickNoteModal({ isOpen, onClose }: QuickNoteModalProps) {
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-end gap-3 border-t border-slate-700 p-4">
+          <div className="flex items-center justify-end gap-3 border-t border-slate-200 p-4">
             <button
               onClick={onClose}
               disabled={isSaving}
-              className="rounded-lg px-4 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-800 hover:text-white disabled:opacity-50"
+              className="rounded-lg px-4 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-white hover:text-slate-900 disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={isSaving || !selectedTrip || !note.trim() || success}
-              className="flex items-center gap-2 rounded-lg bg-cyan-500/20 px-6 py-2 font-medium text-cyan-400 transition-colors hover:bg-cyan-500/30 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex items-center gap-2 rounded-lg bg-cyan-50 px-6 py-2 font-medium text-cyan-600 transition-colors hover:bg-cyan-500/30 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSaving ? (
                 <>

@@ -24,7 +24,7 @@ export default async function AvailabilityTemplatesPage() {
   return (
     <div className="p-6 max-w-6xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">
+        <h1 className="text-3xl font-bold text-slate-900 mb-2">
           Availability Templates
         </h1>
         <p className="text-slate-400">

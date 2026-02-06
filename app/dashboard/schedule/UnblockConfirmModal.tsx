@@ -39,20 +39,20 @@ export function UnblockConfirmModal({
       {/* Modal */}
       <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
-          className="pointer-events-auto w-full max-w-sm rounded-xl border border-slate-700 bg-slate-900 shadow-2xl"
+          className="pointer-events-auto w-full max-w-sm rounded-xl border border-slate-200 bg-white shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-slate-700 p-4">
+          <div className="flex items-center justify-between border-b border-slate-200 p-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/20">
-                <CalendarCheck className="h-5 w-5 text-emerald-400" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50">
+                <CalendarCheck className="h-5 w-5 text-emerald-600" />
               </div>
-              <h2 className="text-lg font-semibold text-white">Unblock Date</h2>
+              <h2 className="text-lg font-semibold text-slate-900">Unblock Date</h2>
             </div>
             <button
               onClick={onClose}
-              className="rounded-md p-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
+              className="rounded-md p-2 text-slate-400 transition-colors hover:bg-white hover:text-slate-900"
             >
               <X className="h-5 w-5" />
             </button>
@@ -60,12 +60,12 @@ export function UnblockConfirmModal({
 
           {/* Content */}
           <div className="space-y-4 p-4">
-            <p className="text-sm text-slate-300">
+            <p className="text-sm text-slate-600">
               Are you sure you want to unblock this date? Guests will be able to book on this day again.
             </p>
 
-            <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-3">
-              <div className="text-sm font-medium text-white">{dateDisplay}</div>
+            <div className="rounded-lg border border-slate-200 bg-white p-3">
+              <div className="text-sm font-medium text-slate-900">{dateDisplay}</div>
               {blackout.reason && (
                 <div className="mt-1 text-xs text-slate-400">
                   Reason: {blackout.reason}
@@ -75,18 +75,18 @@ export function UnblockConfirmModal({
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-end gap-3 border-t border-slate-700 p-4">
+          <div className="flex items-center justify-end gap-3 border-t border-slate-200 p-4">
             <button
               onClick={onClose}
               disabled={isPending}
-              className="rounded-lg px-4 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-800 hover:text-white disabled:opacity-50"
+              className="rounded-lg px-4 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-white hover:text-slate-900 disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               onClick={onConfirm}
               disabled={isPending}
-              className="flex items-center gap-2 rounded-lg bg-emerald-500/20 px-4 py-2 font-medium text-emerald-400 transition-colors hover:bg-emerald-500/30 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex items-center gap-2 rounded-lg bg-emerald-50 px-4 py-2 font-medium text-emerald-600 transition-colors hover:bg-emerald-500/30 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isPending ? (
                 <>

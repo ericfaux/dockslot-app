@@ -140,19 +140,19 @@ export function FloatingActionButton({
           <button
             key={action.id}
             onClick={action.onClick}
-            className="group flex items-center gap-3 rounded-full bg-slate-800 py-3 pl-4 pr-5 shadow-lg border border-slate-700 transition-all duration-150 hover:bg-slate-700 hover:border-cyan-500/50 hover:shadow-cyan-500/10 active:scale-95"
+            className="group flex items-center gap-3 rounded-full bg-white py-3 pl-4 pr-5 shadow-lg border border-slate-200 transition-all duration-150 hover:bg-slate-100 hover:border-cyan-300 hover:shadow-cyan-500/10 active:scale-95"
             style={{
               transitionDelay: isOpen ? `${index * 30}ms` : '0ms',
             }}
           >
-            <div className="text-cyan-400 transition-colors group-hover:text-cyan-300">
+            <div className="text-cyan-600 transition-colors group-hover:text-cyan-600">
               {action.icon}
             </div>
-            <span className="text-sm font-medium text-slate-200 whitespace-nowrap">
+            <span className="text-sm font-medium text-slate-700 whitespace-nowrap">
               {action.label}
             </span>
             {action.shortcut && (
-              <kbd className="ml-1 rounded bg-slate-900 px-1.5 py-0.5 text-xs font-mono text-slate-400">
+              <kbd className="ml-1 rounded bg-white px-1.5 py-0.5 text-xs font-mono text-slate-400">
                 {action.shortcut}
               </kbd>
             )}
@@ -164,7 +164,7 @@ export function FloatingActionButton({
       <div className="relative flex items-center gap-3">
         {/* Tooltip label - visible on hover when closed */}
         {!isOpen && (
-          <div className="pointer-events-none absolute right-full mr-3 hidden whitespace-nowrap rounded-lg bg-slate-800 px-3 py-1.5 text-sm font-medium text-slate-200 opacity-0 shadow-lg transition-opacity group-hover/fab:opacity-100 md:block">
+          <div className="pointer-events-none absolute right-full mr-3 hidden whitespace-nowrap rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-slate-700 opacity-0 shadow-lg transition-opacity group-hover/fab:opacity-100 md:block">
             Quick Actions
           </div>
         )}
@@ -172,7 +172,7 @@ export function FloatingActionButton({
           onClick={() => setIsOpen(!isOpen)}
           className={`group/fab relative flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-all duration-200 active:scale-95 ${
             isOpen
-              ? 'bg-slate-700 border border-slate-600 rotate-45'
+              ? 'bg-slate-100 border border-slate-300 rotate-45'
               : 'bg-gradient-to-br from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 shadow-cyan-500/25 hover:shadow-cyan-500/40'
           }`}
           aria-label={isOpen ? 'Close quick actions' : 'Open quick actions'}
@@ -180,9 +180,9 @@ export function FloatingActionButton({
           title={isOpen ? 'Close' : 'Quick Actions'}
         >
           {isOpen ? (
-            <X className="h-6 w-6 text-slate-300 -rotate-45" />
+            <X className="h-6 w-6 text-slate-600 -rotate-45" />
           ) : (
-            <Plus className="h-7 w-7 text-white" />
+            <Plus className="h-7 w-7 text-slate-900" />
           )}
 
           {/* Pulse animation when closed */}
