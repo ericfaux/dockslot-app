@@ -209,8 +209,8 @@ export function CalendarWeekView({
           style={{ scrollbarWidth: 'thin', scrollbarColor: '#475569 #1e293b' }}
         >
           {/* Time column (sticky) */}
-          <div className="sticky left-0 z-10 bg-slate-900">
-            <div className="h-[76px] border-b border-slate-700/50" /> {/* Header spacer */}
+          <div className="sticky left-0 z-20 bg-slate-900">
+            <div className="sticky top-0 z-30 h-14 border-b border-slate-700/50 bg-slate-900" /> {/* Header spacer - sticky to stay with day headers */}
             <TimeColumn
               startHour={START_HOUR}
               endHour={END_HOUR}
