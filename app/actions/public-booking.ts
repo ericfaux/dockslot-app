@@ -46,7 +46,6 @@ export interface PublicCaptainProfile {
   id: string;
   business_name: string | null;
   full_name: string | null;
-  avatar_url: string | null;
   timezone: string;
   meeting_spot_name: string | null;
   meeting_spot_address: string | null;
@@ -190,7 +189,6 @@ export async function getPublicCaptainProfile(
       id,
       business_name,
       full_name,
-      avatar_url,
       timezone,
       meeting_spot_name,
       meeting_spot_address,
@@ -206,6 +204,7 @@ export async function getPublicCaptainProfile(
     .single();
 
   if (error || !data) {
+    console.error('Failed to fetch captain profile:', error?.message, error?.code);
     return { success: false, error: 'Captain not found', code: 'NOT_FOUND' };
   }
 
@@ -252,6 +251,7 @@ export async function getHibernationInfo(
     .single();
 
   if (error || !data) {
+    console.error('Failed to fetch hibernation info:', error?.message, error?.code);
     return { success: false, error: 'Captain not found', code: 'NOT_FOUND' };
   }
 
@@ -298,6 +298,7 @@ export async function getPublicTripTypes(
     .single();
 
   if (profileError || !profile) {
+    console.error('Failed to fetch captain for trip types:', profileError?.message, profileError?.code);
     return { success: false, error: 'Captain not found', code: 'NOT_FOUND' };
   }
 
