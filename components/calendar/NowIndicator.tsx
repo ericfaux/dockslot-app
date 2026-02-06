@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { toZonedTime } from 'date-fns-tz';
 
 /**
  * NowIndicator - Shows current time line on the calendar
@@ -9,15 +10,17 @@ import { useEffect, useState } from 'react';
 interface NowIndicatorProps {
   startHour: number;
   pixelsPerHour: number;
+  timezone?: string;
 }
 
-export function NowIndicator({ startHour, pixelsPerHour }: NowIndicatorProps) {
+export function NowIndicator({ startHour, pixelsPerHour, timezone }: NowIndicatorProps) {
   const [position, setPosition] = useState<number | null>(null);
 
   useEffect(() => {
     const updatePosition = () => {
       const now = new Date();
-      const currentHour = now.getHours() + now.getMinutes() / 60;
+      const zonedNow = timezone ? toZonedTime(now, timezone) : now;
+      const currentHour = zonedNow.getHours() + zonedNow.getMinutes() / 60;
       const hoursFromStart = currentHour - startHour;
 
       if (hoursFromStart >= 0) {
@@ -31,7 +34,7 @@ export function NowIndicator({ startHour, pixelsPerHour }: NowIndicatorProps) {
     const interval = setInterval(updatePosition, 60000); // Update every minute
 
     return () => clearInterval(interval);
-  }, [startHour, pixelsPerHour]);
+  }, [startHour, pixelsPerHour, timezone]);
 
   if (position === null) return null;
 

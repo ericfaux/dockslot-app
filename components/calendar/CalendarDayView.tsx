@@ -7,6 +7,7 @@ import {
   addDays,
   subDays,
 } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, CalendarX } from 'lucide-react';
 import { DayColumn } from './DayColumn';
 import { TimeColumn } from './TimeColumn';
@@ -17,6 +18,7 @@ interface CalendarDayViewProps {
   date: Date;
   bookings: CalendarBooking[];
   blackoutDates?: BlackoutDate[];
+  timezone?: string;
   onDateChange: (date: Date) => void;
   onViewChange: (view: CalendarView) => void;
   onBlockClick?: (booking: CalendarBooking) => void;
@@ -34,6 +36,7 @@ export function CalendarDayView({
   date,
   bookings,
   blackoutDates = [],
+  timezone,
   onDateChange,
   onViewChange,
   onBlockClick,
@@ -72,12 +75,13 @@ export function CalendarDayView({
   useEffect(() => {
     if (scrollContainerRef.current) {
       const now = new Date();
-      const currentHour = now.getHours();
+      const zonedNow = timezone ? toZonedTime(now, timezone) : now;
+      const currentHour = zonedNow.getHours();
       const scrollToHour = Math.max(0, currentHour - 2);
       const scrollPosition = (scrollToHour - START_HOUR) * PIXELS_PER_HOUR;
       scrollContainerRef.current.scrollTop = Math.max(0, scrollPosition);
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Swipe handlers for day navigation
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -225,6 +229,7 @@ export function CalendarDayView({
               endHour={END_HOUR}
               pixelsPerHour={PIXELS_PER_HOUR}
               isToday={isToday}
+              timezone={timezone}
               onBlockClick={onBlockClick}
               blackoutDate={blackoutDate}
               onBlackoutClick={onBlackoutClick}

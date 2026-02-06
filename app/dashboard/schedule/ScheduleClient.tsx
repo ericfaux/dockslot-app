@@ -13,6 +13,7 @@ import { quickCreateBooking } from '@/app/actions/bookings';
 
 interface ScheduleClientProps {
   captainId: string;
+  timezone?: string;
   isHibernating?: boolean;
   hibernationEndDate?: string | null;
 }
@@ -22,7 +23,7 @@ interface ScheduleClientProps {
  * Manages calendar state and booking detail panel
  */
 
-export function ScheduleClient({ captainId, isHibernating, hibernationEndDate }: ScheduleClientProps) {
+export function ScheduleClient({ captainId, timezone, isHibernating, hibernationEndDate }: ScheduleClientProps) {
   const router = useRouter();
   const [selectedBooking, setSelectedBooking] = useState<CalendarBooking | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -160,6 +161,7 @@ export function ScheduleClient({ captainId, isHibernating, hibernationEndDate }:
       {/* Calendar */}
       <Calendar
         captainId={captainId}
+        timezone={timezone}
         onBlockClick={handleBlockClick}
         onQuickBlockClick={handleQuickBlockClick}
         onBlackoutClick={handleBlackoutClick}

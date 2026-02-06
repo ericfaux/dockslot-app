@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useCallback } from 'react';
 import { format, parseISO, isSameDay, addHours, setHours, setMinutes } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 import { X, Plus } from 'lucide-react';
 import { CalendarBlock } from './CalendarBlock';
 import { NowIndicator } from './NowIndicator';
@@ -28,6 +29,7 @@ export function DayColumn({
   endHour,
   pixelsPerHour,
   isToday,
+  timezone,
   onBlockClick,
   blackoutDate,
   onBlackoutClick,
@@ -52,15 +54,15 @@ export function DayColumn({
 
     // Check if there's a booking at this hour
     const hasBookingAtHour = bookings.some((booking) => {
-      const start = parseISO(booking.scheduled_start);
-      const end = parseISO(booking.scheduled_end);
+      const start = timezone ? toZonedTime(parseISO(booking.scheduled_start), timezone) : parseISO(booking.scheduled_start);
+      const end = timezone ? toZonedTime(parseISO(booking.scheduled_end), timezone) : parseISO(booking.scheduled_end);
       return start.getHours() <= clickedHour && end.getHours() > clickedHour;
     });
 
     if (!hasBookingAtHour) {
       onEmptySlotClick(date, clickedHour);
     }
-  }, [isBlocked, onEmptySlotClick, pixelsPerHour, startHour, bookings, date]);
+  }, [isBlocked, onEmptySlotClick, pixelsPerHour, startHour, bookings, date, timezone]);
 
   // Handle hover for visual feedback
   const handleGridMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -76,19 +78,19 @@ export function DayColumn({
 
     // Check if there's a booking at this hour
     const hasBookingAtHour = bookings.some((booking) => {
-      const start = parseISO(booking.scheduled_start);
-      const end = parseISO(booking.scheduled_end);
+      const start = timezone ? toZonedTime(parseISO(booking.scheduled_start), timezone) : parseISO(booking.scheduled_start);
+      const end = timezone ? toZonedTime(parseISO(booking.scheduled_end), timezone) : parseISO(booking.scheduled_end);
       return start.getHours() <= hour && end.getHours() > hour;
     });
 
     setHoveredHour(hasBookingAtHour ? null : hour);
-  }, [isBlocked, onEmptySlotClick, pixelsPerHour, startHour, bookings]);
+  }, [isBlocked, onEmptySlotClick, pixelsPerHour, startHour, bookings, timezone]);
 
   // Calculate positions for each booking
   const positionedBookings = useMemo((): PositionedBooking[] => {
     return bookings.map((booking) => {
-      const start = parseISO(booking.scheduled_start);
-      const end = parseISO(booking.scheduled_end);
+      const start = timezone ? toZonedTime(parseISO(booking.scheduled_start), timezone) : parseISO(booking.scheduled_start);
+      const end = timezone ? toZonedTime(parseISO(booking.scheduled_end), timezone) : parseISO(booking.scheduled_end);
 
       const startMinutes = start.getHours() * 60 + start.getMinutes();
       const endMinutes = end.getHours() * 60 + end.getMinutes();
@@ -101,7 +103,7 @@ export function DayColumn({
 
       return { booking, top: Math.max(0, top), height };
     });
-  }, [bookings, startHour, pixelsPerHour]);
+  }, [bookings, startHour, pixelsPerHour, timezone]);
 
   // Generate hour grid lines
   const gridLines = useMemo(() => {
@@ -226,7 +228,7 @@ export function DayColumn({
 
         {/* Now indicator (only for today) */}
         {isToday && (
-          <NowIndicator startHour={startHour} pixelsPerHour={pixelsPerHour} />
+          <NowIndicator startHour={startHour} pixelsPerHour={pixelsPerHour} timezone={timezone} />
         )}
 
         {/* Booking blocks */}

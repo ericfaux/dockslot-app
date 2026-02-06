@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 import { requireAuth } from '@/lib/auth/server';
 import { getBookingsWithFilters } from "@/lib/data/bookings";
 import { format, parseISO } from "date-fns";
-import { formatInTimeZone } from "date-fns-tz";
+import { formatInTimeZone, toZonedTime } from "date-fns-tz";
 import {
   Anchor,
   Wind,
@@ -156,9 +156,8 @@ interface HorizonWidgetProps {
 function HorizonWidget({ captainName = "Captain", timezone = "America/New_York", weatherData }: HorizonWidgetProps) {
   // Calculate NOW cursor position in captain's timezone
   const now = new Date();
-  const tzNow = formatInTimeZone(now, timezone, "yyyy-MM-dd'T'HH:mm:ss");
-  const tzDate = new Date(tzNow);
-  const hoursElapsed = tzDate.getHours() + tzDate.getMinutes() / 60;
+  const zonedNow = toZonedTime(now, timezone);
+  const hoursElapsed = zonedNow.getHours() + zonedNow.getMinutes() / 60;
   const nowPosition = (hoursElapsed / 24) * 100;
 
   return (
@@ -401,7 +400,8 @@ export default async function DashboardPage() {
 
     if (profile) {
       captainProfile = profile;
-      captainTimezone = profile.timezone || "America/New_York";
+      // "UTC" is not a valid captain timezone - treat it as unset
+      captainTimezone = (profile.timezone && profile.timezone !== "UTC") ? profile.timezone : "America/New_York";
       dockModeEnabled = profile.dock_mode_enabled || false;
 
       // Fetch real weather data if coordinates available
