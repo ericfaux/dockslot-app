@@ -18,7 +18,7 @@ export default async function SchedulePage() {
   // Get captain profile with hibernation info
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
-    .select('id, is_hibernating, hibernation_end_date, hibernation_resume_time')
+    .select('id, timezone, is_hibernating, hibernation_end_date, hibernation_resume_time')
     .eq('id', user.id)
     .single();
 
@@ -28,6 +28,7 @@ export default async function SchedulePage() {
 
   // Use fallback values if profile query fails - user is still authenticated
   const captainId = profile?.id ?? user.id;
+  const captainTimezone = (profile?.timezone && profile.timezone !== "UTC") ? profile.timezone : "America/New_York";
   const isHibernating = profile?.is_hibernating ?? false;
   const hibernationEndDate = profile?.hibernation_end_date ?? null;
   const hibernationResumeTime = profile?.hibernation_resume_time ?? null;
@@ -83,7 +84,7 @@ export default async function SchedulePage() {
 
       {/* Calendar */}
       <div className="min-h-0 flex-1">
-        <ScheduleClient captainId={user.id} isHibernating={isHibernating} hibernationEndDate={hibernationEndDate} />
+        <ScheduleClient captainId={user.id} timezone={captainTimezone} isHibernating={isHibernating} hibernationEndDate={hibernationEndDate} />
       </div>
     </div>
   );

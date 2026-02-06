@@ -41,6 +41,7 @@ export interface CalendarBooking {
 
 export interface CalendarProps {
   captainId: string;
+  timezone?: string;
   initialDate?: Date;
   initialView?: CalendarView;
   onDateChange?: (date: Date) => void;
@@ -59,6 +60,7 @@ export interface DayColumnProps {
   endHour: number;
   pixelsPerHour: number;
   isToday: boolean;
+  timezone?: string;
   onBlockClick?: (booking: CalendarBooking) => void;
   blackoutDate?: BlackoutDate;
   onBlackoutClick?: (blackout: BlackoutDate) => void;

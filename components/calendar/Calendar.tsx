@@ -29,6 +29,7 @@ function useIsMobile() {
 
 export function Calendar({
   captainId,
+  timezone,
   initialDate = new Date(),
   initialView = 'week',
   onDateChange,
@@ -171,6 +172,7 @@ export function Calendar({
           date={currentDate}
           bookings={bookings}
           blackoutDates={blackoutDates}
+          timezone={timezone}
           onDateChange={handleDateChange}
           onViewChange={handleViewChange}
           onBlockClick={handleBlockClick}
@@ -188,6 +190,7 @@ export function Calendar({
           date={currentDate}
           bookings={bookings}
           blackoutDates={blackoutDates}
+          timezone={timezone}
           onDateChange={handleDateChange}
           onViewChange={handleViewChange}
           onBlockClick={handleBlockClick}
