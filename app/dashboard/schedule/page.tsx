@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { ScheduleClient } from './ScheduleClient';
 import { ExportBookingsButton } from './components/ExportBookingsButton';
 import { HelpTooltip } from '@/components/HelpTooltip';
+import { getAvailabilityWindows } from '@/app/actions/availability';
 
 /**
  * Schedule Page - Server Component
@@ -33,6 +34,27 @@ export default async function SchedulePage() {
   const isHibernating = profile?.is_hibernating ?? false;
   const hibernationEndDate = profile?.hibernation_end_date ?? null;
   const hibernationResumeTime = profile?.hibernation_resume_time ?? null;
+
+  // Fetch availability windows to determine calendar time range
+  const availabilityResult = await getAvailabilityWindows();
+  let availabilityStartHour = 5; // fallback
+  let availabilityEndHour = 21; // fallback
+
+  if (availabilityResult.success && availabilityResult.data) {
+    const activeWindows = availabilityResult.data.filter(w => w.is_active);
+    if (activeWindows.length > 0) {
+      const startHours = activeWindows.map(w => {
+        const [h] = w.start_time.split(':').map(Number);
+        return h;
+      });
+      const endHours = activeWindows.map(w => {
+        const parts = w.end_time.split(':').map(Number);
+        return parts[1] > 0 ? parts[0] + 1 : parts[0];
+      });
+      availabilityStartHour = Math.min(...startHours);
+      availabilityEndHour = Math.max(...endHours);
+    }
+  }
 
   return (
     <div className="flex h-[calc(100vh-4rem)] flex-col md:h-screen">
@@ -86,7 +108,7 @@ export default async function SchedulePage() {
 
       {/* Calendar */}
       <div className="min-h-0 flex-1">
-        <ScheduleClient captainId={user.id} timezone={captainTimezone} isHibernating={isHibernating} hibernationEndDate={hibernationEndDate} />
+        <ScheduleClient captainId={user.id} timezone={captainTimezone} isHibernating={isHibernating} hibernationEndDate={hibernationEndDate} availabilityStartHour={availabilityStartHour} availabilityEndHour={availabilityEndHour} />
       </div>
     </div>
   );

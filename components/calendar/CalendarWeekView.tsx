@@ -29,10 +29,12 @@ interface CalendarWeekViewProps {
   onBlackoutClick?: (blackout: BlackoutDate) => void;
   onEmptySlotClick?: (date: Date, hour: number) => void;
   isLoading?: boolean;
+  availabilityStartHour?: number;
+  availabilityEndHour?: number;
 }
 
-const START_HOUR = 5; // 5 AM
-const END_HOUR = 21; // 9 PM
+const DEFAULT_START_HOUR = 5; // 5 AM
+const DEFAULT_END_HOUR = 21; // 9 PM
 const PIXELS_PER_HOUR = 60;
 
 export function CalendarWeekView({
@@ -47,7 +49,11 @@ export function CalendarWeekView({
   onBlackoutClick,
   onEmptySlotClick,
   isLoading,
+  availabilityStartHour,
+  availabilityEndHour,
 }: CalendarWeekViewProps) {
+  const START_HOUR = availabilityStartHour ?? DEFAULT_START_HOUR;
+  const END_HOUR = availabilityEndHour ?? DEFAULT_END_HOUR;
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Get days of the week
@@ -89,13 +95,22 @@ export function CalendarWeekView({
     return mapped;
   }, [blackoutDates]);
 
-  // Auto-scroll to current time on mount
+  // Auto-scroll to availability start or current time on mount
   useEffect(() => {
     if (scrollContainerRef.current) {
       const now = new Date();
       const zonedNow = timezone ? toZonedTime(now, timezone) : now;
       const currentHour = zonedNow.getHours();
-      const scrollToHour = Math.max(0, currentHour - 2); // Show 2 hours before current time
+
+      let scrollToHour: number;
+      if (currentHour >= START_HOUR && currentHour <= END_HOUR) {
+        // During availability hours: show 2 hours before current time
+        scrollToHour = Math.max(START_HOUR, currentHour - 2);
+      } else {
+        // Outside availability hours: scroll to the start of availability
+        scrollToHour = START_HOUR;
+      }
+
       const scrollPosition = (scrollToHour - START_HOUR) * PIXELS_PER_HOUR;
       scrollContainerRef.current.scrollTop = Math.max(0, scrollPosition);
     }

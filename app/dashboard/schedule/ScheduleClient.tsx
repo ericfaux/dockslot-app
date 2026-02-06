@@ -16,6 +16,8 @@ interface ScheduleClientProps {
   timezone?: string;
   isHibernating?: boolean;
   hibernationEndDate?: string | null;
+  availabilityStartHour?: number;
+  availabilityEndHour?: number;
 }
 
 /**
@@ -23,7 +25,7 @@ interface ScheduleClientProps {
  * Manages calendar state and booking detail panel
  */
 
-export function ScheduleClient({ captainId, timezone, isHibernating, hibernationEndDate }: ScheduleClientProps) {
+export function ScheduleClient({ captainId, timezone, isHibernating, hibernationEndDate, availabilityStartHour, availabilityEndHour }: ScheduleClientProps) {
   const router = useRouter();
   const [selectedBooking, setSelectedBooking] = useState<CalendarBooking | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -167,6 +169,8 @@ export function ScheduleClient({ captainId, timezone, isHibernating, hibernation
         onBlackoutClick={handleBlackoutClick}
         onEmptySlotClick={handleEmptySlotClick}
         refreshKey={refreshKey}
+        availabilityStartHour={availabilityStartHour}
+        availabilityEndHour={availabilityEndHour}
       />
 
       {/* Booking Detail Panel (slide-over) */}
