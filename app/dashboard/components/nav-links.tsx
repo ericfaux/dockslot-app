@@ -80,6 +80,11 @@ export const secondaryNavLinks: NavLink[] = [
     label: "Reviews",
     icon: Star,
   },
+  {
+    href: "/dashboard/billing",
+    label: "Billing",
+    icon: CreditCard,
+  },
 ];
 
 /**
