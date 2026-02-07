@@ -181,6 +181,8 @@ function getStatusColor(status: string): string {
       return 'bg-orange-500';
     case 'no_show':
       return 'bg-red-500';
+    case 'expired':
+      return 'bg-slate-400';
     default:
       return 'bg-slate-500';
   }

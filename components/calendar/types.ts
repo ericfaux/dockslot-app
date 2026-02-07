@@ -124,6 +124,12 @@ export const STATUS_COLORS: Record<BookingStatus, {
     text: 'text-rose-300',
     dot: 'bg-rose-500',
   },
+  expired: {
+    bg: 'bg-slate-500/20',
+    border: 'border-slate-400',
+    text: 'text-slate-400',
+    dot: 'bg-slate-400',
+  },
 };
 
 export const STATUS_LABELS: Record<BookingStatus, string> = {
@@ -134,4 +140,5 @@ export const STATUS_LABELS: Record<BookingStatus, string> = {
   completed: 'Completed',
   cancelled: 'Cancelled',
   no_show: 'No Show',
+  expired: 'Expired',
 };

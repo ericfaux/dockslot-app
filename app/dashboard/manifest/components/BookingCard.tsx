@@ -50,6 +50,10 @@ const STATUS_CONFIG: Record<BookingStatus, { label: string; className: string }>
     label: 'No Show',
     className: 'bg-rose-50 text-rose-600 border-rose-500/30',
   },
+  expired: {
+    label: 'Expired',
+    className: 'bg-slate-100 text-slate-500 border-slate-400/30',
+  },
 };
 
 const PAYMENT_CONFIG: Record<PaymentStatus, { label: string; className: string }> = {

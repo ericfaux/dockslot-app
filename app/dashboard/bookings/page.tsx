@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { Suspense } from 'react'
 import { requireAuth } from '@/lib/auth/server'
 import { BookingsListClient } from './BookingsListClient'
+import { expireOverdueBookings } from '@/app/actions/bookings'
 
 /**
  * Bookings List Page - Server Component
@@ -25,6 +26,11 @@ export default async function BookingsListPage() {
 
   // Use fallback value if profile query fails - user is still authenticated
   const captainId = profile?.id ?? user.id
+
+  // Expire overdue pending_deposit bookings before rendering the list
+  await expireOverdueBookings(captainId).catch((err) => {
+    console.error('Error expiring overdue bookings on bookings list load:', err);
+  });
 
   return (
     <div className="flex flex-col">

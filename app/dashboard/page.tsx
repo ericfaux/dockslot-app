@@ -23,6 +23,7 @@ import { getActionItems } from "@/app/actions/action-items";
 import { BookingStatus, ACTIVE_BOOKING_STATUSES } from "@/lib/db/types";
 import { addHours } from "date-fns";
 import { checkMarineConditions } from "@/lib/weather/noaa";
+import { expireOverdueBookings } from "@/app/actions/bookings";
 import { getBuoyData } from "@/lib/weather/buoy";
 import SunCalc from "suncalc";
 import { weatherCache } from "@/lib/cache";
@@ -381,6 +382,13 @@ export default async function DashboardPage() {
 
   const displayName =
     user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Captain";
+
+  // Expire overdue pending_deposit bookings on dashboard load
+  if (user) {
+    await expireOverdueBookings(user.id).catch((err) => {
+      console.error('Error expiring overdue bookings on dashboard load:', err);
+    });
+  }
 
   // Fetch captain's profile for weather data
   let captainProfile = null;

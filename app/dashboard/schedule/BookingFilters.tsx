@@ -28,6 +28,7 @@ const STATUS_OPTIONS: { value: BookingStatus; label: string; color: string }[] =
   { value: 'completed', label: 'Completed', color: 'text-slate-400' },
   { value: 'cancelled', label: 'Cancelled', color: 'text-rose-600' },
   { value: 'no_show', label: 'No Show', color: 'text-rose-600' },
+  { value: 'expired', label: 'Expired', color: 'text-slate-500' },
 ]
 
 const PAYMENT_OPTIONS = [
