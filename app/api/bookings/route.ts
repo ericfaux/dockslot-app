@@ -591,11 +591,12 @@ export async function POST(request: NextRequest) {
       });
 
     // Send booking confirmation email (async, don't block response)
-    if (process.env.RESEND_API_KEY) {
+    // Gracefully skips if RESEND_API_KEY is not configured
+    {
       // Fetch trip type, vessel, and profile details for email
       const { data: tripDetails } = await supabase
         .from('trip_types')
-        .select('title, duration_hours')
+        .select('title, duration_hours, cancellation_policy_text')
         .eq('id', trip_type_id)
         .single();
 
@@ -607,15 +608,34 @@ export async function POST(request: NextRequest) {
             .single()
         : { data: null };
 
-      const { data: profile } = await supabase
+      const { data: captainProfile } = await supabase
         .from('profiles')
-        .select('business_name, full_name, meeting_spot_name')
+        .select('business_name, full_name, phone, meeting_spot_name, meeting_spot_instructions, cancellation_policy')
         .eq('id', captain_id)
         .single();
 
-      if (tripDetails && profile) {
+      // Fetch email preferences for branding and customization
+      const { data: emailPrefs } = await supabase
+        .from('email_preferences')
+        .select('custom_what_to_bring, business_name_override, logo_url, email_signature')
+        .eq('captain_id', captain_id)
+        .single();
+
+      // Check if captain has an active waiver template
+      const { data: waiverTemplate } = await supabase
+        .from('waiver_templates')
+        .select('id')
+        .eq('owner_id', captain_id)
+        .eq('is_active', true)
+        .limit(1)
+        .single();
+
+      if (tripDetails && captainProfile) {
         const managementUrl = `${request.nextUrl.origin}/manage/${token}`;
-        
+        const displayName = emailPrefs?.business_name_override || captainProfile.business_name || captainProfile.full_name || 'Your Captain';
+        const cancellationPolicy = tripDetails.cancellation_policy_text || captainProfile.cancellation_policy || undefined;
+        const waiverUrl = waiverTemplate ? `${request.nextUrl.origin}/manage/${token}?tab=waivers` : undefined;
+
         sendBookingConfirmation({
           to: guest_email,
           guestName: guest_name,
@@ -623,14 +643,22 @@ export async function POST(request: NextRequest) {
           date: format(new Date(scheduled_start), 'EEEE, MMMM d, yyyy'),
           time: format(new Date(scheduled_start), 'h:mm a'),
           vessel: vesselDetails?.name || 'Your charter vessel',
-          meetingSpot: profile.meeting_spot_name || 'Meeting spot details in booking',
-          captainName: profile.business_name || profile.full_name || 'Your Captain',
+          meetingSpot: captainProfile.meeting_spot_name || 'Meeting spot details in booking',
+          meetingSpotInstructions: captainProfile.meeting_spot_instructions || undefined,
+          captainName: displayName,
+          captainPhone: captainProfile.phone || undefined,
           totalPrice: `$${((total_price_cents || 0) / 100).toFixed(2)}`,
           depositPaid: `$${((deposit_paid_cents || 0) / 100).toFixed(2)}`,
           balanceDue: `$${(finalBalanceDue / 100).toFixed(2)}`,
           managementUrl,
+          waiverUrl,
+          cancellationPolicy,
+          whatToBring: emailPrefs?.custom_what_to_bring || undefined,
+          businessName: emailPrefs?.business_name_override || captainProfile.business_name || undefined,
+          logoUrl: emailPrefs?.logo_url || undefined,
+          emailSignature: emailPrefs?.email_signature || undefined,
         }).catch(err => {
-          console.error('Failed to send booking confirmation email:', err);
+          console.warn('Failed to send booking confirmation email:', err);
           // Don't fail the booking if email fails
         });
       }

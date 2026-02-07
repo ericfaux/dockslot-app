@@ -59,7 +59,10 @@ export async function POST(
 
     const paymentUrl = `${request.nextUrl.origin}/manage/${token.token}?payment=balance`;
 
-    // Send balance payment email
+    // Send balance payment email (graceful failure if RESEND_API_KEY not configured)
+    let emailSent = false;
+    let emailMessageId: string | undefined;
+
     const emailResult = await sendEmail({
       to: booking.guest_email,
       subject: `💳 Balance Payment Required: ${booking.trip_type.title}`,
@@ -81,11 +84,10 @@ export async function POST(
     });
 
     if (!emailResult.success) {
-      console.error('Failed to send balance payment email:', emailResult.error);
-      return NextResponse.json(
-        { error: 'Failed to send email notification' },
-        { status: 500 }
-      );
+      console.warn('Balance payment email not sent:', emailResult.error);
+    } else {
+      emailSent = true;
+      emailMessageId = emailResult.messageId;
     }
 
     // Log the balance request
@@ -93,17 +95,21 @@ export async function POST(
       booking_id: bookingId,
       actor: 'captain',
       entry_type: 'balance_payment_requested',
-      entry_text: `Balance payment request sent to ${booking.guest_email}`,
+      entry_text: emailSent
+        ? `Balance payment request sent to ${booking.guest_email}`
+        : `Balance payment requested (email not sent — email service not configured)`,
       metadata: {
         amount_cents: booking.balance_due_cents,
-        email_id: emailResult.messageId,
+        ...(emailMessageId && { email_id: emailMessageId }),
       },
     });
 
     return NextResponse.json({
       success: true,
-      message: 'Balance payment request sent',
-      emailSent: true,
+      message: emailSent
+        ? 'Balance payment request sent'
+        : 'Balance payment requested but email could not be sent (email service not configured)',
+      emailSent,
     });
   } catch (error) {
     console.error('Balance request error:', error);

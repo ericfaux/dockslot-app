@@ -21,7 +21,7 @@ export async function sendEmail({ to, subject, html, from = DEFAULT_FROM }: Emai
   const apiKey = process.env.RESEND_API_KEY;
   
   if (!apiKey) {
-    console.error('RESEND_API_KEY not configured');
+    console.warn('RESEND_API_KEY not configured — skipping email send');
     return { success: false, error: 'Email service not configured' };
   }
 
