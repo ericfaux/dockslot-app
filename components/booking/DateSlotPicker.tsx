@@ -9,6 +9,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday, isBefore, startOfDay, addMonths, subMonths } from 'date-fns';
 import { ChevronLeft, ChevronRight, Calendar, Clock, AlertCircle, RefreshCw } from 'lucide-react';
 import { CalendarSkeleton, TimeSlotsSkeleton } from './BookingSkeleton';
+import { getTimezoneLabel } from '@/lib/utils/timezone';
 
 interface TimeSlot {
   start: string;
@@ -154,7 +155,7 @@ export function DateSlotPicker({
       {resolvedTimezone && (
         <div className="flex items-center justify-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-xs text-slate-600">
           <Clock className="h-3 w-3" />
-          <span>All times shown in <span className="font-medium">{resolvedTimezone.replace(/_/g, ' ')}</span></span>
+          <span>All times shown in <span className="font-medium">{getTimezoneLabel(resolvedTimezone)}</span></span>
         </div>
       )}
 
