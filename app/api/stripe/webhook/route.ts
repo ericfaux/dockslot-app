@@ -3,20 +3,11 @@ import Stripe from 'stripe';
 import { createSupabaseServiceClient } from '@/utils/supabase/service';
 import { sendBookingConfirmation, sendBalancePaymentConfirmation } from '@/lib/email/resend';
 import { format, parseISO } from 'date-fns';
-
-function getStripeClient() {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) {
-    throw new Error('STRIPE_SECRET_KEY not configured');
-  }
-  return new Stripe(key, {
-    apiVersion: '2026-01-28.clover',
-  });
-}
+import { getStripe } from '@/lib/stripe/config';
 
 export async function POST(request: NextRequest) {
   try {
-    const stripe = getStripeClient();
+    const stripe = getStripe();
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
     if (!webhookSecret) {
@@ -49,9 +40,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Handle successful payment
+    const supabase = createSupabaseServiceClient();
+
+    // ========================================================================
+    // DEPOSIT / BOOKING PAYMENTS
+    // ========================================================================
+
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session;
+
+      // Subscription checkout — handled by customer.subscription.created
+      if (session.mode === 'subscription') {
+        console.log(`✅ Subscription checkout completed for customer ${session.customer}`);
+        return NextResponse.json({ received: true });
+      }
+
+      // Deposit payment checkout
       const { bookingId, depositAmount, totalAmount } = session.metadata || {};
 
       if (!bookingId || !depositAmount || !totalAmount) {
@@ -59,15 +63,13 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Missing metadata' }, { status: 400 });
       }
 
-      const supabase = createSupabaseServiceClient();
-
       // Update booking with deposit payment
       const { error: updateError } = await supabase
         .from('bookings')
         .update({
           deposit_paid_cents: parseInt(depositAmount),
           balance_due_cents: parseInt(totalAmount) - parseInt(depositAmount),
-          status: 'confirmed', // Move from pending_deposit to confirmed
+          status: 'confirmed',
           deposit_paid_at: new Date().toISOString(),
         })
         .eq('id', bookingId);
@@ -116,7 +118,7 @@ export async function POST(request: NextRequest) {
         const managementUrl = `${process.env.NEXT_PUBLIC_APP_URL}/manage/${booking.management_token}`;
         const formattedDate = format(parseISO(booking.scheduled_start), 'EEEE, MMMM d, yyyy');
         const formattedTime = format(parseISO(booking.scheduled_start), 'h:mm a');
-        
+
         await sendBookingConfirmation({
           to: booking.guest_email,
           guestName: booking.guest_name,
@@ -133,19 +135,18 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      // Note: Captain email notifications would require email field in profiles table
-
-      console.log(`✅ Payment processed for booking ${bookingId}`);
+      console.log(`✅ Deposit payment processed for booking ${bookingId}`);
     }
 
-    // Handle balance payment confirmation
+    // ========================================================================
+    // BALANCE PAYMENTS
+    // ========================================================================
+
     if (event.type === 'payment_intent.succeeded') {
       const paymentIntent = event.data.object as Stripe.PaymentIntent;
       const { bookingId, paymentType } = paymentIntent.metadata || {};
 
       if (paymentType === 'balance' && bookingId) {
-        const supabase = createSupabaseServiceClient();
-
         // Update booking with balance payment
         const { error: updateError } = await supabase
           .from('bookings')
@@ -190,7 +191,7 @@ export async function POST(request: NextRequest) {
         if (booking) {
           const managementUrl = `${process.env.NEXT_PUBLIC_APP_URL}/manage/${booking.management_token}`;
           const formattedDate = format(parseISO(booking.scheduled_start), 'EEEE, MMMM d, yyyy');
-          
+
           await sendBalancePaymentConfirmation({
             to: booking.guest_email,
             guestName: booking.guest_name,
@@ -202,6 +203,102 @@ export async function POST(request: NextRequest) {
         }
 
         console.log(`✅ Balance payment processed for booking ${bookingId}`);
+      }
+    }
+
+    // ========================================================================
+    // SUBSCRIPTION EVENTS (Captain Pro billing)
+    // ========================================================================
+
+    if (event.type === 'customer.subscription.created' || event.type === 'customer.subscription.updated') {
+      const subscription = event.data.object as Stripe.Subscription;
+      const userId = subscription.metadata?.dockslot_user_id;
+
+      if (!userId) {
+        console.error('Missing dockslot_user_id in subscription metadata:', subscription.id);
+        return NextResponse.json({ received: true });
+      }
+
+      const isActive = ['active', 'trialing'].includes(subscription.status);
+
+      // In Stripe SDK v20+, current_period_end is on SubscriptionItem, not Subscription
+      const periodEnd = subscription.items?.data?.[0]?.current_period_end;
+
+      const updateData: Record<string, unknown> = {
+        subscription_tier: isActive ? 'pro' : 'starter',
+        stripe_subscription_id: subscription.id,
+        subscription_status: subscription.status === 'active' ? 'active'
+          : subscription.status === 'trialing' ? 'trialing'
+          : subscription.status === 'past_due' ? 'past_due'
+          : subscription.status === 'canceled' ? 'canceled'
+          : subscription.status === 'unpaid' ? 'unpaid'
+          : 'active',
+      };
+
+      if (periodEnd) {
+        updateData.subscription_current_period_end = new Date(periodEnd * 1000).toISOString();
+      }
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update(updateData)
+        .eq('id', userId);
+
+      if (updateError) {
+        console.error('Failed to update subscription:', updateError);
+        return NextResponse.json({ error: 'Failed to update profile' }, { status: 500 });
+      }
+
+      console.log(`✅ Subscription ${event.type} for user ${userId}: ${subscription.status}`);
+    }
+
+    if (event.type === 'customer.subscription.deleted') {
+      const subscription = event.data.object as Stripe.Subscription;
+      const userId = subscription.metadata?.dockslot_user_id;
+
+      if (!userId) {
+        console.error('Missing dockslot_user_id in subscription metadata:', subscription.id);
+        return NextResponse.json({ received: true });
+      }
+
+      // Downgrade to starter
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          subscription_tier: 'starter',
+          subscription_status: 'canceled',
+          stripe_subscription_id: null,
+        })
+        .eq('id', userId);
+
+      if (updateError) {
+        console.error('Failed to downgrade subscription:', updateError);
+        return NextResponse.json({ error: 'Failed to update profile' }, { status: 500 });
+      }
+
+      console.log(`✅ Subscription canceled for user ${userId}`);
+    }
+
+    if (event.type === 'invoice.payment_failed') {
+      const invoice = event.data.object as Stripe.Invoice;
+      // In Stripe SDK v20+, subscription is nested under parent.subscription_details
+      const subDetails = invoice.parent?.subscription_details;
+      const subscriptionId = typeof subDetails?.subscription === 'string'
+        ? subDetails.subscription
+        : subDetails?.subscription?.id ?? null;
+
+      if (subscriptionId) {
+        // Mark as past_due — Stripe will retry automatically
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ subscription_status: 'past_due' })
+          .eq('stripe_subscription_id', subscriptionId);
+
+        if (updateError) {
+          console.error('Failed to update payment failure:', updateError);
+        }
+
+        console.log(`⚠️ Invoice payment failed for subscription ${subscriptionId}`);
       }
     }
 

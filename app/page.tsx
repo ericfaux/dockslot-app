@@ -365,8 +365,8 @@ export default function LandingPage() {
 
             {/* Pro Tier */}
             <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-              <div className="mb-1 inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-                COMING SOON
+              <div className="mb-1 inline-flex rounded-full bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-700">
+                MOST POPULAR
               </div>
               <h3 className="mt-3 text-2xl font-bold text-slate-900">
                 Captain Pro
@@ -381,9 +381,12 @@ export default function LandingPage() {
                 For busy captains who need advanced tools and unlimited
                 bookings.
               </p>
-              <div className="mt-6 block rounded-lg border border-slate-200 px-4 py-3 text-center text-sm font-semibold text-slate-400">
-                Coming Soon
-              </div>
+              <Link
+                href="/login?mode=register&plan=pro"
+                className="mt-6 block rounded-lg bg-slate-900 px-4 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+              >
+                Start with Pro
+              </Link>
               <ul className="mt-6 space-y-3">
                 <PricingFeature text="Everything in Starter" />
                 <PricingFeature text="Unlimited bookings" />

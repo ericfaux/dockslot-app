@@ -41,6 +41,9 @@ export type PaymentType = 'deposit' | 'balance' | 'refund' | 'tip';
 
 export type PaymentRecordStatus = 'pending' | 'succeeded' | 'failed' | 'refunded';
 
+export type SubscriptionTier = 'starter' | 'pro';
+export type SubscriptionStatus = 'active' | 'trialing' | 'past_due' | 'canceled' | 'unpaid';
+
 // ============================================================================
 // Table Interfaces
 // ============================================================================
@@ -51,6 +54,11 @@ export interface Profile {
   full_name: string | null;
   timezone: string;
   stripe_account_id: string | null;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  subscription_tier: SubscriptionTier;
+  subscription_status: SubscriptionStatus;
+  subscription_current_period_end: string | null;
   created_at: string;
   meeting_spot_name: string | null;
   meeting_spot_address: string | null;
