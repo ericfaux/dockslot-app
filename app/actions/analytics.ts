@@ -208,6 +208,7 @@ export async function getBookingInsights(): Promise<BookingInsightsData> {
     completed: 'Completed',
     cancelled: 'Cancelled',
     no_show: 'No Show',
+    expired: 'Expired',
   };
   const statusMap = new Map<string, number>();
   allBookings.forEach(b => {

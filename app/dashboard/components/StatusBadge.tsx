@@ -8,6 +8,7 @@ import {
   Calendar,
   XCircle,
   AlertCircle,
+  TimerOff,
 } from 'lucide-react'
 
 interface StatusBadgeProps {
@@ -97,6 +98,16 @@ const STATUS_CONFIG: Record<
       text: 'text-rose-600',
       border: 'border-rose-500/30',
       ring: 'ring-rose-500/20',
+    },
+  },
+  expired: {
+    label: 'Expired',
+    icon: TimerOff,
+    colors: {
+      bg: 'bg-slate-100',
+      text: 'text-slate-500',
+      border: 'border-slate-400/30',
+      ring: 'ring-slate-400/20',
     },
   },
 }

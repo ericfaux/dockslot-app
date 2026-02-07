@@ -14,7 +14,8 @@ export type BookingStatus =
   | 'rescheduled'
   | 'completed'
   | 'cancelled'
-  | 'no_show';
+  | 'no_show'
+  | 'expired';
 
 export type PaymentStatus =
   | 'unpaid'
@@ -459,13 +460,14 @@ export interface HibernationSubscriber {
 // ============================================================================
 
 export const VALID_TRANSITIONS: Record<BookingStatus, BookingStatus[]> = {
-  pending_deposit: ['confirmed', 'cancelled'],
+  pending_deposit: ['confirmed', 'cancelled', 'expired'],
   confirmed: ['weather_hold', 'completed', 'cancelled', 'no_show'],
   weather_hold: ['confirmed', 'rescheduled', 'cancelled'],
   rescheduled: ['confirmed', 'weather_hold', 'completed', 'cancelled', 'no_show'],
   completed: [],
   cancelled: [],
   no_show: [],
+  expired: [],
 };
 
 export function isValidTransition(from: BookingStatus, to: BookingStatus): boolean {
@@ -486,6 +488,7 @@ export const BOOKING_STATUSES: BookingStatus[] = [
   'completed',
   'cancelled',
   'no_show',
+  'expired',
 ];
 
 export const ACTIVE_BOOKING_STATUSES: BookingStatus[] = [
@@ -499,4 +502,5 @@ export const TERMINAL_BOOKING_STATUSES: BookingStatus[] = [
   'completed',
   'cancelled',
   'no_show',
+  'expired',
 ];

@@ -368,8 +368,8 @@ export async function updateBooking(
   }
 
   // Cannot update terminal status bookings
-  if (['completed', 'cancelled', 'no_show'].includes(existing.status)) {
-    return { success: false, error: 'Cannot update a completed, cancelled, or no-show booking', code: 'VALIDATION' };
+  if (['completed', 'cancelled', 'no_show', 'expired'].includes(existing.status)) {
+    return { success: false, error: 'Cannot update a completed, cancelled, no-show, or expired booking', code: 'VALIDATION' };
   }
 
   const updateData: Record<string, unknown> = {};
@@ -1266,4 +1266,80 @@ export async function quickCreateBooking(
   });
 
   return { success: true, data: booking as BookingWithDetails };
+}
+
+// ============================================================================
+// Expire Overdue Bookings
+// ============================================================================
+
+/**
+ * Finds all bookings with status 'pending_deposit' where scheduled_start
+ * is in the past and transitions them to 'expired'.
+ * Called on dashboard load and by the daily cron job.
+ */
+export async function expireOverdueBookings(
+  captainId?: string
+): Promise<ActionResult<{ expiredCount: number }>> {
+  const supabase = await createSupabaseServerClient();
+  const now = new Date().toISOString();
+
+  // Build query for pending_deposit bookings with past scheduled_start
+  let query = supabase
+    .from('bookings')
+    .select('id')
+    .eq('status', 'pending_deposit')
+    .lt('scheduled_start', now);
+
+  // Scope to captain if provided (dashboard load)
+  if (captainId) {
+    query = query.eq('captain_id', captainId);
+  }
+
+  const { data: overdueBookings, error: fetchError } = await query;
+
+  if (fetchError) {
+    console.error('Error fetching overdue bookings:', fetchError);
+    return { success: false, error: 'Failed to fetch overdue bookings', code: 'UNKNOWN' };
+  }
+
+  if (!overdueBookings || overdueBookings.length === 0) {
+    return { success: true, data: { expiredCount: 0 } };
+  }
+
+  const bookingIds: string[] = overdueBookings.map((b: { id: string }) => b.id);
+
+  // Batch update all overdue bookings to expired
+  const { error: updateError } = await supabase
+    .from('bookings')
+    .update({
+      status: 'expired',
+      updated_at: new Date().toISOString(),
+    })
+    .in('id', bookingIds);
+
+  if (updateError) {
+    console.error('Error expiring overdue bookings:', updateError);
+    return { success: false, error: 'Failed to expire overdue bookings', code: 'UNKNOWN' };
+  }
+
+  // Log each expiration
+  const logEntries = bookingIds.map((id: string) => ({
+    booking_id: id,
+    entry_type: 'status_changed' as const,
+    description: 'Booking expired — deposit not received before scheduled date',
+    old_value: { status: 'pending_deposit' },
+    new_value: { status: 'expired' },
+    actor_type: 'system',
+    actor_id: null,
+  }));
+
+  const { error: logError } = await supabase
+    .from('booking_logs')
+    .insert(logEntries);
+
+  if (logError) {
+    console.error('Error logging expired bookings:', logError);
+  }
+
+  return { success: true, data: { expiredCount: bookingIds.length } };
 }
