@@ -6,6 +6,7 @@ import { Moon, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { ScheduleClient } from './ScheduleClient';
 import { ExportBookingsButton } from './components/ExportBookingsButton';
+import { BookingSearch } from './BookingSearch';
 import { HelpTooltip } from '@/components/HelpTooltip';
 import { getAvailabilityWindows } from '@/app/actions/availability';
 
@@ -96,14 +97,19 @@ export default async function SchedulePage() {
       )}
 
       {/* Page Header */}
-      <div className="mb-4 flex items-center justify-between gap-4">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <div className="flex items-center gap-2">
           <span className="font-mono text-xs uppercase tracking-widest text-slate-500">
             Schedule
           </span>
           <div className="h-px flex-1 bg-white sm:w-32" />
         </div>
-        <ExportBookingsButton captainId={captainId} />
+        <div className="flex items-center gap-3">
+          <div className="w-full sm:w-64">
+            <BookingSearch />
+          </div>
+          <ExportBookingsButton captainId={captainId} />
+        </div>
       </div>
 
       {/* Calendar */}

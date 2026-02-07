@@ -674,22 +674,41 @@ export default async function DashboardPage() {
   let hasTripType = false;
   let hasAnyBooking = false;
   let hasAvailability = false;
+  let hasWaiver = false;
   const hasMeetingSpot = !!(captainProfile?.meeting_spot_latitude && captainProfile?.meeting_spot_longitude);
+  const hasProfile = !!(captainProfile?.full_name && captainProfile?.business_name);
 
   if (user) {
     try {
-      const [vesselResult, tripTypeResult, bookingResult, availabilityResult] = await Promise.all([
+      const [vesselResult, tripTypeResult, bookingResult, availabilityResult, waiverResult] = await Promise.all([
         supabase.from('vessels').select('id', { count: 'exact', head: true }).eq('owner_id', user.id),
         supabase.from('trip_types').select('id', { count: 'exact', head: true }).eq('owner_id', user.id),
         supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('captain_id', user.id).limit(1),
         supabase.from('availability_windows').select('id', { count: 'exact', head: true }).eq('owner_id', user.id),
+        supabase.from('waiver_templates').select('id', { count: 'exact', head: true }).eq('owner_id', user.id),
       ]);
       hasVessel = (vesselResult.count || 0) > 0;
       hasTripType = (tripTypeResult.count || 0) > 0;
       hasAnyBooking = (bookingResult.count || 0) > 0;
       hasAvailability = (availabilityResult.count || 0) > 0;
+      hasWaiver = (waiverResult.count || 0) > 0;
     } catch (err) {
       console.error('Error checking onboarding status:', err);
+    }
+  }
+
+  // Check Stripe connection status
+  let hasStripeConnected = false;
+  if (user) {
+    try {
+      const { data: stripeData } = await supabase
+        .from('profiles')
+        .select('stripe_account_id, stripe_onboarding_complete')
+        .eq('id', user.id)
+        .single();
+      hasStripeConnected = !!(stripeData?.stripe_account_id && stripeData?.stripe_onboarding_complete);
+    } catch {
+      // ignore - will default to false
     }
   }
 
@@ -806,11 +825,14 @@ export default async function DashboardPage() {
       {user && (
         <section aria-label="Getting Started">
           <OnboardingChecklist
+            hasProfile={hasProfile}
             hasMeetingSpot={hasMeetingSpot}
             hasVessel={hasVessel}
             hasTripType={hasTripType}
             hasBooking={hasAnyBooking}
             hasAvailability={hasAvailability}
+            hasWaiver={hasWaiver}
+            hasStripe={hasStripeConnected}
             bookingPageUrl={`/book/${user.id}`}
           />
         </section>
