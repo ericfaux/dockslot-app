@@ -24,3 +24,12 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Ensure desktop sidebar is hidden on mobile viewports.
+   Prevents Tailwind v4 CSS cascade issues where the `hidden` utility
+   and `md:flex` responsive variant have conflicting source order. */
+@media (max-width: 767px) {
+  .desktop-sidebar {
+    display: none !important;
+  }
+}

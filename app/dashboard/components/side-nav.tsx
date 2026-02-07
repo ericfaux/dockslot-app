@@ -23,7 +23,7 @@ export function SideNav({ userEmail, signOutAction }: SideNavProps) {
   const showMore = moreOpen || isSecondaryActive;
 
   return (
-    <aside className="hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:w-16 lg:w-64 bg-slate-900 border-r border-slate-800 text-white transition-all duration-200 group/sidebar hover:md:w-64 z-30">
+    <aside className="desktop-sidebar hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:w-16 lg:w-64 bg-slate-900 border-r border-slate-800 text-white transition-[width] duration-200 group/sidebar hover:md:w-64 z-30">
       <div className="flex flex-col h-full">
         {/* Logo / Brand */}
         <div className="flex items-center h-16 px-4 lg:px-6 border-b border-slate-800">
