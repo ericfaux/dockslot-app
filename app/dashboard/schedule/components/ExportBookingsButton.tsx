@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Download, FileSpreadsheet, Calendar } from 'lucide-react';
+import { Download, FileSpreadsheet, Calendar, Loader2 } from 'lucide-react';
 import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
 
 interface ExportBookingsButtonProps {
@@ -11,10 +11,12 @@ interface ExportBookingsButtonProps {
 export function ExportBookingsButton({ captainId }: ExportBookingsButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [exportingPreset, setExportingPreset] = useState<string | null>(null);
   const [exportStatus, setExportStatus] = useState<string | null>(null);
 
   const handleExport = async (preset?: string) => {
     setExporting(true);
+    setExportingPreset(preset || 'all');
     setExportStatus('Generating CSV...');
 
     try {
@@ -71,6 +73,7 @@ export function ExportBookingsButton({ captainId }: ExportBookingsButtonProps) {
       setTimeout(() => setExportStatus(null), 3000);
     } finally {
       setExporting(false);
+      setExportingPreset(null);
     }
   };
 
@@ -80,8 +83,12 @@ export function ExportBookingsButton({ captainId }: ExportBookingsButtonProps) {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 rounded-lg border border-slate-300 bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 transition-colors hover:bg-slate-200"
       >
-        <Download className="h-4 w-4" />
-        Export CSV
+        {exporting ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <Download className="h-4 w-4" />
+        )}
+        {exporting ? 'Exporting...' : 'Export CSV'}
       </button>
 
       {isOpen && (
@@ -102,7 +109,11 @@ export function ExportBookingsButton({ captainId }: ExportBookingsButtonProps) {
                   disabled={exporting}
                   className="flex w-full items-center gap-3 rounded-lg bg-slate-100 px-4 py-3 text-left text-sm text-slate-900 transition-colors hover:bg-slate-200 disabled:opacity-50"
                 >
-                  <Calendar className="h-4 w-4 text-cyan-600" />
+                  {exportingPreset === 'this-month' ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-cyan-600" />
+                  ) : (
+                    <Calendar className="h-4 w-4 text-cyan-600" />
+                  )}
                   <div>
                     <p className="font-medium">This Month</p>
                     <p className="text-xs text-slate-400">
@@ -116,7 +127,11 @@ export function ExportBookingsButton({ captainId }: ExportBookingsButtonProps) {
                   disabled={exporting}
                   className="flex w-full items-center gap-3 rounded-lg bg-slate-100 px-4 py-3 text-left text-sm text-slate-900 transition-colors hover:bg-slate-200 disabled:opacity-50"
                 >
-                  <Calendar className="h-4 w-4 text-blue-600" />
+                  {exportingPreset === 'last-month' ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                  ) : (
+                    <Calendar className="h-4 w-4 text-blue-600" />
+                  )}
                   <div>
                     <p className="font-medium">Last Month</p>
                     <p className="text-xs text-slate-400">
@@ -130,7 +145,11 @@ export function ExportBookingsButton({ captainId }: ExportBookingsButtonProps) {
                   disabled={exporting}
                   className="flex w-full items-center gap-3 rounded-lg bg-slate-100 px-4 py-3 text-left text-sm text-slate-900 transition-colors hover:bg-slate-200 disabled:opacity-50"
                 >
-                  <FileSpreadsheet className="h-4 w-4 text-green-400" />
+                  {exportingPreset === 'year' ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-green-400" />
+                  ) : (
+                    <FileSpreadsheet className="h-4 w-4 text-green-400" />
+                  )}
                   <div>
                     <p className="font-medium">This Year</p>
                     <p className="text-xs text-slate-400">
@@ -144,7 +163,11 @@ export function ExportBookingsButton({ captainId }: ExportBookingsButtonProps) {
                   disabled={exporting}
                   className="flex w-full items-center gap-3 rounded-lg bg-slate-100 px-4 py-3 text-left text-sm text-slate-900 transition-colors hover:bg-slate-200 disabled:opacity-50"
                 >
-                  <FileSpreadsheet className="h-4 w-4 text-amber-600" />
+                  {exportingPreset === 'confirmed' ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-amber-600" />
+                  ) : (
+                    <FileSpreadsheet className="h-4 w-4 text-amber-600" />
+                  )}
                   <div>
                     <p className="font-medium">Confirmed Only</p>
                     <p className="text-xs text-slate-400">
@@ -158,7 +181,11 @@ export function ExportBookingsButton({ captainId }: ExportBookingsButtonProps) {
                   disabled={exporting}
                   className="flex w-full items-center gap-3 rounded-lg bg-slate-100 px-4 py-3 text-left text-sm text-slate-900 transition-colors hover:bg-slate-200 disabled:opacity-50"
                 >
-                  <FileSpreadsheet className="h-4 w-4 text-purple-600" />
+                  {exportingPreset === 'all' ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-purple-600" />
+                  ) : (
+                    <FileSpreadsheet className="h-4 w-4 text-purple-600" />
+                  )}
                   <div>
                     <p className="font-medium">All Bookings</p>
                     <p className="text-xs text-slate-400">

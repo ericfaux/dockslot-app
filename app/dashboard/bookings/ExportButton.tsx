@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Download } from 'lucide-react'
+import { Download, Loader2 } from 'lucide-react'
 import { BookingFilterState } from '../schedule/BookingFilters'
 
 interface ExportButtonProps {
@@ -79,7 +79,11 @@ export function ExportButton({
         disabled={isExporting || totalCount === 0}
         className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <Download className="h-4 w-4" />
+        {isExporting ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <Download className="h-4 w-4" />
+        )}
         {isExporting ? 'Exporting...' : `Export${totalCount > 0 ? ` (${totalCount})` : ''}`}
       </button>
       {error && (

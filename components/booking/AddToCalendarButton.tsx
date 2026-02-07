@@ -4,7 +4,7 @@
 
 'use client';
 
-import { Calendar, ChevronDown } from 'lucide-react';
+import { Calendar, ChevronDown, Loader2 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 
 interface AddToCalendarButtonProps {
@@ -25,6 +25,7 @@ export function AddToCalendarButton({
   className = '',
 }: AddToCalendarButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [loadingOption, setLoadingOption] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -80,7 +81,8 @@ export function AddToCalendarButton({
     ].filter(Boolean).join('\r\n');
   };
 
-  const downloadICS = () => {
+  const downloadICS = (label: string) => {
+    setLoadingOption(label);
     const icsContent = generateICS();
     const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -91,7 +93,10 @@ export function AddToCalendarButton({
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    setIsOpen(false);
+    setTimeout(() => {
+      setLoadingOption(null);
+      setIsOpen(false);
+    }, 500);
   };
 
   const getGoogleCalendarUrl = (): string => {
@@ -118,32 +123,35 @@ export function AddToCalendarButton({
     return `https://outlook.live.com/calendar/0/action/compose?${params.toString()}`;
   };
 
+  const handleCalendarLink = (label: string, url: string) => {
+    setLoadingOption(label);
+    window.open(url, '_blank');
+    setTimeout(() => {
+      setLoadingOption(null);
+      setIsOpen(false);
+    }, 500);
+  };
+
   const calendarOptions = [
     {
       label: 'Apple Calendar',
       icon: 'apple',
-      action: downloadICS,
+      action: () => downloadICS('Apple Calendar'),
     },
     {
       label: 'Google Calendar',
       icon: 'google',
-      action: () => {
-        window.open(getGoogleCalendarUrl(), '_blank');
-        setIsOpen(false);
-      },
+      action: () => handleCalendarLink('Google Calendar', getGoogleCalendarUrl()),
     },
     {
       label: 'Outlook',
       icon: 'outlook',
-      action: () => {
-        window.open(getOutlookUrl(), '_blank');
-        setIsOpen(false);
-      },
+      action: () => handleCalendarLink('Outlook', getOutlookUrl()),
     },
     {
       label: 'Download .ics',
       icon: 'download',
-      action: downloadICS,
+      action: () => downloadICS('Download .ics'),
     },
   ];
 
@@ -181,15 +189,20 @@ export function AddToCalendarButton({
             <button
               key={index}
               onClick={option.action}
+              disabled={loadingOption !== null}
               className="
                 flex items-center gap-3 w-full px-4 py-3
                 text-sm text-slate-700 text-left
                 transition-colors hover:bg-slate-50
                 border-b border-slate-100 last:border-b-0
-                min-h-[48px]
+                min-h-[48px] disabled:opacity-50 disabled:cursor-not-allowed
               "
             >
-              <Calendar className="h-4 w-4 text-slate-400" />
+              {loadingOption === option.label ? (
+                <Loader2 className="h-4 w-4 animate-spin text-cyan-600" />
+              ) : (
+                <Calendar className="h-4 w-4 text-slate-400" />
+              )}
               <span>{option.label}</span>
             </button>
           ))}
