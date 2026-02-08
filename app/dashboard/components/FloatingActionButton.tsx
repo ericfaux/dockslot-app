@@ -126,7 +126,7 @@ export function FloatingActionButton({
   return (
     <div
       ref={fabRef}
-      className="fixed bottom-6 right-6 z-40 md:top-20 md:bottom-auto md:right-6 flex flex-col-reverse md:flex-col items-end gap-3"
+      className="fixed bottom-6 right-6 z-40 md:top-20 md:bottom-auto md:right-6 flex flex-col-reverse md:flex-col items-end gap-3 pointer-events-none"
     >
       {/* Action buttons - shown when expanded */}
       <div
@@ -161,7 +161,7 @@ export function FloatingActionButton({
       </div>
 
       {/* Main FAB button */}
-      <div className="relative flex items-center gap-3">
+      <div className="relative flex items-center gap-3 pointer-events-auto">
         {/* Tooltip label - visible on hover when closed */}
         {!isOpen && (
           <div className="pointer-events-none absolute right-full mr-3 hidden whitespace-nowrap rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-slate-700 opacity-0 shadow-lg transition-opacity group-hover/fab:opacity-100 md:block">
