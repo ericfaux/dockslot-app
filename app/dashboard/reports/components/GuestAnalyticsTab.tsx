@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Users, UserCheck, Star } from 'lucide-react';
 import {
   BarChart,
@@ -12,9 +13,13 @@ import {
   Legend,
 } from 'recharts';
 import type { GuestAnalyticsData } from '@/app/actions/analytics';
+import { Pagination } from '@/components/ui/Pagination';
+
+const PAGE_SIZE = 25;
 
 interface Props {
   data: GuestAnalyticsData;
+  filteredGuests?: GuestAnalyticsData['topGuestsByTrips'];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -34,7 +39,16 @@ function GuestTooltip({ active, payload, label }: any) {
   return null;
 }
 
-export function GuestAnalyticsTab({ data }: Props) {
+export function GuestAnalyticsTab({ data, filteredGuests }: Props) {
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const guests = filteredGuests ?? data.topGuestsByTrips;
+
+  // Reset page when filtered data changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filteredGuests]);
+
   if (data.totalUniqueGuests === 0) {
     return (
       <div className="rounded-lg border border-slate-200 bg-white p-12 text-center">
@@ -46,6 +60,11 @@ export function GuestAnalyticsTab({ data }: Props) {
       </div>
     );
   }
+
+  const totalPages = Math.max(1, Math.ceil(guests.length / PAGE_SIZE));
+  const startIndex = (currentPage - 1) * PAGE_SIZE;
+  const endIndex = Math.min(startIndex + PAGE_SIZE, guests.length);
+  const paginatedGuests = guests.slice(startIndex, endIndex);
 
   return (
     <div className="space-y-6">
@@ -121,9 +140,14 @@ export function GuestAnalyticsTab({ data }: Props) {
       )}
 
       {/* Top Guests Table */}
-      {data.topGuestsByTrips.length > 0 && (
+      {guests.length > 0 && (
         <div className="rounded-lg border border-slate-200 bg-white p-4 sm:p-6">
-          <h3 className="text-base font-semibold text-slate-900 mb-4">Top Guests</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-base font-semibold text-slate-900">Top Guests</h3>
+            <p className="text-sm text-slate-400">
+              Showing {startIndex + 1}–{endIndex} of {guests.length}
+            </p>
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -135,9 +159,9 @@ export function GuestAnalyticsTab({ data }: Props) {
                 </tr>
               </thead>
               <tbody>
-                {data.topGuestsByTrips.map((guest, idx) => (
+                {paginatedGuests.map((guest, idx) => (
                   <tr key={guest.email} className="border-b border-slate-200">
-                    <td className="py-2.5 text-slate-500 font-mono text-xs">{idx + 1}</td>
+                    <td className="py-2.5 text-slate-500 font-mono text-xs">{startIndex + idx + 1}</td>
                     <td className="py-2.5">
                       <p className="text-slate-900 font-medium truncate max-w-[200px]">{guest.name}</p>
                       <p className="text-xs text-slate-500 truncate max-w-[200px]">{guest.email}</p>
@@ -151,6 +175,15 @@ export function GuestAnalyticsTab({ data }: Props) {
               </tbody>
             </table>
           </div>
+          {guests.length > PAGE_SIZE && (
+            <div className="mt-4">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </div>
+          )}
         </div>
       )}
     </div>

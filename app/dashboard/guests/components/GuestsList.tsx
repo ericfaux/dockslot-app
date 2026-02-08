@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { format, parseISO } from 'date-fns';
 import {
   Users,
@@ -13,8 +13,11 @@ import {
   ChevronUp,
 } from 'lucide-react';
 import { EmptyState } from '@/components/EmptyState';
+import { Pagination } from '@/components/ui/Pagination';
 import { SendEmailModal } from './SendEmailModal';
 import { OfferDiscountModal } from './OfferDiscountModal';
+
+const PAGE_SIZE = 25;
 
 interface Guest {
   email: string;
@@ -43,10 +46,16 @@ export function GuestsList({ guests, tripTypes, businessName }: Props) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'repeat' | 'new'>('all');
   const [expandedGuest, setExpandedGuest] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Modal state
   const [emailGuest, setEmailGuest] = useState<Guest | null>(null);
   const [discountGuest, setDiscountGuest] = useState<Guest | null>(null);
+
+  // Reset to page 1 when search or filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterType]);
 
   const filteredGuests = guests.filter((guest) => {
     const matchesSearch =
@@ -60,6 +69,11 @@ export function GuestsList({ guests, tripTypes, businessName }: Props) {
 
     return matchesSearch && matchesFilter;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filteredGuests.length / PAGE_SIZE));
+  const startIndex = (currentPage - 1) * PAGE_SIZE;
+  const endIndex = Math.min(startIndex + PAGE_SIZE, filteredGuests.length);
+  const paginatedGuests = filteredGuests.slice(startIndex, endIndex);
 
   return (
     <div className="space-y-4">
@@ -107,9 +121,16 @@ export function GuestsList({ guests, tripTypes, businessName }: Props) {
         </div>
       </div>
 
+      {/* Showing count */}
+      {filteredGuests.length > 0 && (
+        <p className="text-sm text-slate-400">
+          Showing {startIndex + 1}–{endIndex} of {filteredGuests.length} guest{filteredGuests.length !== 1 ? 's' : ''}
+        </p>
+      )}
+
       {/* Guests Grid */}
       <div className="space-y-3">
-        {filteredGuests.map((guest) => {
+        {paginatedGuests.map((guest) => {
           const isExpanded = expandedGuest === guest.email;
           const isRepeat = guest.totalTrips > 1;
           const isVIP = guest.totalTrips >= 5;
@@ -296,6 +317,15 @@ export function GuestsList({ guests, tripTypes, businessName }: Props) {
           );
         })}
       </div>
+
+      {/* Pagination */}
+      {filteredGuests.length > PAGE_SIZE && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      )}
 
       {/* Send Email Modal */}
       {emailGuest && (
