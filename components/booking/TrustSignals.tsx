@@ -157,7 +157,7 @@ export function CaptainInfoCard({
           {businessName && name && (
             <p className="text-sm text-slate-500 flex items-center gap-1">
               <User className="h-3 w-3" />
-              {name.split(' ')[0]}
+              {name}
             </p>
           )}
           {meetingSpotName && (
