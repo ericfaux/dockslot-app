@@ -128,6 +128,7 @@ export async function getBuoyData(lat: number, lon: number): Promise<BuoyData | 
         headers: {
           'User-Agent': '(DockSlot Marina Booking, contact@dockslot.app)',
         },
+        next: { revalidate: 600 },
       }
     );
 

@@ -60,6 +60,7 @@ async function getGridPoint(lat: number, lon: number): Promise<{ gridId: string;
       headers: {
         'User-Agent': '(DockSlot Marina Booking, contact@dockslot.app)',
       },
+      next: { revalidate: 300 },
     }
   );
 
@@ -87,6 +88,7 @@ export async function getWeatherAlerts(lat: number, lon: number): Promise<NOAAAl
         headers: {
           'User-Agent': '(DockSlot Marina Booking, contact@dockslot.app)',
         },
+        next: { revalidate: 300 },
       }
     );
 
@@ -128,6 +130,7 @@ export async function getMarineForecast(lat: number, lon: number): Promise<NOAAF
         headers: {
           'User-Agent': '(DockSlot Marina Booking, contact@dockslot.app)',
         },
+        next: { revalidate: 300 },
       }
     );
 
