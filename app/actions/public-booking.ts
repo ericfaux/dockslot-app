@@ -56,6 +56,11 @@ export interface PublicCaptainProfile {
   is_hibernating: boolean;
   hibernation_message: string | null;
   advance_booking_days: number;
+  venmo_enabled: boolean;
+  venmo_username: string | null;
+  zelle_enabled: boolean;
+  zelle_contact: string | null;
+  stripe_account_id: string | null;
 }
 
 export interface CaptainReviewStats {
@@ -198,7 +203,12 @@ export async function getPublicCaptainProfile(
       cancellation_policy,
       is_hibernating,
       hibernation_message,
-      advance_booking_days
+      advance_booking_days,
+      venmo_enabled,
+      venmo_username,
+      zelle_enabled,
+      zelle_contact,
+      stripe_account_id
     `)
     .eq('id', captainId)
     .single();

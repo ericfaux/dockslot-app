@@ -170,6 +170,7 @@ export function SettingsTabs(props: SettingsTabsProps) {
             stripeOnboardingComplete={props.stripeOnboardingComplete}
             businessName={props.profile?.business_name || props.profile?.full_name || ''}
             email={props.userEmail}
+            profile={props.profile}
           />
         )}
         {activeTab === 'notifications' && (

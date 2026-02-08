@@ -24,6 +24,7 @@ import { ProgressIndicator } from '@/components/booking/ProgressIndicator';
 import { StripeCheckoutButton } from '@/components/booking/StripeCheckoutButton';
 import { ManagementLinkCard } from '@/components/booking/ManagementLinkCard';
 import { ConfirmationActions } from './ConfirmationActions';
+import { PaymentMethodSelector } from './PaymentMethodSelector';
 import { formatDollars, formatCents } from '@/lib/utils/format';
 
 const BOOKING_STEPS = [
@@ -80,6 +81,14 @@ export default async function ConfirmPage({ params, searchParams }: ConfirmPageP
     .eq('id', tripTypeId)
     .single();
 
+  // Check captain's alternative payment methods
+  const stripeConnected = !!(profile?.stripe_account_id);
+  const venmoEnabled = profile?.venmo_enabled ?? false;
+  const venmoUsername = profile?.venmo_username ?? null;
+  const zelleEnabled = profile?.zelle_enabled ?? false;
+  const zelleContact = profile?.zelle_contact ?? null;
+  const hasAltPayment = venmoEnabled || zelleEnabled;
+
   // Determine if deposit needs to be paid
   const needsDeposit =
     booking.payment_status === 'unpaid' &&
@@ -88,6 +97,10 @@ export default async function ConfirmPage({ params, searchParams }: ConfirmPageP
     tripType.deposit_amount > 0;
 
   const depositPaid = booking.payment_status === 'deposit_paid' || booking.payment_status === 'fully_paid';
+  const pendingVerification = booking.payment_status === 'pending_verification';
+
+  // Generate short booking ID for payment reference
+  const shortId = `DK-${bookingId.slice(0, 4).toUpperCase()}`;
 
   const currentStep = needsDeposit ? 3 : 4;
 
@@ -133,6 +146,25 @@ export default async function ConfirmPage({ params, searchParams }: ConfirmPageP
           currentStep={currentStep}
           className="mb-8"
         />
+
+        {/* Pending Verification Banner */}
+        {pendingVerification && (
+          <div className="mb-8 rounded-xl border border-yellow-200 bg-yellow-50 p-6">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-yellow-100 flex-shrink-0">
+                <Clock className="h-7 w-7 text-yellow-600" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900 mb-1">
+                  Booking Received!
+                </h1>
+                <p className="text-slate-600">
+                  Your booking is confirmed pending payment verification. The captain will verify your payment shortly.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Success Banner (if deposit paid) */}
         {depositPaid && (
@@ -365,8 +397,27 @@ export default async function ConfirmPage({ params, searchParams }: ConfirmPageP
                 </div>
               </div>
 
-              {/* Stripe Checkout Button */}
-              {needsDeposit && (
+              {/* Payment Methods */}
+              {needsDeposit && hasAltPayment && (
+                <div className="mt-6">
+                  <PaymentMethodSelector
+                    bookingId={booking.id}
+                    depositAmount={tripType!.deposit_amount}
+                    totalPriceCents={booking.total_price_cents}
+                    shortId={shortId}
+                    stripeConnected={stripeConnected}
+                    venmoEnabled={venmoEnabled}
+                    venmoUsername={venmoUsername}
+                    zelleEnabled={zelleEnabled}
+                    zelleContact={zelleContact}
+                    captainId={captainId}
+                    tripTypeId={tripTypeId}
+                  />
+                </div>
+              )}
+
+              {/* Stripe-only checkout (fallback when no alt methods) */}
+              {needsDeposit && !hasAltPayment && (
                 <div className="mt-6">
                   <StripeCheckoutButton
                     bookingId={booking.id}
@@ -381,6 +432,16 @@ export default async function ConfirmPage({ params, searchParams }: ConfirmPageP
                   <div className="flex items-center gap-2 text-sm text-emerald-700 font-medium">
                     <CheckCircle className="h-4 w-4" />
                     <span>Deposit paid - You&apos;re all set!</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Pending Verification */}
+              {pendingVerification && (
+                <div className="mt-4 rounded-lg bg-yellow-50 border border-yellow-200 p-3">
+                  <div className="flex items-center gap-2 text-sm text-yellow-700 font-medium">
+                    <Clock className="h-4 w-4" />
+                    <span>Payment pending verification by captain</span>
                   </div>
                 </div>
               )}

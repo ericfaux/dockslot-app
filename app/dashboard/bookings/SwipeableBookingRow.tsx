@@ -187,6 +187,8 @@ export function SwipeableBookingRow({
                       ? 'text-emerald-600'
                       : booking.payment_status === 'deposit_paid'
                       ? 'text-amber-600'
+                      : booking.payment_status === 'pending_verification'
+                      ? 'text-yellow-600'
                       : 'text-slate-500'
                   }`}
                 />
@@ -195,6 +197,8 @@ export function SwipeableBookingRow({
                     ? 'Fully Paid'
                     : booking.payment_status === 'deposit_paid'
                     ? `Deposit: ${formatCents(booking.deposit_paid_cents)}`
+                    : booking.payment_status === 'pending_verification'
+                    ? 'Pending Verification'
                     : 'Unpaid'}
                 </span>
               </div>

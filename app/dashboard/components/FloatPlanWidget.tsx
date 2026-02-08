@@ -99,6 +99,12 @@ function PaymentBadge({ status }: { status: PaymentStatus }) {
       text: 'text-slate-600',
       border: 'border-slate-200',
     },
+    pending_verification: {
+      label: 'Pending Verification',
+      bg: 'bg-yellow-50',
+      text: 'text-yellow-700',
+      border: 'border-yellow-200',
+    },
   };
 
   const { label, bg, text, border } = config[status] || config.unpaid;

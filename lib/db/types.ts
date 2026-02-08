@@ -22,7 +22,10 @@ export type PaymentStatus =
   | 'deposit_paid'
   | 'fully_paid'
   | 'partially_refunded'
-  | 'fully_refunded';
+  | 'fully_refunded'
+  | 'pending_verification';
+
+export type PaymentMethod = 'stripe' | 'venmo' | 'zelle';
 
 export type LogEntryType =
   | 'booking_created'
@@ -80,6 +83,11 @@ export interface Profile {
   calendar_token: string | null;
   dock_mode_enabled: boolean;
   season_revenue_goal_cents: number;
+  venmo_username: string | null;
+  zelle_contact: string | null;
+  venmo_enabled: boolean;
+  zelle_enabled: boolean;
+  auto_confirm_alt_payments: boolean;
   updated_at: string;
 }
 
@@ -127,6 +135,9 @@ export interface Booking {
   guest_count_confirmed: number | null;
   special_requests: string | null;
   captain_instructions: string | null;
+  payment_method: PaymentMethod;
+  payment_reminder_count: number;
+  last_payment_reminder_at: string | null;
   updated_at: string;
 }
 
