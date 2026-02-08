@@ -33,3 +33,13 @@ body {
     display: none !important;
   }
 }
+
+/* Hide scrollbar while maintaining scroll functionality.
+   Prevents scrollbar from intercepting click events on tab buttons. */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   User,
@@ -72,6 +72,7 @@ export function SettingsTabs(props: SettingsTabsProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const activeTab = searchParams.get('tab') || 'profile';
+  const tabBarRef = useRef<HTMLDivElement>(null);
 
   const setActiveTab = useCallback(
     (tabId: string) => {
@@ -82,19 +83,39 @@ export function SettingsTabs(props: SettingsTabsProps) {
     [router, searchParams]
   );
 
+  // Scroll the active tab button into view when the active tab changes
+  useEffect(() => {
+    const container = tabBarRef.current;
+    if (!container) return;
+    const activeButton = container.querySelector<HTMLElement>(
+      `[data-tab="${activeTab}"]`
+    );
+    if (activeButton) {
+      activeButton.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'nearest',
+      });
+    }
+  }, [activeTab]);
+
   return (
     <div>
       {/* Desktop: Horizontal tab bar */}
       <div className="hidden md:block mb-6">
-        <div className="flex gap-1 overflow-x-auto rounded-lg border border-slate-200 bg-white p-1">
+        <div
+          ref={tabBarRef}
+          className="flex gap-1 overflow-x-auto scrollbar-hide rounded-lg border border-slate-200 bg-white p-1"
+        >
           {TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
+                data-tab={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                className={`relative flex items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                   isActive
                     ? 'bg-white text-slate-900 shadow-sm'
                     : 'text-slate-400 hover:text-slate-700 hover:bg-white'
