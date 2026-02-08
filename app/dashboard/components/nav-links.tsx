@@ -47,6 +47,11 @@ export const primaryNavLinks: NavLink[] = [
     icon: Users,
   },
   {
+    href: "/dashboard/reports",
+    label: "Reports",
+    icon: BarChart3,
+  },
+  {
     href: "/dashboard/settings",
     label: "Settings",
     icon: Settings,
@@ -55,11 +60,6 @@ export const primaryNavLinks: NavLink[] = [
 
 /** Secondary nav — shown in collapsible "More" section */
 export const secondaryNavLinks: NavLink[] = [
-  {
-    href: "/dashboard/reports",
-    label: "Reports",
-    icon: BarChart3,
-  },
   {
     href: "/dashboard/modifications",
     label: "Modifications",
