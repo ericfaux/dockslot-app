@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useCallback, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { format, setHours, setMinutes } from 'date-fns';
-import { Calendar, CalendarBooking, BlackoutDate, STATUS_COLORS, STATUS_LABELS } from '@/components/calendar';
+import { Calendar, CalendarBooking, CalendarView, BlackoutDate, STATUS_COLORS, STATUS_LABELS } from '@/components/calendar';
 import { BookingDetailPanel } from './BookingDetailPanel';
 import { BlackoutModal } from './BlackoutModal';
 import { UnblockConfirmModal } from './UnblockConfirmModal';
@@ -27,6 +27,8 @@ interface ScheduleClientProps {
 
 export function ScheduleClient({ captainId, timezone, isHibernating, hibernationEndDate, availabilityStartHour, availabilityEndHour }: ScheduleClientProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialView: CalendarView = searchParams.get('view') === 'day' ? 'day' : 'week';
   const [selectedBooking, setSelectedBooking] = useState<CalendarBooking | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
@@ -112,6 +114,13 @@ export function ScheduleClient({ captainId, timezone, isHibernating, hibernation
     });
   }, [selectedBlackout]);
 
+  // View change handler - persists view in URL
+  const handleViewChange = useCallback((view: CalendarView) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('view', view);
+    window.history.replaceState({}, '', url.toString());
+  }, []);
+
   // Empty slot click handler - opens quick booking modal
   const handleEmptySlotClick = useCallback((date: Date, hour: number) => {
     setQuickBookingSlot({ date, hour });
@@ -164,6 +173,8 @@ export function ScheduleClient({ captainId, timezone, isHibernating, hibernation
       <Calendar
         captainId={captainId}
         timezone={timezone}
+        initialView={initialView}
+        onViewChange={handleViewChange}
         onBlockClick={handleBlockClick}
         onQuickBlockClick={handleQuickBlockClick}
         onBlackoutClick={handleBlackoutClick}

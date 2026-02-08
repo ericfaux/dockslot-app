@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
 
+import { Suspense } from 'react';
 import { requireAuth } from '@/lib/auth/server';
 import { format, parseISO } from 'date-fns';
 import { Moon, Calendar } from 'lucide-react';
@@ -114,7 +115,9 @@ export default async function SchedulePage() {
 
       {/* Calendar */}
       <div className="min-h-0 flex-1">
-        <ScheduleClient captainId={user.id} timezone={captainTimezone} isHibernating={isHibernating} hibernationEndDate={hibernationEndDate} availabilityStartHour={availabilityStartHour} availabilityEndHour={availabilityEndHour} />
+        <Suspense fallback={null}>
+          <ScheduleClient captainId={user.id} timezone={captainTimezone} isHibernating={isHibernating} hibernationEndDate={hibernationEndDate} availabilityStartHour={availabilityStartHour} availabilityEndHour={availabilityEndHour} />
+        </Suspense>
       </div>
     </div>
   );

@@ -50,6 +50,11 @@ export function Calendar({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Sync currentView when initialView prop changes (e.g., from URL navigation)
+  useEffect(() => {
+    setCurrentView(initialView);
+  }, [initialView]);
+
   // Default to day view on mobile
   useEffect(() => {
     if (isMobile && currentView === 'week') {
