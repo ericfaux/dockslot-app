@@ -22,6 +22,17 @@ export interface RevenueOverviewData {
   thisMonthChange: number;
 }
 
+export interface BookingRow {
+  id: string;
+  guestName: string;
+  guestEmail: string;
+  tripType: string;
+  scheduledStart: string;
+  partySize: number;
+  status: string;
+  totalPriceCents: number;
+}
+
 export interface BookingInsightsData {
   statusBreakdown: Array<{ status: string; count: number; label: string }>;
   byDayOfWeek: Array<{ day: string; count: number; dayIndex: number }>;
@@ -31,6 +42,7 @@ export interface BookingInsightsData {
   averagePartySize: number;
   averageLeadTimeDays: number;
   totalBookings: number;
+  bookings: BookingRow[];
 }
 
 export interface GuestAnalyticsData {
@@ -193,8 +205,9 @@ export async function getBookingInsights(): Promise<BookingInsightsData> {
 
   const { data: bookings } = await supabase
     .from('bookings')
-    .select('id, scheduled_start, status, party_size, created_at, weather_hold_reason, trip_type:trip_types(title)')
-    .eq('captain_id', user.id);
+    .select('id, scheduled_start, status, party_size, created_at, weather_hold_reason, guest_name, guest_email, total_price_cents, trip_type:trip_types(title)')
+    .eq('captain_id', user.id)
+    .order('scheduled_start', { ascending: false });
 
   const allBookings = bookings || [];
   const totalBookings = allBookings.length;
@@ -273,6 +286,21 @@ export async function getBookingInsights(): Promise<BookingInsightsData> {
     ? leadTimes.reduce((sum, d) => sum + d, 0) / leadTimes.length
     : 0;
 
+  // Individual booking rows for the table
+  const bookingRows: BookingRow[] = allBookings.map(b => {
+    const tripType = Array.isArray(b.trip_type) ? b.trip_type[0] : b.trip_type;
+    return {
+      id: b.id,
+      guestName: b.guest_name,
+      guestEmail: b.guest_email,
+      tripType: tripType?.title || 'Unknown',
+      scheduledStart: b.scheduled_start,
+      partySize: b.party_size,
+      status: b.status,
+      totalPriceCents: b.total_price_cents,
+    };
+  });
+
   const result: BookingInsightsData = {
     statusBreakdown,
     byDayOfWeek,
@@ -282,6 +310,7 @@ export async function getBookingInsights(): Promise<BookingInsightsData> {
     averagePartySize,
     averageLeadTimeDays,
     totalBookings,
+    bookings: bookingRows,
   };
 
   analyticsCache.set(cacheKey, result, 300000);
@@ -345,8 +374,7 @@ export async function getGuestAnalytics(): Promise<GuestAnalyticsData> {
       trips: guestBookings.length,
       revenue: centsToDollars(guestBookings.reduce((sum, b) => sum + guestRevenue(b), 0)),
     }))
-    .sort((a, b) => b.trips - a.trips || b.revenue - a.revenue)
-    .slice(0, 10);
+    .sort((a, b) => b.trips - a.trips || b.revenue - a.revenue);
 
   // New vs returning guests over the last 6 months
   const now = new Date();

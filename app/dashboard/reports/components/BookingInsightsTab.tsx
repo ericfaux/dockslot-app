@@ -1,6 +1,7 @@
 'use client';
 
-import { CalendarDays, Clock, Users } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { CalendarDays, Clock } from 'lucide-react';
 import {
   BarChart,
   Bar,
@@ -10,10 +11,14 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import type { BookingInsightsData } from '@/app/actions/analytics';
+import type { BookingInsightsData, BookingRow } from '@/app/actions/analytics';
+import { Pagination } from '@/components/ui/Pagination';
+
+const PAGE_SIZE = 25;
 
 interface Props {
   data: BookingInsightsData;
+  filteredBookings?: BookingRow[];
 }
 
 const statusColors: Record<string, string> = {
@@ -24,6 +29,17 @@ const statusColors: Record<string, string> = {
   rescheduled: 'bg-cyan-500',
   cancelled: 'bg-rose-500',
   no_show: 'bg-slate-500',
+};
+
+const statusLabels: Record<string, string> = {
+  completed: 'Completed',
+  confirmed: 'Confirmed',
+  pending_deposit: 'Pending Deposit',
+  weather_hold: 'Weather Hold',
+  rescheduled: 'Rescheduled',
+  cancelled: 'Cancelled',
+  no_show: 'No Show',
+  expired: 'Expired',
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -39,7 +55,16 @@ function DayTooltip({ active, payload, label }: any) {
   return null;
 }
 
-export function BookingInsightsTab({ data }: Props) {
+export function BookingInsightsTab({ data, filteredBookings }: Props) {
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const bookings = filteredBookings ?? data.bookings;
+
+  // Reset page when filtered data changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filteredBookings]);
+
   if (data.totalBookings === 0) {
     return (
       <div className="rounded-lg border border-slate-200 bg-white p-12 text-center">
@@ -51,6 +76,11 @@ export function BookingInsightsTab({ data }: Props) {
       </div>
     );
   }
+
+  const totalPages = Math.max(1, Math.ceil(bookings.length / PAGE_SIZE));
+  const startIndex = (currentPage - 1) * PAGE_SIZE;
+  const endIndex = Math.min(startIndex + PAGE_SIZE, bookings.length);
+  const paginatedBookings = bookings.slice(startIndex, endIndex);
 
   return (
     <div className="space-y-6">
@@ -179,6 +209,71 @@ export function BookingInsightsTab({ data }: Props) {
           )}
         </div>
       </div>
+
+      {/* Bookings Table */}
+      {bookings.length > 0 && (
+        <div className="rounded-lg border border-slate-200 bg-white p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-base font-semibold text-slate-900">All Bookings</h3>
+            <p className="text-sm text-slate-400">
+              Showing {startIndex + 1}–{endIndex} of {bookings.length}
+            </p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-200">
+                  <th className="pb-2 text-left text-xs font-medium text-slate-400">Guest</th>
+                  <th className="pb-2 text-left text-xs font-medium text-slate-400">Trip</th>
+                  <th className="pb-2 text-left text-xs font-medium text-slate-400">Date</th>
+                  <th className="pb-2 text-right text-xs font-medium text-slate-400">Party</th>
+                  <th className="pb-2 text-right text-xs font-medium text-slate-400">Price</th>
+                  <th className="pb-2 text-right text-xs font-medium text-slate-400">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedBookings.map((b) => (
+                  <tr key={b.id} className="border-b border-slate-100">
+                    <td className="py-2.5">
+                      <p className="font-medium text-slate-900 truncate max-w-[140px]">{b.guestName}</p>
+                      <p className="text-xs text-slate-500 truncate max-w-[140px]">{b.guestEmail}</p>
+                    </td>
+                    <td className="py-2.5 text-slate-600 truncate max-w-[120px]">{b.tripType}</td>
+                    <td className="py-2.5 text-slate-600 whitespace-nowrap">
+                      {new Date(b.scheduledStart).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })}
+                    </td>
+                    <td className="py-2.5 text-right text-slate-600">{b.partySize}</td>
+                    <td className="py-2.5 text-right text-slate-600">
+                      ${((b.totalPriceCents || 0) / 100).toLocaleString()}
+                    </td>
+                    <td className="py-2.5 text-right">
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className={`h-2 w-2 rounded-full ${statusColors[b.status] || 'bg-slate-500'}`} />
+                        <span className="text-xs text-slate-600">
+                          {statusLabels[b.status] || b.status}
+                        </span>
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {bookings.length > PAGE_SIZE && (
+            <div className="mt-4">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Weather Hold Rate */}
       {data.weatherHoldRate > 0 && (
