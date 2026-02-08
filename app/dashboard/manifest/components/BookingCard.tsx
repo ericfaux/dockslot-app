@@ -77,6 +77,10 @@ const PAYMENT_CONFIG: Record<PaymentStatus, { label: string; className: string }
     label: 'Refunded',
     className: 'bg-slate-500/20 text-slate-400 border-slate-500/30',
   },
+  pending_verification: {
+    label: 'Pending Verification',
+    className: 'bg-yellow-50 text-yellow-700 border-yellow-500/30',
+  },
 };
 
 export function BookingCard({ booking }: BookingCardProps) {

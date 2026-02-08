@@ -20,6 +20,11 @@ import {
   MessageSquare,
   Tag as TagIcon,
   ExternalLink,
+  AlertTriangle,
+  Smartphone,
+  Building2,
+  Send,
+  Ban,
 } from 'lucide-react'
 import { BookingWithDetails, BookingStatus } from '@/lib/db/types'
 import StatusBadge, { PaymentBadge } from '@/app/dashboard/components/StatusBadge'
@@ -124,6 +129,42 @@ export function BookingDetailDrawer({
     onClose()
   }, [booking, router, onClose])
 
+  const [showRejectModal, setShowRejectModal] = useState(false)
+
+  const handleVerifyPayment = useCallback(async (action: 'confirm' | 'remind' | 'cancel') => {
+    if (!booking) return
+
+    if (action === 'confirm' && !confirm('Confirm that you received this payment?')) return
+    if (action === 'cancel' && !confirm('Cancel this booking due to non-payment? This cannot be undone.')) return
+
+    setIsProcessing(true)
+    setActionError(null)
+
+    try {
+      const response = await fetch('/api/bookings/verify-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookingId: booking.id, action }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Action failed')
+      }
+
+      if (action === 'remind') {
+        alert('Payment reminder sent to guest')
+      }
+
+      setShowRejectModal(false)
+      onRefresh()
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Action failed')
+    } finally {
+      setIsProcessing(false)
+    }
+  }, [booking, onRefresh])
+
   if (!isOpen || !booking) return null
 
   const scheduledDate = parseISO(booking.scheduled_start)
@@ -183,6 +224,76 @@ export function BookingDetailDrawer({
               <StatusBadge status={booking.status} size="md" />
               <PaymentBadge status={booking.payment_status} size="md" />
             </div>
+
+            {/* Payment Verification Banner */}
+            {booking.payment_status === 'pending_verification' && (
+              <div className="rounded-lg border-2 border-yellow-300 bg-yellow-50 p-4">
+                <div className="flex items-start gap-3 mb-3">
+                  <AlertTriangle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-yellow-800">Payment Verification Needed</h4>
+                    <p className="text-sm text-yellow-700 mt-1">
+                      Guest indicated they sent a{' '}
+                      <span className="font-semibold">
+                        {(booking as any).payment_method === 'venmo' ? 'Venmo' : (booking as any).payment_method === 'zelle' ? 'Zelle' : 'manual'}{' '}
+                      </span>
+                      payment of <span className="font-semibold">{formatCents(booking.total_price_cents)}</span>
+                    </p>
+                    <p className="text-xs text-yellow-600 mt-1">
+                      Reference: DK-{booking.id.slice(0, 4).toUpperCase()} &middot; Booked {format(parseISO(booking.created_at), 'MMM d, h:mm a')}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <button
+                    onClick={() => handleVerifyPayment('confirm')}
+                    disabled={isProcessing}
+                    className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+                  >
+                    <CheckCircle className="h-4 w-4" />
+                    Confirm Payment Received
+                  </button>
+                  <button
+                    onClick={() => setShowRejectModal(true)}
+                    disabled={isProcessing}
+                    className="flex-1 flex items-center justify-center gap-2 rounded-lg border border-rose-300 bg-white px-3 py-2 text-sm font-medium text-rose-600 hover:bg-rose-50 disabled:opacity-50"
+                  >
+                    <XCircle className="h-4 w-4" />
+                    Payment Not Received
+                  </button>
+                </div>
+
+                {/* Reject Modal */}
+                {showRejectModal && (
+                  <div className="mt-3 rounded-lg border border-slate-200 bg-white p-3 space-y-2">
+                    <p className="text-sm font-medium text-slate-700">What would you like to do?</p>
+                    <button
+                      onClick={() => handleVerifyPayment('remind')}
+                      disabled={isProcessing}
+                      className="w-full flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                    >
+                      <Send className="h-4 w-4 text-amber-600" />
+                      Send Payment Reminder
+                    </button>
+                    <button
+                      onClick={() => handleVerifyPayment('cancel')}
+                      disabled={isProcessing}
+                      className="w-full flex items-center gap-2 rounded-lg border border-rose-200 px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 disabled:opacity-50"
+                    >
+                      <Ban className="h-4 w-4" />
+                      Cancel Booking
+                    </button>
+                    <button
+                      onClick={() => setShowRejectModal(false)}
+                      className="w-full text-center text-sm text-slate-500 hover:text-slate-700 py-1"
+                    >
+                      Never mind
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Trip Info */}
             <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">

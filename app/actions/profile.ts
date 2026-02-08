@@ -48,6 +48,11 @@ export interface UpdateProfileParams {
   cancellation_policy?: string | null;
   dock_mode_enabled?: boolean;
   season_revenue_goal_cents?: number;
+  venmo_username?: string | null;
+  zelle_contact?: string | null;
+  venmo_enabled?: boolean;
+  zelle_enabled?: boolean;
+  auto_confirm_manual_payments?: boolean;
 }
 
 // ============================================================================
@@ -316,6 +321,31 @@ export async function updateProfile(
       return { success: false, error: 'Revenue goal must be a non-negative number', code: 'VALIDATION' };
     }
     updateData.season_revenue_goal_cents = Math.floor(params.season_revenue_goal_cents);
+  }
+
+  // Venmo username
+  if (params.venmo_username !== undefined) {
+    updateData.venmo_username = sanitizeText(params.venmo_username, 100);
+  }
+
+  // Zelle contact
+  if (params.zelle_contact !== undefined) {
+    updateData.zelle_contact = sanitizeText(params.zelle_contact, 200);
+  }
+
+  // Venmo enabled
+  if (params.venmo_enabled !== undefined) {
+    updateData.venmo_enabled = Boolean(params.venmo_enabled);
+  }
+
+  // Zelle enabled
+  if (params.zelle_enabled !== undefined) {
+    updateData.zelle_enabled = Boolean(params.zelle_enabled);
+  }
+
+  // Auto-confirm alternative payments
+  if (params.auto_confirm_manual_payments !== undefined) {
+    updateData.auto_confirm_manual_payments = Boolean(params.auto_confirm_manual_payments);
   }
 
   if (Object.keys(updateData).length === 0) {
