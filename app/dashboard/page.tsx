@@ -6,8 +6,8 @@ export const dynamic = 'force-dynamic';
 
 import { requireAuth } from '@/lib/auth/server';
 import { getBookingsWithFilters } from "@/lib/data/bookings";
-import { format, parseISO } from "date-fns";
-import { formatInTimeZone, toZonedTime } from "date-fns-tz";
+import { format } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 import {
   Anchor,
   Wind,
@@ -22,23 +22,16 @@ import WeatherAlertWidget from "./components/WeatherAlertWidget";
 import { getActionItems } from "@/app/actions/action-items";
 import { BookingStatus, ACTIVE_BOOKING_STATUSES } from "@/lib/db/types";
 import { addHours } from "date-fns";
-import { checkMarineConditions } from "@/lib/weather/noaa";
 import { expireOverdueBookings } from "@/app/actions/bookings";
-import { getBuoyData } from "@/lib/weather/buoy";
-import SunCalc from "suncalc";
-import { weatherCache } from "@/lib/cache";
+import { getCachedWeatherData, type WeatherData } from "@/lib/weather/cache";
 import QuickStatsWidgets from "./components/QuickStatsWidgets";
+import { RefreshWeatherButton } from "./components/RefreshWeatherButton";
 import { OnboardingChecklist } from "./components/OnboardingChecklist";
 import { HelpTooltip } from "@/components/HelpTooltip";
 import { WelcomeBanner } from "./components/WelcomeBanner";
 import { FeatureNudges } from "./components/FeatureNudges";
 
-interface WeatherData {
-  waterTemp: number | null;
-  windSpeed: number | null;
-  windDirection: string | null;
-  sunset: string | null;
-}
+// WeatherData type imported from @/lib/weather/cache
 
 // ═══════════════════════════════════════════════════════════════════════════
 // FUEL GAUGE COMPONENT - Circular instrument gauge
@@ -148,6 +141,17 @@ function FuelGauge({ value, maxValue, label, unit, color }: FuelGaugeProps) {
 
 
 // ═══════════════════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════════════════
+
+function formatLastUpdated(timestamp: number): string {
+  const minutes = Math.floor((Date.now() - timestamp) / 60000);
+  if (minutes < 1) return 'Updated just now';
+  if (minutes === 1) return 'Updated 1 min ago';
+  return `Updated ${minutes} min ago`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // HORIZON WIDGET - Hero visualization with tide wave
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -155,9 +159,11 @@ interface HorizonWidgetProps {
   captainName?: string;
   timezone?: string;
   weatherData: WeatherData;
+  lat?: number | null;
+  lon?: number | null;
 }
 
-function HorizonWidget({ captainName = "Captain", timezone = "America/New_York", weatherData }: HorizonWidgetProps) {
+function HorizonWidget({ captainName = "Captain", timezone = "America/New_York", weatherData, lat, lon }: HorizonWidgetProps) {
   // Calculate NOW cursor position in captain's timezone
   const now = new Date();
   const zonedNow = toZonedTime(now, timezone);
@@ -227,61 +233,72 @@ function HorizonWidget({ captainName = "Captain", timezone = "America/New_York",
       </div>
 
       {/* Weather Data Overlay - Top Right */}
-      <div className="absolute right-3 top-3 sm:right-4 sm:top-4 flex flex-col gap-2 sm:flex-row sm:gap-6">
-        {/* Show weather data if available */}
-        {(weatherData.waterTemp !== null || weatherData.windSpeed !== null || weatherData.sunset) ? (
-          <>
-            {weatherData.waterTemp !== null && (
-              <div className="flex items-center gap-2">
-                <ThermometerSun className="h-4 w-4 text-cyan-400" />
-                <div className="text-right sm:text-left">
-                  <span className="font-mono text-lg font-bold text-cyan-400">
-                    {weatherData.waterTemp}°
-                  </span>
-                  <span className="ml-1 text-[10px] uppercase tracking-wider text-slate-500">
-                    Water
-                  </span>
-                </div>
-              </div>
-            )}
-            {weatherData.windSpeed !== null && (
-              <div className="flex items-center gap-2">
-                <Wind className="h-4 w-4 text-cyan-400" />
-                <div className="text-right sm:text-left">
-                  <span className="font-mono text-lg font-bold text-cyan-400">
-                    {weatherData.windSpeed}
-                  </span>
-                  {weatherData.windDirection && (
-                    <span className="ml-1 font-mono text-sm text-cyan-400">
-                      {weatherData.windDirection}
+      <div className="absolute right-3 top-3 sm:right-4 sm:top-4 flex flex-col items-end gap-1">
+        <div className="flex flex-col gap-2 sm:flex-row sm:gap-6">
+          {/* Show weather data if available */}
+          {(weatherData.waterTemp !== null || weatherData.windSpeed !== null || weatherData.sunset) ? (
+            <>
+              {weatherData.waterTemp !== null && (
+                <div className="flex items-center gap-2">
+                  <ThermometerSun className="h-4 w-4 text-cyan-400" />
+                  <div className="text-right sm:text-left">
+                    <span className="font-mono text-lg font-bold text-cyan-400">
+                      {weatherData.waterTemp}°
                     </span>
-                  )}
-                  <span className="ml-1 text-[10px] uppercase tracking-wider text-slate-500">
-                    kts
-                  </span>
+                    <span className="ml-1 text-[10px] uppercase tracking-wider text-slate-500">
+                      Water
+                    </span>
+                  </div>
                 </div>
-              </div>
-            )}
-            {weatherData.sunset && (
-              <div className="flex items-center gap-2">
-                <Sun className="h-4 w-4 text-amber-400" />
-                <div className="text-right sm:text-left">
-                  <span className="font-mono text-lg font-bold text-amber-400">
-                    {weatherData.sunset}
-                  </span>
-                  <span className="ml-1 text-[10px] uppercase tracking-wider text-slate-500">
-                    Sunset
-                  </span>
+              )}
+              {weatherData.windSpeed !== null && (
+                <div className="flex items-center gap-2">
+                  <Wind className="h-4 w-4 text-cyan-400" />
+                  <div className="text-right sm:text-left">
+                    <span className="font-mono text-lg font-bold text-cyan-400">
+                      {weatherData.windSpeed}
+                    </span>
+                    {weatherData.windDirection && (
+                      <span className="ml-1 font-mono text-sm text-cyan-400">
+                        {weatherData.windDirection}
+                      </span>
+                    )}
+                    <span className="ml-1 text-[10px] uppercase tracking-wider text-slate-500">
+                      kts
+                    </span>
+                  </div>
                 </div>
-              </div>
-            )}
-          </>
-        ) : (
-          /* Show helpful message if no weather data */
-          <div className="rounded-lg bg-white/90 px-4 py-2 backdrop-blur-sm">
-            <p className="text-xs text-slate-400">
-              Set meeting spot in Settings to see weather
-            </p>
+              )}
+              {weatherData.sunset && (
+                <div className="flex items-center gap-2">
+                  <Sun className="h-4 w-4 text-amber-400" />
+                  <div className="text-right sm:text-left">
+                    <span className="font-mono text-lg font-bold text-amber-400">
+                      {weatherData.sunset}
+                    </span>
+                    <span className="ml-1 text-[10px] uppercase tracking-wider text-slate-500">
+                      Sunset
+                    </span>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            /* Show helpful message if no weather data */
+            <div className="rounded-lg bg-white/90 px-4 py-2 backdrop-blur-sm">
+              <p className="text-xs text-slate-400">
+                Set meeting spot in Settings to see weather
+              </p>
+            </div>
+          )}
+        </div>
+        {/* Last Updated + Refresh Weather */}
+        {weatherData.lastUpdated && (
+          <div className="flex items-center gap-1.5">
+            <span className="font-mono text-[10px] text-slate-500">
+              {formatLastUpdated(weatherData.lastUpdated)}
+            </span>
+            {lat && lon && <RefreshWeatherButton lat={lat} lon={lon} />}
           </div>
         )}
       </div>
@@ -398,6 +415,7 @@ export default async function DashboardPage() {
     windSpeed: null,
     windDirection: null,
     sunset: null,
+    lastUpdated: null,
   };
 
   let dockModeEnabled = false;
@@ -415,64 +433,14 @@ export default async function DashboardPage() {
       captainTimezone = (profile.timezone && profile.timezone !== "UTC") ? profile.timezone : "America/New_York";
       dockModeEnabled = profile.dock_mode_enabled || false;
 
-      // Fetch real weather data if coordinates available
+      // Fetch weather data with caching (stale-while-revalidate)
       if (profile.meeting_spot_latitude && profile.meeting_spot_longitude) {
         try {
-          const cacheKey = `weather:${profile.meeting_spot_latitude}:${profile.meeting_spot_longitude}`;
-          
-          // Check cache first (5-minute TTL)
-          let cachedWeather = weatherCache.get<WeatherData>(cacheKey);
-          
-          if (cachedWeather) {
-            // Use cached data
-            weatherData = cachedWeather;
-          } else {
-            // Fetch NOAA marine forecast for wind
-            const conditions = await checkMarineConditions(
-              profile.meeting_spot_latitude,
-              profile.meeting_spot_longitude,
-              new Date()
-            );
-
-            // Parse wind data from forecast
-            if (conditions.forecast?.periods[0]) {
-              const period = conditions.forecast.periods[0];
-              
-              // Parse wind speed (e.g., "10 to 15 mph" -> take max)
-              const windMatch = period.windSpeed.match(/(\d+)\s*(?:to\s*(\d+))?\s*mph/);
-              if (windMatch) {
-                const maxWind = parseInt(windMatch[2] || windMatch[1]);
-                weatherData.windSpeed = Math.round(maxWind * 0.868976); // Convert mph to knots
-                weatherData.windDirection = period.windDirection;
-              }
-            }
-
-            // Fetch NOAA buoy data for water temperature
-            const buoyData = await getBuoyData(
-              profile.meeting_spot_latitude,
-              profile.meeting_spot_longitude
-            );
-            
-            if (buoyData?.waterTemperature) {
-              weatherData.waterTemp = Math.round(buoyData.waterTemperature);
-            }
-
-            // Calculate sunset time using suncalc (no API needed!)
-            const sunTimes = SunCalc.getTimes(
-              new Date(),
-              profile.meeting_spot_latitude,
-              profile.meeting_spot_longitude
-            );
-            
-            weatherData.sunset = formatInTimeZone(
-              sunTimes.sunset,
-              captainTimezone,
-              'h:mm a'
-            );
-
-            // Cache for 5 minutes
-            weatherCache.set(cacheKey, weatherData, 300000);
-          }
+          weatherData = await getCachedWeatherData(
+            profile.meeting_spot_latitude,
+            profile.meeting_spot_longitude,
+            captainTimezone
+          );
         } catch (error) {
           console.error('Failed to fetch weather data:', error);
           // Gracefully degrade - leave weatherData as nulls
@@ -778,6 +746,8 @@ export default async function DashboardPage() {
           captainName={displayName}
           timezone={captainTimezone}
           weatherData={weatherData}
+          lat={captainProfile?.meeting_spot_latitude}
+          lon={captainProfile?.meeting_spot_longitude}
         />
       </section>
 
