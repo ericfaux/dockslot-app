@@ -34,6 +34,36 @@ body {
   }
 }
 
+/* Dashboard main content area offset for fixed sidebar and mobile nav.
+   Uses explicit media queries to avoid Tailwind v4 CSS cascade issues
+   (same approach as the desktop-sidebar fix above). */
+.dashboard-content {
+  padding-top: 4rem;     /* 64px – mobile header clearance */
+  padding-bottom: 5rem;  /* 80px – mobile bottom tab bar clearance */
+  transition: padding-left 200ms ease;
+}
+
+@media (min-width: 768px) {
+  .dashboard-content {
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 4rem;  /* 64px – collapsed tablet sidebar (md:w-16) */
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-content {
+    padding-left: 16rem; /* 256px – expanded desktop sidebar (lg:w-64) */
+  }
+}
+
+/* Shift main content when tablet sidebar expands on hover */
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .desktop-sidebar:hover ~ .dashboard-content {
+    padding-left: 16rem;
+  }
+}
+
 /* Hide scrollbar while maintaining scroll functionality.
    Prevents scrollbar from intercepting click events on tab buttons. */
 .scrollbar-hide {
