@@ -6,24 +6,40 @@ import { Users, TrendingUp } from 'lucide-react';
 export default async function GuestsPage() {
   const { user, supabase } = await requireAuth()
 
-  // Fetch all bookings to build guest analytics
-  const { data: bookings } = await supabase
-    .from('bookings')
-    .select(`
-      id,
-      created_at,
-      scheduled_start,
-      guest_name,
-      guest_email,
-      guest_phone,
-      party_size,
-      total_price_cents,
-      deposit_paid_cents,
-      status,
-      trip_type:trip_types(id, title)
-    `)
-    .eq('captain_id', user.id)
-    .order('created_at', { ascending: false });
+  // Fetch bookings, trip types, and profile in parallel
+  const [bookingsResult, tripTypesResult, profileResult] = await Promise.all([
+    supabase
+      .from('bookings')
+      .select(`
+        id,
+        created_at,
+        scheduled_start,
+        guest_name,
+        guest_email,
+        guest_phone,
+        party_size,
+        total_price_cents,
+        deposit_paid_cents,
+        status,
+        trip_type:trip_types(id, title)
+      `)
+      .eq('captain_id', user.id)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('trip_types')
+      .select('id, title')
+      .eq('owner_id', user.id)
+      .order('created_at', { ascending: true }),
+    supabase
+      .from('profiles')
+      .select('business_name')
+      .eq('id', user.id)
+      .single(),
+  ]);
+
+  const bookings = bookingsResult.data;
+  const tripTypes = (tripTypesResult.data || []).map((t) => ({ id: t.id, title: t.title }));
+  const businessName = profileResult.data?.business_name || 'Our Business';
 
   // Group bookings by guest email
   const guestMap = new Map<string, any>();
@@ -158,7 +174,7 @@ export default async function GuestsPage() {
       </div>
 
       {/* Guests List */}
-      <GuestsList guests={guests} />
+      <GuestsList guests={guests} tripTypes={tripTypes} businessName={businessName} />
     </div>
   );
 }

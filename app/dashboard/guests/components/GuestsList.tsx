@@ -1,25 +1,20 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import {
   Users,
   Mail,
   Phone,
-  Calendar,
   DollarSign,
   Star,
   Award,
   ChevronDown,
   ChevronUp,
-  X,
-  Check,
-  Copy,
-  Loader2,
-  Percent,
 } from 'lucide-react';
 import { EmptyState } from '@/components/EmptyState';
-import { createPromoCode } from '@/app/actions/promo-codes';
+import { SendEmailModal } from './SendEmailModal';
+import { OfferDiscountModal } from './OfferDiscountModal';
 
 interface Guest {
   email: string;
@@ -33,23 +28,25 @@ interface Guest {
   favoriteTrip: string | null;
 }
 
-interface Props {
-  guests: Guest[];
+interface TripTypeOption {
+  id: string;
+  title: string;
 }
 
-export function GuestsList({ guests }: Props) {
+interface Props {
+  guests: Guest[];
+  tripTypes: TripTypeOption[];
+  businessName: string;
+}
+
+export function GuestsList({ guests, tripTypes, businessName }: Props) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'repeat' | 'new'>('all');
   const [expandedGuest, setExpandedGuest] = useState<string | null>(null);
 
-  // Discount modal state
+  // Modal state
+  const [emailGuest, setEmailGuest] = useState<Guest | null>(null);
   const [discountGuest, setDiscountGuest] = useState<Guest | null>(null);
-  const [discountValue, setDiscountValue] = useState('10');
-  const [discountType, setDiscountType] = useState<'percentage' | 'fixed'>('percentage');
-  const [isPending, startTransition] = useTransition();
-  const [discountResult, setDiscountResult] = useState<{ code: string } | null>(null);
-  const [discountError, setDiscountError] = useState<string | null>(null);
-  const [codeCopied, setCodeCopied] = useState(false);
 
   const filteredGuests = guests.filter((guest) => {
     const matchesSearch =
@@ -272,21 +269,20 @@ export function GuestsList({ guests }: Props) {
 
                   {/* Actions */}
                   <div className="mt-4 flex gap-2">
-                    <a
-                      href={`mailto:${guest.email}?subject=Thank you for choosing us!&body=Hi ${guest.name},%0D%0A%0D%0AThank you for being a valued customer!`}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEmailGuest(guest);
+                      }}
                       className="flex items-center gap-2 rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-cyan-700"
                     >
                       <Mail className="h-4 w-4" />
                       Send Email
-                    </a>
+                    </button>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         setDiscountGuest(guest);
-                        setDiscountValue('10');
-                        setDiscountType('percentage');
-                        setDiscountResult(null);
-                        setDiscountError(null);
                       }}
                       className="flex items-center gap-2 rounded-lg border border-slate-300 bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 transition-colors hover:bg-slate-200"
                     >
@@ -301,202 +297,22 @@ export function GuestsList({ guests }: Props) {
         })}
       </div>
 
+      {/* Send Email Modal */}
+      {emailGuest && (
+        <SendEmailModal
+          guest={emailGuest}
+          businessName={businessName}
+          onClose={() => setEmailGuest(null)}
+        />
+      )}
+
       {/* Offer Discount Modal */}
       {discountGuest && (
-        <>
-          <div
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
-            onClick={() => setDiscountGuest(null)}
-          />
-          <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center px-4">
-            <div
-              className="pointer-events-auto w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-2xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-slate-900">
-                  Offer Discount
-                </h3>
-                <button
-                  onClick={() => setDiscountGuest(null)}
-                  className="rounded p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-
-              {discountResult ? (
-                /* Success state */
-                <div className="space-y-4">
-                  <div className="rounded-lg bg-emerald-50 border border-emerald-200 p-4 text-center">
-                    <Check className="mx-auto h-8 w-8 text-emerald-600" />
-                    <p className="mt-2 text-sm font-medium text-emerald-800">
-                      Promo code created
-                    </p>
-                    <div className="mt-3 flex items-center justify-center gap-2">
-                      <code className="rounded bg-white px-3 py-1.5 text-lg font-bold text-slate-900 border border-emerald-200">
-                        {discountResult.code}
-                      </code>
-                      <button
-                        onClick={async () => {
-                          try {
-                            await navigator.clipboard.writeText(discountResult.code);
-                            setCodeCopied(true);
-                            setTimeout(() => setCodeCopied(false), 2000);
-                          } catch { /* silent */ }
-                        }}
-                        className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-                      >
-                        {codeCopied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
-                      </button>
-                    </div>
-                  </div>
-                  <p className="text-sm text-slate-500 text-center">
-                    Share this code with {discountGuest.name} via email
-                  </p>
-                  <div className="flex gap-2">
-                    <a
-                      href={`mailto:${discountGuest.email}?subject=A special discount just for you!&body=Hi ${discountGuest.name},%0D%0A%0D%0AAs a valued guest, here's a special discount code for your next booking:%0D%0A%0D%0ACode: ${discountResult.code}%0D%0A%0D%0AUse it when booking your next trip!`}
-                      className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-cyan-700"
-                    >
-                      <Mail className="h-4 w-4" />
-                      Email Code
-                    </a>
-                    <button
-                      onClick={() => setDiscountGuest(null)}
-                      className="flex-1 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
-                    >
-                      Done
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                /* Form state */
-                <div className="space-y-4">
-                  <p className="text-sm text-slate-500">
-                    Create a promo code for <span className="font-medium text-slate-700">{discountGuest.name}</span>
-                  </p>
-
-                  {discountError && (
-                    <div className="rounded-lg bg-rose-50 border border-rose-200 p-3 text-sm text-rose-700">
-                      {discountError}
-                    </div>
-                  )}
-
-                  {/* Discount type toggle */}
-                  <div>
-                    <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                      Discount type
-                    </label>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setDiscountType('percentage')}
-                        className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                          discountType === 'percentage'
-                            ? 'bg-cyan-600 text-white'
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                        }`}
-                      >
-                        <Percent className="mr-1.5 inline h-3.5 w-3.5" />
-                        Percentage
-                      </button>
-                      <button
-                        onClick={() => setDiscountType('fixed')}
-                        className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                          discountType === 'fixed'
-                            ? 'bg-cyan-600 text-white'
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                        }`}
-                      >
-                        <DollarSign className="mr-1.5 inline h-3.5 w-3.5" />
-                        Fixed Amount
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Discount value */}
-                  <div>
-                    <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                      {discountType === 'percentage' ? 'Percentage off' : 'Amount off ($)'}
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        min="1"
-                        max={discountType === 'percentage' ? 100 : 99999}
-                        value={discountValue}
-                        onChange={(e) => setDiscountValue(e.target.value)}
-                        className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-900 placeholder-slate-400 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
-                        placeholder={discountType === 'percentage' ? '10' : '25'}
-                      />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">
-                        {discountType === 'percentage' ? '%' : 'USD'}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex gap-2 pt-2">
-                    <button
-                      onClick={() => {
-                        const value = parseInt(discountValue, 10);
-                        if (!value || value < 1) {
-                          setDiscountError('Please enter a valid discount value');
-                          return;
-                        }
-                        if (discountType === 'percentage' && value > 100) {
-                          setDiscountError('Percentage cannot exceed 100%');
-                          return;
-                        }
-                        setDiscountError(null);
-
-                        // Generate a unique code for this guest
-                        const guestCode = discountGuest.name
-                          .split(' ')[0]
-                          .toUpperCase()
-                          .replace(/[^A-Z]/g, '')
-                          .slice(0, 6);
-                        const suffix = Math.random().toString(36).substring(2, 6).toUpperCase();
-                        const code = `${guestCode}-${suffix}`;
-
-                        startTransition(async () => {
-                          const discountVal = discountType === 'fixed' ? value * 100 : value;
-                          const result = await createPromoCode({
-                            code,
-                            discount_type: discountType,
-                            discount_value: discountVal,
-                            max_uses: 1,
-                          });
-                          if (result.success) {
-                            setDiscountResult({ code });
-                          } else {
-                            setDiscountError(result.error || 'Failed to create promo code');
-                          }
-                        });
-                      }}
-                      disabled={isPending}
-                      className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-cyan-700 disabled:opacity-50"
-                    >
-                      {isPending ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <DollarSign className="h-4 w-4" />
-                      )}
-                      {isPending ? 'Creating...' : 'Create Code'}
-                    </button>
-                    <button
-                      onClick={() => setDiscountGuest(null)}
-                      disabled={isPending}
-                      className="flex-1 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </>
+        <OfferDiscountModal
+          guest={discountGuest}
+          tripTypes={tripTypes}
+          onClose={() => setDiscountGuest(null)}
+        />
       )}
 
       {/* Empty State */}
