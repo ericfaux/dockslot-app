@@ -30,11 +30,13 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
   const [totalCount, setTotalCount] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
   const prevFiltersRef = useRef<string>('')
+  // Initialize filters from URL params (e.g., ?paymentStatus=pending_verification)
+  const initialPaymentStatus = searchParams.get('paymentStatus')
   const [filters, setFilters] = useState<BookingFilterState>({
     search: '',
     tags: [],
     statuses: [],
-    paymentStatus: [],
+    paymentStatus: initialPaymentStatus ? [initialPaymentStatus] : [],
     dateRange: { start: null, end: null },
   })
 

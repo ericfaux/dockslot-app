@@ -33,6 +33,7 @@ const STATUS_OPTIONS: { value: BookingStatus; label: string; color: string }[] =
 
 const PAYMENT_OPTIONS = [
   { value: 'unpaid', label: 'Unpaid' },
+  { value: 'pending_verification', label: 'Pending Verification' },
   { value: 'deposit_paid', label: 'Deposit Paid' },
   { value: 'fully_paid', label: 'Fully Paid' },
 ]

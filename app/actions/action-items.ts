@@ -99,6 +99,46 @@ export async function getActionItems(): Promise<ActionItem[]> {
     }
   }
 
+  // 1b. PENDING VERIFICATION - Venmo/Zelle payments awaiting confirmation
+  const { data: pendingVerifications } = await supabase
+    .from('bookings')
+    .select('id, guest_name, total_price_cents, payment_method, created_at, trip_type_id')
+    .eq('profile_id', user.id)
+    .eq('payment_status', 'pending_verification')
+    .order('created_at', { ascending: true })
+    .limit(10);
+
+  if (pendingVerifications && pendingVerifications.length > 0) {
+    // Add summary item if multiple
+    if (pendingVerifications.length > 1) {
+      items.push({
+        id: 'verify-summary',
+        type: 'payment',
+        priority: 'high',
+        title: `${pendingVerifications.length} payments awaiting verification`,
+        description: 'Venmo/Zelle payments need confirmation',
+        actionUrl: '/dashboard/bookings?paymentStatus=pending_verification',
+        actionLabel: 'View All',
+      });
+    }
+
+    for (const booking of pendingVerifications) {
+      const method = booking.payment_method === 'venmo' ? 'Venmo' : booking.payment_method === 'zelle' ? 'Zelle' : 'Payment';
+      const hoursAgo = Math.ceil((Date.now() - new Date(booking.created_at).getTime()) / (1000 * 60 * 60));
+
+      items.push({
+        id: `verify-${booking.id}`,
+        type: 'payment',
+        priority: hoursAgo >= 24 ? 'high' : 'medium',
+        title: `Verify ${method} payment - ${booking.guest_name}`,
+        description: `$${(booking.total_price_cents / 100).toFixed(2)} • ${hoursAgo < 24 ? `${hoursAgo}h ago` : `${Math.floor(hoursAgo / 24)}d ago`}`,
+        actionUrl: `/dashboard/bookings?detail=${booking.id}`,
+        actionLabel: 'Verify Payment',
+        bookingId: booking.id,
+      });
+    }
+  }
+
   // 2. TRIP REPORT ACTION ITEMS
   // Find completed trips without reports (within last 7 days)
   const weekAgo = addDays(new Date(), -7).toISOString();

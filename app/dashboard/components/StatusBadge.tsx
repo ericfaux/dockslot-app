@@ -144,17 +144,25 @@ export default function StatusBadge({
 
 // Payment status badge variant
 interface PaymentBadgeProps {
-  status: 'unpaid' | 'deposit_paid' | 'fully_paid' | 'partially_refunded' | 'fully_refunded'
+  status: 'unpaid' | 'deposit_paid' | 'fully_paid' | 'partially_refunded' | 'fully_refunded' | 'pending_verification'
   size?: 'sm' | 'md' | 'lg'
 }
 
-const PAYMENT_CONFIG = {
+const PAYMENT_CONFIG: Record<string, { label: string; colors: { bg: string; text: string; border: string } }> = {
   unpaid: {
     label: 'Unpaid',
     colors: {
       bg: 'bg-slate-500/10',
       text: 'text-slate-400',
       border: 'border-slate-500/30',
+    },
+  },
+  pending_verification: {
+    label: 'Pending Verification',
+    colors: {
+      bg: 'bg-yellow-50',
+      text: 'text-yellow-700',
+      border: 'border-yellow-500/30',
     },
   },
   deposit_paid: {
