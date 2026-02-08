@@ -3,14 +3,14 @@ ALTER TABLE profiles ADD COLUMN IF NOT EXISTS venmo_username TEXT;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS zelle_contact TEXT;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS venmo_enabled BOOLEAN DEFAULT false;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS zelle_enabled BOOLEAN DEFAULT false;
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS auto_confirm_alt_payments BOOLEAN DEFAULT true;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS auto_confirm_manual_payments BOOLEAN DEFAULT true;
 
 -- Add payment_method column to bookings
 ALTER TABLE bookings ADD COLUMN IF NOT EXISTS payment_method TEXT DEFAULT 'stripe';
 
 -- Add payment_reminder_count to bookings for auto-reminder tracking
 ALTER TABLE bookings ADD COLUMN IF NOT EXISTS payment_reminder_count INTEGER DEFAULT 0;
-ALTER TABLE bookings ADD COLUMN IF NOT EXISTS last_payment_reminder_at TIMESTAMPTZ;
+ALTER TABLE bookings ADD COLUMN IF NOT EXISTS payment_reminder_last_sent TIMESTAMPTZ;
 
 -- Add 'pending_verification' to payment_status if it's an enum
 -- If payment_status is a text field, this is not needed

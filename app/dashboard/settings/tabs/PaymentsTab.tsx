@@ -30,7 +30,7 @@ export function PaymentsTab(props: PaymentsTabProps) {
   const [venmoUsername, setVenmoUsername] = useState(props.profile?.venmo_username ?? '');
   const [zelleEnabled, setZelleEnabled] = useState(props.profile?.zelle_enabled ?? false);
   const [zelleContact, setZelleContact] = useState(props.profile?.zelle_contact ?? '');
-  const [autoConfirm, setAutoConfirm] = useState(props.profile?.auto_confirm_alt_payments ?? true);
+  const [autoConfirm, setAutoConfirm] = useState(props.profile?.auto_confirm_manual_payments ?? true);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -44,7 +44,7 @@ export function PaymentsTab(props: PaymentsTabProps) {
         venmo_username: venmoUsername || null,
         zelle_enabled: zelleEnabled,
         zelle_contact: zelleContact || null,
-        auto_confirm_alt_payments: autoConfirm,
+        auto_confirm_manual_payments: autoConfirm,
       });
 
       if (result.success) {

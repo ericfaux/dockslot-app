@@ -48,11 +48,11 @@ export async function POST(request: NextRequest) {
     // Get captain profile for auto-confirm setting
     const { data: profile } = await supabase
       .from('profiles')
-      .select('auto_confirm_alt_payments, business_name, full_name, email, venmo_username, zelle_contact')
+      .select('auto_confirm_manual_payments, business_name, full_name, email, venmo_username, zelle_contact')
       .eq('id', booking.captain_id)
       .single();
 
-    const autoConfirm = profile?.auto_confirm_alt_payments ?? true;
+    const autoConfirm = profile?.auto_confirm_manual_payments ?? true;
     const shortId = `DK-${bookingId.slice(0, 4).toUpperCase()}`;
 
     // Determine booking status based on captain's auto-confirm preference

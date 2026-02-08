@@ -87,7 +87,7 @@ export interface Profile {
   zelle_contact: string | null;
   venmo_enabled: boolean;
   zelle_enabled: boolean;
-  auto_confirm_alt_payments: boolean;
+  auto_confirm_manual_payments: boolean;
   updated_at: string;
 }
 
@@ -137,7 +137,7 @@ export interface Booking {
   captain_instructions: string | null;
   payment_method: PaymentMethod;
   payment_reminder_count: number;
-  last_payment_reminder_at: string | null;
+  payment_reminder_last_sent: string | null;
   updated_at: string;
 }
 

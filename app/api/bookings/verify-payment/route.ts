@@ -184,7 +184,7 @@ export async function POST(request: NextRequest) {
         .from('bookings')
         .update({
           payment_reminder_count: (booking.payment_reminder_count || 0) + 1,
-          last_payment_reminder_at: new Date().toISOString(),
+          payment_reminder_last_sent: new Date().toISOString(),
         })
         .eq('id', bookingId);
 

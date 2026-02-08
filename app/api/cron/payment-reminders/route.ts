@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     .from('bookings')
     .select(`
       id, guest_name, guest_email, total_price_cents, payment_method,
-      created_at, scheduled_start, payment_reminder_count, last_payment_reminder_at,
+      created_at, scheduled_start, payment_reminder_count, payment_reminder_last_sent,
       captain_id,
       trip_type:trip_types(title)
     `)
@@ -46,8 +46,8 @@ export async function GET(request: NextRequest) {
 
   for (const booking of bookings) {
     // Don't send if last reminder was less than 24h ago
-    if (booking.last_payment_reminder_at) {
-      const lastReminder = new Date(booking.last_payment_reminder_at).getTime();
+    if (booking.payment_reminder_last_sent) {
+      const lastReminder = new Date(booking.payment_reminder_last_sent).getTime();
       if (Date.now() - lastReminder < 24 * 60 * 60 * 1000) {
         continue;
       }
@@ -122,7 +122,7 @@ export async function GET(request: NextRequest) {
         .from('bookings')
         .update({
           payment_reminder_count: (booking.payment_reminder_count || 0) + 1,
-          last_payment_reminder_at: new Date().toISOString(),
+          payment_reminder_last_sent: new Date().toISOString(),
         })
         .eq('id', booking.id);
 

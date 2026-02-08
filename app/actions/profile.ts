@@ -52,7 +52,7 @@ export interface UpdateProfileParams {
   zelle_contact?: string | null;
   venmo_enabled?: boolean;
   zelle_enabled?: boolean;
-  auto_confirm_alt_payments?: boolean;
+  auto_confirm_manual_payments?: boolean;
 }
 
 // ============================================================================
@@ -344,8 +344,8 @@ export async function updateProfile(
   }
 
   // Auto-confirm alternative payments
-  if (params.auto_confirm_alt_payments !== undefined) {
-    updateData.auto_confirm_alt_payments = Boolean(params.auto_confirm_alt_payments);
+  if (params.auto_confirm_manual_payments !== undefined) {
+    updateData.auto_confirm_manual_payments = Boolean(params.auto_confirm_manual_payments);
   }
 
   if (Object.keys(updateData).length === 0) {
