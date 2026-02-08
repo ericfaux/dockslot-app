@@ -107,7 +107,7 @@ export default async function SelectTripPage({ params }: Props) {
 
         {/* Captain Info Card */}
         <CaptainInfoCard
-          name={profile.full_name || 'Captain'}
+          name={profile.full_name || profile.business_name || 'Captain'}
           businessName={profile.business_name}
           meetingSpotName={profile.meeting_spot_name}
           meetingSpotAddress={profile.meeting_spot_address}
