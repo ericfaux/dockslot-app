@@ -203,6 +203,7 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
       <div className="space-y-3">
         <div className="flex items-center justify-end">
           <FilterPresetsMenu
+            captainId={captainId}
             currentFilters={filters}
             onApplyPreset={handleFilterChange}
           />
