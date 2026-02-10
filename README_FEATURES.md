@@ -259,7 +259,7 @@ Complete guide to all features built in the 2026-01-31 session.
 
 ## 🗄️ Database Migrations Required
 
-**See:** `MIGRATIONS_NEEDED.md` for complete instructions
+**See:** `docs/setup/MIGRATIONS_NEEDED.md` for complete instructions
 
 **Quick Apply:**
 ```bash
@@ -292,9 +292,9 @@ cat supabase/migrations/20260131_*.sql | psql $DATABASE_URL
 
 ## 📝 Documentation
 
-**Session Summary:** `SESSION_2026-01-31.md`  
-**Progress Log:** `PROGRESS_LOG.md`  
-**Migration Guide:** `MIGRATIONS_NEEDED.md`  
+**Session Summary:** `docs/qa/SESSION_2026-01-31.md`
+**Progress Log:** `docs/PROGRESS_LOG.md`
+**Migration Guide:** `docs/setup/MIGRATIONS_NEEDED.md`
 **This File:** `README_FEATURES.md`
 
 ---
