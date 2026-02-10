@@ -333,8 +333,7 @@ export async function getGuestAnalytics(): Promise<GuestAnalyticsData> {
   const { data: bookings } = await supabase
     .from('bookings')
     .select('id, guest_name, guest_email, scheduled_start, status, total_price_cents, deposit_paid_cents, payment_status, created_at')
-    .eq('captain_id', user.id)
-    .not('status', 'eq', 'cancelled');
+    .eq('captain_id', user.id);
 
   const allBookings = bookings || [];
 
@@ -348,13 +347,10 @@ export async function getGuestAnalytics(): Promise<GuestAnalyticsData> {
 
   const totalUniqueGuests = guestMap.size;
 
-  // Repeat guests (2+ bookings that are confirmed/completed)
+  // Repeat guests (2+ bookings regardless of status)
   let repeatGuestCount = 0;
   guestMap.forEach(guestBookings => {
-    const validBookings = guestBookings.filter(b =>
-      ['confirmed', 'completed', 'rescheduled'].includes(b.status)
-    );
-    if (validBookings.length >= 2) repeatGuestCount++;
+    if (guestBookings.length >= 2) repeatGuestCount++;
   });
   const repeatGuestRate = totalUniqueGuests > 0
     ? (repeatGuestCount / totalUniqueGuests) * 100
