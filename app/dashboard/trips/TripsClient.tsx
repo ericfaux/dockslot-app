@@ -51,6 +51,7 @@ export function TripsClient({ initialTripTypes }: TripsClientProps) {
     price_total: number;
     deposit_amount: number;
     description?: string;
+    departure_times?: string[] | null;
   }) => {
     setError(null);
 

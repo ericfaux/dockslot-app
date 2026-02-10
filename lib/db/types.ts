@@ -108,6 +108,7 @@ export interface TripType {
   price_total: number;
   deposit_amount: number;
   description: string | null;
+  departure_times: string[] | null;
   created_at: string;
 }
 

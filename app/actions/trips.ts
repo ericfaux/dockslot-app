@@ -32,6 +32,7 @@ export interface CreateTripTypeParams {
   price_total: number;
   deposit_amount: number;
   description?: string;
+  departure_times?: string[] | null;
 }
 
 export interface UpdateTripTypeParams {
@@ -40,6 +41,7 @@ export interface UpdateTripTypeParams {
   price_total?: number;
   deposit_amount?: number;
   description?: string | null;
+  departure_times?: string[] | null;
 }
 
 // ============================================================================
@@ -126,6 +128,9 @@ export async function createTripType(
   }
 
   const description = sanitizeText(params.description, 1000);
+  const departureTimes = Array.isArray(params.departure_times) && params.departure_times.length > 0
+    ? params.departure_times
+    : null;
 
   // Create the trip type
   const { data, error } = await supabase
@@ -137,6 +142,7 @@ export async function createTripType(
       price_total: params.price_total,
       deposit_amount: params.deposit_amount,
       description,
+      departure_times: departureTimes,
     })
     .select()
     .single();
@@ -225,6 +231,12 @@ export async function updateTripType(
 
   if (params.description !== undefined) {
     updateData.description = sanitizeText(params.description, 1000);
+  }
+
+  if (params.departure_times !== undefined) {
+    updateData.departure_times = Array.isArray(params.departure_times) && params.departure_times.length > 0
+      ? params.departure_times
+      : null;
   }
 
   if (Object.keys(updateData).length === 0) {

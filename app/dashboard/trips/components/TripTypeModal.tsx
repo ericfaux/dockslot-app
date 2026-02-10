@@ -1,8 +1,26 @@
 'use client';
 
 import { useState, useTransition, useRef, useCallback } from 'react';
-import { X, Loader2 } from 'lucide-react';
+import { X, Loader2, Plus, Clock } from 'lucide-react';
 import { TripType } from '@/lib/db/types';
+
+// Generate time options in 30-minute increments for the dropdown
+function generateTimeOptions(): { value: string; label: string }[] {
+  const options: { value: string; label: string }[] = [];
+  for (let h = 0; h < 24; h++) {
+    for (let m = 0; m < 60; m += 30) {
+      const period = h >= 12 ? 'PM' : 'AM';
+      const displayH = h % 12 || 12;
+      const label = m === 0
+        ? `${displayH}:00 ${period}`
+        : `${displayH}:${String(m).padStart(2, '0')} ${period}`;
+      options.push({ value: label, label });
+    }
+  }
+  return options;
+}
+
+const TIME_OPTIONS = generateTimeOptions();
 
 interface TripTypeFormProps {
   tripType: TripType | null;
@@ -12,6 +30,7 @@ interface TripTypeFormProps {
     price_total: number;
     deposit_amount: number;
     description?: string;
+    departure_times?: string[] | null;
   }) => Promise<boolean>;
   onClose: () => void;
   error?: string | null;
@@ -34,6 +53,23 @@ function TripTypeForm({ tripType, onSubmit, onClose, error }: TripTypeFormProps)
     tripType?.deposit_amount?.toString() ?? ''
   );
   const [description, setDescription] = useState(tripType?.description ?? '');
+  const [departureTimes, setDepartureTimes] = useState<string[]>(
+    tripType?.departure_times ?? []
+  );
+  const [newDepartureTime, setNewDepartureTime] = useState('');
+
+  const addDepartureTime = () => {
+    if (!newDepartureTime) return;
+    if (departureTimes.includes(newDepartureTime)) return;
+    setDepartureTimes(prev => [...prev, newDepartureTime].sort((a, b) => {
+      return TIME_OPTIONS.findIndex(o => o.value === a) - TIME_OPTIONS.findIndex(o => o.value === b);
+    }));
+    setNewDepartureTime('');
+  };
+
+  const removeDepartureTime = (time: string) => {
+    setDepartureTimes(prev => prev.filter(t => t !== time));
+  };
 
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
@@ -75,9 +111,10 @@ function TripTypeForm({ tripType, onSubmit, onClose, error }: TripTypeFormProps)
         price_total: total,
         deposit_amount: deposit,
         description: description.trim() || undefined,
+        departure_times: departureTimes.length > 0 ? departureTimes : null,
       });
     });
-  }, [title, durationHours, priceTotal, depositAmount, description, onSubmit]);
+  }, [title, durationHours, priceTotal, depositAmount, description, departureTimes, onSubmit]);
 
   const displayError = formError || error;
 
@@ -192,6 +229,66 @@ function TripTypeForm({ tripType, onSubmit, onClose, error }: TripTypeFormProps)
             disabled={isPending}
           />
         </div>
+
+        {/* Departure Times */}
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-slate-600">
+            Departure Times <span className="text-slate-500">(optional)</span>
+          </label>
+          <p className="mb-2 text-xs text-slate-400">
+            Set specific departure times. If none are set, slots are generated every 30 minutes.
+          </p>
+
+          {/* Existing departure times */}
+          {departureTimes.length > 0 && (
+            <div className="mb-2 flex flex-wrap gap-2">
+              {departureTimes.map((time) => (
+                <span
+                  key={time}
+                  className="inline-flex items-center gap-1 rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-sm text-cyan-700"
+                >
+                  <Clock className="h-3 w-3" />
+                  {time}
+                  <button
+                    type="button"
+                    onClick={() => removeDepartureTime(time)}
+                    disabled={isPending}
+                    className="ml-0.5 rounded-full p-0.5 text-cyan-400 hover:bg-cyan-100 hover:text-cyan-700 disabled:opacity-50"
+                    aria-label={`Remove ${time}`}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Add departure time */}
+          <div className="flex gap-2">
+            <select
+              value={newDepartureTime}
+              onChange={(e) => setNewDepartureTime(e.target.value)}
+              disabled={isPending}
+              className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            >
+              <option value="">Select a time...</option>
+              {TIME_OPTIONS.filter(opt => !departureTimes.includes(opt.value)).map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={addDepartureTime}
+              disabled={isPending || !newDepartureTime}
+              className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Plus className="h-4 w-4" />
+              Add
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Modal Footer */}
@@ -237,6 +334,7 @@ interface TripTypeModalProps {
     price_total: number;
     deposit_amount: number;
     description?: string;
+    departure_times?: string[] | null;
   }) => Promise<boolean>;
   tripType: TripType | null;
   error?: string | null;
