@@ -336,7 +336,7 @@
 - Booking confirmation email template
 - Weather hold notification email template
 - Balance payment request email template
-- Complete setup documentation (EMAIL_SETUP.md)
+- Complete setup documentation (setup/EMAIL_SETUP.md)
 
 #### Priority 2: Balance Payment Flow ✅
 - **Commit:** e6b1ba7
@@ -361,7 +361,7 @@
 - Captain email alerts (dangerous/caution/safe)
 - Severity classification system
 - Vercel cron configuration
-- Complete documentation (WEATHER_MONITORING.md)
+- Complete documentation (setup/WEATHER_MONITORING.md)
 
 #### Tier 3: Trip Reports System ✅
 - **Commit:** 62273a3
@@ -399,9 +399,9 @@
 2. `20260131_calendar_token.sql` - Calendar tokens for iCal export
 
 ### Documentation Created
-- `EMAIL_SETUP.md` - Resend email configuration
-- `WEATHER_MONITORING.md` - Automated weather check setup
-- `TODO_SETUP.md` - Tracks features needing external accounts
+- `setup/EMAIL_SETUP.md` - Resend email configuration
+- `setup/WEATHER_MONITORING.md` - Automated weather check setup
+- `setup/TODO_SETUP.md` - Tracks features needing external accounts
 
 ### Navigation Updates
 - Added "Analytics" to sidebar
@@ -415,19 +415,19 @@
 - **Setup:** Create Resend account, add RESEND_API_KEY to Vercel
 - **Free tier:** 3,000 emails/month
 - **Time:** ~5 minutes
-- **See:** EMAIL_SETUP.md
+- **See:** setup/EMAIL_SETUP.md
 
 ### Weather Monitoring
 - **Status:** Code complete, cron configured
 - **Setup:** Already deployed with Vercel cron
 - **Runs:** Daily at 8 AM UTC
 - **Optional:** Add CRON_SECRET for security
-- **See:** WEATHER_MONITORING.md
+- **See:** setup/WEATHER_MONITORING.md
 
 ### Stripe Payments
 - **Status:** Code complete, awaiting keys
 - **Setup:** Add Stripe API keys to Vercel env
-- **See:** STRIPE_SETUP.md
+- **See:** setup/STRIPE_SETUP.md
 
 ## What's Working (No External Deps)
 
@@ -1235,7 +1235,7 @@ Reviewed Phase 1 from HEARTBEAT.md roadmap. **Findings:**
   - Character countdown to next segment
   - Message preview truncation
 - Documentation:
-  - SMS_SETUP.md with complete Twilio setup guide
+  - setup/SMS_SETUP.md with complete Twilio setup guide
   - Pricing information (~$2-5/month typical usage)
   - Troubleshooting section
   - Security notes
@@ -1243,7 +1243,7 @@ Reviewed Phase 1 from HEARTBEAT.md roadmap. **Findings:**
 **Code Added:**
 - `/lib/sms/twilio.ts` - Twilio SMS library (95 lines)
 - `/app/api/bookings/[id]/send-sms/route.ts` - SMS API endpoint (120 lines)
-- `SMS_SETUP.md` - Setup documentation (120 lines)
+- `setup/SMS_SETUP.md` - Setup documentation (120 lines)
 - Updated `/app/dashboard/components/SendMessageModal.tsx` - Email/SMS toggle (~80 lines modified)
 
 **Use Cases:**
@@ -1574,7 +1574,7 @@ Reviewed Phase 1 from HEARTBEAT.md roadmap. **Findings:**
   - Added to `vercel.json` cron schedule
   - Optional CRON_SECRET for security
   - Uses NEXT_PUBLIC_APP_URL for review links
-- Documentation: `REVIEW_REQUESTS_SETUP.md`
+- Documentation: `setup/REVIEW_REQUESTS_SETUP.md`
   - Setup instructions
   - Timing and filtering logic
   - Manual trigger instructions
@@ -1584,7 +1584,7 @@ Reviewed Phase 1 from HEARTBEAT.md roadmap. **Findings:**
 **Code Added:**
 - `/lib/email/review-requests.ts` - Email template (125 lines)
 - `/app/api/cron/send-review-requests/route.ts` - Cron job (160 lines)
-- `REVIEW_REQUESTS_SETUP.md` - Documentation (180 lines)
+- `setup/REVIEW_REQUESTS_SETUP.md` - Documentation (180 lines)
 - Updated `vercel.json` - Added cron schedule
 
 **Email Content:**
