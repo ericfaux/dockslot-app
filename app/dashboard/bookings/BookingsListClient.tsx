@@ -254,7 +254,7 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
             description="Your first booking is a big deal — let's make it happen! Share your booking link with potential guests or create a booking manually."
             actions={[
               { label: 'Share Booking Link', href: '/dashboard/settings?tab=booking-page' },
-              { label: 'Create Booking', href: '/dashboard/schedule', variant: 'secondary' },
+              { label: 'Create Booking', href: '/dashboard/bookings/new', variant: 'secondary' },
             ]}
           />
         )
