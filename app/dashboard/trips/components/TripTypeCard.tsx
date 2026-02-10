@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Clock, DollarSign, Pencil, Archive, RotateCcw, AlertTriangle } from 'lucide-react';
+import { Clock, DollarSign, Pencil, Archive, RotateCcw, AlertTriangle, Navigation } from 'lucide-react';
 import { TripType } from '@/lib/db/types';
 import { formatDollars } from '@/lib/utils/format';
 
@@ -139,6 +139,28 @@ export function TripTypeCard({ tripType, onEdit, onDelete, onRestore, isDeleting
             </div>
           </div>
         </div>
+
+        {/* Departure Times */}
+        {tripType.departure_times && tripType.departure_times.length > 0 && (
+          <div className="flex items-start gap-3">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white">
+              <Navigation className="h-4 w-4 text-blue-600" />
+            </div>
+            <div>
+              <div className="text-sm text-slate-500">Departures</div>
+              <div className="mt-0.5 flex flex-wrap gap-1">
+                {tripType.departure_times.map((time) => (
+                  <span
+                    key={time}
+                    className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700"
+                  >
+                    {time}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Archive Confirmation Overlay */}

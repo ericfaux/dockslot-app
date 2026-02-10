@@ -69,6 +69,24 @@ export interface DateRangeAvailabilityResult {
 }
 
 // ============================================================================
+// Helpers
+// ============================================================================
+
+/**
+ * Parse a departure time string like "6:00 AM" or "2:30 PM" into hours and minutes.
+ */
+function parseDepartureTimeStr(timeStr: string): { hours: number; minutes: number } | null {
+  const match = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (!match) return null;
+  let hours = parseInt(match[1], 10);
+  const minutes = parseInt(match[2], 10);
+  const period = match[3].toUpperCase();
+  if (period === 'AM' && hours === 12) hours = 0;
+  if (period === 'PM' && hours !== 12) hours += 12;
+  return { hours, minutes };
+}
+
+// ============================================================================
 // Main Functions
 // ============================================================================
 
@@ -127,10 +145,10 @@ export async function getAvailableSlots(
     return { success: false, error: 'Captain is not accepting bookings', code: 'HIBERNATING' };
   }
 
-  // Get trip type for duration
+  // Get trip type for duration and departure times
   const { data: tripType, error: tripError } = await supabase
     .from('trip_types')
-    .select('duration_hours')
+    .select('duration_hours, departure_times')
     .eq('id', tripTypeId)
     .eq('owner_id', captainId)
     .single();
@@ -254,6 +272,9 @@ export async function getAvailableSlots(
   const now = new Date();
   const nowWithBuffer = addMinutes(now, bufferMinutes);
 
+  // Check if trip type has specific departure times configured
+  const hasDepartureTimes = Array.isArray(tripType.departure_times) && tripType.departure_times.length > 0;
+
   // Generate available slots from availability windows
   const slots: AvailableSlot[] = [];
 
@@ -263,27 +284,58 @@ export async function getAvailableSlots(
 
     if (!startParsed || !endParsed) continue;
 
-    // Generate slots at 30-minute intervals
-    let currentHour = startParsed.hours;
-    let currentMinute = startParsed.minutes;
+    // Build the list of candidate start times (as {hours, minutes})
+    const candidates: { hours: number; minutes: number }[] = [];
 
-    while (true) {
-      const slotStartTime = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`;
+    if (hasDepartureTimes) {
+      // Use specific departure times, filtered to fit within the window
+      for (const dt of tripType.departure_times!) {
+        const parsed = parseDepartureTimeStr(dt);
+        if (!parsed) continue;
 
-      // Calculate end time based on trip duration
-      const slotEndMinutes = currentMinute;
-      const slotEndHour = currentHour + tripDurationHours;
-      const slotEndTime = `${String(slotEndHour).padStart(2, '0')}:${String(slotEndMinutes).padStart(2, '0')}`;
+        const startInMinutes = parsed.hours * 60 + parsed.minutes;
+        const endInMinutes = (parsed.hours + tripDurationHours) * 60 + parsed.minutes;
+        const windowStartMinutes = startParsed.hours * 60 + startParsed.minutes;
+        const windowEndMinutes = endParsed.hours * 60 + endParsed.minutes;
 
-      // Check if slot ends within the availability window
-      if (
-        slotEndHour > endParsed.hours ||
-        (slotEndHour === endParsed.hours && slotEndMinutes > endParsed.minutes)
-      ) {
-        break;
+        // Only include if departure starts at/after window start and trip end fits within window
+        if (startInMinutes >= windowStartMinutes && endInMinutes <= windowEndMinutes) {
+          candidates.push(parsed);
+        }
       }
+    } else {
+      // Fall back to 30-minute intervals
+      let currentHour = startParsed.hours;
+      let currentMinute = startParsed.minutes;
 
-      // Create ISO timestamps for the slot
+      while (true) {
+        const slotEndHour = currentHour + tripDurationHours;
+        const slotEndMinute = currentMinute;
+
+        if (
+          slotEndHour > endParsed.hours ||
+          (slotEndHour === endParsed.hours && slotEndMinute > endParsed.minutes)
+        ) {
+          break;
+        }
+
+        candidates.push({ hours: currentHour, minutes: currentMinute });
+
+        currentMinute += 30;
+        if (currentMinute >= 60) {
+          currentMinute = 0;
+          currentHour += 1;
+        }
+        if (currentHour > 23) break;
+      }
+    }
+
+    // Evaluate each candidate
+    for (const candidate of candidates) {
+      const slotStartTime = `${String(candidate.hours).padStart(2, '0')}:${String(candidate.minutes).padStart(2, '0')}`;
+      const slotEndHour = candidate.hours + tripDurationHours;
+      const slotEndTime = `${String(slotEndHour).padStart(2, '0')}:${String(candidate.minutes).padStart(2, '0')}`;
+
       const slotStartTs = createTimestamp(dateStr, slotStartTime, timezone);
       const slotEndTs = createTimestamp(dateStr, slotEndTime, timezone);
 
@@ -323,16 +375,6 @@ export async function getAvailableSlots(
           });
         }
       }
-
-      // Move to next slot (30-minute intervals)
-      currentMinute += 30;
-      if (currentMinute >= 60) {
-        currentMinute = 0;
-        currentHour += 1;
-      }
-
-      // Safety check to prevent infinite loop
-      if (currentHour > 23) break;
     }
   }
 

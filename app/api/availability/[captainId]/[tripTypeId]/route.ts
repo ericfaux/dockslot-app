@@ -4,19 +4,35 @@
 
 import { createSupabaseServiceClient } from "@/utils/supabase/service";
 import { NextRequest, NextResponse } from "next/server";
-import { 
-  format, 
-  parseISO, 
-  addDays, 
-  startOfMonth, 
-  endOfMonth, 
+import {
+  format,
+  parseISO,
+  addDays,
+  startOfMonth,
+  endOfMonth,
   eachDayOfInterval,
   addHours,
   parse,
   isBefore,
   isAfter,
   startOfDay,
+  setHours,
+  setMinutes,
 } from "date-fns";
+
+/**
+ * Parse a departure time string like "6:00 AM" or "2:30 PM" into hours and minutes.
+ */
+function parseDepartureTime(timeStr: string): { hours: number; minutes: number } | null {
+  const match = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (!match) return null;
+  let hours = parseInt(match[1], 10);
+  const minutes = parseInt(match[2], 10);
+  const period = match[3].toUpperCase();
+  if (period === 'AM' && hours === 12) hours = 0;
+  if (period === 'PM' && hours !== 12) hours += 12;
+  return { hours, minutes };
+}
 
 interface TimeSlot {
   start: string; // HH:MM
@@ -50,10 +66,10 @@ export async function GET(
   try {
     const supabase = createSupabaseServiceClient();
 
-    // Fetch trip type to get duration (only if active)
+    // Fetch trip type to get duration and departure times (only if active)
     const { data: tripType, error: tripError } = await supabase
       .from('trip_types')
-      .select('duration_hours, owner_id')
+      .select('duration_hours, owner_id, departure_times')
       .eq('id', tripTypeId)
       .eq('is_active', true)
       .single();
@@ -164,14 +180,42 @@ export async function GET(
       // Generate time slots from availability windows
       const slots: TimeSlot[] = [];
 
+      // Check if trip type has specific departure times configured
+      const hasDepartureTimes = Array.isArray(tripType.departure_times) && tripType.departure_times.length > 0;
+
       for (const window of windowsForDay) {
         const windowStart = parse(window.start_time, 'HH:mm:ss', day);
         const windowEnd = parse(window.end_time, 'HH:mm:ss', day);
 
-        // Generate slots at 30-minute intervals
-        let slotStart = windowStart;
+        // Build the list of candidate start times
+        const candidateStarts: Date[] = [];
 
-        while (isBefore(addHours(slotStart, tripType.duration_hours), windowEnd)) {
+        if (hasDepartureTimes) {
+          // Use specific departure times
+          for (const dt of tripType.departure_times!) {
+            const parsed = parseDepartureTime(dt);
+            if (!parsed) continue;
+            const candidate = setMinutes(setHours(day, parsed.hours), parsed.minutes);
+            // Only include if it falls within this availability window
+            const tripEnd = addHours(candidate, tripType.duration_hours);
+            if (
+              (isAfter(candidate, windowStart) || candidate.getTime() === windowStart.getTime()) &&
+              (isBefore(tripEnd, windowEnd) || tripEnd.getTime() === windowEnd.getTime())
+            ) {
+              candidateStarts.push(candidate);
+            }
+          }
+        } else {
+          // Fall back to 30-minute intervals
+          let slotStart = windowStart;
+          while (isBefore(addHours(slotStart, tripType.duration_hours), windowEnd)) {
+            candidateStarts.push(slotStart);
+            slotStart = addHours(slotStart, 0.5);
+          }
+        }
+
+        // Evaluate each candidate start time
+        for (const slotStart of candidateStarts) {
           const slotEnd = addHours(slotStart, tripType.duration_hours);
 
           // Count overlapping bookings for this slot (for capacity tracking)
@@ -200,9 +244,6 @@ export async function GET(
             total_capacity: maxVesselCapacity,
             remaining_capacity: isWithinBuffer ? 0 : displayRemaining,
           });
-
-          // Move to next slot (30-minute intervals)
-          slotStart = addHours(slotStart, 0.5);
         }
       }
 
