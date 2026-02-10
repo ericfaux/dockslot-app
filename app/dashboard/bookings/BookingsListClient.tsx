@@ -12,7 +12,7 @@ import { SwipeableBookingRow } from './SwipeableBookingRow'
 import { BookingDetailDrawer } from './BookingDetailDrawer'
 import { EmptyState } from '@/components/EmptyState'
 
-const PAGE_SIZE = 20
+const PAGE_SIZE = 25
 
 interface BookingsListClientProps {
   captainId: string
