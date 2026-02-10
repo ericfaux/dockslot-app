@@ -71,11 +71,12 @@ export default async function CaptainProfilePage({ params }: CaptainProfileProps
     .select('*')
     .eq('owner_id', captainId);
 
-  // Fetch trip types
+  // Fetch trip types (only active)
   const { data: tripTypes } = await supabase
     .from('trip_types')
     .select('*')
     .eq('owner_id', captainId)
+    .eq('is_active', true)
     .order('price_total', { ascending: true });
 
   const primaryVessel = vessels && vessels.length > 0 ? vessels[0] : null;

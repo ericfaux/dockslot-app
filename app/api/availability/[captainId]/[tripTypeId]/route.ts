@@ -50,11 +50,12 @@ export async function GET(
   try {
     const supabase = createSupabaseServiceClient();
 
-    // Fetch trip type to get duration
+    // Fetch trip type to get duration (only if active)
     const { data: tripType, error: tripError } = await supabase
       .from('trip_types')
       .select('duration_hours, owner_id')
       .eq('id', tripTypeId)
+      .eq('is_active', true)
       .single();
 
     if (tripError || !tripType) {

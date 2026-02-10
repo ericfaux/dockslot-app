@@ -2,11 +2,11 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Loader2 } from 'lucide-react';
+import { Plus, Loader2, Archive, ChevronDown, ChevronRight } from 'lucide-react';
 import { TripType } from '@/lib/db/types';
 import { TripTypeCard } from './components/TripTypeCard';
 import { TripTypeModal } from './components/TripTypeModal';
-import { createTripType, updateTripType, deleteTripType } from '@/app/actions/trips';
+import { createTripType, updateTripType, deleteTripType, reactivateTripType } from '@/app/actions/trips';
 
 interface TripsClientProps {
   initialTripTypes: TripType[];
@@ -19,6 +19,10 @@ export function TripsClient({ initialTripTypes }: TripsClientProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTripType, setEditingTripType] = useState<TripType | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
+
+  const activeTripTypes = tripTypes.filter((t) => t.is_active);
+  const archivedTripTypes = tripTypes.filter((t) => !t.is_active);
 
   const handleAddNew = () => {
     setEditingTripType(null);
@@ -37,10 +41,31 @@ export function TripsClient({ initialTripTypes }: TripsClientProps) {
       setError(null);
       const result = await deleteTripType(tripTypeId);
       if (result.success) {
-        setTripTypes((prev) => prev.filter((t) => t.id !== tripTypeId));
+        if (result.data?.archived) {
+          setTripTypes((prev) =>
+            prev.map((t) => (t.id === tripTypeId ? { ...t, is_active: false } : t))
+          );
+        } else {
+          setTripTypes((prev) => prev.filter((t) => t.id !== tripTypeId));
+        }
         router.refresh();
       } else {
-        setError(result.error || 'Failed to delete trip type');
+        setError(result.error || 'Failed to archive trip type');
+      }
+    });
+  };
+
+  const handleRestore = (tripTypeId: string) => {
+    startTransition(async () => {
+      setError(null);
+      const result = await reactivateTripType(tripTypeId);
+      if (result.success && result.data) {
+        setTripTypes((prev) =>
+          prev.map((t) => (t.id === tripTypeId ? result.data! : t))
+        );
+        router.refresh();
+      } else {
+        setError(result.error || 'Failed to restore trip type');
       }
     });
   };
@@ -118,8 +143,8 @@ export function TripsClient({ initialTripTypes }: TripsClientProps) {
         </button>
       </div>
 
-      {/* Trip Types List */}
-      {tripTypes.length === 0 ? (
+      {/* Active Trip Types List */}
+      {activeTripTypes.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-slate-200 bg-white py-16">
           <div className="mb-4 rounded-full bg-white p-4">
             <Plus className="h-8 w-8 text-slate-500" />
@@ -137,7 +162,7 @@ export function TripsClient({ initialTripTypes }: TripsClientProps) {
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {tripTypes.map((tripType) => (
+          {activeTripTypes.map((tripType) => (
             <TripTypeCard
               key={tripType.id}
               tripType={tripType}
@@ -146,6 +171,39 @@ export function TripsClient({ initialTripTypes }: TripsClientProps) {
               isDeleting={isPending}
             />
           ))}
+        </div>
+      )}
+
+      {/* Archived Section */}
+      {archivedTripTypes.length > 0 && (
+        <div className="border-t border-slate-200 pt-6">
+          <button
+            onClick={() => setShowArchived(!showArchived)}
+            className="flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-700"
+          >
+            <Archive className="h-4 w-4" />
+            Archived Trip Types ({archivedTripTypes.length})
+            {showArchived ? (
+              <ChevronDown className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
+          </button>
+
+          {showArchived && (
+            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {archivedTripTypes.map((tripType) => (
+                <TripTypeCard
+                  key={tripType.id}
+                  tripType={tripType}
+                  onEdit={() => handleEdit(tripType)}
+                  onDelete={() => handleDelete(tripType.id)}
+                  onRestore={() => handleRestore(tripType.id)}
+                  isDeleting={isPending}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
 
