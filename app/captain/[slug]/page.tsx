@@ -51,11 +51,12 @@ export default async function CaptainPublicProfilePage({ params }: PageProps) {
     .eq('captain_id', profile.id)
     .order('name')
 
-  // Get trip types
+  // Get trip types (only active)
   const { data: tripTypes } = await supabase
     .from('trip_types')
     .select('*')
     .eq('captain_id', profile.id)
+    .eq('is_active', true)
     .order('title')
 
   // Get reviews and ratings

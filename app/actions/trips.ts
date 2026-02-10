@@ -266,7 +266,7 @@ export async function updateTripType(
 
 export async function deleteTripType(
   tripTypeId: string
-): Promise<ActionResult<{ deleted: boolean }>> {
+): Promise<ActionResult<{ deleted: boolean; archived?: boolean }>> {
   if (!tripTypeId || !isValidUUID(tripTypeId)) {
     return { success: false, error: 'Invalid trip type ID', code: 'VALIDATION' };
   }
@@ -291,23 +291,30 @@ export async function deleteTripType(
     return { success: false, error: 'Trip type not found', code: 'NOT_FOUND' };
   }
 
-  // Check if trip type is in use by any active bookings
-  const { data: activeBookings } = await supabase
+  // Check if any bookings reference this trip type (any status)
+  const { data: anyBookings } = await supabase
     .from('bookings')
     .select('id')
     .eq('trip_type_id', tripTypeId)
-    .in('status', ['pending_deposit', 'confirmed', 'weather_hold', 'rescheduled'])
     .limit(1);
 
-  if (activeBookings && activeBookings.length > 0) {
-    return {
-      success: false,
-      error: 'Cannot delete trip type: it is currently used by active bookings',
-      code: 'IN_USE',
-    };
+  if (anyBookings && anyBookings.length > 0) {
+    // Soft delete: archive the trip type so historical bookings remain valid
+    const { error } = await supabase
+      .from('trip_types')
+      .update({ is_active: false })
+      .eq('id', tripTypeId)
+      .eq('owner_id', user.id);
+
+    if (error) {
+      console.error('Error archiving trip type:', error);
+      return { success: false, error: 'Failed to archive trip type', code: 'UNKNOWN' };
+    }
+
+    return { success: true, data: { deleted: true, archived: true } };
   }
 
-  // Delete the trip type
+  // No bookings reference this trip type — safe to hard delete
   const { error } = await supabase
     .from('trip_types')
     .delete()
@@ -320,4 +327,40 @@ export async function deleteTripType(
   }
 
   return { success: true, data: { deleted: true } };
+}
+
+// ============================================================================
+// Reactivate (Restore) Trip Type
+// ============================================================================
+
+export async function reactivateTripType(
+  tripTypeId: string
+): Promise<ActionResult<TripType>> {
+  if (!tripTypeId || !isValidUUID(tripTypeId)) {
+    return { success: false, error: 'Invalid trip type ID', code: 'VALIDATION' };
+  }
+
+  const supabase = await createSupabaseServerClient();
+
+  // Get the current user
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) {
+    return { success: false, error: 'Not authenticated', code: 'UNAUTHORIZED' };
+  }
+
+  // Restore: set is_active back to true
+  const { data, error } = await supabase
+    .from('trip_types')
+    .update({ is_active: true })
+    .eq('id', tripTypeId)
+    .eq('owner_id', user.id)
+    .select()
+    .single();
+
+  if (error || !data) {
+    console.error('Error reactivating trip type:', error);
+    return { success: false, error: 'Trip type not found', code: 'NOT_FOUND' };
+  }
+
+  return { success: true, data: data as TripType };
 }

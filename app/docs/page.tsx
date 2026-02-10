@@ -17,12 +17,12 @@ import {
   Share2,
   Eye,
   CheckCircle,
-  XCircle,
   CloudRain,
   DollarSign,
   Globe,
   MapPin,
 } from "lucide-react";
+import { articles as fullArticles } from "./articles";
 
 // ---------------------------------------------------------------------------
 // Data
@@ -250,16 +250,12 @@ function FAQAccordion({ item }: { item: FAQItem }) {
 }
 
 function TopicCard({ topic }: { topic: HelpTopic }) {
-  const [expanded, setExpanded] = useState(false);
-
   return (
-    <div className="bg-white border border-slate-200 rounded-lg hover:border-cyan-200 transition-colors">
-      <button
-        type="button"
-        onClick={() => setExpanded((prev) => !prev)}
-        className="flex items-center justify-between w-full px-4 py-3.5 text-left text-sm font-medium text-slate-700 hover:text-slate-900 transition-colors rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2"
-        aria-expanded={expanded}
-      >
+    <Link
+      href={`/docs/${topic.id}`}
+      className="bg-white border border-slate-200 rounded-lg hover:border-cyan-200 hover:shadow-sm transition-all block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2"
+    >
+      <span className="flex items-center justify-between w-full px-4 py-3.5 text-sm font-medium text-slate-700">
         <span className="flex items-center gap-2.5">
           <span className="text-cyan-600 flex-shrink-0">{topic.icon}</span>
           {topic.title}
@@ -267,15 +263,10 @@ function TopicCard({ topic }: { topic: HelpTopic }) {
         <ChevronRight
           size={14}
           aria-hidden="true"
-          className={`flex-shrink-0 ml-3 text-slate-400 transition-transform duration-200 ${expanded ? "rotate-90" : ""}`}
+          className="flex-shrink-0 ml-3 text-slate-400"
         />
-      </button>
-      {expanded && (
-        <div className="px-4 pb-4 text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-3 ml-[30px]">
-          {topic.content}
-        </div>
-      )}
-    </div>
+      </span>
+    </Link>
   );
 }
 
@@ -288,6 +279,15 @@ export default function DocsPage() {
 
   const lowerQuery = query.toLowerCase().trim();
 
+  // Build a lookup of full article text keyed by topic id for deeper search
+  const articleTextMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const a of fullArticles) {
+      map.set(a.slug, a.blocks.map((b) => b.content).join(" ").toLowerCase());
+    }
+    return map;
+  }, []);
+
   // Filter sections and topics based on search query
   const filteredSections = useMemo(() => {
     if (!lowerQuery) return sections;
@@ -298,7 +298,8 @@ export default function DocsPage() {
         topics: section.topics.filter(
           (t) =>
             t.title.toLowerCase().includes(lowerQuery) ||
-            t.content.toLowerCase().includes(lowerQuery)
+            t.content.toLowerCase().includes(lowerQuery) ||
+            (articleTextMap.get(t.id)?.includes(lowerQuery) ?? false)
         ),
       }))
       .filter(
@@ -307,7 +308,7 @@ export default function DocsPage() {
           section.title.toLowerCase().includes(lowerQuery) ||
           section.description.toLowerCase().includes(lowerQuery)
       );
-  }, [lowerQuery]);
+  }, [lowerQuery, articleTextMap]);
 
   const filteredFAQ = useMemo(() => {
     if (!lowerQuery) return faqItems;

@@ -21,11 +21,12 @@ export default async function CancellationPoliciesPage() {
     redirect('/dashboard')
   }
 
-  // Get all trip types for this captain
+  // Get active trip types for this captain (archived types keep their policies)
   const { data: tripTypes } = await supabase
     .from('trip_types')
     .select('*')
     .eq('captain_id', profile.id)
+    .eq('is_active', true)
     .order('title')
 
   return (
