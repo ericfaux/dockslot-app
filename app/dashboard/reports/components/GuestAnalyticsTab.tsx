@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Users, UserCheck, Star } from 'lucide-react';
+import { EmptyState } from '@/components/EmptyState';
 import {
   BarChart,
   Bar,
@@ -20,6 +21,7 @@ const PAGE_SIZE = 25;
 interface Props {
   data: GuestAnalyticsData;
   filteredGuests?: GuestAnalyticsData['topGuestsByTrips'];
+  captainId: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -39,8 +41,9 @@ function GuestTooltip({ active, payload, label }: any) {
   return null;
 }
 
-export function GuestAnalyticsTab({ data, filteredGuests }: Props) {
+export function GuestAnalyticsTab({ data, filteredGuests, captainId }: Props) {
   const [currentPage, setCurrentPage] = useState(1);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   const guests = filteredGuests ?? data.topGuestsByTrips;
 
@@ -49,15 +52,33 @@ export function GuestAnalyticsTab({ data, filteredGuests }: Props) {
     setCurrentPage(1);
   }, [filteredGuests]);
 
+  const handleCopyBookingLink = useCallback(async () => {
+    const url = `${window.location.origin}/book/${captainId}`;
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      const textarea = document.createElement('textarea');
+      textarea.value = url;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+    }
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
+  }, [captainId]);
+
   if (data.totalUniqueGuests === 0) {
     return (
-      <div className="rounded-lg border border-slate-200 bg-white p-12 text-center">
-        <Users className="mx-auto h-12 w-12 text-slate-600" />
-        <h3 className="mt-4 text-lg font-medium text-slate-900">No guest data yet</h3>
-        <p className="mt-2 text-sm text-slate-400">
-          Guest analytics will populate as you book trips.
-        </p>
-      </div>
+      <EmptyState
+        icon={Users}
+        title="No guest data yet"
+        description="Book your first trip or share your booking link to start building guest insights."
+        actions={[
+          { label: 'Create Your First Booking', href: '/dashboard/bookings/new' },
+          { label: linkCopied ? 'Copied!' : 'Share Booking Link', onClick: handleCopyBookingLink, variant: 'secondary' },
+        ]}
+      />
     );
   }
 

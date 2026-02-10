@@ -235,7 +235,7 @@ export function ReportsPageClient({
               <BookingInsightsTab data={bookingData} filteredBookings={filteredBookings} />
             )}
             {activeTab === 'guests' && (
-              <GuestAnalyticsTab data={guestData} filteredGuests={filteredGuests} />
+              <GuestAnalyticsTab data={guestData} filteredGuests={filteredGuests} captainId={captainId} />
             )}
             {activeTab === 'season' && <SeasonPerformanceTab data={seasonData} />}
             {activeTab === 'promos' && <PromoCodesTab data={promoData} />}
