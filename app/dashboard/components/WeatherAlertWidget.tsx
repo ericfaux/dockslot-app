@@ -222,6 +222,7 @@ export default function WeatherAlertWidget({
             <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
           </button>
         </div>
+        <p className="text-[10px] text-rose-400 opacity-50 text-right mt-1">Source: NOAA Marine Forecast</p>
       </div>
     );
   }
@@ -283,6 +284,7 @@ export default function WeatherAlertWidget({
             <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
           </button>
         </div>
+        <p className="text-[10px] text-amber-400 opacity-50 text-right mt-1">Source: NOAA Marine Forecast</p>
       </div>
     );
   }
@@ -328,6 +330,7 @@ export default function WeatherAlertWidget({
           </button>
         </div>
       </div>
+      <p className="text-[10px] text-slate-400 opacity-50 text-right mt-1">Source: NOAA Marine Forecast</p>
     </div>
   );
 }
