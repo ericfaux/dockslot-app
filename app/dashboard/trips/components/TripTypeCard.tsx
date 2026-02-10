@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Clock, DollarSign, Pencil, Trash2, AlertTriangle } from 'lucide-react';
+import { Clock, DollarSign, Pencil, Archive, RotateCcw, AlertTriangle } from 'lucide-react';
 import { TripType } from '@/lib/db/types';
 import { formatDollars } from '@/lib/utils/format';
 
@@ -9,11 +9,13 @@ interface TripTypeCardProps {
   tripType: TripType;
   onEdit: () => void;
   onDelete: () => void;
+  onRestore?: () => void;
   isDeleting?: boolean;
 }
 
-export function TripTypeCard({ tripType, onEdit, onDelete, isDeleting }: TripTypeCardProps) {
+export function TripTypeCard({ tripType, onEdit, onDelete, onRestore, isDeleting }: TripTypeCardProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const isArchived = !tripType.is_active;
 
   const formatDuration = (hours: number) => {
     if (hours === 1) return '1 hour';
@@ -39,11 +41,22 @@ export function TripTypeCard({ tripType, onEdit, onDelete, isDeleting }: TripTyp
 
   return (
     <div
-      className="group relative flex flex-col rounded-lg border border-slate-200 bg-white transition-all hover:border-cyan-300"
+      className={`group relative flex flex-col rounded-lg border bg-white transition-all ${
+        isArchived
+          ? 'border-slate-200 opacity-70'
+          : 'border-slate-200 hover:border-cyan-300'
+      }`}
       style={{
         boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03), 0 4px 20px rgba(0,0,0,0.3)',
       }}
     >
+      {/* Archived Badge */}
+      {isArchived && (
+        <div className="absolute -top-2 left-3 z-10 rounded-full bg-slate-500 px-2 py-0.5 text-xs font-medium text-white">
+          Archived
+        </div>
+      )}
+
       {/* Card Header */}
       <div className="flex items-start justify-between border-b border-slate-200 p-4">
         <div className="flex-1 pr-2">
@@ -55,21 +68,34 @@ export function TripTypeCard({ tripType, onEdit, onDelete, isDeleting }: TripTyp
 
         {/* Action Buttons */}
         <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-          <button
-            onClick={onEdit}
-            className="rounded-md p-2 text-slate-400 hover:bg-white hover:text-cyan-600"
-            title="Edit trip type"
-          >
-            <Pencil className="h-4 w-4" />
-          </button>
-          <button
-            onClick={handleDeleteClick}
-            disabled={isDeleting}
-            className="rounded-md p-2 text-slate-400 hover:bg-white hover:text-rose-600 disabled:opacity-50"
-            title="Delete trip type"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
+          {isArchived ? (
+            <button
+              onClick={onRestore}
+              disabled={isDeleting}
+              className="rounded-md p-2 text-slate-400 hover:bg-white hover:text-cyan-600 disabled:opacity-50"
+              title="Restore trip type"
+            >
+              <RotateCcw className="h-4 w-4" />
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={onEdit}
+                className="rounded-md p-2 text-slate-400 hover:bg-white hover:text-cyan-600"
+                title="Edit trip type"
+              >
+                <Pencil className="h-4 w-4" />
+              </button>
+              <button
+                onClick={handleDeleteClick}
+                disabled={isDeleting}
+                className="rounded-md p-2 text-slate-400 hover:bg-white hover:text-amber-600 disabled:opacity-50"
+                title="Archive trip type"
+              >
+                <Archive className="h-4 w-4" />
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -115,14 +141,17 @@ export function TripTypeCard({ tripType, onEdit, onDelete, isDeleting }: TripTyp
         </div>
       </div>
 
-      {/* Delete Confirmation Overlay */}
+      {/* Archive Confirmation Overlay */}
       {showDeleteConfirm && (
         <div className="absolute inset-0 flex flex-col items-center justify-center rounded-lg bg-white/95 p-4">
-          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-rose-50">
-            <AlertTriangle className="h-6 w-6 text-rose-600" />
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-amber-50">
+            <AlertTriangle className="h-6 w-6 text-amber-600" />
           </div>
           <p className="mb-4 text-center text-sm text-slate-600">
-            Delete <span className="font-medium text-slate-900">{tripType.title}</span>?
+            Archive <span className="font-medium text-slate-900">{tripType.title}</span>?
+          </p>
+          <p className="mb-4 text-center text-xs text-slate-400">
+            This will hide it from your booking page. You can restore it later.
           </p>
           <div className="flex gap-3">
             <button
@@ -134,9 +163,9 @@ export function TripTypeCard({ tripType, onEdit, onDelete, isDeleting }: TripTyp
             <button
               onClick={handleDeleteClick}
               disabled={isDeleting}
-              className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-500 disabled:opacity-50"
+              className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-500 disabled:opacity-50"
             >
-              {isDeleting ? 'Deleting...' : 'Delete'}
+              {isDeleting ? 'Archiving...' : 'Archive'}
             </button>
           </div>
         </div>

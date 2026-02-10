@@ -36,12 +36,13 @@ export default async function BookingPage({ params }: BookingPageProps) {
     redirect(`/book/${captainId}`);
   }
 
-  // Fetch trip type
+  // Fetch trip type (only if active)
   const { data: tripType } = await supabase
     .from('trip_types')
     .select('*')
     .eq('id', tripTypeId)
     .eq('owner_id', captainId)
+    .eq('is_active', true)
     .single();
 
   if (!tripType) {

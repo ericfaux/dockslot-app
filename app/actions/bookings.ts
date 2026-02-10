@@ -278,12 +278,16 @@ export async function createBooking(
     const supabase = await createSupabaseServerClient();
     const { data: tripType } = await supabase
       .from('trip_types')
-      .select('id, price_total, deposit_amount, owner_id')
+      .select('id, price_total, deposit_amount, owner_id, is_active')
       .eq('id', params.trip_type_id)
       .single();
 
     if (!tripType || tripType.owner_id !== params.captain_id) {
       return { success: false, error: 'Trip type not found', code: 'NOT_FOUND' };
+    }
+
+    if (!tripType.is_active) {
+      return { success: false, error: 'This trip type is no longer available', code: 'VALIDATION' };
     }
 
     totalPriceCents = Math.round(tripType.price_total * 100);

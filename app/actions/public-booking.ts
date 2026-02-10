@@ -320,7 +320,7 @@ export async function getPublicTripTypes(
     };
   }
 
-  // Get active trip types
+  // Get active trip types (exclude archived)
   const { data: tripTypes, error: tripError } = await supabase
     .from('trip_types')
     .select(`
@@ -332,6 +332,7 @@ export async function getPublicTripTypes(
       description
     `)
     .eq('owner_id', captainId)
+    .eq('is_active', true)
     .order('price_total', { ascending: true });
 
   if (tripError) {
@@ -369,6 +370,7 @@ export async function getPublicTripType(
     `)
     .eq('id', tripTypeId)
     .eq('owner_id', captainId)
+    .eq('is_active', true)
     .single();
 
   if (error || !data) {
