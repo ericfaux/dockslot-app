@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { checkMarineConditions, generateWeatherHoldReason } from '@/lib/weather/noaa';
+import { generateWeatherHoldReason } from '@/lib/weather/noaa';
+import { getCachedMarineConditions } from '@/lib/weather/cache';
 
 /**
  * GET /api/weather/check?lat=LAT&lon=LON&date=ISO_DATE
- * 
+ *
  * Check marine weather conditions for a specific location and date
  * Uses NOAA Marine Weather API (free, no key required)
- * 
+ * Responses are cached for 5 minutes in Supabase
+ *
  * Returns safety assessment with alerts and forecast
  */
 export async function GET(request: NextRequest) {
@@ -14,7 +16,6 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const latParam = searchParams.get('lat');
     const lonParam = searchParams.get('lon');
-    const dateParam = searchParams.get('date');
 
     if (!latParam || !lonParam) {
       return NextResponse.json(
@@ -36,7 +37,7 @@ export async function GET(request: NextRequest) {
     // Validate US waters (NOAA only covers US)
     if (lat < 24 || lat > 50 || lon < -125 || lon > -66) {
       return NextResponse.json(
-        { 
+        {
           error: 'Location outside NOAA coverage area (US waters only)',
           fallback: true,
         },
@@ -44,9 +45,16 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const tripDate = dateParam ? new Date(dateParam) : new Date();
+    const result = await getCachedMarineConditions(lat, lon);
 
-    const conditions = await checkMarineConditions(lat, lon, tripDate);
+    if (!result) {
+      return NextResponse.json(
+        { error: 'Failed to fetch weather data' },
+        { status: 500 }
+      );
+    }
+
+    const { conditions, fetchedAt } = result;
     const suggestedReason = generateWeatherHoldReason(conditions);
 
     return NextResponse.json({
@@ -54,12 +62,12 @@ export async function GET(request: NextRequest) {
       conditions,
       suggestedReason,
       location: { lat, lon },
-      checkedAt: new Date().toISOString(),
+      checkedAt: new Date(fetchedAt).toISOString(),
     });
   } catch (error) {
     console.error('Weather check error:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to fetch weather data',
         details: error instanceof Error ? error.message : 'Unknown error',
       },

@@ -10,8 +10,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing or invalid coordinates' }, { status: 400 });
     }
 
-    // Clear in-memory cache for these coordinates
-    invalidateWeatherCache(lat, lon);
+    // Clear both in-memory and Supabase caches for these coordinates
+    await invalidateWeatherCache(lat, lon);
 
     // Also revalidate the Next.js fetch cache for the dashboard
     revalidatePath('/dashboard');
