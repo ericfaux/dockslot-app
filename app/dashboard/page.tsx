@@ -299,6 +299,7 @@ function HorizonWidget({ captainName = "Captain", timezone = "America/New_York",
               {formatLastUpdated(weatherData.lastUpdated)}
             </span>
             {lat && lon && <RefreshWeatherButton lat={lat} lon={lon} />}
+            <span className="font-mono text-[10px] text-slate-500 opacity-50">Data: NOAA</span>
           </div>
         )}
       </div>
