@@ -72,9 +72,24 @@ export async function GET(request: NextRequest) {
           
           const weatherReason = generateWeatherHoldReason(conditions);
 
-          // Send email to captain
-          const captainEmail = profile.email || `captain-${booking.captain_id}@dockslot.app`;
-          
+          // Resolve captain email: prefer profile email, fallback to auth user email
+          let captainEmail = profile.email;
+          if (!captainEmail) {
+            const { data: authUser } = await supabase.auth.admin.getUserById(booking.captain_id);
+            captainEmail = authUser?.user?.email || null;
+          }
+
+          if (!captainEmail) {
+            console.warn(`No email found for captain ${booking.captain_id}, skipping weather alert`);
+            results.push({
+              bookingId: booking.id,
+              status: 'failed',
+              recommendation: conditions.recommendation,
+              reason: 'No captain email available',
+            });
+            continue;
+          }
+
           const emailResult = await sendEmail({
             to: captainEmail,
             subject: `⚠️ Weather Alert: ${tripType.title} in ${hoursUntil}h`,

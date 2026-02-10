@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { sendBookingConfirmation } from '@/lib/email/resend'
+import { sendCancellationConfirmation } from '@/lib/email/resend'
+import { format, parseISO } from 'date-fns'
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest) {
     // Verify all bookings belong to this captain
     const { data: bookings, error: fetchError } = await supabase
       .from('bookings')
-      .select('id, captain_id, status')
+      .select('id, captain_id, status, guest_name, guest_email, scheduled_start, vessel_id, deposit_paid_cents, trip_type:trip_types(title)')
       .in('id', booking_ids)
 
     if (fetchError || !bookings) {
@@ -66,7 +67,22 @@ export async function POST(request: NextRequest) {
     switch (action) {
       case 'cancel': {
         const reason = data?.reason || 'Cancelled by captain'
-        
+
+        // Fetch captain profile and email prefs for cancellation emails
+        const { data: captainProfile } = await supabase
+          .from('profiles')
+          .select('business_name, full_name, phone')
+          .eq('id', profile.id)
+          .single()
+
+        const { data: emailPrefs } = await supabase
+          .from('email_preferences')
+          .select('business_name_override, logo_url')
+          .eq('captain_id', profile.id)
+          .single()
+
+        const displayName = emailPrefs?.business_name_override || captainProfile?.business_name || captainProfile?.full_name || 'Your Captain'
+
         for (const bookingId of booking_ids) {
           const { error } = await supabase
             .from('bookings')
@@ -87,6 +103,48 @@ export async function POST(request: NextRequest) {
               actor_type: 'captain',
               actor_id: user.id,
             })
+
+            // Send cancellation email to guest
+            const bookingData = bookings.find((b) => b.id === bookingId)
+            if (bookingData && !bookingData.guest_email.includes('@placeholder.dockslot')) {
+              const { data: guestToken } = await supabase
+                .from('guest_tokens')
+                .select('token')
+                .eq('booking_id', bookingId)
+                .single()
+
+              const vesselRes = bookingData.vessel_id
+                ? await supabase.from('vessels').select('name').eq('id', bookingData.vessel_id).single()
+                : { data: null }
+
+              const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dockslot.app'
+              const managementUrl = guestToken
+                ? `${appUrl}/manage/${guestToken.token}`
+                : appUrl
+
+              const tripType = Array.isArray(bookingData.trip_type) ? bookingData.trip_type[0] : bookingData.trip_type
+              const refundInfo = bookingData.deposit_paid_cents > 0
+                ? `A deposit of $${(bookingData.deposit_paid_cents / 100).toFixed(2)} was on file. Refund eligibility depends on the cancellation policy.`
+                : undefined
+
+              sendCancellationConfirmation({
+                to: bookingData.guest_email,
+                guestName: bookingData.guest_name,
+                tripType: tripType?.title || 'Charter Trip',
+                date: format(parseISO(bookingData.scheduled_start), 'EEEE, MMMM d, yyyy'),
+                time: format(parseISO(bookingData.scheduled_start), 'h:mm a'),
+                vessel: vesselRes.data?.name || 'Charter Vessel',
+                captainName: displayName,
+                reason,
+                refundInfo,
+                managementUrl,
+                businessName: emailPrefs?.business_name_override || captainProfile?.business_name || undefined,
+                logoUrl: emailPrefs?.logo_url || undefined,
+              }).catch(err => {
+                console.warn(`Failed to send cancellation email for booking ${bookingId}:`, err)
+              })
+            }
+
             successCount++
           }
         }

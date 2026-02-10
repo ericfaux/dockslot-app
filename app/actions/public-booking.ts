@@ -22,6 +22,7 @@ import {
 } from '@/lib/utils/validation';
 import { addHours, format, parseISO, isValid, startOfDay, endOfDay, isBefore, addDays } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
+import { sendBookingConfirmation } from '@/lib/email/resend';
 
 // ============================================================================
 // Types
@@ -869,6 +870,71 @@ export async function createPublicBooking(
       actor_type: 'guest',
       actor_id: null,
     });
+
+  // Send booking confirmation email (async, don't block response)
+  {
+    const [tripDetails, captainProfile, emailPrefs, waiverTemplate] = await Promise.all([
+      supabase
+        .from('trip_types')
+        .select('title, duration_hours, cancellation_policy_text, vessel_id')
+        .eq('id', params.trip_type_id)
+        .single(),
+      supabase
+        .from('profiles')
+        .select('business_name, full_name, phone, meeting_spot_name, meeting_spot_instructions, cancellation_policy')
+        .eq('id', params.captain_id)
+        .single(),
+      supabase
+        .from('email_preferences')
+        .select('custom_what_to_bring, business_name_override, logo_url, email_signature')
+        .eq('captain_id', params.captain_id)
+        .single(),
+      supabase
+        .from('waiver_templates')
+        .select('id')
+        .eq('owner_id', params.captain_id)
+        .eq('is_active', true)
+        .limit(1)
+        .single(),
+    ]);
+
+    const vesselRes = tripDetails.data?.vessel_id
+      ? await supabase.from('vessels').select('name').eq('id', tripDetails.data.vessel_id).single()
+      : { data: null };
+
+    if (tripDetails.data && captainProfile.data) {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dockslot.app';
+      const managementUrl = `${appUrl}/manage/${guestToken}`;
+      const displayName = emailPrefs.data?.business_name_override || captainProfile.data.business_name || captainProfile.data.full_name || 'Your Captain';
+      const cancellationPolicy = tripDetails.data.cancellation_policy_text || captainProfile.data.cancellation_policy || undefined;
+      const waiverUrl = waiverTemplate.data ? `${appUrl}/manage/${guestToken}?tab=waivers` : undefined;
+
+      sendBookingConfirmation({
+        to: params.guest_email.trim().toLowerCase(),
+        guestName: sanitizeName(params.guest_name),
+        tripType: tripDetails.data.title,
+        date: format(new Date(scheduledStart), 'EEEE, MMMM d, yyyy'),
+        time: format(new Date(scheduledStart), 'h:mm a'),
+        vessel: vesselRes.data?.name || 'Your charter vessel',
+        meetingSpot: captainProfile.data.meeting_spot_name || 'Meeting spot details in booking',
+        meetingSpotInstructions: captainProfile.data.meeting_spot_instructions || undefined,
+        captainName: displayName,
+        captainPhone: captainProfile.data.phone || undefined,
+        totalPrice: `$${(totalPriceCents / 100).toFixed(2)}`,
+        depositPaid: '$0.00',
+        balanceDue: `$${(totalPriceCents / 100).toFixed(2)}`,
+        managementUrl,
+        waiverUrl,
+        cancellationPolicy,
+        whatToBring: emailPrefs.data?.custom_what_to_bring || undefined,
+        businessName: emailPrefs.data?.business_name_override || captainProfile.data.business_name || undefined,
+        logoUrl: emailPrefs.data?.logo_url || undefined,
+        emailSignature: emailPrefs.data?.email_signature || undefined,
+      }).catch(err => {
+        console.warn('Failed to send booking confirmation email:', err);
+      });
+    }
+  }
 
   return {
     success: true,
