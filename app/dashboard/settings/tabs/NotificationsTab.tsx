@@ -8,9 +8,25 @@ import {
   Mail,
   MessageSquare,
   Palette,
+  AlertTriangle,
 } from 'lucide-react';
 import { EmailPreferences } from '@/lib/db/types';
 import { getEmailPreferences, updateEmailPreferences } from '@/app/actions/email-preferences';
+import { getProfile } from '@/app/actions/profile';
+
+/**
+ * Checks if a branding field value contains placeholder/example text
+ * that should not be sent in real emails.
+ */
+function containsPlaceholderText(value: string): boolean {
+  if (!value) return false;
+  const lower = value.toLowerCase();
+  return (
+    lower.includes('example.com') ||
+    lower.includes('captain mike') ||
+    lower.includes('(555) 123-4567')
+  );
+}
 
 export function NotificationsTab() {
   const router = useRouter();
@@ -40,11 +56,20 @@ export function NotificationsTab() {
   const [logoUrl, setLogoUrl] = useState('');
   const [emailSignature, setEmailSignature] = useState('');
 
+  // Profile data for placeholder hints and fallback
+  const [profileBusinessName, setProfileBusinessName] = useState('');
+  const [profilePhone, setProfilePhone] = useState('');
+  const [profileFullName, setProfileFullName] = useState('');
+
   useEffect(() => {
     async function loadPreferences() {
-      const result = await getEmailPreferences();
-      if (result.success && result.data) {
-        const p = result.data;
+      const [prefsResult, profileResult] = await Promise.all([
+        getEmailPreferences(),
+        getProfile(),
+      ]);
+
+      if (prefsResult.success && prefsResult.data) {
+        const p = prefsResult.data;
         setBookingConfirmation(p.booking_confirmation_enabled);
         setDepositReminder(p.deposit_reminder_enabled);
         setTripReminder(p.trip_reminder_enabled);
@@ -56,11 +81,27 @@ export function NotificationsTab() {
         setSmsDayOfReminder(p.sms_day_of_reminder);
         setSmsWeatherHold(p.sms_weather_hold);
         setCustomWhatToBring(p.custom_what_to_bring || '');
-        setBusinessNameOverride(p.business_name_override || '');
-        setBusinessPhoneOverride(p.business_phone_override || '');
-        setLogoUrl(p.logo_url || '');
-        setEmailSignature(p.email_signature || '');
+
+        // Clear out values that contain placeholder text instead of loading them
+        const nameOverride = p.business_name_override || '';
+        const phoneOverride = p.business_phone_override || '';
+        const logo = p.logo_url || '';
+        const signature = p.email_signature || '';
+
+        setBusinessNameOverride(containsPlaceholderText(nameOverride) ? '' : nameOverride);
+        setBusinessPhoneOverride(containsPlaceholderText(phoneOverride) ? '' : phoneOverride);
+        setLogoUrl(containsPlaceholderText(logo) ? '' : logo);
+        setEmailSignature(containsPlaceholderText(signature) ? '' : signature);
       }
+
+      // Use profile data for placeholder hints
+      if (profileResult.success && profileResult.data) {
+        const prof = profileResult.data;
+        setProfileBusinessName(prof.business_name || '');
+        setProfilePhone(prof.phone || '');
+        setProfileFullName(prof.full_name || '');
+      }
+
       setIsLoading(false);
     }
     loadPreferences();
@@ -233,6 +274,24 @@ export function NotificationsTab() {
           Customize the content and branding of automated emails.
         </p>
 
+        {/* Warning banner if any field contains placeholder text */}
+        {(containsPlaceholderText(businessNameOverride) ||
+          containsPlaceholderText(businessPhoneOverride) ||
+          containsPlaceholderText(logoUrl) ||
+          containsPlaceholderText(emailSignature)) && (
+          <div className="mb-5 flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3">
+            <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-amber-800">
+                Placeholder text detected
+              </p>
+              <p className="mt-1 text-xs text-amber-700">
+                One or more branding fields contain example data (e.g. &quot;example.com&quot;, &quot;Captain Mike&quot;, &quot;(555) 123-4567&quot;). Please update or clear these fields so your emails use your real business information.
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="space-y-5">
           <div>
             <label className={labelClassName}>Business Name (in emails)</label>
@@ -240,10 +299,13 @@ export function NotificationsTab() {
               type="text"
               value={businessNameOverride}
               onChange={(e) => setBusinessNameOverride(e.target.value)}
-              placeholder="Leave blank to use your profile business name"
+              placeholder={profileBusinessName ? `From profile: ${profileBusinessName}` : 'Leave blank to use your profile business name'}
               className={inputClassName}
               maxLength={200}
             />
+            <p className="mt-1 text-xs text-slate-500">
+              Leave blank to use your profile business name{profileBusinessName ? ` (${profileBusinessName})` : ''}.
+            </p>
           </div>
 
           <div>
@@ -252,10 +314,13 @@ export function NotificationsTab() {
               type="text"
               value={businessPhoneOverride}
               onChange={(e) => setBusinessPhoneOverride(e.target.value)}
-              placeholder="Leave blank to use your profile phone"
+              placeholder={profilePhone ? `From profile: ${profilePhone}` : 'Leave blank to use your profile phone'}
               className={inputClassName}
               maxLength={20}
             />
+            <p className="mt-1 text-xs text-slate-500">
+              Leave blank to use your profile phone number{profilePhone ? ` (${profilePhone})` : ''}.
+            </p>
           </div>
 
           <div>
@@ -264,7 +329,7 @@ export function NotificationsTab() {
               type="url"
               value={logoUrl}
               onChange={(e) => setLogoUrl(e.target.value)}
-              placeholder="https://example.com/logo.png"
+              placeholder="https://your-website.com/logo.png"
               className={inputClassName}
               maxLength={500}
             />
@@ -293,7 +358,9 @@ export function NotificationsTab() {
             <textarea
               value={emailSignature}
               onChange={(e) => setEmailSignature(e.target.value)}
-              placeholder={"Captain Mike's Charters\n(555) 123-4567\nTight lines!"}
+              placeholder={profileBusinessName || profileFullName
+                ? `${profileBusinessName || profileFullName}\n${profilePhone || 'Your phone number'}\nTight lines!`
+                : 'Your Business Name\nYour phone number\nTight lines!'}
               rows={3}
               className={inputClassName}
               maxLength={1000}

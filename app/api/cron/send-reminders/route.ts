@@ -157,6 +157,11 @@ export async function GET(request: NextRequest) {
             }
           }
 
+          // Resolve captain phone — use override only if it's not placeholder text
+          const phoneOverride = prefs?.business_phone_override || '';
+          const isPlaceholderPhone = phoneOverride.includes('(555) 123-4567');
+          const resolvedPhone = (!isPlaceholderPhone && phoneOverride) ? phoneOverride : (profile?.phone || undefined);
+
           // Send the reminder email
           const emailResult = await sendTripReminder({
             to: booking.guest_email,
@@ -168,7 +173,7 @@ export async function GET(request: NextRequest) {
             meetingSpot,
             meetingSpotInstructions: profile?.meeting_spot_instructions || undefined,
             captainName: profile?.full_name || profile?.business_name || 'Your Captain',
-            captainPhone: prefs?.business_phone_override || profile?.phone || undefined,
+            captainPhone: resolvedPhone,
             passengerCount: booking.party_size || 1,
             managementUrl,
             waiverUrl,
