@@ -34,7 +34,13 @@ import {
   sanitizeNotes,
   getDateInTimezone,
 } from '@/lib/utils/validation';
-import { differenceInDays, parseISO } from 'date-fns';
+import { differenceInDays, parseISO, format } from 'date-fns';
+import {
+  sendBookingConfirmation,
+  sendWeatherHoldNotification,
+  sendCancellationConfirmation,
+  sendRescheduleConfirmation,
+} from '@/lib/email/resend';
 
 // ============================================================================
 // Types
@@ -351,6 +357,54 @@ export async function createBooking(
     return { success: false, error: 'Booking created but failed to retrieve', code: 'UNKNOWN' };
   }
 
+  // Send booking confirmation email (async, don't block response)
+  // Skip placeholder emails (walk-up/phone bookings)
+  if (!params.guest_email.includes('@placeholder.dockslot')) {
+    const supabaseEmail = await createSupabaseServerClient();
+    const [tripDetails, emailPrefs, waiverTemplate] = await Promise.all([
+      params.trip_type_id
+        ? supabaseEmail.from('trip_types').select('title, cancellation_policy_text, vessel_id').eq('id', params.trip_type_id).single()
+        : { data: null },
+      supabaseEmail.from('email_preferences').select('custom_what_to_bring, business_name_override, logo_url, email_signature').eq('captain_id', params.captain_id).single(),
+      supabaseEmail.from('waiver_templates').select('id').eq('owner_id', params.captain_id).eq('is_active', true).limit(1).single(),
+    ]);
+
+    const vesselRes = params.vessel_id
+      ? await supabaseEmail.from('vessels').select('name').eq('id', params.vessel_id).single()
+      : { data: null };
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dockslot.app';
+    const managementUrl = `${appUrl}/manage/${confirmationCode}`;
+    const displayName = emailPrefs.data?.business_name_override || profile.business_name || profile.full_name || 'Your Captain';
+    const cancellationPolicy = tripDetails?.data?.cancellation_policy_text || profile.cancellation_policy || undefined;
+    const waiverUrl = waiverTemplate.data ? `${appUrl}/manage/${confirmationCode}?tab=waivers` : undefined;
+
+    sendBookingConfirmation({
+      to: params.guest_email.trim().toLowerCase(),
+      guestName: sanitizeName(params.guest_name),
+      tripType: tripDetails?.data?.title || 'Charter Trip',
+      date: format(new Date(params.scheduled_start), 'EEEE, MMMM d, yyyy'),
+      time: format(new Date(params.scheduled_start), 'h:mm a'),
+      vessel: vesselRes.data?.name || 'Your charter vessel',
+      meetingSpot: profile.meeting_spot_name || 'Meeting spot details in booking',
+      meetingSpotInstructions: profile.meeting_spot_instructions || undefined,
+      captainName: displayName,
+      captainPhone: profile.phone || undefined,
+      totalPrice: `$${(totalPriceCents / 100).toFixed(2)}`,
+      depositPaid: '$0.00',
+      balanceDue: `$${(totalPriceCents / 100).toFixed(2)}`,
+      managementUrl,
+      waiverUrl,
+      cancellationPolicy,
+      whatToBring: emailPrefs.data?.custom_what_to_bring || undefined,
+      businessName: emailPrefs.data?.business_name_override || profile.business_name || undefined,
+      logoUrl: emailPrefs.data?.logo_url || undefined,
+      emailSignature: emailPrefs.data?.email_signature || undefined,
+    }).catch(err => {
+      console.warn('Failed to send booking confirmation email:', err);
+    });
+  }
+
   return { success: true, data: booking };
 }
 
@@ -593,12 +647,60 @@ export async function cancelBooking(
   bookingId: string,
   reason?: string
 ): Promise<ActionResult<Booking>> {
-  return transitionBookingStatus(
+  // Fetch booking details before transition (needed for email)
+  const existingBooking = await getBookingById(bookingId);
+
+  const result = await transitionBookingStatus(
     bookingId,
     'cancelled',
     { internal_notes: reason },
     `Booking cancelled${reason ? `: ${reason}` : ''}`
   );
+
+  // Send cancellation confirmation email to guest
+  if (result.success && existingBooking && !existingBooking.guest_email.includes('@placeholder.dockslot')) {
+    const supabaseEmail = await createSupabaseServerClient();
+
+    const [profileRes, emailPrefsRes, guestTokenRes] = await Promise.all([
+      supabaseEmail.from('profiles').select('business_name, full_name, phone').eq('id', existingBooking.captain_id).single(),
+      supabaseEmail.from('email_preferences').select('business_name_override, logo_url').eq('captain_id', existingBooking.captain_id).single(),
+      supabaseEmail.from('guest_tokens').select('token').eq('booking_id', bookingId).single(),
+    ]);
+
+    const vesselRes = existingBooking.vessel_id
+      ? await supabaseEmail.from('vessels').select('name').eq('id', existingBooking.vessel_id).single()
+      : { data: null };
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dockslot.app';
+    const managementUrl = guestTokenRes.data
+      ? `${appUrl}/manage/${guestTokenRes.data.token}`
+      : `${appUrl}`;
+    const displayName = emailPrefsRes.data?.business_name_override || profileRes.data?.business_name || profileRes.data?.full_name || 'Your Captain';
+
+    // Check if deposit was paid for refund info
+    const refundInfo = existingBooking.deposit_paid_cents > 0
+      ? `A deposit of $${(existingBooking.deposit_paid_cents / 100).toFixed(2)} was on file. Refund eligibility depends on the cancellation policy.`
+      : undefined;
+
+    sendCancellationConfirmation({
+      to: existingBooking.guest_email,
+      guestName: existingBooking.guest_name,
+      tripType: existingBooking.trip_type?.title || 'Charter Trip',
+      date: format(parseISO(existingBooking.scheduled_start), 'EEEE, MMMM d, yyyy'),
+      time: format(parseISO(existingBooking.scheduled_start), 'h:mm a'),
+      vessel: vesselRes.data?.name || 'Charter Vessel',
+      captainName: displayName,
+      reason,
+      refundInfo,
+      managementUrl,
+      businessName: emailPrefsRes.data?.business_name_override || profileRes.data?.business_name || undefined,
+      logoUrl: emailPrefsRes.data?.logo_url || undefined,
+    }).catch(err => {
+      console.warn('Failed to send cancellation confirmation email:', err);
+    });
+  }
+
+  return result;
 }
 
 export async function markNoShow(bookingId: string): Promise<ActionResult<Booking>> {
@@ -621,6 +723,9 @@ export async function setWeatherHold(
     return { success: false, error: 'Weather hold reason is required', code: 'VALIDATION' };
   }
 
+  // Fetch booking details before transition (needed for email)
+  const existingBooking = await getBookingById(bookingId);
+
   const result = await transitionBookingStatus(
     bookingId,
     'weather_hold',
@@ -636,6 +741,44 @@ export async function setWeatherHold(
       newValue: { weather_hold_reason: reason },
       actorType: 'captain',
     });
+
+    // Send weather hold notification email to guest
+    if (existingBooking && !existingBooking.guest_email.includes('@placeholder.dockslot')) {
+      const supabaseEmail = await createSupabaseServerClient();
+
+      // Fetch guest token for reschedule link
+      const { data: guestToken } = await supabaseEmail
+        .from('guest_tokens')
+        .select('token')
+        .eq('booking_id', bookingId)
+        .single();
+
+      // Fetch captain profile for name
+      const { data: profile } = await supabaseEmail
+        .from('profiles')
+        .select('business_name, full_name')
+        .eq('id', existingBooking.captain_id)
+        .single();
+
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dockslot.app';
+      const rescheduleUrl = guestToken
+        ? `${appUrl}/reschedule/${guestToken.token}`
+        : `${appUrl}/manage/${bookingId}`;
+
+      const tripTypeName = existingBooking.trip_type?.title || 'Charter Trip';
+
+      sendWeatherHoldNotification({
+        to: existingBooking.guest_email,
+        guestName: existingBooking.guest_name,
+        tripType: tripTypeName,
+        originalDate: format(parseISO(existingBooking.scheduled_start), 'EEEE, MMMM d, yyyy'),
+        reason: reason.trim(),
+        rescheduleUrl,
+        captainName: profile?.business_name || profile?.full_name || 'Your Captain',
+      }).catch(err => {
+        console.warn('Failed to send weather hold notification email:', err);
+      });
+    }
   }
 
   return result;
@@ -805,6 +948,37 @@ export async function acceptRescheduleOffer(
     },
     actorType: 'guest',
   });
+
+  // Send reschedule confirmation email to guest
+  if (!existing.guest_email.includes('@placeholder.dockslot')) {
+    const { data: guestToken } = await supabase
+      .from('guest_tokens')
+      .select('token')
+      .eq('booking_id', bookingId)
+      .single();
+
+    const vesselRes = existing.vessel_id
+      ? await supabase.from('vessels').select('name').eq('id', existing.vessel_id).single()
+      : { data: null };
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dockslot.app';
+    const managementUrl = guestToken
+      ? `${appUrl}/manage/${guestToken.token}`
+      : `${appUrl}`;
+
+    sendRescheduleConfirmation({
+      to: existing.guest_email,
+      guestName: existing.guest_name,
+      tripType: existing.trip_type?.title || 'Charter Trip',
+      oldDate: format(parseISO(existing.scheduled_start), 'EEEE, MMMM d, yyyy'),
+      newDate: format(parseISO(offer.proposed_start), 'EEEE, MMMM d, yyyy'),
+      newTime: format(parseISO(offer.proposed_start), 'h:mm a'),
+      vessel: vesselRes.data?.name || 'Charter Vessel',
+      managementUrl,
+    }).catch(err => {
+      console.warn('Failed to send reschedule confirmation email:', err);
+    });
+  }
 
   return { success: true, data: data as Booking };
 }
@@ -1115,6 +1289,37 @@ export async function guestSelectRescheduleOffer(
     },
     actorType: 'guest',
   });
+
+  // Send reschedule confirmation email to guest
+  if (!booking.guest_email.includes('@placeholder.dockslot')) {
+    const { data: guestTokenData } = await supabase
+      .from('guest_tokens')
+      .select('token')
+      .eq('booking_id', booking.id)
+      .single();
+
+    const vesselRes = booking.vessel_id
+      ? await supabase.from('vessels').select('name').eq('id', booking.vessel_id).single()
+      : { data: null };
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dockslot.app';
+    const managementUrl = guestTokenData
+      ? `${appUrl}/manage/${guestTokenData.token}`
+      : `${appUrl}`;
+
+    sendRescheduleConfirmation({
+      to: booking.guest_email,
+      guestName: booking.guest_name,
+      tripType: booking.trip_type?.title || 'Charter Trip',
+      oldDate: format(parseISO(booking.scheduled_start), 'EEEE, MMMM d, yyyy'),
+      newDate: format(parseISO(offer.proposed_start), 'EEEE, MMMM d, yyyy'),
+      newTime: format(parseISO(offer.proposed_start), 'h:mm a'),
+      vessel: vesselRes.data?.name || 'Charter Vessel',
+      managementUrl,
+    }).catch(err => {
+      console.warn('Failed to send reschedule confirmation email:', err);
+    });
+  }
 
   return { success: true, data: data as Booking };
 }
