@@ -3,7 +3,7 @@
  * Sent 24 or 48 hours before scheduled departure
  */
 
-import { sendEmail } from './resend';
+import { sendEmail, containsPlaceholderText } from './resend';
 
 export async function sendTripReminder(params: {
   to: string;
@@ -33,7 +33,11 @@ export async function sendTripReminder(params: {
     ? params.whatToBring.split('\n').filter(Boolean).map(item => `<li>${item.trim()}</li>`).join('')
     : `<li>Photo ID</li><li>Sunscreen &amp; sunglasses</li><li>Light jacket or windbreaker</li><li>Camera or phone for photos</li><li>Any medications you may need</li><li>Snacks &amp; beverages (if allowed)</li>`;
 
-  const displayName = params.businessName || 'DockSlot';
+  // Strip placeholder values from branding fields, falling back to real data
+  const safeBusinessName = params.businessName && !containsPlaceholderText(params.businessName) ? params.businessName : undefined;
+  const safeLogoUrl = params.logoUrl && !containsPlaceholderText(params.logoUrl) ? params.logoUrl : undefined;
+  const safeEmailSignature = params.emailSignature && !containsPlaceholderText(params.emailSignature) ? params.emailSignature : undefined;
+  const displayName = safeBusinessName || 'DockSlot';
   const timingLabel = params.reminderTiming === '48h' ? 'in 2 days' : 'tomorrow';
 
   const html = `
@@ -47,7 +51,7 @@ export async function sendTripReminder(params: {
   <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto; background-color: #1e293b;">
     <tr>
       <td style="padding: 40px 20px; text-align: center; background: linear-gradient(to bottom, #0c4a6e, #0f172a);">
-        ${params.logoUrl ? `<img src="${params.logoUrl}" alt="${displayName}" style="max-height: 60px; margin-bottom: 10px;">` : ''}
+        ${safeLogoUrl ? `<img src="${safeLogoUrl}" alt="${displayName}" style="max-height: 60px; margin-bottom: 10px;">` : ''}
         <h1 style="margin: 0; color: #06b6d4; font-size: 28px;">Trip Reminder</h1>
         <p style="margin: 10px 0 0; color: #94a3b8;">Your charter is ${timingLabel}!</p>
       </td>
@@ -113,9 +117,9 @@ export async function sendTripReminder(params: {
           </a>
         </div>
 
-        ${params.emailSignature ? `
+        ${safeEmailSignature ? `
         <div style="margin: 20px 0 0; padding-top: 15px; border-top: 1px solid #334155;">
-          <p style="margin: 0; color: #94a3b8; font-size: 13px; white-space: pre-line;">${params.emailSignature}</p>
+          <p style="margin: 0; color: #94a3b8; font-size: 13px; white-space: pre-line;">${safeEmailSignature}</p>
         </div>
         ` : `
         <p style="margin: 30px 0 0; color: #94a3b8; text-align: center; font-size: 14px;">

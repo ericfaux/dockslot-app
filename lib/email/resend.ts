@@ -11,6 +11,28 @@ interface EmailParams {
   from?: string;
 }
 
+/**
+ * Checks if a branding field value contains placeholder/example text
+ * that should not appear in real emails.
+ */
+export function containsPlaceholderText(value: string | undefined | null): boolean {
+  if (!value) return false;
+  const lower = value.toLowerCase();
+  return (
+    lower.includes('example.com') ||
+    lower.includes('captain mike') ||
+    lower.includes('(555) 123-4567')
+  );
+}
+
+/**
+ * Returns the value if it's not placeholder text, otherwise returns undefined.
+ */
+function stripPlaceholder(value: string | undefined): string | undefined {
+  if (!value || containsPlaceholderText(value)) return undefined;
+  return value;
+}
+
 const DEFAULT_FROM = 'DockSlot <bookings@dockslot.app>';
 
 export async function sendEmail({ to, subject, html, from = DEFAULT_FROM }: EmailParams): Promise<{
@@ -83,7 +105,11 @@ export async function sendBookingConfirmation(params: {
     ? params.whatToBring.split('\n').filter(Boolean).map(item => `<li>${item.trim()}</li>`).join('')
     : `<li>Photo ID</li><li>Sunscreen &amp; sunglasses</li><li>Light jacket or windbreaker</li><li>Camera or phone for photos</li><li>Any medications you may need</li>`;
 
-  const displayName = params.businessName || params.captainName;
+  // Strip placeholder values from branding fields, falling back to real data
+  const safeBusinessName = stripPlaceholder(params.businessName);
+  const safeLogoUrl = stripPlaceholder(params.logoUrl);
+  const safeEmailSignature = stripPlaceholder(params.emailSignature);
+  const displayName = safeBusinessName || params.captainName;
 
   const html = `
 <!DOCTYPE html>
@@ -96,7 +122,7 @@ export async function sendBookingConfirmation(params: {
   <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto; background-color: #1e293b;">
     <tr>
       <td style="padding: 40px 20px; text-align: center; background: linear-gradient(to bottom, #0c4a6e, #0f172a);">
-        ${params.logoUrl ? `<img src="${params.logoUrl}" alt="${displayName}" style="max-height: 60px; margin-bottom: 10px;">` : ''}
+        ${safeLogoUrl ? `<img src="${safeLogoUrl}" alt="${displayName}" style="max-height: 60px; margin-bottom: 10px;">` : ''}
         <h1 style="margin: 0; color: #06b6d4; font-size: 28px;">${displayName}</h1>
         <p style="margin: 10px 0 0; color: #94a3b8;">Charter Booking Confirmed</p>
       </td>
@@ -161,9 +187,9 @@ export async function sendBookingConfirmation(params: {
           </a>
         </div>
 
-        ${params.emailSignature ? `
+        ${safeEmailSignature ? `
         <div style="margin: 20px 0 0; padding-top: 15px; border-top: 1px solid #334155;">
-          <p style="margin: 0; color: #94a3b8; font-size: 13px; white-space: pre-line;">${params.emailSignature}</p>
+          <p style="margin: 0; color: #94a3b8; font-size: 13px; white-space: pre-line;">${safeEmailSignature}</p>
         </div>
         ` : ''}
       </td>
@@ -570,7 +596,10 @@ export async function sendDepositReminder(params: {
   businessName?: string;
   logoUrl?: string;
 }): Promise<{ success: boolean; error?: string; messageId?: string }> {
-  const displayName = params.businessName || params.captainName;
+  // Strip placeholder values from branding fields, falling back to real data
+  const safeBusinessName = stripPlaceholder(params.businessName);
+  const safeLogoUrl = stripPlaceholder(params.logoUrl);
+  const displayName = safeBusinessName || params.captainName;
 
   const html = `
 <!DOCTYPE html>
@@ -583,7 +612,7 @@ export async function sendDepositReminder(params: {
   <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto; background-color: #1e293b;">
     <tr>
       <td style="padding: 40px 20px; text-align: center; background: linear-gradient(to bottom, #92400e, #0f172a);">
-        ${params.logoUrl ? `<img src="${params.logoUrl}" alt="${displayName}" style="max-height: 60px; margin-bottom: 10px;">` : ''}
+        ${safeLogoUrl ? `<img src="${safeLogoUrl}" alt="${displayName}" style="max-height: 60px; margin-bottom: 10px;">` : ''}
         <h1 style="margin: 0; color: #fbbf24; font-size: 28px;">Deposit Reminder</h1>
         <p style="margin: 10px 0 0; color: #94a3b8;">Complete Your Booking</p>
       </td>
@@ -658,7 +687,10 @@ export async function sendCancellationConfirmation(params: {
   businessName?: string;
   logoUrl?: string;
 }): Promise<{ success: boolean; error?: string; messageId?: string }> {
-  const displayName = params.businessName || params.captainName;
+  // Strip placeholder values from branding fields, falling back to real data
+  const safeBusinessName = stripPlaceholder(params.businessName);
+  const safeLogoUrl = stripPlaceholder(params.logoUrl);
+  const displayName = safeBusinessName || params.captainName;
 
   const html = `
 <!DOCTYPE html>
@@ -671,7 +703,7 @@ export async function sendCancellationConfirmation(params: {
   <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto; background-color: #1e293b;">
     <tr>
       <td style="padding: 40px 20px; text-align: center; background: linear-gradient(to bottom, #991b1b, #0f172a);">
-        ${params.logoUrl ? `<img src="${params.logoUrl}" alt="${displayName}" style="max-height: 60px; margin-bottom: 10px;">` : ''}
+        ${safeLogoUrl ? `<img src="${safeLogoUrl}" alt="${displayName}" style="max-height: 60px; margin-bottom: 10px;">` : ''}
         <h1 style="margin: 0; color: #fca5a5; font-size: 28px;">Booking Cancelled</h1>
         <p style="margin: 10px 0 0; color: #94a3b8;">Cancellation Confirmation</p>
       </td>
