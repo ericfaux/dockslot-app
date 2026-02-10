@@ -48,14 +48,15 @@ export default async function BookingPage({ params }: BookingPageProps) {
     notFound();
   }
 
-  // Fetch vessel (optional for display)
+  // Fetch vessels to determine max party size (single-vessel capacity)
   const { data: vessels } = await supabase
     .from('vessels')
-    .select('*')
-    .eq('owner_id', captainId)
-    .limit(1);
+    .select('id, capacity')
+    .eq('owner_id', captainId);
 
-  const vessel = vessels?.[0];
+  const maxVesselCapacity = vessels && vessels.length > 0
+    ? Math.max(...vessels.map(v => v.capacity))
+    : 6;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -105,14 +106,6 @@ export default async function BookingPage({ params }: BookingPageProps) {
                 {tripType.duration_hours} hours
               </span>
             </div>
-            {vessel && (
-              <div className="flex justify-between">
-                <span className="text-slate-500">Vessel</span>
-                <span className="font-medium text-slate-900">
-                  {vessel.name} (up to {vessel.capacity} guests)
-                </span>
-              </div>
-            )}
             <div className="border-t border-slate-200 pt-3">
               <div className="flex justify-between text-base">
                 <span className="font-semibold text-slate-900">Total Price</span>
@@ -137,7 +130,7 @@ export default async function BookingPage({ params }: BookingPageProps) {
           tripDuration={tripType.duration_hours}
           depositAmount={tripType.deposit_amount}
           totalPrice={tripType.price_total}
-          maxCapacity={vessel?.capacity || 6}
+          maxCapacity={maxVesselCapacity}
           captainTimezone={profile.timezone || undefined}
           cancellationPolicy={profile.cancellation_policy || undefined}
           meetingSpotLatitude={profile.meeting_spot_latitude || undefined}

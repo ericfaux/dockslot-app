@@ -90,6 +90,10 @@ export async function GET(
       .eq('owner_id', captainId);
 
     const totalCapacity = vessels?.reduce((sum, v) => sum + v.capacity, 0) || 6;
+    // Max capacity of a single vessel — this is what a customer can actually book
+    const maxVesselCapacity = vessels && vessels.length > 0
+      ? Math.max(...vessels.map(v => v.capacity))
+      : 6;
 
     // Fetch availability windows (weekly schedule)
     const { data: availabilityWindows } = await supabase
@@ -177,19 +181,23 @@ export async function GET(
           }) || [];
 
           const bookedCount = overlappingBookings.length;
-          const remainingCapacity = Math.max(0, totalCapacity - overlappingBookings.reduce((sum, b) => sum + (b.party_size || 1), 0));
-          const isBooked = bookedCount > 0;
+          const combinedRemaining = Math.max(0, totalCapacity - overlappingBookings.reduce((sum, b) => sum + (b.party_size || 1), 0));
+          // Display per-vessel capacity so customers see the max their party can be
+          const displayRemaining = Math.min(combinedRemaining, maxVesselCapacity);
 
           // Check if slot is within buffer time from now
           const isWithinBuffer = isBefore(slotStart, addHours(now, bufferMinutes / 60));
 
+          // Slot is available as long as any vessel has remaining capacity
+          const isAvailable = combinedRemaining > 0 && !isWithinBuffer;
+
           slots.push({
             start: format(slotStart, 'HH:mm'),
             end: format(slotEnd, 'HH:mm'),
-            available: !isBooked && !isWithinBuffer,
+            available: isAvailable,
             booked_count: bookedCount,
-            total_capacity: totalCapacity,
-            remaining_capacity: isWithinBuffer ? 0 : remainingCapacity,
+            total_capacity: maxVesselCapacity,
+            remaining_capacity: isWithinBuffer ? 0 : displayRemaining,
           });
 
           // Move to next slot (30-minute intervals)

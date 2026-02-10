@@ -378,7 +378,7 @@ export function DateSlotPicker({
                         <span className={`text-xs ${
                           isLastSpot ? 'text-amber-600 font-medium' : 'text-emerald-600'
                         }`}>
-                          {slot.remaining_capacity} of {slot.total_capacity} spots
+                          {slot.remaining_capacity} {slot.remaining_capacity === 1 ? 'spot' : 'spots'} available
                         </span>
                       )}
                     </div>
