@@ -1,6 +1,7 @@
 'use client';
 
 import { Tag, TrendingUp, DollarSign, Hash, Percent } from 'lucide-react';
+import { EmptyState } from '@/components/EmptyState';
 import type { PromoCodeAnalyticsData } from '@/app/actions/analytics';
 
 interface Props {
@@ -19,13 +20,14 @@ export function PromoCodesTab({ data }: Props) {
 
   if (data.totalCodes === 0) {
     return (
-      <div className="text-center py-16">
-        <Tag className="h-12 w-12 text-slate-600 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-slate-900 mb-2">No Promo Codes Yet</h3>
-        <p className="text-sm text-slate-400 max-w-md mx-auto">
-          Create promo codes in Settings to start offering discounts and tracking their performance here.
-        </p>
-      </div>
+      <EmptyState
+        icon={Tag}
+        title="No Promo Codes Yet"
+        description="Create promo codes in Settings to start offering discounts and tracking their performance here."
+        actions={[
+          { label: 'Create Promo Code', href: '/dashboard/settings?tab=promo-codes' },
+        ]}
+      />
     );
   }
 

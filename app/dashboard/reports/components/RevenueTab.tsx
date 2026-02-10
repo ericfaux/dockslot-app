@@ -1,6 +1,7 @@
 'use client';
 
 import { DollarSign, TrendingUp, TrendingDown, AlertCircle } from 'lucide-react';
+import { EmptyState } from '@/components/EmptyState';
 import {
   BarChart,
   Bar,
@@ -41,13 +42,14 @@ export function RevenueTab({ data }: Props) {
 
   if (!hasData) {
     return (
-      <div className="rounded-lg border border-slate-200 bg-white p-12 text-center">
-        <DollarSign className="mx-auto h-12 w-12 text-slate-600" />
-        <h3 className="mt-4 text-lg font-medium text-slate-900">No revenue data yet</h3>
-        <p className="mt-2 text-sm text-slate-400">
-          Revenue metrics will appear once you start receiving payments for bookings.
-        </p>
-      </div>
+      <EmptyState
+        icon={DollarSign}
+        title="No revenue data yet"
+        description="Connect your Stripe account to start collecting deposits and tracking revenue."
+        actions={[
+          { label: 'Connect Stripe', href: '/dashboard/settings?tab=payments' },
+        ]}
+      />
     );
   }
 
