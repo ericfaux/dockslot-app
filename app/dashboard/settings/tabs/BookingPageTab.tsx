@@ -14,6 +14,8 @@ import {
   Download,
   Trash2,
   AlertCircle,
+  Palette,
+  Code,
 } from 'lucide-react';
 import { Profile, HibernationSubscriber, TripType } from '@/lib/db/types';
 import { updateProfile } from '@/app/actions/profile';
@@ -23,6 +25,8 @@ import {
   exportHibernationSubscribers,
 } from '@/app/actions/hibernation-subscribers';
 import { BookingLinkCard } from '@/components/BookingLinkCard';
+import { ImageUpload } from '@/components/ui/ImageUpload';
+import { EmbedCodeSnippet } from '../components/EmbedCodeSnippet';
 import ReferralProgramClient from '../referrals/ReferralProgramClient';
 import PromoCodesClient from '../promo-codes/PromoCodesClient';
 
@@ -46,6 +50,11 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
   const [hibernationShowContactInfo, setHibernationShowContactInfo] = useState(initialProfile?.hibernation_show_contact_info ?? false);
   const [cancellationPolicy, setCancellationPolicy] = useState(initialProfile?.cancellation_policy || '');
 
+  // Branding state
+  const [heroImageUrl, setHeroImageUrl] = useState(initialProfile?.hero_image_url || '');
+  const [bookingTagline, setBookingTagline] = useState(initialProfile?.booking_tagline || '');
+  const [brandAccentColor, setBrandAccentColor] = useState(initialProfile?.brand_accent_color || '#0891b2');
+
   const timezone = initialProfile?.timezone || 'America/New_York';
 
   // Subscriber management state
@@ -62,9 +71,12 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
       hibernationShowReturnDate !== (initialProfile?.hibernation_show_return_date ?? true) ||
       hibernationAllowNotifications !== (initialProfile?.hibernation_allow_notifications ?? true) ||
       hibernationShowContactInfo !== (initialProfile?.hibernation_show_contact_info ?? false) ||
-      cancellationPolicy !== (initialProfile?.cancellation_policy || '')
+      cancellationPolicy !== (initialProfile?.cancellation_policy || '') ||
+      heroImageUrl !== (initialProfile?.hero_image_url || '') ||
+      bookingTagline !== (initialProfile?.booking_tagline || '') ||
+      brandAccentColor !== (initialProfile?.brand_accent_color || '#0891b2')
     );
-  }, [isHibernating, hibernationMessage, hibernationEndDate, hibernationResumeTime, hibernationShowReturnDate, hibernationAllowNotifications, hibernationShowContactInfo, cancellationPolicy, initialProfile]);
+  }, [isHibernating, hibernationMessage, hibernationEndDate, hibernationResumeTime, hibernationShowReturnDate, hibernationAllowNotifications, hibernationShowContactInfo, cancellationPolicy, heroImageUrl, bookingTagline, brandAccentColor, initialProfile]);
 
   const loadSubscribers = async () => {
     if (subscribersLoading) return;
@@ -117,6 +129,9 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
         hibernation_allow_notifications: hibernationAllowNotifications,
         hibernation_show_contact_info: hibernationShowContactInfo,
         cancellation_policy: cancellationPolicy || null,
+        hero_image_url: heroImageUrl || null,
+        booking_tagline: bookingTagline || null,
+        brand_accent_color: brandAccentColor || '#0891b2',
       });
 
       if (result.success) {
@@ -149,6 +164,107 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
       {/* Booking Link */}
       {initialProfile?.id && (
         <BookingLinkCard captainId={initialProfile.id} />
+      )}
+
+      {/* Branding */}
+      <section className={sectionClassName}>
+        <div className="mb-4 flex items-center gap-2">
+          <Palette className="h-5 w-5 text-cyan-600" />
+          <h2 className="text-lg font-semibold text-slate-900">Branding</h2>
+        </div>
+        <p className="mb-4 text-sm text-slate-400">
+          Customize the look of your public booking page with your own branding.
+        </p>
+
+        {/* Hero Image */}
+        <ImageUpload
+          currentImageUrl={heroImageUrl || null}
+          onUpload={(url) => setHeroImageUrl(url)}
+          onRemove={() => setHeroImageUrl('')}
+          bucket="captain-assets"
+          storagePath={`${initialProfile?.id}/hero`}
+          label="Hero Image"
+          hint="Displayed as the cover photo on your booking page. Recommended: 1200x400px."
+          aspectRatio="16/5"
+        />
+
+        {/* Booking Tagline */}
+        <div className="mt-4">
+          <label htmlFor="bookingTagline" className={labelClassName}>
+            Booking Tagline
+          </label>
+          <input
+            type="text"
+            id="bookingTagline"
+            value={bookingTagline}
+            onChange={(e) => setBookingTagline(e.target.value)}
+            maxLength={200}
+            placeholder="e.g., Experience the best fishing in the Gulf!"
+            className={inputClassName}
+          />
+          <p className="mt-1.5 text-xs text-slate-500">
+            {bookingTagline.length}/200 characters. Displayed below your business name on the booking page.
+          </p>
+        </div>
+
+        {/* Brand Accent Color */}
+        <div className="mt-4">
+          <label className={labelClassName}>Brand Accent Color</label>
+          <div className="flex items-center gap-3">
+            <input
+              type="color"
+              value={brandAccentColor}
+              onChange={(e) => setBrandAccentColor(e.target.value)}
+              className="h-10 w-14 cursor-pointer rounded border border-slate-200 bg-white p-1"
+            />
+            <input
+              type="text"
+              value={brandAccentColor}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (/^#[0-9a-fA-F]{0,6}$/.test(val) || val === '#') {
+                  setBrandAccentColor(val);
+                }
+              }}
+              maxLength={7}
+              className={`${inputClassName} w-28 font-mono`}
+            />
+            <div
+              className="h-10 flex-1 rounded-lg flex items-center justify-center text-white text-sm font-medium"
+              style={{ backgroundColor: brandAccentColor }}
+            >
+              Preview
+            </div>
+          </div>
+          <div className="mt-1.5 flex items-center justify-between">
+            <p className="text-xs text-slate-500">
+              Used for buttons and highlights on your booking page.
+            </p>
+            {brandAccentColor !== '#0891b2' && (
+              <button
+                type="button"
+                onClick={() => setBrandAccentColor('#0891b2')}
+                className="text-xs text-cyan-600 hover:underline"
+              >
+                Reset to default
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Embed on Your Website */}
+      {initialProfile?.id && (
+        <section className={sectionClassName}>
+          <div className="mb-4 flex items-center gap-2">
+            <Code className="h-5 w-5 text-cyan-600" />
+            <h2 className="text-lg font-semibold text-slate-900">Embed on Your Website</h2>
+          </div>
+          <p className="mb-4 text-sm text-slate-400">
+            Paste this code into your website to embed your trip selection directly on any page.
+          </p>
+          <EmbedCodeSnippet captainId={initialProfile.id} />
+        </section>
       )}
 
       {/* Cancellation Policy */}

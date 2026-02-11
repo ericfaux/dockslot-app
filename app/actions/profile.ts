@@ -53,6 +53,9 @@ export interface UpdateProfileParams {
   venmo_enabled?: boolean;
   zelle_enabled?: boolean;
   auto_confirm_manual_payments?: boolean;
+  hero_image_url?: string | null;
+  booking_tagline?: string | null;
+  brand_accent_color?: string | null;
 }
 
 // ============================================================================
@@ -346,6 +349,29 @@ export async function updateProfile(
   // Auto-confirm alternative payments
   if (params.auto_confirm_manual_payments !== undefined) {
     updateData.auto_confirm_manual_payments = Boolean(params.auto_confirm_manual_payments);
+  }
+
+  // Hero image URL
+  if (params.hero_image_url !== undefined) {
+    updateData.hero_image_url = sanitizeText(params.hero_image_url, 2000);
+  }
+
+  // Booking tagline
+  if (params.booking_tagline !== undefined) {
+    updateData.booking_tagline = sanitizeText(params.booking_tagline, 200);
+  }
+
+  // Brand accent color
+  if (params.brand_accent_color !== undefined) {
+    if (params.brand_accent_color) {
+      const hexRegex = /^#[0-9a-fA-F]{6}$/;
+      if (!hexRegex.test(params.brand_accent_color)) {
+        return { success: false, error: 'Invalid accent color format (must be #RRGGBB)', code: 'VALIDATION' };
+      }
+      updateData.brand_accent_color = params.brand_accent_color;
+    } else {
+      updateData.brand_accent_color = '#0891b2';
+    }
   }
 
   if (Object.keys(updateData).length === 0) {

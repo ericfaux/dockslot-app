@@ -1,6 +1,7 @@
 // components/booking/ProgressIndicator.tsx
 // Mobile-friendly booking progress indicator (light theme)
 // Shows current step with labels and visual progress bar
+// Uses CSS variables from BrandedLayout for accent color
 
 'use client';
 
@@ -26,15 +27,18 @@ export function ProgressIndicator({ steps, currentStep, className = '' }: Progre
           <span className="text-sm font-medium text-slate-900">
             Step {currentStep} of {steps.length}
           </span>
-          <span className="text-sm text-cyan-700 font-medium">
+          <span className="text-sm font-medium" style={{ color: 'var(--brand-accent, #0e7490)' }}>
             {steps[currentStep - 1]?.shortLabel || steps[currentStep - 1]?.label}
           </span>
         </div>
         {/* Progress bar */}
         <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
           <div
-            className="h-full bg-cyan-600 transition-all duration-300 ease-out rounded-full"
-            style={{ width: `${(currentStep / steps.length) * 100}%` }}
+            className="h-full transition-all duration-300 ease-out rounded-full"
+            style={{
+              backgroundColor: 'var(--brand-accent, #0891b2)',
+              width: `${(currentStep / steps.length) * 100}%`,
+            }}
           />
         </div>
       </div>
@@ -54,10 +58,17 @@ export function ProgressIndicator({ steps, currentStep, className = '' }: Progre
                   className={`
                     flex h-10 w-10 items-center justify-center rounded-full
                     text-sm font-semibold transition-all
-                    ${isCompleted ? 'bg-cyan-600 text-white' : ''}
-                    ${isCurrent ? 'bg-cyan-600 text-white ring-4 ring-cyan-100' : ''}
                     ${isUpcoming ? 'bg-slate-200 text-slate-400' : ''}
                   `}
+                  style={
+                    isCompleted || isCurrent
+                      ? {
+                          backgroundColor: 'var(--brand-accent, #0891b2)',
+                          color: 'white',
+                          ...(isCurrent ? { boxShadow: '0 0 0 4px var(--brand-accent-light, #ecfeff)' } : {}),
+                        }
+                      : undefined
+                  }
                 >
                   {isCompleted ? (
                     <Check className="h-5 w-5" />
@@ -68,10 +79,10 @@ export function ProgressIndicator({ steps, currentStep, className = '' }: Progre
                 <span
                   className={`
                     mt-2 text-xs font-medium whitespace-nowrap
-                    ${isCurrent ? 'text-cyan-700' : ''}
                     ${isCompleted ? 'text-slate-600' : ''}
                     ${isUpcoming ? 'text-slate-400' : ''}
                   `}
+                  style={isCurrent ? { color: 'var(--brand-accent, #0e7490)' } : undefined}
                 >
                   {step.label}
                 </span>
@@ -80,11 +91,17 @@ export function ProgressIndicator({ steps, currentStep, className = '' }: Progre
               {/* Connector line */}
               {index < steps.length - 1 && (
                 <div
-                  className={`
-                    h-0.5 w-12 mx-3 transition-colors
-                    ${stepNum < currentStep ? 'bg-cyan-600' : 'bg-slate-200'}
-                  `}
-                />
+                  className="h-0.5 w-12 mx-3 transition-colors"
+                  style={{
+                    backgroundColor: stepNum < currentStep
+                      ? 'var(--brand-accent, #0891b2)'
+                      : undefined,
+                  }}
+                >
+                  {stepNum >= currentStep && (
+                    <div className="h-full bg-slate-200" />
+                  )}
+                </div>
               )}
             </div>
           );

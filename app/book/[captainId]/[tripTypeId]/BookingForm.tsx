@@ -312,7 +312,7 @@ export function BookingForm({
         <div className="space-y-6">
           <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
             <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-slate-900">
-              <Calendar className="h-5 w-5 text-cyan-600" />
+              <Calendar className="h-5 w-5" style={{ color: 'var(--brand-accent, #0891b2)' }} />
               Select Date & Time
             </h3>
 
@@ -374,7 +374,7 @@ export function BookingForm({
           {/* Guest Information */}
           <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
             <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-slate-900">
-              <Users className="h-5 w-5 text-cyan-600" />
+              <Users className="h-5 w-5" style={{ color: 'var(--brand-accent, #0891b2)' }} />
               Contact Information
             </h3>
 
@@ -521,7 +521,8 @@ export function BookingForm({
                     type="button"
                     onClick={validatePromoCode}
                     disabled={!promoCode.trim() || promoValidating || promoValid === true}
-                    className="rounded-xl bg-cyan-600 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px]"
+                    className="rounded-xl px-5 py-3 text-sm font-medium text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px]"
+                    style={{ backgroundColor: 'var(--brand-accent, #0891b2)' }}
                   >
                     {promoValidating ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -622,7 +623,7 @@ export function BookingForm({
             summaryContent={
               <div className="flex items-center justify-between text-sm">
                 <span className="text-slate-500">Deposit:</span>
-                <span className="text-cyan-700 font-semibold">
+                <span className="font-semibold" style={{ color: 'var(--brand-accent, #0e7490)' }}>
                   {promoDiscountCents > 0 && promoValid ? (
                     <>
                       <span className="text-slate-400 line-through mr-1.5">{formatDollars(depositAmount)}</span>

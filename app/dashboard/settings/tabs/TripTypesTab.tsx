@@ -10,9 +10,10 @@ import { createTripType, updateTripType, deleteTripType, reactivateTripType } fr
 
 interface TripTypesTabProps {
   initialTripTypes: TripType[];
+  captainId?: string;
 }
 
-export function TripTypesTab({ initialTripTypes }: TripTypesTabProps) {
+export function TripTypesTab({ initialTripTypes, captainId }: TripTypesTabProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [tripTypes, setTripTypes] = useState<TripType[]>(initialTripTypes);
@@ -78,6 +79,8 @@ export function TripTypesTab({ initialTripTypes }: TripTypesTabProps) {
     price_total: number;
     deposit_amount: number;
     description?: string;
+    departure_times?: string[] | null;
+    image_url?: string | null;
   }) => {
     setError(null);
 
@@ -218,6 +221,7 @@ export function TripTypesTab({ initialTripTypes }: TripTypesTabProps) {
         onClose={handleModalClose}
         onSubmit={handleModalSubmit}
         tripType={editingTripType}
+        captainId={captainId}
         error={error}
       />
     </div>

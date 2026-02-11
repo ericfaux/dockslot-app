@@ -150,7 +150,7 @@ export function SettingsTabs(props: SettingsTabsProps) {
           <MeetingSpotTab initialProfile={props.profile} />
         )}
         {activeTab === 'trip-types' && (
-          <TripTypesTab initialTripTypes={props.tripTypes} />
+          <TripTypesTab initialTripTypes={props.tripTypes} captainId={props.profile?.id} />
         )}
         {activeTab === 'vessels' && (
           <VesselsTab initialVessels={props.vessels} />
