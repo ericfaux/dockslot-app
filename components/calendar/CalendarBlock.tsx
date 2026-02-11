@@ -59,7 +59,7 @@ export const CalendarBlock = memo(function CalendarBlock({
             <div className={`truncate text-sm font-semibold ${colors.text}`}>
               {booking.guest_name}
             </div>
-            <div className="flex items-center gap-2 text-slate-400">
+            <div className="flex items-center gap-2 text-slate-300">
               <Clock className="h-3 w-3" />
               <span className="font-mono text-[10px]">
                 {startTime} - {endTime}
@@ -87,7 +87,7 @@ export const CalendarBlock = memo(function CalendarBlock({
             )}
 
             {/* Meta row */}
-            <div className="mt-1 flex items-center gap-3 text-slate-500">
+            <div className="mt-1 flex items-center gap-3 text-slate-400">
               {/* Party size */}
               <div className="flex items-center gap-1">
                 <Users className="h-3 w-3" />
