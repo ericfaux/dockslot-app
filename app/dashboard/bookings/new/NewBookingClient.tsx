@@ -39,6 +39,10 @@ export function NewBookingClient({
   const [startTime, setStartTime] = useState('')
   const [endTime, setEndTime] = useState('')
 
+  // Field-level validation errors
+  const [tripTypeError, setTripTypeError] = useState<string | null>(null)
+  const [vesselError, setVesselError] = useState<string | null>(null)
+
   // Guest info
   const [guestName, setGuestName] = useState('')
   const [guestEmail, setGuestEmail] = useState('')
@@ -77,6 +81,13 @@ export function NewBookingClient({
     }
   }, [selectedTripType, startTime, date])
 
+  // Auto-select trip type if only one exists
+  useEffect(() => {
+    if (tripTypes.length === 1 && !tripTypeId) {
+      setTripTypeId(tripTypes[0].id)
+    }
+  }, [tripTypes, tripTypeId])
+
   // Auto-select vessel if only one exists
   useEffect(() => {
     if (vessels.length === 1 && !vesselId) {
@@ -99,8 +110,21 @@ export function NewBookingClient({
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
+    setTripTypeError(null)
+    setVesselError(null)
 
     // Client-side validation
+    let hasFieldError = false
+    if (!tripTypeId) {
+      setTripTypeError('Please select a trip type')
+      hasFieldError = true
+    }
+    if (!vesselId) {
+      setVesselError('Please select a vessel')
+      hasFieldError = true
+    }
+    if (hasFieldError) return
+
     if (!guestName.trim()) {
       setError('Guest name is required')
       return
@@ -175,16 +199,22 @@ export function NewBookingClient({
             <select
               id="tripType"
               value={tripTypeId}
-              onChange={(e) => setTripTypeId(e.target.value)}
-              className={selectClass}
+              onChange={(e) => {
+                setTripTypeId(e.target.value)
+                if (e.target.value) setTripTypeError(null)
+              }}
+              className={`${selectClass}${tripTypeError ? ' border-red-400 focus:border-red-500 focus:ring-red-500' : ''}`}
             >
-              <option value="">No trip type</option>
+              <option value="">Select a trip type</option>
               {tripTypes.map((t) => (
                 <option key={t.id} value={t.id}>
                   {t.title} ({t.duration_hours}h &mdash; ${t.price_total})
                 </option>
               ))}
             </select>
+            {tripTypeError && (
+              <p className="mt-1 text-sm text-red-600">{tripTypeError}</p>
+            )}
           </div>
 
           <div>
@@ -194,16 +224,22 @@ export function NewBookingClient({
             <select
               id="vessel"
               value={vesselId}
-              onChange={(e) => setVesselId(e.target.value)}
-              className={selectClass}
+              onChange={(e) => {
+                setVesselId(e.target.value)
+                if (e.target.value) setVesselError(null)
+              }}
+              className={`${selectClass}${vesselError ? ' border-red-400 focus:border-red-500 focus:ring-red-500' : ''}`}
             >
-              <option value="">No vessel</option>
+              <option value="">Select a vessel</option>
               {vessels.map((v) => (
                 <option key={v.id} value={v.id}>
                   {v.name} (up to {v.capacity})
                 </option>
               ))}
             </select>
+            {vesselError && (
+              <p className="mt-1 text-sm text-red-600">{vesselError}</p>
+            )}
           </div>
         </div>
 
