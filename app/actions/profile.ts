@@ -51,7 +51,9 @@ export interface UpdateProfileParams {
   venmo_username?: string | null;
   zelle_contact?: string | null;
   venmo_enabled?: boolean;
+  venmo_payment_instructions?: string | null;
   zelle_enabled?: boolean;
+  zelle_payment_instructions?: string | null;
   auto_confirm_manual_payments?: boolean;
 }
 
@@ -338,9 +340,19 @@ export async function updateProfile(
     updateData.venmo_enabled = Boolean(params.venmo_enabled);
   }
 
+  // Venmo payment instructions
+  if (params.venmo_payment_instructions !== undefined) {
+    updateData.venmo_payment_instructions = sanitizeText(params.venmo_payment_instructions, 500);
+  }
+
   // Zelle enabled
   if (params.zelle_enabled !== undefined) {
     updateData.zelle_enabled = Boolean(params.zelle_enabled);
+  }
+
+  // Zelle payment instructions
+  if (params.zelle_payment_instructions !== undefined) {
+    updateData.zelle_payment_instructions = sanitizeText(params.zelle_payment_instructions, 500);
   }
 
   // Auto-confirm alternative payments

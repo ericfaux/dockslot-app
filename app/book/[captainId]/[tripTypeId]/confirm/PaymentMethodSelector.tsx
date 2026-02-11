@@ -24,8 +24,10 @@ interface PaymentMethodSelectorProps {
   stripeConnected: boolean;
   venmoEnabled: boolean;
   venmoUsername: string | null;
+  venmoPaymentInstructions: string | null;
   zelleEnabled: boolean;
   zelleContact: string | null;
+  zellePaymentInstructions: string | null;
   captainId: string;
   tripTypeId: string;
 }
@@ -38,8 +40,10 @@ export function PaymentMethodSelector({
   stripeConnected,
   venmoEnabled,
   venmoUsername,
+  venmoPaymentInstructions,
   zelleEnabled,
   zelleContact,
+  zellePaymentInstructions,
   captainId,
   tripTypeId,
 }: PaymentMethodSelectorProps) {
@@ -261,6 +265,14 @@ export function PaymentMethodSelector({
             Open Venmo
           </a>
 
+          {/* Captain's Custom Payment Instructions */}
+          {venmoPaymentInstructions && (
+            <div className="rounded-lg bg-blue-100 border border-blue-200 p-3">
+              <p className="text-xs font-medium text-blue-800 mb-1">Instructions from captain:</p>
+              <p className="text-sm text-blue-900 whitespace-pre-line">{venmoPaymentInstructions}</p>
+            </div>
+          )}
+
           {/* Confirmation Checkbox */}
           <label className="flex items-start gap-3 cursor-pointer rounded-lg bg-white p-3 border border-blue-100">
             <input
@@ -342,6 +354,14 @@ export function PaymentMethodSelector({
               <strong>{zelleContact}</strong>. Include the booking reference in the memo.
             </p>
           </div>
+
+          {/* Captain's Custom Payment Instructions */}
+          {zellePaymentInstructions && (
+            <div className="rounded-lg bg-purple-100 border border-purple-200 p-3">
+              <p className="text-xs font-medium text-purple-800 mb-1">Instructions from captain:</p>
+              <p className="text-sm text-purple-900 whitespace-pre-line">{zellePaymentInstructions}</p>
+            </div>
+          )}
 
           {/* Confirmation Checkbox */}
           <label className="flex items-start gap-3 cursor-pointer rounded-lg bg-white p-3 border border-purple-100">
