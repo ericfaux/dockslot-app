@@ -171,7 +171,7 @@ export function DateSlotPicker({
         </button>
 
         <div className="flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-cyan-600" />
+          <Calendar className="h-5 w-5" style={{ color: 'var(--brand-accent, #0891b2)' }} />
           <h3 className="text-lg font-semibold text-slate-900">
             {format(currentMonth, 'MMMM yyyy')}
           </h3>
@@ -224,16 +224,32 @@ export function DateSlotPicker({
                   aria-pressed={isSelected}
                   className={`
                     relative min-h-[48px] rounded-xl border text-sm font-medium transition-all
-                    focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:ring-offset-2 focus:ring-offset-white
+                    focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white
                     ${isPast ? 'cursor-not-allowed border-transparent bg-slate-50 text-slate-300' : ''}
                     ${!hasSlots && !isPast ? 'cursor-not-allowed border-slate-100 bg-slate-50 text-slate-400' : ''}
-                    ${hasSlots && !isPast && !isSelected ? 'border-slate-200 bg-white text-slate-900 hover:border-cyan-400 hover:bg-cyan-50 active:scale-95 shadow-sm' : ''}
-                    ${isSelected ? 'border-cyan-600 bg-cyan-600 text-white ring-2 ring-cyan-200' : ''}
-                    ${isTodayDate && !isSelected ? 'border-cyan-300' : ''}
+                    ${hasSlots && !isPast && !isSelected ? 'border-slate-200 bg-white text-slate-900 active:scale-95 shadow-sm' : ''}
+                    ${isSelected ? 'text-white ring-2' : ''}
+                    ${isTodayDate && !isSelected ? '' : ''}
                   `}
+                  style={{
+                    ...(isSelected ? {
+                      borderColor: 'var(--brand-accent, #0891b2)',
+                      backgroundColor: 'var(--brand-accent, #0891b2)',
+                      '--tw-ring-color': 'var(--brand-accent-light, #cffafe)',
+                    } as React.CSSProperties : {}),
+                    ...(isTodayDate && !isSelected ? {
+                      borderColor: 'var(--brand-accent-ring, rgba(8, 145, 178, 0.4))',
+                    } : {}),
+                    ...(hasSlots && !isPast && !isSelected ? {
+                      '--hover-border': 'var(--brand-accent, #22d3ee)',
+                    } as React.CSSProperties : {}),
+                  }}
                 >
                   <div className="flex h-full flex-col items-center justify-center py-2">
-                    <span className={isTodayDate && !isSelected ? 'text-cyan-700 font-bold' : ''}>
+                    <span
+                      className={isTodayDate && !isSelected ? 'font-bold' : ''}
+                      style={isTodayDate && !isSelected ? { color: 'var(--brand-accent, #0e7490)' } : undefined}
+                    >
                       {format(date, 'd')}
                     </span>
                     {hasSlots && !isPast && (
@@ -279,7 +295,7 @@ export function DateSlotPicker({
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-cyan-600" />
+              <Clock className="h-5 w-5" style={{ color: 'var(--brand-accent, #0891b2)' }} />
               <h4 className="font-semibold text-slate-900">
                 {format(selectedDate, 'EEEE, MMMM d')}
               </h4>
@@ -347,31 +363,41 @@ export function DateSlotPicker({
                     className={`
                       relative flex flex-col items-start rounded-xl border p-4 text-left
                       transition-all min-h-[72px]
-                      focus:outline-none focus:ring-2 focus:ring-cyan-500/50
+                      focus:outline-none focus:ring-2
                       active:scale-[0.98]
                       ${isSelectedTime
-                        ? 'border-cyan-600 bg-cyan-50 ring-2 ring-cyan-200'
+                        ? 'ring-2'
                         : isLastSpot
                           ? 'border-amber-300 bg-amber-50/50 hover:border-amber-400 hover:bg-amber-50 shadow-sm'
-                          : 'border-slate-200 bg-white hover:border-cyan-400 hover:bg-cyan-50/50 shadow-sm'
+                          : 'border-slate-200 bg-white shadow-sm'
                       }
                     `}
+                    style={isSelectedTime ? {
+                      borderColor: 'var(--brand-accent, #0891b2)',
+                      backgroundColor: 'var(--brand-accent-light, #ecfeff)',
+                      '--tw-ring-color': 'var(--brand-accent-light, #cffafe)',
+                    } as React.CSSProperties : undefined}
                   >
                     <div className="flex items-baseline gap-1.5">
-                      <span className={`text-lg font-semibold ${
-                        isSelectedTime ? 'text-cyan-800' : 'text-slate-900'
-                      }`}>
+                      <span
+                        className="text-lg font-semibold"
+                        style={{ color: isSelectedTime ? 'var(--brand-accent-hover, #0e7490)' : undefined }}
+                      >
                         {formatTime(slot.start)}
                       </span>
-                      <span className={`text-sm ${isSelectedTime ? 'text-cyan-600' : 'text-slate-400'}`}>
+                      <span
+                        className={`text-sm ${!isSelectedTime ? 'text-slate-400' : ''}`}
+                        style={{ color: isSelectedTime ? 'var(--brand-accent, #0891b2)' : undefined }}
+                      >
                         - {formatTime(slot.end)}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-2 mt-1">
-                      <span className={`text-xs ${
-                        isSelectedTime ? 'text-cyan-600' : 'text-slate-400'
-                      }`}>
+                      <span
+                        className={`text-xs ${!isSelectedTime ? 'text-slate-400' : ''}`}
+                        style={{ color: isSelectedTime ? 'var(--brand-accent, #0891b2)' : undefined }}
+                      >
                         {duration}
                       </span>
                       {slot.total_capacity > 1 && (
@@ -392,7 +418,7 @@ export function DateSlotPicker({
                     )}
 
                     {isSelectedTime && (
-                      <div className="absolute top-3 right-3 h-5 w-5 rounded-full bg-cyan-600 flex items-center justify-center">
+                      <div className="absolute top-3 right-3 h-5 w-5 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--brand-accent, #0891b2)' }}>
                         <svg
                           className="h-3 w-3 text-white"
                           fill="none"
@@ -451,16 +477,25 @@ export function DateSlotPicker({
 
       {/* Selected slot summary */}
       {selectedDate && selectedTime && (
-        <div className="rounded-xl border border-cyan-200 bg-cyan-50 p-4">
+        <div
+          className="rounded-xl border p-4"
+          style={{
+            borderColor: 'var(--brand-accent-ring, rgba(8, 145, 178, 0.25))',
+            backgroundColor: 'var(--brand-accent-light, #ecfeff)',
+          }}
+        >
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-100">
-              <Calendar className="h-5 w-5 text-cyan-700" />
+            <div
+              className="flex h-10 w-10 items-center justify-center rounded-full"
+              style={{ backgroundColor: 'var(--brand-accent-ring, rgba(8, 145, 178, 0.25))' }}
+            >
+              <Calendar className="h-5 w-5" style={{ color: 'var(--brand-accent, #0e7490)' }} />
             </div>
             <div>
-              <p className="text-sm font-medium text-cyan-900">
+              <p className="text-sm font-medium text-slate-900">
                 {format(selectedDate, 'EEEE, MMMM d, yyyy')}
               </p>
-              <p className="text-xs text-cyan-700">
+              <p className="text-xs" style={{ color: 'var(--brand-accent, #0e7490)' }}>
                 {formatTime(selectedTime)} - {tripDuration} hour trip
               </p>
             </div>

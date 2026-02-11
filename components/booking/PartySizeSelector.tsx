@@ -29,7 +29,7 @@ export function PartySizeSelector({
   return (
     <div className={className}>
       <div className="flex items-center gap-2 mb-3">
-        <Users className="h-5 w-5 text-cyan-600" />
+        <Users className="h-5 w-5" style={{ color: 'var(--brand-accent, #0891b2)' }} />
         <span className="text-sm font-medium text-slate-700">
           How many guests?
         </span>
@@ -51,10 +51,15 @@ export function PartySizeSelector({
                 min-h-[72px]
                 ${
                   isSelected
-                    ? 'border-cyan-600 bg-cyan-50 text-cyan-800'
+                    ? ''
                     : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50'
                 }
               `}
+              style={isSelected ? {
+                borderColor: 'var(--brand-accent, #0891b2)',
+                backgroundColor: 'var(--brand-accent-light, #ecfeff)',
+                color: 'var(--brand-accent-hover, #0e7490)',
+              } : undefined}
               aria-pressed={isSelected}
             >
               <span className="text-2xl font-bold">{size}</span>
@@ -64,7 +69,7 @@ export function PartySizeSelector({
 
               {/* Selected indicator */}
               {isSelected && (
-                <div className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-cyan-600 flex items-center justify-center">
+                <div className="absolute -top-1 -right-1 h-4 w-4 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--brand-accent, #0891b2)' }}>
                   <svg
                     className="h-2.5 w-2.5 text-white"
                     fill="none"

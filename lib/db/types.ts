@@ -91,6 +91,9 @@ export interface Profile {
   zelle_payment_instructions: string | null;
   auto_confirm_manual_payments: boolean;
   updated_at: string;
+  hero_image_url: string | null;
+  booking_tagline: string | null;
+  brand_accent_color: string;
 }
 
 export interface Vessel {
@@ -112,6 +115,7 @@ export interface TripType {
   description: string | null;
   departure_times: string[] | null;
   is_active: boolean;
+  image_url: string | null;
   created_at: string;
 }
 

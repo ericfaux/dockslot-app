@@ -58,7 +58,8 @@ export function StripeCheckoutButton({ bookingId, depositAmount }: StripeCheckou
       <button
         onClick={handleCheckout}
         disabled={isLoading}
-        className="w-full rounded-xl bg-cyan-600 px-6 py-4 font-semibold text-white transition-all hover:bg-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[52px]"
+        className="w-full rounded-xl px-6 py-4 font-semibold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[52px]"
+        style={{ backgroundColor: 'var(--brand-accent, #0891b2)' }}
       >
         {isLoading ? (
           <>

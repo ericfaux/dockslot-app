@@ -3,6 +3,7 @@
 import { useState, useTransition, useRef, useCallback } from 'react';
 import { X, Loader2, Plus, Clock } from 'lucide-react';
 import { TripType } from '@/lib/db/types';
+import { ImageUpload } from '@/components/ui/ImageUpload';
 
 // Generate time options in 30-minute increments for the dropdown
 function generateTimeOptions(): { value: string; label: string }[] {
@@ -22,21 +23,25 @@ function generateTimeOptions(): { value: string; label: string }[] {
 
 const TIME_OPTIONS = generateTimeOptions();
 
+interface TripTypeFormData {
+  title: string;
+  duration_hours: number;
+  price_total: number;
+  deposit_amount: number;
+  description?: string;
+  departure_times?: string[] | null;
+  image_url?: string | null;
+}
+
 interface TripTypeFormProps {
   tripType: TripType | null;
-  onSubmit: (data: {
-    title: string;
-    duration_hours: number;
-    price_total: number;
-    deposit_amount: number;
-    description?: string;
-    departure_times?: string[] | null;
-  }) => Promise<boolean>;
+  captainId?: string;
+  onSubmit: (data: TripTypeFormData) => Promise<boolean>;
   onClose: () => void;
   error?: string | null;
 }
 
-function TripTypeForm({ tripType, onSubmit, onClose, error }: TripTypeFormProps) {
+function TripTypeForm({ tripType, captainId, onSubmit, onClose, error }: TripTypeFormProps) {
   const [isPending, startTransition] = useTransition();
   const [formError, setFormError] = useState<string | null>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -53,6 +58,7 @@ function TripTypeForm({ tripType, onSubmit, onClose, error }: TripTypeFormProps)
     tripType?.deposit_amount?.toString() ?? ''
   );
   const [description, setDescription] = useState(tripType?.description ?? '');
+  const [imageUrl, setImageUrl] = useState(tripType?.image_url ?? '');
   const [departureTimes, setDepartureTimes] = useState<string[]>(
     tripType?.departure_times ?? []
   );
@@ -112,9 +118,10 @@ function TripTypeForm({ tripType, onSubmit, onClose, error }: TripTypeFormProps)
         deposit_amount: deposit,
         description: description.trim() || undefined,
         departure_times: departureTimes.length > 0 ? departureTimes : null,
+        image_url: imageUrl || null,
       });
     });
-  }, [title, durationHours, priceTotal, depositAmount, description, departureTimes, onSubmit]);
+  }, [title, durationHours, priceTotal, depositAmount, description, departureTimes, imageUrl, onSubmit]);
 
   const displayError = formError || error;
 
@@ -230,6 +237,19 @@ function TripTypeForm({ tripType, onSubmit, onClose, error }: TripTypeFormProps)
           />
         </div>
 
+        {/* Trip Image */}
+        <ImageUpload
+          currentImageUrl={imageUrl || null}
+          onUpload={(url) => setImageUrl(url)}
+          onRemove={() => setImageUrl('')}
+          bucket="captain-assets"
+          storagePath={`${captainId || 'unknown'}/trips/${tripType?.id || 'new'}`}
+          label="Trip Image"
+          hint="Shown on the trip card. Square or landscape images work best."
+          maxSizeMB={3}
+          aspectRatio="16/9"
+        />
+
         {/* Departure Times */}
         <div>
           <label className="mb-1.5 block text-sm font-medium text-slate-600">
@@ -328,15 +348,9 @@ function TripTypeForm({ tripType, onSubmit, onClose, error }: TripTypeFormProps)
 interface TripTypeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: {
-    title: string;
-    duration_hours: number;
-    price_total: number;
-    deposit_amount: number;
-    description?: string;
-    departure_times?: string[] | null;
-  }) => Promise<boolean>;
+  onSubmit: (data: TripTypeFormData) => Promise<boolean>;
   tripType: TripType | null;
+  captainId?: string;
   error?: string | null;
 }
 
@@ -345,6 +359,7 @@ export function TripTypeModal({
   onClose,
   onSubmit,
   tripType,
+  captainId,
   error,
 }: TripTypeModalProps) {
   const handleBackdropClick = (e: React.MouseEvent) => {
@@ -396,6 +411,7 @@ export function TripTypeModal({
         <TripTypeForm
           key={formKey}
           tripType={tripType}
+          captainId={captainId}
           onSubmit={onSubmit}
           onClose={onClose}
           error={error}

@@ -62,6 +62,9 @@ export interface PublicCaptainProfile {
   zelle_enabled: boolean;
   zelle_contact: string | null;
   stripe_account_id: string | null;
+  hero_image_url: string | null;
+  booking_tagline: string | null;
+  brand_accent_color: string;
 }
 
 export interface CaptainReviewStats {
@@ -102,6 +105,7 @@ export interface PublicTripType {
   price_total: number;
   deposit_amount: number;
   description: string | null;
+  image_url: string | null;
   vessel?: {
     id: string;
     name: string;
@@ -209,7 +213,10 @@ export async function getPublicCaptainProfile(
       venmo_username,
       zelle_enabled,
       zelle_contact,
-      stripe_account_id
+      stripe_account_id,
+      hero_image_url,
+      booking_tagline,
+      brand_accent_color
     `)
     .eq('id', captainId)
     .single();
@@ -330,7 +337,8 @@ export async function getPublicTripTypes(
       duration_hours,
       price_total,
       deposit_amount,
-      description
+      description,
+      image_url
     `)
     .eq('owner_id', captainId)
     .eq('is_active', true)
@@ -367,7 +375,8 @@ export async function getPublicTripType(
       duration_hours,
       price_total,
       deposit_amount,
-      description
+      description,
+      image_url
     `)
     .eq('id', tripTypeId)
     .eq('owner_id', captainId)

@@ -84,10 +84,8 @@ export function CTAButton({
 
   const variantStyles = {
     primary: `
-      bg-cyan-600 text-white
-      hover:bg-cyan-700
+      text-white
       active:scale-[0.98]
-      disabled:hover:bg-cyan-600
     `,
     secondary: `
       border border-slate-300 bg-white text-slate-700
@@ -102,6 +100,7 @@ export function CTAButton({
       onClick={onClick}
       disabled={disabled || loading}
       className={`${baseStyles} ${variantStyles[variant]} ${className}`}
+      style={variant === 'primary' ? { backgroundColor: 'var(--brand-accent, #0891b2)' } : undefined}
     >
       {loading ? (
         <>
