@@ -59,7 +59,7 @@ export const CalendarBlock = memo(function CalendarBlock({
             <div className={`truncate text-sm font-semibold ${colors.text}`}>
               {booking.guest_name}
             </div>
-            <div className="flex items-center gap-2 text-slate-300">
+            <div className="flex items-center gap-2 text-slate-200">
               <Clock className="h-3 w-3" />
               <span className="font-mono text-[10px]">
                 {startTime} - {endTime}
@@ -87,7 +87,7 @@ export const CalendarBlock = memo(function CalendarBlock({
             )}
 
             {/* Meta row */}
-            <div className="mt-1 flex items-center gap-3 text-slate-400">
+            <div className="mt-1 flex items-center gap-3 text-slate-300">
               {/* Party size */}
               <div className="flex items-center gap-1">
                 <Users className="h-3 w-3" />
@@ -118,15 +118,15 @@ export const CalendarBlock = memo(function CalendarBlock({
       {isCompact && (
         <div className="pointer-events-none absolute bottom-full left-0 z-50 mb-1 hidden w-48 rounded-md bg-slate-800 p-2 shadow-lg group-hover:block">
           <div className={`font-semibold ${colors.text}`}>{booking.guest_name}</div>
-          <div className="text-xs text-slate-400">
+          <div className="text-xs text-slate-300">
             {startTime} - {endTime}
           </div>
           {booking.trip_type && (
-            <div className="text-xs text-slate-500">{booking.trip_type.title}</div>
+            <div className="text-xs text-slate-400">{booking.trip_type.title}</div>
           )}
           <div className="mt-1 flex items-center gap-1 text-xs">
             <div className={`h-1.5 w-1.5 rounded-full ${colors.dot}`} />
-            <span className="text-slate-400">{statusLabel}</span>
+            <span className="text-slate-300">{statusLabel}</span>
           </div>
         </div>
       )}

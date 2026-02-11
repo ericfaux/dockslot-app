@@ -192,16 +192,16 @@ export function CalendarWeekView({
         {(['confirmed', 'pending_deposit', 'weather_hold', 'rescheduled'] as BookingStatus[]).map((status) => (
           <div key={status} className="flex items-center gap-1.5 whitespace-nowrap">
             <div className={`h-3 w-3 rounded-full ${STATUS_COLORS[status].dot}`} />
-            <span className="font-mono text-xs text-slate-300">{STATUS_LABELS[status]}</span>
+            <span className="font-mono text-xs font-medium text-slate-200">{STATUS_LABELS[status]}</span>
           </div>
         ))}
         <div className="flex items-center gap-1.5 whitespace-nowrap">
           <div className="h-3 w-3 rounded-full bg-slate-500" />
-          <span className="font-mono text-xs text-slate-300">Completed</span>
+          <span className="font-mono text-xs font-medium text-slate-200">Completed</span>
         </div>
         <div className="flex items-center gap-1.5 whitespace-nowrap">
           <div className="h-3 w-3 rounded-full bg-rose-500" />
-          <span className="font-mono text-xs text-slate-300">Cancelled / No Show</span>
+          <span className="font-mono text-xs font-medium text-slate-200">Cancelled / No Show</span>
         </div>
       </div>
 

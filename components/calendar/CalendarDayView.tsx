@@ -192,9 +192,27 @@ export function CalendarDayView({
         <span className="text-[10px] text-slate-600 font-mono">← swipe to navigate days →</span>
       </div>
 
+      {/* Status Legend */}
+      <div className="flex items-center gap-4 border-b border-slate-700/50 px-4 py-2 overflow-x-auto">
+        {(['confirmed', 'pending_deposit', 'weather_hold', 'rescheduled'] as BookingStatus[]).map((status) => (
+          <div key={status} className="flex items-center gap-1.5 whitespace-nowrap">
+            <div className={`h-3 w-3 rounded-full ${STATUS_COLORS[status].dot}`} />
+            <span className="font-mono text-xs text-slate-300">{STATUS_LABELS[status]}</span>
+          </div>
+        ))}
+        <div className="flex items-center gap-1.5 whitespace-nowrap">
+          <div className="h-3 w-3 rounded-full bg-slate-500" />
+          <span className="font-mono text-xs text-slate-300">Completed</span>
+        </div>
+        <div className="flex items-center gap-1.5 whitespace-nowrap">
+          <div className="h-3 w-3 rounded-full bg-rose-500" />
+          <span className="font-mono text-xs text-slate-300">Cancelled / No Show</span>
+        </div>
+      </div>
+
       {/* Booking summary for the day */}
       <div className="flex items-center gap-3 border-b border-slate-700/50 px-3 py-2">
-        <span className="font-mono text-xs text-slate-400">
+        <span className="font-mono text-xs text-slate-300">
           {dayBookings.length} booking{dayBookings.length !== 1 ? 's' : ''}
         </span>
         {onQuickBlockClick && (
