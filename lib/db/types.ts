@@ -86,7 +86,9 @@ export interface Profile {
   venmo_username: string | null;
   zelle_contact: string | null;
   venmo_enabled: boolean;
+  venmo_payment_instructions: string | null;
   zelle_enabled: boolean;
+  zelle_payment_instructions: string | null;
   auto_confirm_manual_payments: boolean;
   updated_at: string;
 }

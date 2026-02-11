@@ -14,6 +14,7 @@ import {
   ToggleRight,
   CheckCircle,
   AlertCircle,
+  AlertTriangle,
 } from 'lucide-react';
 
 interface PaymentsTabProps {
@@ -28,11 +29,49 @@ export function PaymentsTab(props: PaymentsTabProps) {
   const [isPending, startTransition] = useTransition();
   const [venmoEnabled, setVenmoEnabled] = useState(props.profile?.venmo_enabled ?? false);
   const [venmoUsername, setVenmoUsername] = useState(props.profile?.venmo_username ?? '');
+  const [venmoPaymentInstructions, setVenmoPaymentInstructions] = useState(props.profile?.venmo_payment_instructions ?? '');
   const [zelleEnabled, setZelleEnabled] = useState(props.profile?.zelle_enabled ?? false);
   const [zelleContact, setZelleContact] = useState(props.profile?.zelle_contact ?? '');
+  const [zellePaymentInstructions, setZellePaymentInstructions] = useState(props.profile?.zelle_payment_instructions ?? '');
   const [autoConfirm, setAutoConfirm] = useState(props.profile?.auto_confirm_manual_payments ?? true);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+
+  // Warning dialog state
+  const [warningDialog, setWarningDialog] = useState<'venmo' | 'zelle' | null>(null);
+
+  const handleToggleVenmo = () => {
+    if (!venmoEnabled) {
+      // Turning ON — show warning first
+      setWarningDialog('venmo');
+    } else {
+      // Turning OFF — no warning needed
+      setVenmoEnabled(false);
+    }
+  };
+
+  const handleToggleZelle = () => {
+    if (!zelleEnabled) {
+      // Turning ON — show warning first
+      setWarningDialog('zelle');
+    } else {
+      // Turning OFF — no warning needed
+      setZelleEnabled(false);
+    }
+  };
+
+  const handleConfirmWarning = () => {
+    if (warningDialog === 'venmo') {
+      setVenmoEnabled(true);
+    } else if (warningDialog === 'zelle') {
+      setZelleEnabled(true);
+    }
+    setWarningDialog(null);
+  };
+
+  const handleCancelWarning = () => {
+    setWarningDialog(null);
+  };
 
   const handleSavePaymentMethods = () => {
     setSaveSuccess(false);
@@ -42,8 +81,10 @@ export function PaymentsTab(props: PaymentsTabProps) {
       const result = await updateProfile({
         venmo_enabled: venmoEnabled,
         venmo_username: venmoUsername || null,
+        venmo_payment_instructions: venmoPaymentInstructions || null,
         zelle_enabled: zelleEnabled,
         zelle_contact: zelleContact || null,
+        zelle_payment_instructions: zellePaymentInstructions || null,
         auto_confirm_manual_payments: autoConfirm,
       });
 
@@ -56,8 +97,60 @@ export function PaymentsTab(props: PaymentsTabProps) {
     });
   };
 
+  const warningMethodName = warningDialog === 'venmo' ? 'Venmo' : 'Zelle';
+
   return (
     <div className="space-y-8">
+      {/* Warning Confirmation Dialog */}
+      {warningDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-xl bg-white shadow-2xl">
+            <div className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 flex-shrink-0">
+                  <AlertTriangle className="h-6 w-6 text-amber-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                    Enable {warningMethodName} Payments?
+                  </h3>
+                  <div className="space-y-3 text-sm text-slate-600">
+                    <p>
+                      <strong className="text-slate-900">Important:</strong> DockSlot does not integrate
+                      with {warningMethodName} to automatically track or confirm incoming payments.
+                    </p>
+                    <p>
+                      When a guest selects {warningMethodName} as their payment method, they will send
+                      payment directly to your {warningMethodName} account outside of DockSlot. You will
+                      need to:
+                    </p>
+                    <ul className="list-disc pl-5 space-y-1 text-slate-500">
+                      <li>Manually check your {warningMethodName} account for incoming payments</li>
+                      <li>Confirm payment receipt in DockSlot for each booking</li>
+                      <li>Follow up with guests if payment is not received</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-3 border-t border-slate-200 px-6 py-4">
+              <button
+                onClick={handleCancelWarning}
+                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmWarning}
+                className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-amber-700"
+              >
+                I Understand, Enable {warningMethodName}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Stripe Integration */}
       <div>
         <h3 className="text-lg font-semibold text-slate-900 mb-1">Card Payments (Stripe)</h3>
@@ -96,7 +189,7 @@ export function PaymentsTab(props: PaymentsTabProps) {
                 </div>
               </div>
               <button
-                onClick={() => setVenmoEnabled(!venmoEnabled)}
+                onClick={handleToggleVenmo}
                 className="flex items-center gap-2"
               >
                 {venmoEnabled ? (
@@ -127,6 +220,22 @@ export function PaymentsTab(props: PaymentsTabProps) {
                     Your Venmo username without the @ symbol
                   </p>
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Payment Instructions (Optional)
+                  </label>
+                  <textarea
+                    value={venmoPaymentInstructions}
+                    onChange={(e) => setVenmoPaymentInstructions(e.target.value.slice(0, 500))}
+                    placeholder="e.g., Please do not mark as goods/services. Include your booking number in the payment note."
+                    rows={3}
+                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
+                  />
+                  <p className="mt-1 text-xs text-slate-400">
+                    {venmoPaymentInstructions.length}/500 — These instructions will be shown to guests on the booking page.
+                  </p>
+                </div>
               </div>
             )}
           </div>
@@ -144,7 +253,7 @@ export function PaymentsTab(props: PaymentsTabProps) {
                 </div>
               </div>
               <button
-                onClick={() => setZelleEnabled(!zelleEnabled)}
+                onClick={handleToggleZelle}
                 className="flex items-center gap-2"
               >
                 {zelleEnabled ? (
@@ -170,6 +279,22 @@ export function PaymentsTab(props: PaymentsTabProps) {
                   />
                   <p className="mt-1 text-xs text-slate-400">
                     The email or phone number linked to your Zelle account
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Payment Instructions (Optional)
+                  </label>
+                  <textarea
+                    value={zellePaymentInstructions}
+                    onChange={(e) => setZellePaymentInstructions(e.target.value.slice(0, 500))}
+                    placeholder="e.g., Include your full name and booking number in the memo."
+                    rows={3}
+                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 resize-none"
+                  />
+                  <p className="mt-1 text-xs text-slate-400">
+                    {zellePaymentInstructions.length}/500 — These instructions will be shown to guests on the booking page.
                   </p>
                 </div>
               </div>
@@ -225,9 +350,15 @@ export function PaymentsTab(props: PaymentsTabProps) {
                         <p className="text-xs text-slate-500">Send to @{venmoUsername.replace(/^@/, '')}</p>
                       </div>
                     </div>
-                    <div className="text-xs text-slate-400">
-                      Guest sends payment via Venmo, then confirms on DockSlot.
-                    </div>
+                    {venmoPaymentInstructions ? (
+                      <div className="text-xs text-slate-600 bg-blue-50 rounded-md p-2 mt-2">
+                        {venmoPaymentInstructions}
+                      </div>
+                    ) : (
+                      <div className="text-xs text-slate-400">
+                        Guest sends payment via Venmo, then confirms on DockSlot.
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -242,9 +373,15 @@ export function PaymentsTab(props: PaymentsTabProps) {
                         <p className="text-xs text-slate-500">Send to {zelleContact}</p>
                       </div>
                     </div>
-                    <div className="text-xs text-slate-400">
-                      Guest sends payment via their banking app, then confirms on DockSlot.
-                    </div>
+                    {zellePaymentInstructions ? (
+                      <div className="text-xs text-slate-600 bg-purple-50 rounded-md p-2 mt-2">
+                        {zellePaymentInstructions}
+                      </div>
+                    ) : (
+                      <div className="text-xs text-slate-400">
+                        Guest sends payment via their banking app, then confirms on DockSlot.
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

@@ -85,8 +85,10 @@ export default async function ConfirmPage({ params, searchParams }: ConfirmPageP
   const stripeConnected = !!(profile?.stripe_account_id);
   const venmoEnabled = profile?.venmo_enabled ?? false;
   const venmoUsername = profile?.venmo_username ?? null;
+  const venmoPaymentInstructions = profile?.venmo_payment_instructions ?? null;
   const zelleEnabled = profile?.zelle_enabled ?? false;
   const zelleContact = profile?.zelle_contact ?? null;
+  const zellePaymentInstructions = profile?.zelle_payment_instructions ?? null;
   const hasAltPayment = venmoEnabled || zelleEnabled;
 
   // Determine if deposit needs to be paid
@@ -408,8 +410,10 @@ export default async function ConfirmPage({ params, searchParams }: ConfirmPageP
                     stripeConnected={stripeConnected}
                     venmoEnabled={venmoEnabled}
                     venmoUsername={venmoUsername}
+                    venmoPaymentInstructions={venmoPaymentInstructions}
                     zelleEnabled={zelleEnabled}
                     zelleContact={zelleContact}
+                    zellePaymentInstructions={zellePaymentInstructions}
                     captainId={captainId}
                     tripTypeId={tripTypeId}
                   />
