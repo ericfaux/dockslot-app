@@ -119,7 +119,7 @@ export function DayColumn({
   const isWeekend = date.getDay() === 0 || date.getDay() === 6;
 
   return (
-    <div className="flex flex-1 flex-col border-r border-slate-700/50 last:border-r-0">
+    <div className="flex flex-1 flex-col border-r border-slate-500/70 last:border-r-0">
       {/* Day Header - sticky so it stays visible when scrolling */}
       <div
         className={`sticky top-0 z-10 relative flex h-14 flex-col items-center justify-center border-b border-slate-700/50 ${
@@ -193,7 +193,7 @@ export function DayColumn({
         {gridLines.map((hour, index) => (
           <div
             key={hour}
-            className="absolute left-0 right-0 border-t border-slate-700/30"
+            className="absolute left-0 right-0 border-t border-slate-500/60"
             style={{ top: index * pixelsPerHour }}
           />
         ))}
@@ -218,7 +218,7 @@ export function DayColumn({
         {gridLines.slice(0, -1).map((hour, index) => (
           <div
             key={`half-${hour}`}
-            className="absolute left-0 right-0 border-t border-slate-700/15"
+            className="absolute left-0 right-0 border-t border-slate-600/40"
             style={{ top: index * pixelsPerHour + pixelsPerHour / 2 }}
           />
         ))}

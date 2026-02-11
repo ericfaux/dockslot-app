@@ -191,17 +191,17 @@ export function CalendarWeekView({
       <div className="flex items-center gap-4 border-b border-slate-700/50 px-4 py-2 overflow-x-auto">
         {(['confirmed', 'pending_deposit', 'weather_hold', 'rescheduled'] as BookingStatus[]).map((status) => (
           <div key={status} className="flex items-center gap-1.5 whitespace-nowrap">
-            <div className={`h-2.5 w-2.5 rounded-full ${STATUS_COLORS[status].dot}`} />
-            <span className="font-mono text-[10px] text-slate-400">{STATUS_LABELS[status]}</span>
+            <div className={`h-3 w-3 rounded-full ${STATUS_COLORS[status].dot}`} />
+            <span className="font-mono text-xs font-medium text-slate-200">{STATUS_LABELS[status]}</span>
           </div>
         ))}
         <div className="flex items-center gap-1.5 whitespace-nowrap">
-          <div className="h-2.5 w-2.5 rounded-full bg-slate-500" />
-          <span className="font-mono text-[10px] text-slate-400">Completed</span>
+          <div className="h-3 w-3 rounded-full bg-slate-500" />
+          <span className="font-mono text-xs font-medium text-slate-200">Completed</span>
         </div>
         <div className="flex items-center gap-1.5 whitespace-nowrap">
-          <div className="h-2.5 w-2.5 rounded-full bg-rose-500" />
-          <span className="font-mono text-[10px] text-slate-400">Cancelled / No Show</span>
+          <div className="h-3 w-3 rounded-full bg-rose-500" />
+          <span className="font-mono text-xs font-medium text-slate-200">Cancelled / No Show</span>
         </div>
       </div>
 
