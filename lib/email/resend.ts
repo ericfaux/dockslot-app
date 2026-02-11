@@ -9,6 +9,7 @@ interface EmailParams {
   subject: string;
   html: string;
   from?: string;
+  replyTo?: string;
 }
 
 /**
@@ -35,31 +36,36 @@ function stripPlaceholder(value: string | undefined): string | undefined {
 
 const DEFAULT_FROM = 'DockSlot <bookings@dockslot.app>';
 
-export async function sendEmail({ to, subject, html, from = DEFAULT_FROM }: EmailParams): Promise<{
+export async function sendEmail({ to, subject, html, from = DEFAULT_FROM, replyTo }: EmailParams): Promise<{
   success: boolean;
   error?: string;
   messageId?: string;
 }> {
   const apiKey = process.env.RESEND_API_KEY;
-  
+
   if (!apiKey) {
     console.warn('RESEND_API_KEY not configured — skipping email send');
     return { success: false, error: 'Email service not configured' };
   }
 
   try {
+    const payload: Record<string, unknown> = {
+      from,
+      to: [to],
+      subject,
+      html,
+    };
+    if (replyTo) {
+      payload.reply_to = replyTo;
+    }
+
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        from,
-        to: [to],
-        subject,
-        html,
-      }),
+      body: JSON.stringify(payload),
     });
 
     const data = await response.json();
@@ -507,9 +513,12 @@ export async function sendCustomGuestMessage(params: {
   subject: string;
   message: string;
   bookingId: string;
-}) {
+  captainName?: string;
+  captainEmail?: string;
+}): Promise<{ success: boolean; error?: string; messageId?: string }> {
   const messageHtml = params.message.replace(/\n/g, '<br>');
-  
+  const captainLabel = params.captainName || 'Your Captain';
+
   const html = `
 <!DOCTYPE html>
 <html>
@@ -522,12 +531,12 @@ export async function sendCustomGuestMessage(params: {
     <tr>
       <td align="center" style="padding: 40px 20px;">
         <table role="presentation" style="max-width: 600px; width: 100%; border-collapse: collapse; background-color: #1e293b; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);">
-          
+
           <!-- Header -->
           <tr>
             <td style="padding: 32px 32px 24px; background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);">
               <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 600;">
-                ⚓ Message from Your Captain
+                ⚓ Message from ${captainLabel}
               </h1>
             </td>
           </tr>
@@ -538,7 +547,7 @@ export async function sendCustomGuestMessage(params: {
               <p style="margin: 0 0 16px; color: #e2e8f0; font-size: 16px; line-height: 1.6;">
                 Hi ${params.guestName},
               </p>
-              
+
               <div style="margin: 24px 0; padding: 20px; background-color: #0f172a; border-left: 4px solid #06b6d4; border-radius: 6px;">
                 <p style="margin: 0; color: #e2e8f0; font-size: 15px; line-height: 1.7; white-space: pre-wrap;">
 ${messageHtml}
@@ -572,10 +581,17 @@ ${messageHtml}
 </html>
   `;
 
+  // Use captain's name in sender and set reply-to their email
+  const from = params.captainName
+    ? `${params.captainName} via DockSlot <bookings@dockslot.app>`
+    : DEFAULT_FROM;
+
   return sendEmail({
     to: params.to,
     subject: params.subject,
     html,
+    from,
+    replyTo: params.captainEmail,
   });
 }
 

@@ -26,12 +26,12 @@ export async function POST(
       )
     }
 
-    // Get booking with guest details
+    // Get booking with guest details and captain info
     const { data: booking, error: bookingError } = await supabase
       .from('bookings')
       .select(`
         *,
-        captain_profiles!inner(user_id),
+        captain_profiles!inner(user_id, full_name, email),
         vessels(name),
         trip_types(name)
       `)
@@ -55,18 +55,23 @@ export async function POST(
     }
 
     // Send email via Resend
-    try {
-      await sendCustomGuestMessage({
-        to: booking.guest_email,
-        guestName: booking.guest_name,
-        subject,
-        message,
-        bookingId: booking.id,
-      })
-    } catch (emailError) {
-      console.error('Email send failed:', emailError)
+    const captainName = booking.captain_profiles.full_name || undefined
+    const captainEmail = booking.captain_profiles.email || user.email || undefined
+
+    const emailResult = await sendCustomGuestMessage({
+      to: booking.guest_email,
+      guestName: booking.guest_name,
+      subject,
+      message,
+      bookingId: booking.id,
+      captainName,
+      captainEmail,
+    })
+
+    if (!emailResult.success) {
+      console.error('Email send failed:', emailResult.error)
       return NextResponse.json(
-        { error: 'Failed to send email' },
+        { error: emailResult.error || 'Failed to send email' },
         { status: 500 }
       )
     }
