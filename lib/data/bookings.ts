@@ -5,6 +5,7 @@
 
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import {
+  AvailabilityWindow,
   Booking,
   BookingWithDetails,
   BookingLog,
@@ -13,7 +14,7 @@ import {
   BookingStatus,
   ACTIVE_BOOKING_STATUSES,
 } from '@/lib/db/types';
-import { getDateInTimezone, getDayOfWeek, isBookingWithinTimeWindow } from '@/lib/utils/validation';
+import { getDateInTimezone, getDayOfWeek, getTimeInTimezone, isBookingWithinTimeWindow } from '@/lib/utils/validation';
 
 // ============================================================================
 // Column Selections (for query optimization)
@@ -310,6 +311,29 @@ export interface CaptainAvailabilityResult {
   reason?: string;
 }
 
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+function formatTime12h(time24: string): string {
+  const [hours, minutes] = time24.split(':').map(Number);
+  const period = hours >= 12 ? 'PM' : 'AM';
+  const displayHours = hours % 12 || 12;
+  return minutes === 0
+    ? `${displayHours} ${period}`
+    : `${displayHours}:${String(minutes).padStart(2, '0')} ${period}`;
+}
+
+function describeTimeDifference(earlier: string, later: string): string {
+  const [h1, m1] = earlier.split(':').map(Number);
+  const [h2, m2] = later.split(':').map(Number);
+  let diffMinutes = (h2 * 60 + m2) - (h1 * 60 + m1);
+  if (diffMinutes < 0) diffMinutes += 24 * 60;
+  const hours = Math.floor(diffMinutes / 60);
+  const minutes = diffMinutes % 60;
+  if (hours === 0) return `${minutes}m`;
+  if (minutes === 0) return `${hours}h`;
+  return `${hours}h ${minutes}m`;
+}
+
 export async function checkCaptainAvailability(
   params: CaptainAvailabilityParams
 ): Promise<CaptainAvailabilityResult> {
@@ -324,26 +348,36 @@ export async function checkCaptainAvailability(
   const timezone = profile.timezone || 'UTC';
   const dayOfWeek = getDayOfWeek(params.scheduledStart, timezone);
 
-  // Get active availability windows for this day
+  // Get all availability windows for this day (active and inactive)
   const { data: windows, error } = await supabase
     .from('availability_windows')
     .select('*')
     .eq('owner_id', params.captainId)
-    .eq('day_of_week', dayOfWeek)
-    .eq('is_active', true);
+    .eq('day_of_week', dayOfWeek);
 
   if (error) {
     console.error('Error checking captain availability:', error);
     return { available: false, reason: 'Unable to check availability' };
   }
 
-  // If no windows defined, assume always available
+  // If no windows defined at all, assume always available (no restrictions configured)
   if (!windows || windows.length === 0) {
     return { available: true };
   }
 
-  // Check if the booking fits within any availability window
-  for (const window of windows) {
+  const activeWindows = windows.filter((w: AvailabilityWindow) => w.is_active);
+
+  // If window exists but is inactive, the day is OFF
+  if (activeWindows.length === 0) {
+    const dayName = DAY_NAMES[dayOfWeek];
+    return {
+      available: false,
+      reason: `Not available on ${dayName}s`,
+    };
+  }
+
+  // Check if the booking fits within any active availability window
+  for (const window of activeWindows) {
     if (
       isBookingWithinTimeWindow(
         params.scheduledStart,
@@ -357,9 +391,33 @@ export async function checkCaptainAvailability(
     }
   }
 
+  // Build a descriptive error message showing the available hours
+  const window = activeWindows[0];
+  const dayName = DAY_NAMES[dayOfWeek];
+  const windowStartFmt = formatTime12h(window.start_time);
+  const windowEndFmt = formatTime12h(window.end_time);
+
+  const bookingStartTime = getTimeInTimezone(params.scheduledStart, timezone);
+  const bookingEndTime = getTimeInTimezone(params.scheduledEnd, timezone);
+
+  // Normalize window times for comparison
+  const normalizedWindowStart = window.start_time.length === 5 ? `${window.start_time}:00` : window.start_time;
+  const normalizedWindowEnd = window.end_time.length === 5 ? `${window.end_time}:00` : window.end_time;
+
+  let detail: string;
+  if (bookingStartTime < normalizedWindowStart) {
+    detail = `Your booking starts at ${formatTime12h(bookingStartTime)} (${describeTimeDifference(bookingStartTime, normalizedWindowStart)} too early)`;
+  } else if (bookingStartTime > normalizedWindowEnd) {
+    detail = `Your booking starts at ${formatTime12h(bookingStartTime)} (${describeTimeDifference(normalizedWindowEnd, bookingStartTime)} too late)`;
+  } else if (bookingEndTime > normalizedWindowEnd) {
+    detail = `Your booking ends at ${formatTime12h(bookingEndTime)} (${describeTimeDifference(normalizedWindowEnd, bookingEndTime)} past closing)`;
+  } else {
+    detail = `Your booking (${formatTime12h(bookingStartTime)} – ${formatTime12h(bookingEndTime)}) doesn't fit this window`;
+  }
+
   return {
     available: false,
-    reason: 'This time slot is outside available booking hours',
+    reason: `${dayName} bookings are available ${windowStartFmt} – ${windowEndFmt}. ${detail}`,
   };
 }
 
