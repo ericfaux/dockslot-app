@@ -60,15 +60,15 @@ const EVENT_CONFIG: Record<string, { icon: React.ElementType; color: string; bg:
   payment_refunded: { icon: RotateCcw, color: 'text-purple-600', bg: 'bg-purple-50' },
   waiver_signed: { icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50' },
   passenger_added: { icon: User, color: 'text-cyan-600', bg: 'bg-cyan-50' },
-  passenger_updated: { icon: User, color: 'text-slate-400', bg: 'bg-slate-500/20' },
+  passenger_updated: { icon: User, color: 'text-slate-500', bg: 'bg-slate-500/20' },
   rescheduled: { icon: Calendar, color: 'text-amber-600', bg: 'bg-amber-50' },
   weather_hold_set: { icon: CloudRain, color: 'text-amber-600', bg: 'bg-amber-50' },
-  note_added: { icon: Edit3, color: 'text-slate-400', bg: 'bg-slate-500/20' },
+  note_added: { icon: Edit3, color: 'text-slate-500', bg: 'bg-slate-500/20' },
   guest_communication: { icon: Mail, color: 'text-blue-600', bg: 'bg-blue-50' },
   completed: { icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50' },
   cancelled: { icon: XCircle, color: 'text-rose-600', bg: 'bg-rose-50' },
   balance_requested: { icon: DollarSign, color: 'text-cyan-600', bg: 'bg-cyan-50' },
-  default: { icon: Clock, color: 'text-slate-400', bg: 'bg-slate-500/20' },
+  default: { icon: Clock, color: 'text-slate-500', bg: 'bg-slate-500/20' },
 };
 
 function getEventConfig(eventType: string) {
@@ -207,7 +207,7 @@ export function ActivityLog({ logs, auditLogs, isLoading }: ActivityLogProps) {
                       <h4 className="font-medium text-slate-700 print:text-black">
                         {event.title}
                       </h4>
-                      <p className="mt-0.5 text-sm text-slate-400 print:text-slate-600">
+                      <p className="mt-0.5 text-sm text-slate-500 print:text-slate-600">
                         {event.description}
                       </p>
                     </div>

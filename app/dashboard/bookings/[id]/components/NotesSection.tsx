@@ -146,7 +146,7 @@ export function NotesSection({
               <MessageSquare className="h-3 w-3" />
               Guest&apos;s Special Requests
             </div>
-            <p className="whitespace-pre-wrap text-sm text-amber-200 print:text-amber-800">
+            <p className="whitespace-pre-wrap text-sm text-amber-800 print:text-amber-800">
               {specialRequests}
             </p>
           </div>

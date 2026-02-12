@@ -220,7 +220,7 @@ export function GuestInfoSection({ booking, guestToken }: GuestInfoSectionProps)
             <div className="mb-2 text-xs font-medium uppercase tracking-wider text-cyan-600">
               Captain Instructions
             </div>
-            <p className="whitespace-pre-wrap text-cyan-200 print:text-cyan-800">
+            <p className="whitespace-pre-wrap text-cyan-800 print:text-cyan-800">
               {booking.captain_instructions}
             </p>
           </div>
