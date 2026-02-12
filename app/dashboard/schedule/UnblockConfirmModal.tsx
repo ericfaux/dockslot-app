@@ -39,7 +39,7 @@ export function UnblockConfirmModal({
       {/* Modal */}
       <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
-          className="pointer-events-auto w-full max-w-sm rounded-xl border border-slate-200 bg-white shadow-2xl"
+          className="pointer-events-auto w-full max-w-sm max-h-[90vh] overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}

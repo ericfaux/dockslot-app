@@ -36,13 +36,13 @@ export function SendEmailModal({ guest, businessName, onClose }: SendEmailModalP
         className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center px-4">
+      <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
-          className="pointer-events-auto w-full max-w-lg rounded-xl border border-slate-200 bg-white shadow-2xl"
+          className="pointer-events-auto w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-slate-200 p-6">
+          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white p-6 rounded-t-xl">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-50">
                 <Mail className="h-5 w-5 text-cyan-600" />

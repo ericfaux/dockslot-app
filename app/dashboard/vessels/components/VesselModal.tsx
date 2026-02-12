@@ -196,7 +196,7 @@ export function VesselModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
       onClick={handleBackdropClick}
       onKeyDown={handleKeyDown}
       role="dialog"
@@ -204,13 +204,13 @@ export function VesselModal({
       aria-labelledby="modal-title"
     >
       <div
-        className="relative w-full max-w-md rounded-lg border border-slate-200 bg-white"
+        className="relative w-full max-w-md max-h-[90vh] overflow-y-auto rounded-lg border border-slate-200 bg-white"
         style={{
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
         }}
       >
         {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4 rounded-t-lg">
           <h2 id="modal-title" className="text-lg font-medium text-slate-900">
             {vessel ? 'Edit Vessel' : 'Add Vessel'}
           </h2>
