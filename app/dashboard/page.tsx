@@ -422,11 +422,15 @@ export default async function DashboardPage() {
   let dockModeEnabled = false;
 
   if (user) {
-    const { data: profile } = await supabase
+    const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('meeting_spot_latitude, meeting_spot_longitude, timezone, business_name, full_name, dock_mode_enabled, season_revenue_goal_cents, is_hibernating, hibernation_end_date, booking_slug')
+      .select('meeting_spot_latitude, meeting_spot_longitude, timezone, business_name, full_name, dock_mode_enabled, season_revenue_goal_cents, is_hibernating, hibernation_end_date')
       .eq('id', user.id)
       .single();
+
+    if (profileError) {
+      console.error('Failed to fetch captain profile:', profileError.message);
+    }
 
     if (profile) {
       captainProfile = profile;
@@ -448,6 +452,17 @@ export default async function DashboardPage() {
         }
       }
     }
+  }
+
+  // Fetch booking_slug separately so migration timing doesn't break core dashboard
+  let bookingSlug: string | null = null;
+  if (user) {
+    const { data: slugRow } = await supabase
+      .from('profiles')
+      .select('booking_slug')
+      .eq('id', user.id)
+      .single();
+    bookingSlug = slugRow?.booking_slug ?? null;
   }
 
   // Fetch today's and tomorrow's bookings for the Float Plan
@@ -885,7 +900,7 @@ export default async function DashboardPage() {
             </span>
             <div className="h-px flex-1 bg-slate-200" />
           </div>
-          <BookingLinkCard captainId={user.id} bookingSlug={captainProfile?.booking_slug} compact />
+          <BookingLinkCard captainId={user.id} bookingSlug={bookingSlug} compact />
         </section>
       )}
 
