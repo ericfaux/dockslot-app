@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { List, ChevronLeft, ChevronRight } from 'lucide-react'
+import { List, ChevronLeft, ChevronRight, FilterX } from 'lucide-react'
 import BookingFilters, { BookingFilterState } from '../schedule/BookingFilters'
 import { BookingWithDetails } from '@/lib/db/types'
 import { ExportButton } from './ExportButton'
@@ -29,6 +29,8 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [totalCount, setTotalCount] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
+  const [totalUnfilteredCount, setTotalUnfilteredCount] = useState<number | null>(null)
+  const [filterResetKey, setFilterResetKey] = useState(0)
   const prevFiltersRef = useRef<string>('')
   // Initialize filters from URL params (e.g., ?paymentStatus=pending_verification)
   const initialPaymentStatus = searchParams.get('paymentStatus')
@@ -93,7 +95,7 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
     router.replace(`/dashboard/bookings${paramStr ? `?${paramStr}` : ''}`, { scroll: false })
   }, [searchParams, router])
 
-  // Fetch available tags
+  // Fetch available tags and unfiltered booking count
   useEffect(() => {
     const fetchTags = async () => {
       try {
@@ -106,12 +108,50 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
         console.error('Error fetching tags:', error)
       }
     }
+    const fetchUnfilteredCount = async () => {
+      try {
+        const params = new URLSearchParams({
+          captainId,
+          limit: '1',
+          page: '1',
+          includeHistorical: 'true',
+        })
+        const response = await fetch(`/api/bookings?${params.toString()}`)
+        if (response.ok) {
+          const data = await response.json()
+          setTotalUnfilteredCount(data.totalCount || 0)
+        }
+      } catch (error) {
+        console.error('Error fetching unfiltered count:', error)
+      }
+    }
     fetchTags()
-  }, [])
+    fetchUnfilteredCount()
+  }, [captainId])
+
+  const hasActiveFilters =
+    filters.search !== '' ||
+    filters.tags.length > 0 ||
+    filters.statuses.length > 0 ||
+    filters.paymentStatus.length > 0 ||
+    filters.dateRange.start !== null ||
+    filters.dateRange.end !== null
 
   // Reset to page 1 when filters change
   const handleFilterChange = useCallback((newFilters: BookingFilterState) => {
     setFilters(newFilters)
+  }, [])
+
+  const handleClearFilters = useCallback(() => {
+    const emptyFilters: BookingFilterState = {
+      search: '',
+      tags: [],
+      statuses: [],
+      paymentStatus: [],
+      dateRange: { start: null, end: null },
+    }
+    setFilters(emptyFilters)
+    setFilterResetKey((k) => k + 1)
   }, [])
 
   // Fetch bookings with filters and pagination
@@ -122,6 +162,7 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
         captainId: captainId,
         limit: String(PAGE_SIZE),
         page: String(currentPage),
+        includeHistorical: 'true',
       })
 
       if (filters.search) params.append('search', filters.search)
@@ -209,6 +250,7 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
           />
         </div>
         <BookingFilters
+          key={filterResetKey}
           onFilterChange={handleFilterChange}
           availableTags={availableTags}
         />
@@ -240,12 +282,22 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-cyan-500 border-t-transparent" />
         </div>
       ) : bookings.length === 0 ? (
-        filters.search || filters.tags.length > 0 || filters.statuses.length > 0 || filters.paymentStatus.length > 0 || filters.dateRange.start ? (
+        hasActiveFilters || (totalUnfilteredCount !== null && totalUnfilteredCount > 0) ? (
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-12 text-center">
-            <p className="text-slate-400">No bookings found</p>
-            <p className="mt-2 text-sm text-slate-500">
-              Try adjusting your filters or search query
+            <FilterX className="mx-auto h-10 w-10 text-slate-300" />
+            <p className="mt-3 font-medium text-slate-500">No bookings match your filters</p>
+            <p className="mt-1 text-sm text-slate-400">
+              Try adjusting your filters or search query to find what you&apos;re looking for.
             </p>
+            {hasActiveFilters && (
+              <button
+                onClick={handleClearFilters}
+                className="mt-4 inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              >
+                <FilterX className="h-4 w-4" />
+                Clear filters
+              </button>
+            )}
           </div>
         ) : (
           <EmptyState

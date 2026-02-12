@@ -24,7 +24,7 @@ export function ExportButton({
 
     try {
       // Build query params from filters
-      const params = new URLSearchParams({ captainId })
+      const params = new URLSearchParams({ captainId, includeHistorical: 'true' })
 
       if (filters.search) params.append('search', filters.search)
       if (filters.tags.length > 0)

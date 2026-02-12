@@ -40,6 +40,7 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get('startDate') || undefined
     const endDate = searchParams.get('endDate') || undefined
     const search = searchParams.get('search') || undefined
+    const includeHistorical = searchParams.get('includeHistorical') === 'true'
 
     // Parse status filter
     let status: BookingStatus[] | undefined
@@ -83,6 +84,7 @@ export async function GET(request: NextRequest) {
       paymentStatus,
       tags,
       search,
+      includeHistorical,
     })
 
     // Generate CSV
