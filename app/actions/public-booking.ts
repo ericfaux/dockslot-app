@@ -178,6 +178,44 @@ function generateGuestToken(): string {
 }
 
 // ============================================================================
+// Slug Resolution
+// ============================================================================
+
+/**
+ * Resolve a captain identifier (UUID or booking slug) to a captain UUID.
+ * Returns the UUID if the input is already a valid UUID, otherwise looks up
+ * the booking_slug in the profiles table.
+ */
+export async function resolveCaptainId(
+  identifier: string
+): Promise<ActionResult<string>> {
+  if (!identifier || typeof identifier !== 'string') {
+    return { success: false, error: 'Invalid identifier', code: 'VALIDATION' };
+  }
+
+  // If it's already a valid UUID, return it directly
+  if (isValidUUID(identifier)) {
+    return { success: true, data: identifier };
+  }
+
+  // Otherwise, treat it as a booking slug
+  const slug = identifier.toLowerCase();
+  const supabase = createSupabaseServiceClient();
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('booking_slug', slug)
+    .single();
+
+  if (error || !data) {
+    return { success: false, error: 'Captain not found', code: 'NOT_FOUND' };
+  }
+
+  return { success: true, data: data.id };
+}
+
+// ============================================================================
 // Public Server Actions
 // ============================================================================
 

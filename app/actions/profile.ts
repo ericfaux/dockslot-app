@@ -58,6 +58,7 @@ export interface UpdateProfileParams {
   hero_image_url?: string | null;
   booking_tagline?: string | null;
   brand_accent_color?: string | null;
+  booking_slug?: string | null;
 }
 
 // ============================================================================
@@ -383,6 +384,33 @@ export async function updateProfile(
       updateData.brand_accent_color = params.brand_accent_color;
     } else {
       updateData.brand_accent_color = '#0891b2';
+    }
+  }
+
+  // Booking slug
+  if (params.booking_slug !== undefined) {
+    if (params.booking_slug) {
+      const slug = params.booking_slug.trim().toLowerCase();
+      const slugRegex = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+      if (slug.length < 3 || slug.length > 50) {
+        return { success: false, error: 'Booking slug must be between 3 and 50 characters', code: 'VALIDATION' };
+      }
+      if (!slugRegex.test(slug)) {
+        return { success: false, error: 'Booking slug can only contain lowercase letters, numbers, and hyphens', code: 'VALIDATION' };
+      }
+      // Check uniqueness
+      const { data: existing } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('booking_slug', slug)
+        .neq('id', user.id)
+        .single();
+      if (existing) {
+        return { success: false, error: 'This booking slug is already taken', code: 'VALIDATION' };
+      }
+      updateData.booking_slug = slug;
+    } else {
+      updateData.booking_slug = null;
     }
   }
 

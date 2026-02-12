@@ -424,7 +424,7 @@ export default async function DashboardPage() {
   if (user) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('meeting_spot_latitude, meeting_spot_longitude, timezone, business_name, full_name, dock_mode_enabled, season_revenue_goal_cents, is_hibernating, hibernation_end_date')
+      .select('meeting_spot_latitude, meeting_spot_longitude, timezone, business_name, full_name, dock_mode_enabled, season_revenue_goal_cents, is_hibernating, hibernation_end_date, booking_slug')
       .eq('id', user.id)
       .single();
 
@@ -885,7 +885,7 @@ export default async function DashboardPage() {
             </span>
             <div className="h-px flex-1 bg-slate-200" />
           </div>
-          <BookingLinkCard captainId={user.id} compact />
+          <BookingLinkCard captainId={user.id} bookingSlug={captainProfile?.booking_slug} compact />
         </section>
       )}
 

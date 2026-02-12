@@ -5,15 +5,17 @@ import { Check, Copy, Code } from 'lucide-react';
 
 interface EmbedCodeSnippetProps {
   captainId: string;
+  bookingSlug?: string | null;
 }
 
-export function EmbedCodeSnippet({ captainId }: EmbedCodeSnippetProps) {
+export function EmbedCodeSnippet({ captainId, bookingSlug }: EmbedCodeSnippetProps) {
   const [copied, setCopied] = useState(false);
   const [embedUrl, setEmbedUrl] = useState('');
 
   useEffect(() => {
-    setEmbedUrl(`${window.location.origin}/book/${captainId}/embed`);
-  }, [captainId]);
+    const bookPath = bookingSlug ? `/book/${bookingSlug}` : `/book/${captainId}`;
+    setEmbedUrl(`${window.location.origin}${bookPath}/embed`);
+  }, [captainId, bookingSlug]);
 
   const iframeCode = `<iframe\n  src="${embedUrl}"\n  width="100%"\n  height="600"\n  style="border: none; border-radius: 12px; max-width: 800px;"\n  title="Book a Trip"\n></iframe>`;
 

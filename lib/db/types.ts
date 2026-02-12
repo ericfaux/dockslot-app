@@ -94,6 +94,7 @@ export interface Profile {
   hero_image_url: string | null;
   booking_tagline: string | null;
   brand_accent_color: string;
+  booking_slug: string | null;
 }
 
 export interface Vessel {

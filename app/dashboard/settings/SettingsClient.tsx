@@ -258,7 +258,7 @@ export function SettingsClient({ initialProfile, initialAvailabilityWindows, use
 
       {/* Booking Link - Show at top for easy access */}
       {initialProfile?.id && (
-        <BookingLinkCard captainId={initialProfile.id} />
+        <BookingLinkCard captainId={initialProfile.id} bookingSlug={initialProfile.booking_slug} />
       )}
 
       {/* Profile Information */}
