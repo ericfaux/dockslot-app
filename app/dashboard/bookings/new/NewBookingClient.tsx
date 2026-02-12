@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
   ArrowLeft,
@@ -29,7 +29,7 @@ export function NewBookingClient({
 }: NewBookingClientProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [isPending, startTransition] = useTransition()
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   // Trip details
@@ -107,7 +107,7 @@ export function NewBookingClient({
     }
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
     setTripTypeError(null)
@@ -144,7 +144,9 @@ export function NewBookingClient({
       return
     }
 
-    startTransition(async () => {
+    setIsSubmitting(true)
+
+    try {
       const result = await createBooking({
         captain_id: captainId,
         trip_type_id: tripTypeId || undefined,
@@ -161,11 +163,14 @@ export function NewBookingClient({
 
       if (result.success && result.data) {
         router.push(`/dashboard/bookings/${result.data.id}`)
-        router.refresh()
       } else {
+        setIsSubmitting(false)
         setError(result.error ?? 'Failed to create booking')
       }
-    })
+    } catch {
+      setIsSubmitting(false)
+      setError('An unexpected error occurred')
+    }
   }
 
   const inputClass =
@@ -454,15 +459,15 @@ export function NewBookingClient({
 
         <button
           type="submit"
-          disabled={isPending}
+          disabled={isSubmitting}
           className="flex items-center gap-2 rounded-lg bg-cyan-500 px-6 py-2 text-sm font-medium text-white hover:bg-cyan-400 disabled:opacity-50"
         >
-          {isPending ? (
+          {isSubmitting ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
             <CalendarPlus className="h-4 w-4" />
           )}
-          {isPending ? 'Creating...' : 'Create Booking'}
+          {isSubmitting ? 'Creating...' : 'Create Booking'}
         </button>
       </div>
     </form>
