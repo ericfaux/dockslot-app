@@ -92,14 +92,18 @@ export default function DuplicateBookingModal({
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+        className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
 
       {/* Modal */}
-      <div className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg border border-slate-200 bg-white p-6 shadow-2xl">
+      <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div
+          className="pointer-events-auto w-full max-w-md max-h-[90vh] overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-2xl"
+          onClick={(e) => e.stopPropagation()}
+        >
         {/* Header */}
-        <div className="mb-4 flex items-start justify-between">
+        <div className="sticky top-0 z-10 flex items-start justify-between bg-white p-6 pb-4 rounded-t-lg">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-50">
               <Copy className="h-5 w-5 text-cyan-600" />
@@ -122,7 +126,7 @@ export default function DuplicateBookingModal({
         </div>
 
         {/* Form */}
-        <div className="space-y-4">
+        <div className="space-y-4 px-6">
           {/* Guest Name */}
           <div>
             <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-slate-600">
@@ -246,7 +250,7 @@ export default function DuplicateBookingModal({
         </div>
 
         {/* Actions */}
-        <div className="mt-6 flex gap-3">
+        <div className="mt-6 flex gap-3 px-6 pb-6">
           <button
             onClick={onClose}
             disabled={isDuplicating}
@@ -261,6 +265,7 @@ export default function DuplicateBookingModal({
           >
             {isDuplicating ? 'Duplicating...' : 'Duplicate Booking'}
           </button>
+        </div>
         </div>
       </div>
     </>
