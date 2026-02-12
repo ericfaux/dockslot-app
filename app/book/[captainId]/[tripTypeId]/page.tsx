@@ -9,6 +9,7 @@ import { ChevronLeft } from "lucide-react";
 import { BookingForm } from "./BookingForm";
 import { BrandedLayout } from "../../components/BrandedLayout";
 import { formatDollars } from "@/lib/utils/format";
+import { resolveCaptainId } from "@/app/actions/public-booking";
 
 interface BookingPageProps {
   params: Promise<{
@@ -18,7 +19,15 @@ interface BookingPageProps {
 }
 
 export default async function BookingPage({ params }: BookingPageProps) {
-  const { captainId, tripTypeId } = await params;
+  const { captainId: rawId, tripTypeId } = await params;
+
+  // Resolve slug or UUID to captain ID
+  const resolveResult = await resolveCaptainId(rawId);
+  if (!resolveResult.success || !resolveResult.data) {
+    notFound();
+  }
+  const captainId = resolveResult.data;
+
   const supabase = createSupabaseServiceClient();
 
   // Fetch captain profile

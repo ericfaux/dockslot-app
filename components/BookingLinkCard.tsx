@@ -5,18 +5,20 @@ import { Check, Copy, ExternalLink, Link2, Share2 } from 'lucide-react';
 
 interface BookingLinkCardProps {
   captainId: string;
+  bookingSlug?: string | null;
   compact?: boolean; // For dashboard vs settings view
 }
 
-export function BookingLinkCard({ captainId, compact = false }: BookingLinkCardProps) {
+export function BookingLinkCard({ captainId, bookingSlug, compact = false }: BookingLinkCardProps) {
   const [copied, setCopied] = useState(false);
-  const [bookingUrl, setBookingUrl] = useState(`/book/${captainId}`);
+  const urlPath = bookingSlug ? `/book/${bookingSlug}` : `/book/${captainId}`;
+  const [bookingUrl, setBookingUrl] = useState(urlPath);
   const [isDismissed, setIsDismissed] = useState(false);
 
   // Build the full URL on the client side
   useEffect(() => {
-    setBookingUrl(`${window.location.origin}/book/${captainId}`);
-  }, [captainId]);
+    setBookingUrl(`${window.location.origin}${bookingSlug ? `/book/${bookingSlug}` : `/book/${captainId}`}`);
+  }, [captainId, bookingSlug]);
 
   // Check localStorage for dismissed state (only in compact/dashboard mode)
   useEffect(() => {

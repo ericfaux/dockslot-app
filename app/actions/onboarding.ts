@@ -126,13 +126,46 @@ export async function saveProfileStep(
     return { success: false, error: 'Business name is required' };
   }
 
+  // Auto-generate a booking slug from the business name
+  const businessName = params.business_name.trim();
+  let baseSlug = businessName
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 50)
+    .replace(/-$/, '');
+
+  if (baseSlug.length < 3) {
+    baseSlug = (baseSlug + '-charter').slice(0, 50);
+  }
+
+  // Check uniqueness and append number if needed
+  let bookingSlug = baseSlug;
+  let counter = 1;
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const { data: existing } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('booking_slug', bookingSlug)
+      .neq('id', user.id)
+      .single();
+
+    if (!existing) break;
+    counter++;
+    bookingSlug = `${baseSlug.slice(0, 50 - String(counter).length - 1)}-${counter}`;
+  }
+
   const { error } = await supabase
     .from('profiles')
     .update({
       full_name: params.full_name.trim(),
-      business_name: params.business_name.trim(),
+      business_name: businessName,
       phone: params.phone?.trim() || null,
       timezone: params.timezone || 'America/New_York',
+      booking_slug: bookingSlug,
       onboarding_step: 1,
       updated_at: new Date().toISOString(),
     })

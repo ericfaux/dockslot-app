@@ -1,5 +1,5 @@
 import { Anchor, AlertTriangle, CheckCircle } from 'lucide-react';
-import { getPublicCaptainProfile, getPublicTripTypes, getHibernationInfo, getCaptainSocialProof } from '@/app/actions/public-booking';
+import { getPublicCaptainProfile, getPublicTripTypes, getHibernationInfo, getCaptainSocialProof, resolveCaptainId } from '@/app/actions/public-booking';
 import { TripCard } from '../components/TripCard';
 import { BrandedLayout } from '../components/BrandedLayout';
 import { CaptainInfoCard, CancellationPolicy, StarRating } from '@/components/booking/TrustSignals';
@@ -20,7 +20,32 @@ const BOOKING_STEPS = [
 ];
 
 export default async function SelectTripPage({ params }: Props) {
-  const { captainId } = await params;
+  const { captainId: rawId } = await params;
+
+  // Resolve slug or UUID to captain ID
+  const resolveResult = await resolveCaptainId(rawId);
+  if (!resolveResult.success || !resolveResult.data) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full text-center">
+          <div className="rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+            <div className="flex justify-center mb-4">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
+                <AlertTriangle className="h-8 w-8 text-red-500" />
+              </div>
+            </div>
+            <h1 className="text-xl font-semibold text-slate-900 mb-2">
+              Captain Not Found
+            </h1>
+            <p className="text-slate-500">
+              We couldn&apos;t find a captain with this booking link.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  const captainId = resolveResult.data;
 
   // Fetch captain profile, trip types, and social proof in parallel
   const [profileResult, tripTypesResult, socialProofResult] = await Promise.all([

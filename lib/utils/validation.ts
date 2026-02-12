@@ -224,3 +224,32 @@ export function sanitizeName(name: string | null | undefined): string {
 export function sanitizeNotes(notes: string | null | undefined): string {
   return sanitizeString(notes, 2000);
 }
+
+// ============================================================================
+// Booking Slug Validation & Generation
+// ============================================================================
+
+const BOOKING_SLUG_REGEX = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+export function isValidBookingSlug(slug: string): boolean {
+  if (!slug || typeof slug !== 'string') return false;
+  if (slug.length < 3 || slug.length > 50) return false;
+  return BOOKING_SLUG_REGEX.test(slug);
+}
+
+export function generateSlugFromName(name: string): string {
+  let slug = name
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 50)
+    .replace(/-$/, '');
+
+  if (slug.length < 3) {
+    slug = (slug + '-charter').slice(0, 50);
+  }
+
+  return slug;
+}

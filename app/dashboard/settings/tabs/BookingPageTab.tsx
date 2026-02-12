@@ -16,6 +16,7 @@ import {
   AlertCircle,
   Palette,
   Code,
+  Link2,
 } from 'lucide-react';
 import { Profile, HibernationSubscriber, TripType } from '@/lib/db/types';
 import { updateProfile } from '@/app/actions/profile';
@@ -55,6 +56,10 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
   const [bookingTagline, setBookingTagline] = useState(initialProfile?.booking_tagline || '');
   const [brandAccentColor, setBrandAccentColor] = useState(initialProfile?.brand_accent_color || '#0891b2');
 
+  // Booking slug state
+  const [bookingSlug, setBookingSlug] = useState(initialProfile?.booking_slug || '');
+  const [slugError, setSlugError] = useState<string | null>(null);
+
   const timezone = initialProfile?.timezone || 'America/New_York';
 
   // Subscriber management state
@@ -74,9 +79,10 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
       cancellationPolicy !== (initialProfile?.cancellation_policy || '') ||
       heroImageUrl !== (initialProfile?.hero_image_url || '') ||
       bookingTagline !== (initialProfile?.booking_tagline || '') ||
-      brandAccentColor !== (initialProfile?.brand_accent_color || '#0891b2')
+      brandAccentColor !== (initialProfile?.brand_accent_color || '#0891b2') ||
+      bookingSlug !== (initialProfile?.booking_slug || '')
     );
-  }, [isHibernating, hibernationMessage, hibernationEndDate, hibernationResumeTime, hibernationShowReturnDate, hibernationAllowNotifications, hibernationShowContactInfo, cancellationPolicy, heroImageUrl, bookingTagline, brandAccentColor, initialProfile]);
+  }, [isHibernating, hibernationMessage, hibernationEndDate, hibernationResumeTime, hibernationShowReturnDate, hibernationAllowNotifications, hibernationShowContactInfo, cancellationPolicy, heroImageUrl, bookingTagline, brandAccentColor, bookingSlug, initialProfile]);
 
   const loadSubscribers = async () => {
     if (subscribersLoading) return;
@@ -115,7 +121,32 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
     setSubscribersExpanded(!subscribersExpanded);
   };
 
+  const validateSlug = (value: string): string | null => {
+    if (!value) return null;
+    if (value.length < 3) return 'Must be at least 3 characters';
+    if (value.length > 50) return 'Must be 50 characters or fewer';
+    if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(value)) {
+      return 'Only lowercase letters, numbers, and hyphens (no leading/trailing/consecutive hyphens)';
+    }
+    return null;
+  };
+
+  const handleSlugChange = (value: string) => {
+    const sanitized = value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    setBookingSlug(sanitized);
+    setSlugError(sanitized ? validateSlug(sanitized) : null);
+  };
+
   const handleSave = () => {
+    if (bookingSlug) {
+      const err = validateSlug(bookingSlug);
+      if (err) {
+        setSlugError(err);
+        setError('Please fix the booking slug before saving');
+        return;
+      }
+    }
+
     startTransition(async () => {
       setError(null);
       setSuccess(null);
@@ -132,6 +163,7 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
         hero_image_url: heroImageUrl || null,
         booking_tagline: bookingTagline || null,
         brand_accent_color: brandAccentColor || '#0891b2',
+        booking_slug: bookingSlug || null,
       });
 
       if (result.success) {
@@ -163,8 +195,47 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
 
       {/* Booking Link */}
       {initialProfile?.id && (
-        <BookingLinkCard captainId={initialProfile.id} />
+        <BookingLinkCard captainId={initialProfile.id} bookingSlug={initialProfile.booking_slug} />
       )}
+
+      {/* Custom Booking Slug */}
+      <section className={sectionClassName}>
+        <div className="mb-4 flex items-center gap-2">
+          <Link2 className="h-5 w-5 text-cyan-600" />
+          <h2 className="text-lg font-semibold text-slate-900">Custom Booking URL</h2>
+        </div>
+        <p className="mb-4 text-sm text-slate-400">
+          Choose a custom URL for your booking page instead of using the default ID-based link.
+        </p>
+        <div>
+          <label htmlFor="bookingSlug" className={labelClassName}>
+            Booking Slug
+          </label>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-slate-500 whitespace-nowrap">/book/</span>
+            <input
+              type="text"
+              id="bookingSlug"
+              value={bookingSlug}
+              onChange={(e) => handleSlugChange(e.target.value)}
+              maxLength={50}
+              placeholder="erics-boats"
+              className={`${inputClassName} font-mono ${slugError ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-500' : ''}`}
+            />
+          </div>
+          {slugError && (
+            <p className="mt-1.5 text-xs text-rose-500">{slugError}</p>
+          )}
+          {!slugError && bookingSlug && (
+            <p className="mt-1.5 text-xs text-emerald-600">
+              Your booking page will be available at /book/{bookingSlug}
+            </p>
+          )}
+          <p className="mt-1.5 text-xs text-slate-500">
+            {bookingSlug.length}/50 characters. Lowercase letters, numbers, and hyphens only (3-50 chars).
+          </p>
+        </div>
+      </section>
 
       {/* Branding */}
       <section className={sectionClassName}>
@@ -263,7 +334,7 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
           <p className="mb-4 text-sm text-slate-400">
             Paste this code into your website to embed your trip selection directly on any page.
           </p>
-          <EmbedCodeSnippet captainId={initialProfile.id} />
+          <EmbedCodeSnippet captainId={initialProfile.id} bookingSlug={initialProfile.booking_slug} />
         </section>
       )}
 
