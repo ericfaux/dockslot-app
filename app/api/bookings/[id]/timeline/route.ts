@@ -29,13 +29,7 @@ export async function GET(
     }
 
     // Verify captain owns this booking
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('user_id', user.id)
-      .single()
-
-    if (!profile || profile.id !== booking.captain_id) {
+    if (user.id !== booking.captain_id) {
       return NextResponse.json(
         { error: 'Not authorized to view this booking' },
         { status: 403 }
@@ -51,10 +45,7 @@ export async function GET(
 
     if (logsError) {
       console.error('Error fetching booking logs:', logsError)
-      return NextResponse.json(
-        { error: 'Failed to fetch timeline' },
-        { status: 500 }
-      )
+      // Don't fail the request, just return empty logs
     }
 
     // Fetch audit logs for additional events
