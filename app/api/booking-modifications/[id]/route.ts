@@ -48,7 +48,7 @@ export async function PATCH(
 
     // Verify captain ownership
     const booking = modRequest.bookings as any
-    if (booking.captain_profiles.user_id !== user.id) {
+    if (booking.captain_profiles.id !== user.id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 

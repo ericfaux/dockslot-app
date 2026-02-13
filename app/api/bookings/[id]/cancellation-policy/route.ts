@@ -21,7 +21,7 @@ export async function GET(
       .from('bookings')
       .select(`
         *,
-        captain_profiles!inner(user_id),
+        captain_profiles!inner(id),
         trip_types(
           id,
           title,
@@ -38,7 +38,7 @@ export async function GET(
     }
 
     // Verify ownership (captain or guest)
-    const isCaptain = booking.captain_profiles.user_id === user.id
+    const isCaptain = booking.captain_profiles.id === user.id
     // For guest access, would need token auth - skipping for now
     
     if (!isCaptain) {
