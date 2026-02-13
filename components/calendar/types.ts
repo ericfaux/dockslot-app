@@ -85,7 +85,7 @@ export const STATUS_COLORS: Record<BookingStatus, {
   pending_deposit: {
     bg: 'bg-amber-500/45',
     border: 'border-amber-500',
-    text: 'text-amber-100',
+    text: 'text-amber-400',
     dot: 'bg-amber-500',
   },
   confirmed: {
