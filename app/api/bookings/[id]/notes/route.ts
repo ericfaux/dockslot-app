@@ -32,7 +32,7 @@ export async function PATCH(
     const { data: profile } = await supabase
       .from('profiles')
       .select('id')
-      .eq('user_id', user.id)
+      .eq('id', user.id)
       .single()
 
     if (!profile || profile.id !== booking.captain_id) {
