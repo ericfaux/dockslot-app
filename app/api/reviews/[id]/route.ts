@@ -23,7 +23,7 @@ export async function PATCH(
       .from('reviews')
       .select(`
         *,
-        captain_profiles!inner(user_id)
+        captain_profiles!inner(id)
       `)
       .eq('id', reviewId)
       .single()
@@ -33,7 +33,7 @@ export async function PATCH(
     }
 
     // Verify ownership
-    if ((review.captain_profiles as any).user_id !== user.id) {
+    if ((review.captain_profiles as any).id !== user.id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
@@ -117,7 +117,7 @@ export async function DELETE(
       .from('reviews')
       .select(`
         *,
-        captain_profiles!inner(user_id)
+        captain_profiles!inner(id)
       `)
       .eq('id', reviewId)
       .single()
@@ -127,7 +127,7 @@ export async function DELETE(
     }
 
     // Verify ownership
-    if ((review.captain_profiles as any).user_id !== user.id) {
+    if ((review.captain_profiles as any).id !== user.id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 

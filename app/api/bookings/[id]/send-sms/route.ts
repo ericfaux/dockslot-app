@@ -31,7 +31,7 @@ export async function POST(
       .from('bookings')
       .select(`
         *,
-        captain_profiles!inner(user_id),
+        captain_profiles!inner(id),
         vessels(name),
         trip_types(name)
       `)
@@ -43,7 +43,7 @@ export async function POST(
     }
 
     // Verify ownership
-    if (booking.captain_profiles.user_id !== user.id) {
+    if (booking.captain_profiles.id !== user.id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
