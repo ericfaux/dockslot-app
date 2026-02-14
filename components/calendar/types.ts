@@ -83,49 +83,49 @@ export const STATUS_COLORS: Record<BookingStatus, {
   dot: string;
 }> = {
   pending_deposit: {
-    bg: 'bg-amber-500/45',
+    bg: 'bg-amber-950/80',
     border: 'border-amber-500',
-    text: 'text-amber-400',
+    text: 'text-amber-100',
     dot: 'bg-amber-500',
   },
   confirmed: {
-    bg: 'bg-emerald-500/40',
+    bg: 'bg-emerald-950/80',
     border: 'border-emerald-500',
     text: 'text-emerald-100',
     dot: 'bg-emerald-500',
   },
   weather_hold: {
-    bg: 'bg-blue-500/40',
+    bg: 'bg-blue-950/80',
     border: 'border-blue-500',
     text: 'text-blue-100',
     dot: 'bg-blue-500',
   },
   rescheduled: {
-    bg: 'bg-purple-500/40',
+    bg: 'bg-purple-950/80',
     border: 'border-purple-500',
     text: 'text-purple-100',
     dot: 'bg-purple-500',
   },
   completed: {
-    bg: 'bg-slate-500/40',
+    bg: 'bg-slate-800/80',
     border: 'border-slate-500',
     text: 'text-slate-200',
     dot: 'bg-slate-500',
   },
   cancelled: {
-    bg: 'bg-rose-500/40',
+    bg: 'bg-rose-950/80',
     border: 'border-rose-500',
     text: 'text-rose-100',
     dot: 'bg-rose-500',
   },
   no_show: {
-    bg: 'bg-rose-500/40',
+    bg: 'bg-rose-950/80',
     border: 'border-rose-500',
     text: 'text-rose-100',
     dot: 'bg-rose-500',
   },
   expired: {
-    bg: 'bg-slate-500/40',
+    bg: 'bg-slate-800/80',
     border: 'border-slate-400',
     text: 'text-slate-200',
     dot: 'bg-slate-400',
