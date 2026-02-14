@@ -13,6 +13,7 @@ import {
   type PublicCaptainProfile,
   type PublicTripType,
 } from '@/app/actions/public-booking';
+import { BookingHelpButton } from '../../../components/BookingHelpButton';
 
 interface Props {
   params: Promise<{
@@ -263,6 +264,14 @@ export default function GuestDetailsPage({ params }: Props) {
           </p>
         </div>
       </footer>
+
+      {profile && (
+        <BookingHelpButton
+          email={profile.booking_help_email}
+          phone={profile.booking_help_phone}
+          captainName={profile.business_name || profile.full_name || null}
+        />
+      )}
     </div>
   );
 }

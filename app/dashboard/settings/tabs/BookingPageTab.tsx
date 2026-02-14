@@ -17,6 +17,7 @@ import {
   Palette,
   Code,
   Link2,
+  LifeBuoy,
 } from 'lucide-react';
 import { Profile, HibernationSubscriber, TripType } from '@/lib/db/types';
 import { updateProfile } from '@/app/actions/profile';
@@ -60,6 +61,10 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
   const [bookingSlug, setBookingSlug] = useState(initialProfile?.booking_slug || '');
   const [slugError, setSlugError] = useState<string | null>(null);
 
+  // Booking help button state
+  const [bookingHelpShowEmail, setBookingHelpShowEmail] = useState(initialProfile?.booking_help_show_email ?? false);
+  const [bookingHelpShowPhone, setBookingHelpShowPhone] = useState(initialProfile?.booking_help_show_phone ?? false);
+
   const timezone = initialProfile?.timezone || 'America/New_York';
 
   // Subscriber management state
@@ -80,9 +85,11 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
       heroImageUrl !== (initialProfile?.hero_image_url || '') ||
       bookingTagline !== (initialProfile?.booking_tagline || '') ||
       brandAccentColor !== (initialProfile?.brand_accent_color || '#0891b2') ||
-      bookingSlug !== (initialProfile?.booking_slug || '')
+      bookingSlug !== (initialProfile?.booking_slug || '') ||
+      bookingHelpShowEmail !== (initialProfile?.booking_help_show_email ?? false) ||
+      bookingHelpShowPhone !== (initialProfile?.booking_help_show_phone ?? false)
     );
-  }, [isHibernating, hibernationMessage, hibernationEndDate, hibernationResumeTime, hibernationShowReturnDate, hibernationAllowNotifications, hibernationShowContactInfo, cancellationPolicy, heroImageUrl, bookingTagline, brandAccentColor, bookingSlug, initialProfile]);
+  }, [isHibernating, hibernationMessage, hibernationEndDate, hibernationResumeTime, hibernationShowReturnDate, hibernationAllowNotifications, hibernationShowContactInfo, cancellationPolicy, heroImageUrl, bookingTagline, brandAccentColor, bookingSlug, bookingHelpShowEmail, bookingHelpShowPhone, initialProfile]);
 
   const loadSubscribers = async () => {
     if (subscribersLoading) return;
@@ -164,6 +171,8 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
         booking_tagline: bookingTagline || null,
         brand_accent_color: brandAccentColor || '#0891b2',
         booking_slug: bookingSlug || null,
+        booking_help_show_email: bookingHelpShowEmail,
+        booking_help_show_phone: bookingHelpShowPhone,
       });
 
       if (result.success) {
@@ -360,6 +369,68 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
             This policy is displayed to guests during the booking process.
           </p>
         </div>
+      </section>
+
+      {/* Booking Page Help Button */}
+      <section className={sectionClassName}>
+        <div className="mb-4 flex items-center gap-2">
+          <LifeBuoy className="h-5 w-5 text-cyan-600" />
+          <h2 className="text-lg font-semibold text-slate-900">Help Button</h2>
+        </div>
+        <p className="mb-4 text-sm text-slate-400">
+          Show a help button on your booking page so guests can contact you directly.
+          Choose which contact info to share.
+        </p>
+        <div className="space-y-3">
+          <label className="flex cursor-pointer items-center gap-3">
+            <input
+              type="checkbox"
+              checked={bookingHelpShowEmail}
+              onChange={(e) => setBookingHelpShowEmail(e.target.checked)}
+              className="h-4 w-4 rounded border-slate-300 bg-white text-cyan-600 focus:ring-cyan-500 focus:ring-offset-0"
+            />
+            <span className="text-sm text-slate-600">
+              Share email on booking page
+            </span>
+          </label>
+          {bookingHelpShowEmail && initialProfile?.email && (
+            <p className="ml-7 text-xs text-slate-400">
+              Guests will see: {initialProfile.email}
+            </p>
+          )}
+          {bookingHelpShowEmail && !initialProfile?.email && (
+            <p className="ml-7 text-xs text-amber-500">
+              You need to add an email in your Profile settings first.
+            </p>
+          )}
+
+          <label className="flex cursor-pointer items-center gap-3">
+            <input
+              type="checkbox"
+              checked={bookingHelpShowPhone}
+              onChange={(e) => setBookingHelpShowPhone(e.target.checked)}
+              className="h-4 w-4 rounded border-slate-300 bg-white text-cyan-600 focus:ring-cyan-500 focus:ring-offset-0"
+            />
+            <span className="text-sm text-slate-600">
+              Share phone number on booking page
+            </span>
+          </label>
+          {bookingHelpShowPhone && initialProfile?.phone && (
+            <p className="ml-7 text-xs text-slate-400">
+              Guests will see: {initialProfile.phone}
+            </p>
+          )}
+          {bookingHelpShowPhone && !initialProfile?.phone && (
+            <p className="ml-7 text-xs text-amber-500">
+              You need to add a phone number in your Profile settings first.
+            </p>
+          )}
+        </div>
+        {!bookingHelpShowEmail && !bookingHelpShowPhone && (
+          <p className="mt-3 text-xs text-slate-400">
+            When both are off, the help button will not appear on your booking page.
+          </p>
+        )}
       </section>
 
       {/* Hibernation Mode */}

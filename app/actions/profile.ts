@@ -59,6 +59,8 @@ export interface UpdateProfileParams {
   booking_tagline?: string | null;
   brand_accent_color?: string | null;
   booking_slug?: string | null;
+  booking_help_show_email?: boolean;
+  booking_help_show_phone?: boolean;
 }
 
 // ============================================================================
@@ -412,6 +414,16 @@ export async function updateProfile(
     } else {
       updateData.booking_slug = null;
     }
+  }
+
+  // Booking help: show email on booking page
+  if (params.booking_help_show_email !== undefined) {
+    updateData.booking_help_show_email = Boolean(params.booking_help_show_email);
+  }
+
+  // Booking help: show phone on booking page
+  if (params.booking_help_show_phone !== undefined) {
+    updateData.booking_help_show_phone = Boolean(params.booking_help_show_phone);
   }
 
   if (Object.keys(updateData).length === 0) {

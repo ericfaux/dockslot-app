@@ -10,6 +10,7 @@ import { BookingForm } from "./BookingForm";
 import { BrandedLayout } from "../../components/BrandedLayout";
 import { formatDollars } from "@/lib/utils/format";
 import { resolveCaptainId } from "@/app/actions/public-booking";
+import { BookingHelpButton } from "../../components/BookingHelpButton";
 
 interface BookingPageProps {
   params: Promise<{
@@ -150,6 +151,16 @@ export default async function BookingPage({ params }: BookingPageProps) {
           />
         </div>
       </div>
+
+      <BookingHelpButton
+        email={profile.booking_help_show_email ? profile.email : null}
+        phone={profile.booking_help_show_phone ? profile.phone : null}
+        captainName={
+          (profile.booking_help_show_email || profile.booking_help_show_phone)
+            ? (profile.business_name || profile.full_name || null)
+            : null
+        }
+      />
     </BrandedLayout>
   );
 }

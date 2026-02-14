@@ -4,6 +4,7 @@ import { TripCard } from '../components/TripCard';
 import { BrandedLayout } from '../components/BrandedLayout';
 import { CaptainInfoCard, CancellationPolicy, StarRating } from '@/components/booking/TrustSignals';
 import { HibernationPage } from '../components/HibernationPage';
+import { BookingHelpButton } from '../components/BookingHelpButton';
 
 interface Props {
   params: Promise<{
@@ -307,6 +308,12 @@ export default async function SelectTripPage({ params }: Props) {
           </div>
         </footer>
       </div>
+
+      <BookingHelpButton
+        email={profile.booking_help_email}
+        phone={profile.booking_help_phone}
+        captainName={profile.business_name || profile.full_name || null}
+      />
     </BrandedLayout>
   );
 }

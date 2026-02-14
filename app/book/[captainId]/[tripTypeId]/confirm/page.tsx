@@ -26,6 +26,7 @@ import { ManagementLinkCard } from '@/components/booking/ManagementLinkCard';
 import { ConfirmationActions } from './ConfirmationActions';
 import { PaymentMethodSelector } from './PaymentMethodSelector';
 import { formatDollars, formatCents } from '@/lib/utils/format';
+import { BookingHelpButton } from '../../../components/BookingHelpButton';
 
 const BOOKING_STEPS = [
   { label: 'Select Trip', shortLabel: 'Trip' },
@@ -469,6 +470,16 @@ export default async function ConfirmPage({ params, searchParams }: ConfirmPageP
           </p>
         </div>
       </footer>
+
+      <BookingHelpButton
+        email={profile?.booking_help_show_email ? profile.email : null}
+        phone={profile?.booking_help_show_phone ? profile.phone : null}
+        captainName={
+          (profile?.booking_help_show_email || profile?.booking_help_show_phone)
+            ? (profile?.business_name || profile?.full_name || null)
+            : null
+        }
+      />
     </div>
   );
 }
