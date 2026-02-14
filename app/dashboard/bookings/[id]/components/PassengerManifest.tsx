@@ -230,7 +230,7 @@ export function PassengerManifest({
                     ? 'bg-emerald-50 text-emerald-600'
                     : signedCount > 0
                     ? 'bg-amber-50 text-amber-600'
-                    : 'bg-slate-500/20 text-slate-500'
+                    : 'bg-slate-100 text-slate-600'
                 }`}
               >
                 <FileCheck className="h-4 w-4" />
@@ -320,7 +320,7 @@ export function PassengerManifest({
                               className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
                                 waiverStatus.status === 'signed'
                                   ? 'bg-emerald-50 text-emerald-600'
-                                  : 'bg-slate-500/20 text-slate-500'
+                                  : 'bg-slate-100 text-slate-600'
                               }`}
                             >
                               {waiverStatus.status === 'signed' ? (

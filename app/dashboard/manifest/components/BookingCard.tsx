@@ -32,7 +32,7 @@ const STATUS_CONFIG: Record<BookingStatus, { label: string; className: string }>
   },
   weather_hold: {
     label: 'Weather Hold',
-    className: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+    className: 'bg-orange-50 text-orange-600 border-orange-500/30',
   },
   rescheduled: {
     label: 'Rescheduled',
@@ -40,7 +40,7 @@ const STATUS_CONFIG: Record<BookingStatus, { label: string; className: string }>
   },
   completed: {
     label: 'Completed',
-    className: 'bg-slate-500/20 text-slate-400 border-slate-500/30',
+    className: 'bg-slate-100 text-slate-600 border-slate-500/30',
   },
   cancelled: {
     label: 'Cancelled',
@@ -52,7 +52,7 @@ const STATUS_CONFIG: Record<BookingStatus, { label: string; className: string }>
   },
   expired: {
     label: 'Expired',
-    className: 'bg-slate-100 text-slate-500 border-slate-400/30',
+    className: 'bg-slate-100 text-slate-600 border-slate-400/30',
   },
 };
 
@@ -71,11 +71,11 @@ const PAYMENT_CONFIG: Record<PaymentStatus, { label: string; className: string }
   },
   partially_refunded: {
     label: 'Partially Refunded',
-    className: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+    className: 'bg-orange-50 text-orange-600 border-orange-500/30',
   },
   fully_refunded: {
     label: 'Refunded',
-    className: 'bg-slate-500/20 text-slate-400 border-slate-500/30',
+    className: 'bg-slate-100 text-slate-600 border-slate-500/30',
   },
   pending_verification: {
     label: 'Pending Verification',

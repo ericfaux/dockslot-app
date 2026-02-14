@@ -74,8 +74,8 @@ const STATUS_CONFIG: Record<
     label: 'Completed',
     icon: CheckCircle,
     colors: {
-      bg: 'bg-slate-500/10',
-      text: 'text-slate-400',
+      bg: 'bg-slate-100',
+      text: 'text-slate-600',
       border: 'border-slate-500/30',
       ring: 'ring-slate-500/20',
     },
@@ -105,7 +105,7 @@ const STATUS_CONFIG: Record<
     icon: TimerOff,
     colors: {
       bg: 'bg-slate-100',
-      text: 'text-slate-500',
+      text: 'text-slate-600',
       border: 'border-slate-400/30',
       ring: 'ring-slate-400/20',
     },
@@ -152,8 +152,8 @@ const PAYMENT_CONFIG: Record<string, { label: string; colors: { bg: string; text
   unpaid: {
     label: 'Unpaid',
     colors: {
-      bg: 'bg-slate-500/10',
-      text: 'text-slate-400',
+      bg: 'bg-slate-100',
+      text: 'text-slate-600',
       border: 'border-slate-500/30',
     },
   },

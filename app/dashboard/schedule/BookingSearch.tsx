@@ -215,13 +215,13 @@ export function BookingSearch({ onSelectBooking }: BookingSearchProps) {
                   {result.status && (
                     <span className="flex items-center gap-1">
                       <span className={`h-1.5 w-1.5 rounded-full ${STATUS_COLORS[result.status] || 'bg-slate-400'}`} />
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs text-slate-600">
                         {STATUS_LABELS[result.status] || result.status}
                       </span>
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-3 text-xs text-slate-400">
+                <div className="flex items-center gap-3 text-xs text-slate-500">
                   {result.scheduledStart && (
                     <span className="flex items-center gap-1">
                       <Clock className="h-3 w-3" />
