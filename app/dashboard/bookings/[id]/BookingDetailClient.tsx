@@ -27,18 +27,6 @@ interface WaiverSignatureWithTemplate extends WaiverSignature {
   } | null;
 }
 
-interface AuditLog {
-  id: string;
-  table_name: string;
-  record_id: string;
-  action: string;
-  changed_fields: string[] | null;
-  old_values: Record<string, unknown> | null;
-  new_values: Record<string, unknown> | null;
-  user_id: string | null;
-  created_at: string;
-}
-
 interface BookingDetails {
   booking: BookingWithDetails;
   passengers: Passenger[];
@@ -46,7 +34,6 @@ interface BookingDetails {
   activeWaiverTemplate: { id: string; title: string; version: number } | null;
   payments: Payment[];
   logs: BookingLog[];
-  auditLogs: AuditLog[];
   guestToken: { token: string; expires_at: string } | null;
 }
 
@@ -218,7 +205,6 @@ export function BookingDetailClient({ bookingId, initialBooking }: BookingDetail
           {/* Activity Log */}
           <ActivityLog
             logs={details?.logs || []}
-            auditLogs={details?.auditLogs || []}
             isLoading={isLoading && !details}
           />
         </div>
