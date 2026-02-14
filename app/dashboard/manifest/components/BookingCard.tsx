@@ -99,11 +99,6 @@ export function BookingCard({ booking }: BookingCardProps) {
 
   const hasPassengers = booking.passengers && booking.passengers.length > 0;
 
-  const handlePrintManifest = () => {
-    const printUrl = `/api/manifest/print/${booking.id}`;
-    window.open(printUrl, '_blank');
-  };
-
   return (
     <div
       className="group relative flex flex-col rounded-lg border border-slate-200 bg-white transition-all hover:border-cyan-300"
@@ -143,15 +138,17 @@ export function BookingCard({ booking }: BookingCardProps) {
           >
             {paymentConfig.label}
           </span>
-          <button
-            onClick={handlePrintManifest}
+          <a
+            href={`/api/manifest/print/${booking.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
             className="mt-2 flex items-center gap-1.5 rounded-lg border border-slate-300 bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-900 transition-colors hover:bg-slate-200"
             title="Print passenger manifest for Coast Guard compliance"
             aria-label={`Print passenger manifest for ${booking.guest_name}'s trip`}
           >
             <Printer className="h-3.5 w-3.5" />
             Print Manifest
-          </button>
+          </a>
         </div>
       </div>
 
