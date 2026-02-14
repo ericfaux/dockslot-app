@@ -19,6 +19,7 @@ import {
   setHours,
   setMinutes,
 } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 
 /**
  * Parse a departure time string like "6:00 AM" or "2:30 PM" into hours and minutes.
@@ -146,7 +147,7 @@ export async function GET(
     // Build availability map
     const availability: Record<string, TimeSlot[]> = {};
     const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
-    const now = new Date();
+    const now = toZonedTime(new Date(), captainTimezone);
     const maxBookingDate = addDays(now, maxAdvanceDays);
 
     for (const day of daysInMonth) {
