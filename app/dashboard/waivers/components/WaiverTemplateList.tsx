@@ -116,13 +116,13 @@ export function WaiverTemplateList({ templates: initialTemplates }: Props) {
                     {template.title}
                   </h3>
                   {template.is_active && (
-                    <span className="flex items-center gap-1 rounded-full bg-green-500/20 px-2 py-0.5 text-xs font-medium text-green-400">
+                    <span className="flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700">
                       <CheckCircle className="h-3 w-3" />
                       Active
                     </span>
                   )}
                   {!template.is_active && (
-                    <span className="flex items-center gap-1 rounded-full bg-slate-500/20 px-2 py-0.5 text-xs font-medium text-slate-400">
+                    <span className="flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
                       <XCircle className="h-3 w-3" />
                       Inactive
                     </span>

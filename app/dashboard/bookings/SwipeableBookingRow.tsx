@@ -17,6 +17,18 @@ import { BookingWithDetails, BookingStatus } from '@/lib/db/types'
 import { STATUS_COLORS, STATUS_LABELS } from '@/components/calendar/types'
 import { formatCents } from '@/lib/utils/format'
 
+// Light-background text colors (calendar STATUS_COLORS.text is for dark backgrounds)
+const STATUS_TEXT_ON_LIGHT: Record<BookingStatus, string> = {
+  pending_deposit: 'text-amber-600',
+  confirmed: 'text-emerald-600',
+  weather_hold: 'text-blue-600',
+  rescheduled: 'text-purple-600',
+  completed: 'text-slate-600',
+  cancelled: 'text-rose-600',
+  no_show: 'text-rose-600',
+  expired: 'text-slate-600',
+}
+
 interface SwipeableBookingRowProps {
   booking: BookingWithDetails
   isSelected: boolean
@@ -145,7 +157,7 @@ export function SwipeableBookingRow({
               </h3>
               <div className="flex items-center gap-2">
                 <div className={`h-2 w-2 rounded-full ${colors.dot}`} />
-                <span className={`text-sm ${colors.text}`}>{statusLabel}</span>
+                <span className={`text-sm ${STATUS_TEXT_ON_LIGHT[booking.status]}`}>{statusLabel}</span>
               </div>
             </div>
 

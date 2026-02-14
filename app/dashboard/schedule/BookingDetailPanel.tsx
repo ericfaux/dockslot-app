@@ -22,6 +22,19 @@ import {
   Copy,
 } from 'lucide-react';
 import { CalendarBooking, STATUS_COLORS, STATUS_LABELS, WeatherHoldModal, RescheduleOffers } from '@/components/calendar';
+import { BookingStatus } from '@/lib/db/types';
+
+// Light-background text colors (calendar STATUS_COLORS.text is for dark backgrounds)
+const STATUS_TEXT_ON_LIGHT: Record<BookingStatus, string> = {
+  pending_deposit: 'text-amber-600',
+  confirmed: 'text-emerald-600',
+  weather_hold: 'text-blue-600',
+  rescheduled: 'text-purple-600',
+  completed: 'text-slate-600',
+  cancelled: 'text-rose-600',
+  no_show: 'text-rose-600',
+  expired: 'text-slate-600',
+};
 import {
   cancelBooking,
   markNoShow,
@@ -224,7 +237,7 @@ export function BookingDetailPanel({
               </h2>
               <div className="mt-1 flex items-center gap-2">
                 <div className={`h-2 w-2 rounded-full ${colors.dot}`} />
-                <span className={`text-sm ${colors.text}`}>{statusLabel}</span>
+                <span className={`text-sm ${STATUS_TEXT_ON_LIGHT[booking.status as BookingStatus]}`}>{statusLabel}</span>
               </div>
             </div>
             <button

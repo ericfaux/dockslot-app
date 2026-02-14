@@ -143,19 +143,19 @@ export function CalendarDayView({
         <div className="flex items-center gap-1">
           <button
             onClick={handlePrevDay}
-            className="rounded-md p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200"
+            className="rounded-md p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-300 transition-colors hover:bg-slate-800 hover:text-slate-100"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
           <button
             onClick={handleNextDay}
-            className="rounded-md p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200"
+            className="rounded-md p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-300 transition-colors hover:bg-slate-800 hover:text-slate-100"
           >
             <ChevronRight className="h-5 w-5" />
           </button>
           <button
             onClick={handleToday}
-            className="rounded-md px-3 py-1.5 min-h-[44px] font-mono text-xs font-medium text-cyan-400 transition-colors hover:bg-cyan-400/10"
+            className="rounded-md px-3 py-1.5 min-h-[44px] font-mono text-xs font-medium text-cyan-300 transition-colors hover:bg-cyan-300/10"
           >
             TODAY
           </button>
@@ -163,7 +163,7 @@ export function CalendarDayView({
 
         {/* Date Label */}
         <div className="flex items-center gap-2">
-          <CalendarIcon className="h-4 w-4 text-slate-500" />
+          <CalendarIcon className="h-4 w-4 text-slate-400" />
           <span className="font-mono text-sm font-medium text-slate-300">
             {dateLabel}
           </span>
@@ -177,8 +177,8 @@ export function CalendarDayView({
               onClick={() => onViewChange(view)}
               className={`rounded-md px-2.5 py-1 min-h-[36px] font-mono text-xs font-medium transition-all ${
                 view === 'day'
-                  ? 'bg-cyan-500/20 text-cyan-400'
-                  : 'text-slate-500 hover:text-slate-300'
+                  ? 'bg-cyan-500/20 text-cyan-300'
+                  : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               {view.toUpperCase()}
@@ -218,7 +218,7 @@ export function CalendarDayView({
         {onQuickBlockClick && (
           <button
             onClick={onQuickBlockClick}
-            className="flex items-center gap-1.5 rounded-md px-3 py-1.5 min-h-[36px] font-mono text-xs font-medium text-rose-400 transition-colors hover:bg-rose-400/10 ml-auto"
+            className="flex items-center gap-1.5 rounded-md px-3 py-1.5 min-h-[36px] font-mono text-xs font-medium text-rose-300 transition-colors hover:bg-rose-300/10 ml-auto"
           >
             <CalendarX className="h-3.5 w-3.5" />
             BLOCK

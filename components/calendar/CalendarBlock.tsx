@@ -81,7 +81,7 @@ export const CalendarBlock = memo(function CalendarBlock({
 
             {/* Trip type */}
             {booking.trip_type && (
-              <div className="mt-0.5 truncate text-xs text-slate-400">
+              <div className="mt-0.5 truncate text-xs text-slate-300">
                 {booking.trip_type.title}
               </div>
             )}
