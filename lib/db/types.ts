@@ -95,6 +95,8 @@ export interface Profile {
   booking_tagline: string | null;
   brand_accent_color: string;
   booking_slug: string | null;
+  booking_help_show_email: boolean;
+  booking_help_show_phone: boolean;
 }
 
 export interface Vessel {

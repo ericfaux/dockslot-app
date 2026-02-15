@@ -65,6 +65,8 @@ export interface PublicCaptainProfile {
   hero_image_url: string | null;
   booking_tagline: string | null;
   brand_accent_color: string;
+  booking_help_email: string | null;
+  booking_help_phone: string | null;
 }
 
 export interface CaptainReviewStats {
@@ -254,7 +256,11 @@ export async function getPublicCaptainProfile(
       stripe_account_id,
       hero_image_url,
       booking_tagline,
-      brand_accent_color
+      brand_accent_color,
+      booking_help_show_email,
+      booking_help_show_phone,
+      email,
+      phone
     `)
     .eq('id', captainId)
     .single();
@@ -272,7 +278,33 @@ export async function getPublicCaptainProfile(
     };
   }
 
-  return { success: true, data: data as PublicCaptainProfile };
+  const result: PublicCaptainProfile = {
+    id: data.id,
+    business_name: data.business_name,
+    full_name: data.full_name,
+    timezone: data.timezone,
+    meeting_spot_name: data.meeting_spot_name,
+    meeting_spot_address: data.meeting_spot_address,
+    meeting_spot_instructions: data.meeting_spot_instructions,
+    meeting_spot_latitude: data.meeting_spot_latitude,
+    meeting_spot_longitude: data.meeting_spot_longitude,
+    cancellation_policy: data.cancellation_policy,
+    is_hibernating: data.is_hibernating,
+    hibernation_message: data.hibernation_message,
+    advance_booking_days: data.advance_booking_days,
+    venmo_enabled: data.venmo_enabled,
+    venmo_username: data.venmo_username,
+    zelle_enabled: data.zelle_enabled,
+    zelle_contact: data.zelle_contact,
+    stripe_account_id: data.stripe_account_id,
+    hero_image_url: data.hero_image_url,
+    booking_tagline: data.booking_tagline,
+    brand_accent_color: data.brand_accent_color,
+    booking_help_email: data.booking_help_show_email ? data.email : null,
+    booking_help_phone: data.booking_help_show_phone ? data.phone : null,
+  };
+
+  return { success: true, data: result };
 }
 
 /**
