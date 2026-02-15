@@ -34,7 +34,8 @@ function stripPlaceholder(value: string | undefined): string | undefined {
   return value;
 }
 
-const DEFAULT_FROM = 'DockSlot <bookings@dockslot.app>';
+const RESEND_FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+const DEFAULT_FROM = `DockSlot <${RESEND_FROM_EMAIL}>`;
 
 export async function sendEmail({ to, subject, html, from = DEFAULT_FROM, replyTo }: EmailParams): Promise<{
   success: boolean;
@@ -583,7 +584,7 @@ ${messageHtml}
 
   // Use captain's name in sender and set reply-to their email
   const from = params.captainName
-    ? `${params.captainName} via DockSlot <bookings@dockslot.app>`
+    ? `${params.captainName} via DockSlot <${RESEND_FROM_EMAIL}>`
     : DEFAULT_FROM;
 
   return sendEmail({
