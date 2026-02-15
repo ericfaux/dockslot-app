@@ -2,10 +2,12 @@
 // Booking flow page - Date selection + guest details (light theme)
 // Mobile-first checkout experience
 
+export const dynamic = 'force-dynamic';
+
 import { createSupabaseServiceClient } from "@/utils/supabase/service";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import { AlertTriangle, ChevronLeft } from "lucide-react";
 import { BookingForm } from "./BookingForm";
 import { BrandedLayout } from "../../components/BrandedLayout";
 import { formatDollars } from "@/lib/utils/format";
@@ -25,6 +27,27 @@ export default async function BookingPage({ params }: BookingPageProps) {
   // Resolve slug or UUID to captain ID
   const resolveResult = await resolveCaptainId(rawId);
   if (!resolveResult.success || !resolveResult.data) {
+    if (resolveResult.code === 'DATABASE') {
+      return (
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+          <div className="max-w-md w-full text-center">
+            <div className="rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+              <div className="flex justify-center mb-4">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
+                  <AlertTriangle className="h-8 w-8 text-red-500" />
+                </div>
+              </div>
+              <h1 className="text-xl font-semibold text-slate-900 mb-2">
+                Temporarily Unavailable
+              </h1>
+              <p className="text-slate-500">
+                We had trouble loading this booking page. Please refresh to try again.
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
     notFound();
   }
   const captainId = resolveResult.data;

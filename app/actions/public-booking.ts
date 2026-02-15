@@ -211,7 +211,27 @@ export async function resolveCaptainId(
     .eq('booking_slug', slug)
     .single();
 
-  if (error || !data) {
+  if (error) {
+    // PGRST116 = "no rows found" from .single() -- genuine not-found
+    if (error.code === 'PGRST116') {
+      console.warn(`[resolveCaptainId] No profile found for slug "${slug}"`);
+      return { success: false, error: 'Captain not found', code: 'NOT_FOUND' };
+    }
+    // Any other error is a transient/database issue
+    console.error(
+      `[resolveCaptainId] Database error resolving slug "${slug}":`,
+      error.message,
+      error.code
+    );
+    return {
+      success: false,
+      error: 'Unable to look up booking link. Please try again.',
+      code: 'DATABASE',
+    };
+  }
+
+  if (!data) {
+    console.warn(`[resolveCaptainId] Query returned null data for slug "${slug}"`);
     return { success: false, error: 'Captain not found', code: 'NOT_FOUND' };
   }
 
