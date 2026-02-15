@@ -212,14 +212,14 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
   // Auto-open drawer if ?detail={id} is in URL
   useEffect(() => {
     const detailId = searchParams.get('detail')
-    if (detailId && bookings.length > 0 && !isDrawerOpen) {
+    if (detailId && bookings.length > 0) {
       const booking = bookings.find((b) => b.id === detailId)
       if (booking) {
         setDrawerBooking(booking)
         setIsDrawerOpen(true)
       }
     }
-  }, [searchParams, bookings, isDrawerOpen])
+  }, [searchParams, bookings])
 
   // Handle weather hold action (defined after fetchBookings)
   const handleWeatherHold = useCallback(async (bookingId: string) => {
