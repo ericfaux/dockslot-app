@@ -347,10 +347,11 @@ export async function getGuestAnalytics(): Promise<GuestAnalyticsData> {
 
   const totalUniqueGuests = guestMap.size;
 
-  // Repeat guests (2+ bookings regardless of status)
+  // Repeat guests (2+ non-cancelled/no-show bookings)
   let repeatGuestCount = 0;
   guestMap.forEach(guestBookings => {
-    if (guestBookings.length >= 2) repeatGuestCount++;
+    const validTrips = guestBookings.filter(b => b.status !== 'cancelled' && b.status !== 'no_show').length;
+    if (validTrips >= 2) repeatGuestCount++;
   });
   const repeatGuestRate = totalUniqueGuests > 0
     ? (repeatGuestCount / totalUniqueGuests) * 100
@@ -364,12 +365,15 @@ export async function getGuestAnalytics(): Promise<GuestAnalyticsData> {
   }
 
   const topGuestsByTrips = Array.from(guestMap.entries())
-    .map(([email, guestBookings]) => ({
-      name: guestBookings[0].guest_name,
-      email,
-      trips: guestBookings.length,
-      revenue: centsToDollars(guestBookings.reduce((sum, b) => sum + guestRevenue(b), 0)),
-    }))
+    .map(([email, guestBookings]) => {
+      const validBookings = guestBookings.filter(b => b.status !== 'cancelled' && b.status !== 'no_show');
+      return {
+        name: guestBookings[0].guest_name,
+        email,
+        trips: validBookings.length,
+        revenue: centsToDollars(validBookings.reduce((sum, b) => sum + guestRevenue(b), 0)),
+      };
+    })
     .sort((a, b) => b.trips - a.trips || b.revenue - a.revenue);
 
   // New vs returning guests over the last 6 months
