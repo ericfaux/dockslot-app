@@ -121,19 +121,6 @@ export async function POST(
       })
       .eq('id', bookingId);
 
-    // Log audit entry
-    await supabase.from('audit_log').insert({
-      booking_id: bookingId,
-      action: 'refund_issued',
-      details: {
-        refund_amount_cents,
-        reason: reason.trim(),
-        stripe_refund_id: refund.id,
-        refund_status: refund.status,
-      },
-      created_by: user.id,
-    });
-
     // Send refund notification email to guest
     const formattedDate = format(parseISO(booking.scheduled_start), 'EEEE, MMMM d, yyyy');
     const managementUrl = `${process.env.NEXT_PUBLIC_APP_URL}/manage/${booking.management_token}`;

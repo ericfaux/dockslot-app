@@ -48,22 +48,9 @@ export async function GET(
       // Don't fail the request, just return empty logs
     }
 
-    // Fetch audit logs for additional events
-    const { data: auditLogs, error: auditError } = await supabase
-      .from('audit_logs')
-      .select('*')
-      .eq('table_name', 'bookings')
-      .eq('record_id', id)
-      .order('created_at', { ascending: false })
-
-    if (auditError) {
-      console.error('Error fetching audit logs:', auditError)
-      // Don't fail the request, just return empty audit logs
-    }
-
     return NextResponse.json({
       logs: logs || [],
-      auditLogs: auditLogs || [],
+      auditLogs: [],
     })
   } catch (error) {
     console.error('Unexpected error:', error)

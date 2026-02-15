@@ -152,14 +152,5 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to save settings' }, { status: 500 });
   }
 
-  // Log the change
-  await supabase.from('audit_logs').insert({
-    table_name: 'referral_settings',
-    record_id: user.id,
-    action: 'update',
-    actor_id: user.id,
-    new_value: data,
-  });
-
   return NextResponse.json(data);
 }
