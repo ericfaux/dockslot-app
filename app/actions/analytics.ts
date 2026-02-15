@@ -157,7 +157,8 @@ export async function getRevenueOverview(): Promise<RevenueOverviewData> {
     });
   }
 
-  // Average booking value (non-cancelled, non-pending)
+  // Average booking value based on listed total_price (not payments received).
+  // Excludes pending_deposit and no_show bookings.
   const paidBookings = allBookings.filter(b =>
     !['pending_deposit', 'no_show'].includes(b.status)
   );
