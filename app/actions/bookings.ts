@@ -41,6 +41,7 @@ import {
   sendCancellationConfirmation,
   sendRescheduleConfirmation,
 } from '@/lib/email/resend';
+import { sendBookingConfirmationSMS } from '@/lib/sms/notifications';
 
 // ============================================================================
 // Types
@@ -365,7 +366,7 @@ export async function createBooking(
       params.trip_type_id
         ? supabaseEmail.from('trip_types').select('title, cancellation_policy_text, vessel_id').eq('id', params.trip_type_id).single()
         : { data: null },
-      supabaseEmail.from('email_preferences').select('custom_what_to_bring, business_name_override, logo_url, email_signature').eq('captain_id', params.captain_id).single(),
+      supabaseEmail.from('email_preferences').select('custom_what_to_bring, business_name_override, logo_url, email_signature, sms_booking_confirmation').eq('captain_id', params.captain_id).single(),
       supabaseEmail.from('waiver_templates').select('id').eq('owner_id', params.captain_id).eq('is_active', true).limit(1).single(),
     ]);
 
@@ -403,6 +404,21 @@ export async function createBooking(
     }).catch(err => {
       console.warn('Failed to send booking confirmation email:', err);
     });
+
+    // Send SMS booking confirmation if guest has phone and captain has SMS enabled
+    const smsEnabled = emailPrefs.data?.sms_booking_confirmation !== false;
+    if (smsEnabled && params.guest_phone) {
+      sendBookingConfirmationSMS({
+        to: params.guest_phone,
+        guestName: sanitizeName(params.guest_name),
+        tripType: tripDetails?.data?.title || 'Charter Trip',
+        date: format(new Date(params.scheduled_start), 'EEEE, MMMM d, yyyy'),
+        time: format(new Date(params.scheduled_start), 'h:mm a'),
+        managementUrl,
+      }).catch(err => {
+        console.warn('Failed to send booking confirmation SMS:', err);
+      });
+    }
   }
 
   return { success: true, data: booking };

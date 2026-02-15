@@ -23,6 +23,7 @@ import {
 import { addHours, format, parseISO, isValid, startOfDay, endOfDay, isBefore, addDays } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { sendBookingConfirmation } from '@/lib/email/resend';
+import { sendBookingConfirmationSMS } from '@/lib/sms/notifications';
 
 // ============================================================================
 // Types
@@ -965,7 +966,7 @@ export async function createPublicBooking(
         .single(),
       supabase
         .from('email_preferences')
-        .select('custom_what_to_bring, business_name_override, logo_url, email_signature')
+        .select('custom_what_to_bring, business_name_override, logo_url, email_signature, sms_booking_confirmation')
         .eq('captain_id', params.captain_id)
         .single(),
       supabase
@@ -1012,6 +1013,21 @@ export async function createPublicBooking(
       }).catch(err => {
         console.warn('Failed to send booking confirmation email:', err);
       });
+
+      // Send SMS booking confirmation if guest has phone and captain has SMS enabled
+      const smsEnabled = emailPrefs.data?.sms_booking_confirmation !== false;
+      if (smsEnabled && params.guest_phone) {
+        sendBookingConfirmationSMS({
+          to: params.guest_phone,
+          guestName: sanitizeName(params.guest_name),
+          tripType: tripDetails.data.title,
+          date: format(new Date(scheduledStart), 'EEEE, MMMM d, yyyy'),
+          time: format(new Date(scheduledStart), 'h:mm a'),
+          managementUrl,
+        }).catch(err => {
+          console.warn('Failed to send booking confirmation SMS:', err);
+        });
+      }
     }
   }
 
