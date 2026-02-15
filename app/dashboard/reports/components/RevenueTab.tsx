@@ -39,6 +39,8 @@ function RevenueTooltip({ active, payload, label }: any) {
 
 export function RevenueTab({ data }: Props) {
   const hasData = data.allTimeRevenue > 0 || data.revenueByTripType.length > 0;
+  const hasMonthlyRevenue = data.revenueByMonth.some((m) => m.revenue > 0);
+  const hasTripTypeRevenue = data.revenueByTripType.some((t) => t.revenue > 0);
 
   if (!hasData) {
     return (
@@ -93,10 +95,11 @@ export function RevenueTab({ data }: Props) {
         </div>
 
         <div className="rounded-lg border border-slate-200 bg-white p-4">
-          <p className="text-xs text-slate-400 mb-1">Avg Booking</p>
+          <p className="text-xs text-slate-400 mb-1">Avg Booking Value</p>
           <p className="text-2xl font-bold text-slate-900">
             ${data.averageBookingValue.toFixed(0)}
           </p>
+          <p className="text-[10px] text-slate-300 mt-1">Based on listed price</p>
         </div>
       </div>
 
@@ -119,50 +122,67 @@ export function RevenueTab({ data }: Props) {
       {/* Revenue by Month Chart */}
       <div className="rounded-lg border border-slate-200 bg-white p-4 sm:p-6">
         <h3 className="text-base font-semibold text-slate-900 mb-4">Revenue by Month</h3>
-        <div className="h-64 sm:h-72 -mx-2 sm:mx-0">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart
-              data={data.revenueByMonth}
-              margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-              <XAxis
-                dataKey="label"
-                tick={{ fill: '#94a3b8', fontSize: 11 }}
-                axisLine={{ stroke: '#334155' }}
-                tickLine={false}
-              />
-              <YAxis
-                tick={{ fill: '#94a3b8', fontSize: 11 }}
-                axisLine={{ stroke: '#334155' }}
-                tickLine={false}
-                tickFormatter={formatCurrency}
-              />
-              <Tooltip content={<RevenueTooltip />} />
-              <defs>
-                <linearGradient id="revenueLineGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#06b6d4" stopOpacity={0.3} />
-                  <stop offset="100%" stopColor="#06b6d4" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <Line
-                type="monotone"
-                dataKey="revenue"
-                stroke="#06b6d4"
-                strokeWidth={2}
-                dot={{ fill: '#06b6d4', r: 4 }}
-                activeDot={{ r: 6, fill: '#22d3ee' }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+        {hasMonthlyRevenue ? (
+          <div className="h-64 sm:h-72 -mx-2 sm:mx-0">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart
+                data={data.revenueByMonth}
+                margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                <XAxis
+                  dataKey="label"
+                  tick={{ fill: '#94a3b8', fontSize: 11 }}
+                  axisLine={{ stroke: '#334155' }}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fill: '#94a3b8', fontSize: 11 }}
+                  axisLine={{ stroke: '#334155' }}
+                  tickLine={false}
+                  tickFormatter={formatCurrency}
+                  domain={[0, (dataMax: number) => Math.max(dataMax, 100)]}
+                />
+                <Tooltip content={<RevenueTooltip />} />
+                <defs>
+                  <linearGradient id="revenueLineGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#06b6d4" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="#06b6d4" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <Line
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke="#06b6d4"
+                  strokeWidth={2}
+                  dot={{ fill: '#06b6d4', r: 4 }}
+                  activeDot={{ r: 6, fill: '#22d3ee' }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-48 text-center">
+            <DollarSign className="h-8 w-8 text-slate-300 mb-2" />
+            <p className="text-sm text-slate-400">No revenue data yet</p>
+            <p className="text-xs text-slate-300 mt-1">Revenue will appear here once payments are received</p>
+          </div>
+        )}
       </div>
 
       {/* Revenue by Trip Type */}
       {data.revenueByTripType.length > 0 && (
         <div className="rounded-lg border border-slate-200 bg-white p-4 sm:p-6">
           <h3 className="text-base font-semibold text-slate-900 mb-4">Revenue by Trip Type</h3>
-          {data.revenueByTripType.length <= 6 ? (
+          {!hasTripTypeRevenue ? (
+            <div className="flex flex-col items-center justify-center h-48 text-center">
+              <DollarSign className="h-8 w-8 text-slate-300 mb-2" />
+              <p className="text-sm text-slate-400">No revenue data yet</p>
+              <p className="text-xs text-slate-300 mt-1">
+                {data.revenueByTripType.length} trip type{data.revenueByTripType.length !== 1 ? 's' : ''} with bookings — revenue will appear once payments are received
+              </p>
+            </div>
+          ) : data.revenueByTripType.length <= 6 ? (
             <div className="h-48 -mx-2 sm:mx-0">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
@@ -177,6 +197,7 @@ export function RevenueTab({ data }: Props) {
                     axisLine={{ stroke: '#334155' }}
                     tickLine={false}
                     tickFormatter={formatCurrency}
+                    domain={[0, (dataMax: number) => Math.max(dataMax, 100)]}
                   />
                   <YAxis
                     dataKey="name"
