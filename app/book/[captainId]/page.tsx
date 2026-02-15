@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { Anchor, AlertTriangle, CheckCircle } from 'lucide-react';
 import { getPublicCaptainProfile, getPublicTripTypes, getHibernationInfo, getCaptainSocialProof, resolveCaptainId } from '@/app/actions/public-booking';
 import { TripCard } from '../components/TripCard';
@@ -26,6 +28,7 @@ export default async function SelectTripPage({ params }: Props) {
   // Resolve slug or UUID to captain ID
   const resolveResult = await resolveCaptainId(rawId);
   if (!resolveResult.success || !resolveResult.data) {
+    const isTransient = resolveResult.code === 'DATABASE';
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
         <div className="max-w-md w-full text-center">
@@ -36,10 +39,12 @@ export default async function SelectTripPage({ params }: Props) {
               </div>
             </div>
             <h1 className="text-xl font-semibold text-slate-900 mb-2">
-              Captain Not Found
+              {isTransient ? 'Temporarily Unavailable' : 'Captain Not Found'}
             </h1>
             <p className="text-slate-500">
-              We couldn&apos;t find a captain with this booking link.
+              {isTransient
+                ? 'We had trouble loading this booking page. Please refresh to try again.'
+                : "We couldn\u0027t find a captain with this booking link."}
             </p>
           </div>
         </div>
