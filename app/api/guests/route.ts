@@ -95,14 +95,14 @@ export async function GET(request: NextRequest) {
       if (booking.status !== 'cancelled' && booking.status !== 'no_show') {
         guest.totalTrips++;
         guest.totalSpent += booking.total_price_cents || 0;
-      }
 
-      const tripDate = new Date(booking.scheduled_start);
-      if (!guest.lastTripDate || tripDate > new Date(guest.lastTripDate)) {
-        guest.lastTripDate = booking.scheduled_start;
-      }
-      if (!guest.firstTripDate || tripDate < new Date(guest.firstTripDate)) {
-        guest.firstTripDate = booking.scheduled_start;
+        const tripDate = new Date(booking.scheduled_start);
+        if (!guest.lastTripDate || tripDate > new Date(guest.lastTripDate)) {
+          guest.lastTripDate = booking.scheduled_start;
+        }
+        if (!guest.firstTripDate || tripDate < new Date(guest.firstTripDate)) {
+          guest.firstTripDate = booking.scheduled_start;
+        }
       }
     }
 
