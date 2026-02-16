@@ -2,10 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServiceClient } from '@/utils/supabase/service';
 import { sendReviewRequest } from '@/lib/email/review-requests';
 
+const TIMING_OFFSETS_MS: Record<string, number> = {
+  immediate: 0,
+  '8h': 8 * 60 * 60 * 1000,
+  '24h': 24 * 60 * 60 * 1000,
+  '48h': 48 * 60 * 60 * 1000,
+};
+
 /**
- * Cron job: Send review requests for recently completed trips
- * Runs daily at 10 AM UTC
- * Sends emails to guests whose trips were completed 1 day ago
+ * Cron job: Send review requests for completed trips
+ * Runs hourly to support variable timing (immediate, 8h, 24h, 48h)
+ *
+ * For each completed booking where no review request has been sent yet,
+ * checks the captain's chosen timing offset against scheduled_end.
+ * Only sends if scheduled_end + offset <= now.
  *
  * Uses service client (not session client) since cron jobs run without auth.
  */
@@ -18,17 +28,13 @@ export async function GET(req: NextRequest) {
     }
 
     const supabase = createSupabaseServiceClient();
+    const now = new Date();
 
-    // Calculate date range: trips completed yesterday
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    yesterday.setHours(0, 0, 0, 0);
+    // Safety cap: only consider bookings that ended in the last 7 days
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    // Find completed trips from yesterday that don't have reviews yet
-    // and haven't already received a review request
+    // Find completed bookings that haven't received a review request yet
+    // and ended within the last 7 days
     const { data: bookings, error: bookingsError } = await supabase
       .from('bookings')
       .select(`
@@ -36,6 +42,7 @@ export async function GET(req: NextRequest) {
         guest_name,
         guest_email,
         scheduled_start,
+        scheduled_end,
         management_token,
         captain_id,
         vessel_id,
@@ -43,8 +50,7 @@ export async function GET(req: NextRequest) {
         review_request_sent_at
       `)
       .eq('status', 'completed')
-      .gte('scheduled_start', yesterday.toISOString())
-      .lt('scheduled_start', today.toISOString())
+      .gte('scheduled_end', sevenDaysAgo.toISOString())
       .is('review_request_sent_at', null);
 
     if (bookingsError) {
@@ -63,6 +69,19 @@ export async function GET(req: NextRequest) {
       });
     }
 
+    // Batch-fetch captain preferences to reduce DB round trips
+    const captainIds = [...new Set(bookings.map((b) => b.captain_id))];
+    const { data: allPrefs } = await supabase
+      .from('email_preferences')
+      .select(
+        'captain_id, review_request_enabled, review_request_timing, review_request_custom_message, google_review_link, include_google_review_link'
+      )
+      .in('captain_id', captainIds);
+
+    const prefsMap = new Map(
+      (allPrefs || []).map((p) => [p.captain_id, p])
+    );
+
     const results = [];
     let successCount = 0;
     let failCount = 0;
@@ -74,15 +93,32 @@ export async function GET(req: NextRequest) {
           continue;
         }
 
-        // Check captain email preferences
-        const { data: prefs } = await supabase
-          .from('email_preferences')
-          .select('review_request_enabled')
-          .eq('captain_id', booking.captain_id)
-          .single();
+        // Get captain preferences (defaults if not set)
+        const prefs = prefsMap.get(booking.captain_id);
+        const reviewEnabled = prefs ? prefs.review_request_enabled : true;
+        const timing = prefs?.review_request_timing || '24h';
 
-        if (prefs && !prefs.review_request_enabled) {
-          results.push({ booking_id: booking.id, status: 'skipped', reason: 'disabled by captain' });
+        if (!reviewEnabled) {
+          results.push({
+            booking_id: booking.id,
+            status: 'skipped',
+            reason: 'disabled by captain',
+          });
+          continue;
+        }
+
+        // Check if timing offset has elapsed since scheduled_end
+        const scheduledEnd = new Date(booking.scheduled_end);
+        const offsetMs = TIMING_OFFSETS_MS[timing] ?? TIMING_OFFSETS_MS['24h'];
+        const sendAfter = new Date(scheduledEnd.getTime() + offsetMs);
+
+        if (now < sendAfter) {
+          // Not time yet — skip
+          results.push({
+            booking_id: booking.id,
+            status: 'skipped',
+            reason: `waiting until ${sendAfter.toISOString()} (timing: ${timing})`,
+          });
           continue;
         }
 
@@ -94,15 +130,31 @@ export async function GET(req: NextRequest) {
           .single();
 
         if (existingReview) {
-          results.push({ booking_id: booking.id, status: 'skipped', reason: 'review exists' });
+          results.push({
+            booking_id: booking.id,
+            status: 'skipped',
+            reason: 'review exists',
+          });
           continue;
         }
 
         // Fetch related data
         const [vesselRes, tripTypeRes, profileRes] = await Promise.all([
-          supabase.from('vessels').select('name').eq('id', booking.vessel_id).single(),
-          supabase.from('trip_types').select('title').eq('id', booking.trip_type_id).single(),
-          supabase.from('profiles').select('business_name, full_name').eq('id', booking.captain_id).single(),
+          supabase
+            .from('vessels')
+            .select('name')
+            .eq('id', booking.vessel_id)
+            .single(),
+          supabase
+            .from('trip_types')
+            .select('title')
+            .eq('id', booking.trip_type_id)
+            .single(),
+          supabase
+            .from('profiles')
+            .select('business_name, full_name')
+            .eq('id', booking.captain_id)
+            .single(),
         ]);
 
         const reviewUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://dockslot-app.vercel.app'}/review/${booking.management_token}`;
@@ -112,14 +164,24 @@ export async function GET(req: NextRequest) {
           guestName: booking.guest_name,
           tripType: tripTypeRes.data?.title || 'Your trip',
           vesselName: vesselRes.data?.name || 'Charter Vessel',
-          tripDate: new Date(booking.scheduled_start).toLocaleDateString('en-US', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          }),
-          captainName: profileRes.data?.business_name || profileRes.data?.full_name || 'us',
+          tripDate: new Date(booking.scheduled_start).toLocaleDateString(
+            'en-US',
+            {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            }
+          ),
+          captainName:
+            profileRes.data?.business_name ||
+            profileRes.data?.full_name ||
+            'us',
           reviewUrl,
+          customMessage: prefs?.review_request_custom_message || null,
+          googleReviewLink: prefs?.google_review_link || null,
+          includeGoogleReviewLink:
+            prefs?.include_google_review_link || false,
         });
 
         if (result.success) {
@@ -138,6 +200,7 @@ export async function GET(req: NextRequest) {
             metadata: {
               email_type: 'review_request',
               email_id: result.messageId,
+              timing,
               sent_at: new Date().toISOString(),
             },
           });
@@ -146,15 +209,23 @@ export async function GET(req: NextRequest) {
           results.push({ booking_id: booking.id, status: 'sent' });
         } else {
           failCount++;
-          results.push({ booking_id: booking.id, status: 'failed', error: result.error });
+          results.push({
+            booking_id: booking.id,
+            status: 'failed',
+            error: result.error,
+          });
         }
       } catch (error) {
-        console.error(`Failed to send review request for booking ${booking.id}:`, error);
+        console.error(
+          `Failed to send review request for booking ${booking.id}:`,
+          error
+        );
         failCount++;
         results.push({
           booking_id: booking.id,
           status: 'error',
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error:
+            error instanceof Error ? error.message : 'Unknown error',
         });
       }
     }
