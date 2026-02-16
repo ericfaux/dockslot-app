@@ -258,6 +258,16 @@ export function BillingClient({
         )}
       </div>
 
+      {/* Zero Commission Callout */}
+      <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-6 py-4 text-center">
+        <p className="text-sm font-semibold text-emerald-800">
+          0% commission on every plan. Always.
+        </p>
+        <p className="mt-1 text-xs text-emerald-600">
+          Your booking link. Your guests. Your money. Standard Stripe processing fees apply on Captain and Fleet plans.
+        </p>
+      </div>
+
       {/* Plan Cards */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Deckhand (Free) */}
@@ -420,16 +430,6 @@ export function BillingClient({
             ))}
           </ul>
         </div>
-      </div>
-
-      {/* Zero Commission Callout */}
-      <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-6 py-4 text-center">
-        <p className="text-sm font-semibold text-emerald-800">
-          0% commission on every plan. Always.
-        </p>
-        <p className="mt-1 text-xs text-emerald-600">
-          Your booking link. Your guests. Your money. Standard Stripe processing fees apply on Captain and Fleet plans.
-        </p>
       </div>
 
       {/* Subscription Details (Paid plans) */}
