@@ -9,6 +9,8 @@ import {
   MessageSquare,
   Palette,
   AlertTriangle,
+  Star,
+  ExternalLink,
 } from 'lucide-react';
 import { EmailPreferences, SubscriptionTier } from '@/lib/db/types';
 import { canUseFeature } from '@/lib/subscription/gates';
@@ -49,6 +51,10 @@ export function NotificationsTab({ subscriptionTier }: NotificationsTabProps) {
   const [reminderTiming, setReminderTiming] = useState<('24h' | '48h')[]>(['24h']);
   const [weatherAlert, setWeatherAlert] = useState(true);
   const [reviewRequest, setReviewRequest] = useState(true);
+  const [reviewRequestTiming, setReviewRequestTiming] = useState<'immediate' | '8h' | '24h' | '48h'>('24h');
+  const [reviewRequestCustomMessage, setReviewRequestCustomMessage] = useState('');
+  const [googleReviewLink, setGoogleReviewLink] = useState('');
+  const [includeGoogleReviewLink, setIncludeGoogleReviewLink] = useState(false);
   const [cancellationNotification, setCancellationNotification] = useState(true);
 
   // SMS toggles
@@ -83,6 +89,10 @@ export function NotificationsTab({ subscriptionTier }: NotificationsTabProps) {
         setReminderTiming(p.trip_reminder_timing);
         setWeatherAlert(p.weather_alert_enabled);
         setReviewRequest(p.review_request_enabled);
+        setReviewRequestTiming(p.review_request_timing || '24h');
+        setReviewRequestCustomMessage(p.review_request_custom_message || '');
+        setGoogleReviewLink(p.google_review_link || '');
+        setIncludeGoogleReviewLink(p.include_google_review_link || false);
         setCancellationNotification(p.cancellation_notification_enabled);
         setSmsBookingConfirmation(p.sms_booking_confirmation);
         setSmsDayOfReminder(p.sms_day_of_reminder);
@@ -137,6 +147,10 @@ export function NotificationsTab({ subscriptionTier }: NotificationsTabProps) {
         trip_reminder_timing: reminderTiming,
         weather_alert_enabled: weatherAlert,
         review_request_enabled: reviewRequest,
+        review_request_timing: reviewRequestTiming,
+        review_request_custom_message: reviewRequestCustomMessage || null,
+        google_review_link: googleReviewLink || null,
+        include_google_review_link: includeGoogleReviewLink,
         cancellation_notification_enabled: cancellationNotification,
         sms_booking_confirmation: smsBookingConfirmation,
         sms_day_of_reminder: smsDayOfReminder,
@@ -230,6 +244,93 @@ export function NotificationsTab({ subscriptionTier }: NotificationsTabProps) {
             checked={reviewRequest}
             onChange={setReviewRequest}
           />
+          {reviewRequest && (
+            <div className="ml-12 space-y-5 rounded-lg border border-slate-100 bg-slate-50 p-4">
+              {/* Timing selector */}
+              <div>
+                <p className="text-sm font-medium text-slate-700 mb-2">
+                  When to send
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {([
+                    { value: 'immediate' as const, label: 'Right after trip' },
+                    { value: '8h' as const, label: '8 hours after' },
+                    { value: '24h' as const, label: '24 hours after' },
+                    { value: '48h' as const, label: '48 hours after' },
+                  ]).map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => setReviewRequestTiming(option.value)}
+                      className={`rounded-md border px-3 py-1.5 text-xs font-medium transition-colors ${
+                        reviewRequestTiming === option.value
+                          ? 'border-cyan-600 bg-cyan-50 text-cyan-700'
+                          : 'border-slate-200 bg-white text-slate-500 hover:text-slate-700'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-1.5 text-xs text-slate-400">
+                  Time is relative to when the trip is scheduled to end on your calendar.
+                </p>
+              </div>
+
+              {/* Custom message */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Custom Review Request Message
+                </label>
+                <textarea
+                  value={reviewRequestCustomMessage}
+                  onChange={(e) => setReviewRequestCustomMessage(e.target.value)}
+                  placeholder={`Thank you for choosing {business_name}! We had a great time with you aboard {vessel_name} and would love to hear your feedback.`}
+                  rows={4}
+                  className={inputClassName}
+                  maxLength={2000}
+                />
+                <p className="mt-1 text-xs text-slate-400">
+                  Leave blank for the default message. Available placeholders: {'{guest_name}'}, {'{business_name}'}, {'{trip_type}'}, {'{vessel_name}'}, {'{trip_date}'}.
+                </p>
+              </div>
+
+              {/* Google Reviews */}
+              <div className="border-t border-slate-200 pt-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Star className="h-4 w-4 text-amber-500" />
+                  <p className="text-sm font-medium text-slate-700">Google Reviews</p>
+                </div>
+                <ToggleRow
+                  label="Include Google Reviews link"
+                  description="Add a button linking to your Google review page"
+                  checked={includeGoogleReviewLink}
+                  onChange={setIncludeGoogleReviewLink}
+                />
+                {includeGoogleReviewLink && (
+                  <div className="mt-3">
+                    <label className="block text-sm font-medium text-slate-600 mb-1.5">
+                      Google Review Link
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="url"
+                        value={googleReviewLink}
+                        onChange={(e) => setGoogleReviewLink(e.target.value)}
+                        placeholder="https://g.page/r/your-business/review"
+                        className={inputClassName}
+                        maxLength={500}
+                      />
+                      <ExternalLink className="absolute right-3 top-3 h-4 w-4 text-slate-400 pointer-events-none" />
+                    </div>
+                    <p className="mt-1 text-xs text-slate-400">
+                      Find this in your Google Business Profile under &quot;Ask for reviews&quot; or &quot;Get more reviews&quot;.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
           <ToggleRow
             label="Cancellation / Reschedule Notification"
             description="Sent when a booking status changes"
