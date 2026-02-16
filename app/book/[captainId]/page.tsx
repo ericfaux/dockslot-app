@@ -1,7 +1,8 @@
 export const dynamic = 'force-dynamic';
 
-import { Anchor, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Anchor, AlertTriangle, CheckCircle, CalendarOff } from 'lucide-react';
 import { getPublicCaptainProfile, getPublicTripTypes, getHibernationInfo, getCaptainSocialProof, resolveCaptainId } from '@/app/actions/public-booking';
+import { createSupabaseServiceClient } from '@/utils/supabase/service';
 import { TripCard } from '../components/TripCard';
 import { BrandedLayout } from '../components/BrandedLayout';
 import { CaptainInfoCard, CancellationPolicy, StarRating } from '@/components/booking/TrustSignals';
@@ -94,10 +95,60 @@ export default async function SelectTripPage({ params }: Props) {
   const profile = profileResult.data!;
   const tripTypes = tripTypesResult.success ? tripTypesResult.data! : [];
   const socialProof = socialProofResult.success ? socialProofResult.data! : null;
-  const hasHero = !!profile.hero_image_url;
+
+  // Fetch subscription tier and booking count for limit enforcement + branding
+  const supabase = createSupabaseServiceClient();
+  const { data: tierData } = await supabase
+    .from('profiles')
+    .select('subscription_tier, monthly_booking_count, booking_count_reset_date')
+    .eq('id', captainId)
+    .single();
+
+  const subscriptionTier = tierData?.subscription_tier ?? 'deckhand';
+  let monthlyBookingCount = tierData?.monthly_booking_count ?? 0;
+  const isDeckhand = subscriptionTier === 'deckhand';
+
+  // Lazy reset: if current month (UTC) differs from booking_count_reset_date, reset the count
+  if (tierData) {
+    const now = new Date();
+    const currentYear = now.getUTCFullYear();
+    const currentMonth = now.getUTCMonth();
+
+    if (tierData.booking_count_reset_date) {
+      const resetDate = new Date(tierData.booking_count_reset_date);
+      if (resetDate.getUTCFullYear() !== currentYear || resetDate.getUTCMonth() !== currentMonth) {
+        monthlyBookingCount = 0;
+        await supabase
+          .from('profiles')
+          .update({
+            monthly_booking_count: 0,
+            booking_count_reset_date: now.toISOString().split('T')[0],
+          })
+          .eq('id', captainId);
+      }
+    } else {
+      monthlyBookingCount = 0;
+      await supabase
+        .from('profiles')
+        .update({
+          monthly_booking_count: 0,
+          booking_count_reset_date: now.toISOString().split('T')[0],
+        })
+        .eq('id', captainId);
+    }
+  }
+
+  const isScheduleFull = isDeckhand && monthlyBookingCount >= 10;
+
+  // Branding enforcement: deckhand tier uses default DockSlot styling only
+  const effectiveHeroImageUrl = isDeckhand ? null : profile.hero_image_url;
+  const effectiveBookingTagline = isDeckhand ? null : profile.booking_tagline;
+  const effectiveAccentColor = isDeckhand ? '#0891b2' : (profile.brand_accent_color || '#0891b2');
+
+  const hasHero = !!effectiveHeroImageUrl;
 
   return (
-    <BrandedLayout accentColor={profile.brand_accent_color || '#0891b2'}>
+    <BrandedLayout accentColor={effectiveAccentColor}>
       <div className="min-h-screen bg-slate-50">
         {/* Hero or Standard Header */}
         {hasHero ? (
@@ -105,7 +156,7 @@ export default async function SelectTripPage({ params }: Props) {
             {/* Hero Image Section */}
             <div className="relative h-48 sm:h-64 w-full overflow-hidden">
               <img
-                src={profile.hero_image_url!}
+                src={effectiveHeroImageUrl!}
                 alt={profile.business_name || 'Charter'}
                 className="h-full w-full object-cover"
               />
@@ -115,9 +166,9 @@ export default async function SelectTripPage({ params }: Props) {
                   <h1 className="text-2xl sm:text-3xl font-bold text-white drop-shadow-lg">
                     {profile.business_name || profile.full_name || 'Charter Captain'}
                   </h1>
-                  {profile.booking_tagline && (
+                  {effectiveBookingTagline && (
                     <p className="mt-1 text-sm sm:text-base text-white/90 drop-shadow">
-                      {profile.booking_tagline}
+                      {effectiveBookingTagline}
                     </p>
                   )}
                 </div>
@@ -158,7 +209,7 @@ export default async function SelectTripPage({ params }: Props) {
                       {profile.business_name || profile.full_name || 'Charter Captain'}
                     </h1>
                     <p className="text-sm text-slate-500">
-                      {profile.booking_tagline || 'Book Your Trip'}
+                      {effectiveBookingTagline || 'Book Your Trip'}
                     </p>
                   </div>
                 </div>
@@ -230,77 +281,96 @@ export default async function SelectTripPage({ params }: Props) {
             />
           )}
 
-          {/* Page Title */}
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-slate-900 mb-2">Select Your Trip</h2>
-            <p className="text-slate-500">
-              Choose from the available charter experiences below.
-            </p>
-          </div>
-
-          {/* Trip Cards */}
-          {tripTypes.length === 0 ? (
+          {/* Schedule Full Message (Deckhand at booking limit) */}
+          {isScheduleFull ? (
             <div className="rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm">
               <div className="flex justify-center mb-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
-                  <Anchor className="h-6 w-6 text-slate-400" />
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-amber-50">
+                  <CalendarOff className="h-8 w-8 text-amber-500" />
                 </div>
               </div>
-              <h3 className="text-lg font-medium text-slate-900 mb-2">No Trips Available</h3>
+              <h2 className="text-xl font-semibold text-slate-900 mb-2">
+                This captain&apos;s schedule is currently full.
+              </h2>
               <p className="text-slate-500">
-                This captain hasn&apos;t set up any trip types yet. Please check back later.
+                Please check back later.
               </p>
             </div>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2">
-              {tripTypes.map((tripType) => (
-                <TripCard
-                  key={tripType.id}
-                  id={tripType.id}
-                  title={tripType.title}
-                  description={tripType.description}
-                  duration_hours={tripType.duration_hours}
-                  price_total={tripType.price_total}
-                  deposit_amount={tripType.deposit_amount}
-                  captainId={captainId}
-                  image_url={tripType.image_url}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* Featured Reviews */}
-          {socialProof?.review_stats?.featured_reviews && socialProof.review_stats.featured_reviews.length > 0 && (
-            <div className="mt-8">
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">What Guests Say</h3>
-              <div className="space-y-3">
-                {socialProof.review_stats.featured_reviews.map((review, index) => (
-                  <div key={index} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="flex gap-0.5">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <svg
-                            key={star}
-                            className={`h-3.5 w-3.5 ${
-                              star <= review.overall_rating
-                                ? 'fill-amber-400 text-amber-400'
-                                : 'fill-slate-200 text-slate-200'
-                            }`}
-                            viewBox="0 0 24 24"
-                          >
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                          </svg>
-                        ))}
-                      </div>
-                      <span className="text-sm font-medium text-slate-700">{review.guest_name}</span>
-                    </div>
-                    {review.review_text && (
-                      <p className="text-sm text-slate-600 line-clamp-2">&ldquo;{review.review_text}&rdquo;</p>
-                    )}
-                  </div>
-                ))}
+            <>
+              {/* Page Title */}
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold text-slate-900 mb-2">Select Your Trip</h2>
+                <p className="text-slate-500">
+                  Choose from the available charter experiences below.
+                </p>
               </div>
-            </div>
+
+              {/* Trip Cards */}
+              {tripTypes.length === 0 ? (
+                <div className="rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+                  <div className="flex justify-center mb-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
+                      <Anchor className="h-6 w-6 text-slate-400" />
+                    </div>
+                  </div>
+                  <h3 className="text-lg font-medium text-slate-900 mb-2">No Trips Available</h3>
+                  <p className="text-slate-500">
+                    This captain hasn&apos;t set up any trip types yet. Please check back later.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {tripTypes.map((tripType) => (
+                    <TripCard
+                      key={tripType.id}
+                      id={tripType.id}
+                      title={tripType.title}
+                      description={tripType.description}
+                      duration_hours={tripType.duration_hours}
+                      price_total={tripType.price_total}
+                      deposit_amount={tripType.deposit_amount}
+                      captainId={captainId}
+                      image_url={tripType.image_url}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* Featured Reviews */}
+              {socialProof?.review_stats?.featured_reviews && socialProof.review_stats.featured_reviews.length > 0 && (
+                <div className="mt-8">
+                  <h3 className="text-lg font-semibold text-slate-900 mb-4">What Guests Say</h3>
+                  <div className="space-y-3">
+                    {socialProof.review_stats.featured_reviews.map((review, index) => (
+                      <div key={index} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="flex gap-0.5">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <svg
+                                key={star}
+                                className={`h-3.5 w-3.5 ${
+                                  star <= review.overall_rating
+                                    ? 'fill-amber-400 text-amber-400'
+                                    : 'fill-slate-200 text-slate-200'
+                                }`}
+                                viewBox="0 0 24 24"
+                              >
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                              </svg>
+                            ))}
+                          </div>
+                          <span className="text-sm font-medium text-slate-700">{review.guest_name}</span>
+                        </div>
+                        {review.review_text && (
+                          <p className="text-sm text-slate-600 line-clamp-2">&ldquo;{review.review_text}&rdquo;</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </main>
 

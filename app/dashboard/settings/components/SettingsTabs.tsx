@@ -187,12 +187,17 @@ export function SettingsTabs(props: SettingsTabsProps) {
           />
         )}
         {activeTab === 'booking-page' && (
-          <BookingPageTab initialProfile={props.profile} tripTypes={props.tripTypes} />
+          <BookingPageTab
+            initialProfile={props.profile}
+            tripTypes={props.tripTypes}
+            subscriptionTier={(props.profile?.subscription_tier as SubscriptionTier) ?? 'deckhand'}
+          />
         )}
         {activeTab === 'advanced' && (
           <AdvancedTab
             initialProfile={props.profile}
             calendarToken={props.calendarToken}
+            subscriptionTier={(props.profile?.subscription_tier as SubscriptionTier) ?? 'deckhand'}
           />
         )}
       </div>

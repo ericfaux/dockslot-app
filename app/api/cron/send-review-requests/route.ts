@@ -47,11 +47,13 @@ export async function GET(req: NextRequest) {
         captain_id,
         vessel_id,
         trip_type_id,
-        review_request_sent_at
+        review_request_sent_at,
+        profile:profiles!captain_id!inner(subscription_tier)
       `)
       .eq('status', 'completed')
       .gte('scheduled_end', sevenDaysAgo.toISOString())
-      .is('review_request_sent_at', null);
+      .is('review_request_sent_at', null)
+      .in('profile.subscription_tier', ['captain', 'fleet']);
 
     if (bookingsError) {
       console.error('Bookings fetch error:', bookingsError);

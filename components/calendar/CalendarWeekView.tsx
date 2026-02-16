@@ -11,11 +11,12 @@ import {
   subWeeks,
 } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, CalendarX } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, CalendarX, Lock } from 'lucide-react';
 import { DayColumn } from './DayColumn';
 import { TimeColumn } from './TimeColumn';
 import { CalendarBooking, CalendarView, BlackoutDate, STATUS_COLORS, STATUS_LABELS } from './types';
 import { BookingStatus } from '@/lib/db/types';
+import { GatedButton } from '@/components/GatedButton';
 
 interface CalendarWeekViewProps {
   date: Date;
@@ -31,6 +32,8 @@ interface CalendarWeekViewProps {
   isLoading?: boolean;
   availabilityStartHour?: number;
   availabilityEndHour?: number;
+  /** When true, the Day view option is locked behind a paywall */
+  dayViewLocked?: boolean;
 }
 
 const DEFAULT_START_HOUR = 5; // 5 AM
@@ -51,6 +54,7 @@ export function CalendarWeekView({
   isLoading,
   availabilityStartHour,
   availabilityEndHour,
+  dayViewLocked,
 }: CalendarWeekViewProps) {
   const START_HOUR = availabilityStartHour ?? DEFAULT_START_HOUR;
   const END_HOUR = availabilityEndHour ?? DEFAULT_END_HOUR;
@@ -151,13 +155,15 @@ export function CalendarWeekView({
             TODAY
           </button>
           {onQuickBlockClick && (
-            <button
-              onClick={onQuickBlockClick}
-              className="flex items-center gap-1.5 rounded-md px-3 py-1.5 min-h-[44px] font-mono text-xs font-medium text-rose-300 transition-colors hover:bg-rose-300/10"
-            >
-              <CalendarX className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">QUICK </span>BLOCK
-            </button>
+            <GatedButton feature="quick_block">
+              <button
+                onClick={onQuickBlockClick}
+                className="flex items-center gap-1.5 rounded-md px-3 py-1.5 min-h-[44px] font-mono text-xs font-medium text-rose-300 transition-colors hover:bg-rose-300/10"
+              >
+                <CalendarX className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">QUICK </span>BLOCK
+              </button>
+            </GatedButton>
           )}
         </div>
 
@@ -171,19 +177,33 @@ export function CalendarWeekView({
 
         {/* View Switcher */}
         <div className="flex items-center gap-1 rounded-lg bg-slate-800/50 p-1">
-          {(['day', 'week'] as CalendarView[]).map((view) => (
-            <button
-              key={view}
-              onClick={() => onViewChange(view)}
-              className={`rounded-md px-2.5 py-1 min-h-[36px] font-mono text-xs font-medium transition-all ${
-                view === 'week'
-                  ? 'bg-cyan-500/20 text-cyan-300'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              {view.toUpperCase()}
-            </button>
-          ))}
+          {(['day', 'week'] as CalendarView[]).map((view) => {
+            const isLocked = view === 'day' && dayViewLocked;
+            const isActive = view === 'week'; // Week view is always active in this component
+            return (
+              <button
+                key={view}
+                onClick={() => onViewChange(view)}
+                className={`rounded-md px-2.5 py-1 min-h-[36px] font-mono text-xs font-medium transition-all ${
+                  isLocked
+                    ? 'text-slate-600 cursor-pointer'
+                    : isActive
+                    ? 'bg-cyan-500/20 text-cyan-300'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <span className="flex items-center gap-1">
+                  {view.toUpperCase()}
+                  {isLocked && (
+                    <span className="inline-flex items-center gap-0.5 rounded bg-amber-500/20 px-1 py-0.5 text-[9px] font-bold uppercase text-amber-400">
+                      <Lock className="h-2.5 w-2.5" />
+                      Captain
+                    </span>
+                  )}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 

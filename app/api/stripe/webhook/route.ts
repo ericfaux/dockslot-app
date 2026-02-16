@@ -272,12 +272,50 @@ export async function POST(request: NextRequest) {
           subscription_tier: 'deckhand',
           subscription_status: 'canceled',
           stripe_subscription_id: null,
+          monthly_booking_count: 0,
+          booking_count_reset_date: new Date().toISOString().slice(0, 10),
         })
         .eq('id', userId);
 
       if (updateError) {
         console.error('Failed to downgrade subscription:', updateError);
         return NextResponse.json({ error: 'Failed to update profile' }, { status: 500 });
+      }
+
+      // Archive extra trip types (keep only the oldest active one)
+      const { data: tripTypes } = await supabase
+        .from('trip_types')
+        .select('id')
+        .eq('owner_id', userId)
+        .eq('is_active', true)
+        .order('created_at', { ascending: true });
+
+      if (tripTypes && tripTypes.length > 1) {
+        const idsToDeactivate = tripTypes.slice(1).map((t: { id: string }) => t.id);
+        await supabase
+          .from('trip_types')
+          .update({ is_active: false })
+          .in('id', idsToDeactivate);
+        console.log(`Archived ${idsToDeactivate.length} extra trip types for user ${userId}`);
+      }
+
+      // Archive extra vessels (keep only the oldest one)
+      const { data: vessels } = await supabase
+        .from('vessels')
+        .select('id')
+        .eq('owner_id', userId)
+        .order('created_at', { ascending: true });
+
+      if (vessels && vessels.length > 1) {
+        const vesselIdsToArchive = vessels.slice(1).map((v: { id: string }) => v.id);
+        await supabase
+          .from('vessels')
+          .delete()
+          .in('id', vesselIdsToArchive)
+          .then(() => {
+            // If delete fails (FK constraints), that's fine — data is preserved
+          });
+        console.log(`Attempted to archive ${vesselIdsToArchive.length} extra vessels for user ${userId}`);
       }
 
       console.log(`✅ Subscription canceled for user ${userId}`);

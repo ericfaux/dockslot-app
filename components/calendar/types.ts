@@ -53,6 +53,8 @@ export interface CalendarProps {
   refreshKey?: number;
   availabilityStartHour?: number;
   availabilityEndHour?: number;
+  /** When true, the Day view option is locked behind a paywall */
+  dayViewLocked?: boolean;
 }
 
 export interface DayColumnProps {

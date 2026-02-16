@@ -1,12 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { Search, X, Tag, Calendar, DollarSign, Users } from 'lucide-react'
+import { Search, X, Tag, Calendar, DollarSign, Users, Lock } from 'lucide-react'
 import { BookingStatus } from '@/lib/db/types'
 
 interface BookingFiltersProps {
   onFilterChange: (filters: BookingFilterState) => void
   availableTags?: string[]
+  /** When true, only show the search bar and disable advanced filter controls */
+  deckhandMode?: boolean
 }
 
 export interface BookingFilterState {
@@ -38,7 +40,7 @@ const PAYMENT_OPTIONS = [
   { value: 'fully_paid', label: 'Fully Paid' },
 ]
 
-export default function BookingFilters({ onFilterChange, availableTags = [] }: BookingFiltersProps) {
+export default function BookingFilters({ onFilterChange, availableTags = [], deckhandMode = false }: BookingFiltersProps) {
   const [filters, setFilters] = useState<BookingFilterState>({
     search: '',
     tags: [],
@@ -124,16 +126,28 @@ export default function BookingFilters({ onFilterChange, availableTags = [] }: B
       {/* Filter Toggle & Clear */}
       <div className="flex items-center justify-between">
         <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="flex items-center gap-2 rounded px-3 py-2 text-sm text-cyan-600 hover:bg-white"
+          onClick={() => {
+            if (!deckhandMode) {
+              setIsExpanded(!isExpanded)
+            }
+          }}
+          className={`flex items-center gap-2 rounded px-3 py-2 text-sm ${
+            deckhandMode ? 'text-slate-400 cursor-default' : 'text-cyan-600 hover:bg-white'
+          }`}
         >
           <Tag className="h-4 w-4" />
           <span>
             {isExpanded ? 'Hide Filters' : 'Show Filters'}
             {activeFilterCount > 0 && ` (${activeFilterCount})`}
           </span>
+          {deckhandMode && (
+            <span className="inline-flex items-center gap-0.5 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold uppercase text-amber-600">
+              <Lock className="h-2.5 w-2.5" />
+              Captain
+            </span>
+          )}
         </button>
-        {hasActiveFilters && (
+        {hasActiveFilters && !deckhandMode && (
           <button
             onClick={clearAllFilters}
             className="flex items-center gap-1 rounded px-3 py-2 text-sm text-slate-400 hover:bg-white hover:text-slate-700"
@@ -144,8 +158,8 @@ export default function BookingFilters({ onFilterChange, availableTags = [] }: B
         )}
       </div>
 
-      {/* Expanded Filters */}
-      {isExpanded && (
+      {/* Expanded Filters - not available in deckhand mode */}
+      {isExpanded && !deckhandMode && (
         <div className="space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
           {/* Tags */}
           {availableTags.length > 0 && (
@@ -250,8 +264,8 @@ export default function BookingFilters({ onFilterChange, availableTags = [] }: B
         </div>
       )}
 
-      {/* Active Filter Pills */}
-      {hasActiveFilters && !isExpanded && (
+      {/* Active Filter Pills - not available in deckhand mode */}
+      {hasActiveFilters && !isExpanded && !deckhandMode && (
         <div className="flex flex-wrap gap-2">
           {filters.tags.map((tag) => (
             <span

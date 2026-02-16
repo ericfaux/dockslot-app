@@ -37,11 +37,12 @@ export async function GET(request: NextRequest) {
         guest_name,
         guest_email,
         trip_type:trip_types(title),
-        profile:profiles!captain_id(business_name, full_name, email, meeting_spot_latitude, meeting_spot_longitude)
+        profile:profiles!captain_id!inner(business_name, full_name, email, meeting_spot_latitude, meeting_spot_longitude, subscription_tier)
       `)
       .in('status', ['confirmed', 'pending_deposit'])
       .gte('scheduled_start', tomorrow.toISOString())
-      .lte('scheduled_start', dayAfter.toISOString());
+      .lte('scheduled_start', dayAfter.toISOString())
+      .in('profile.subscription_tier', ['captain', 'fleet']);
 
     if (error) {
       console.error('Failed to fetch bookings:', error);

@@ -25,29 +25,36 @@ interface BillingClientProps {
 }
 
 const DECKHAND_FEATURES = [
-  'Online booking page',
-  'Up to 30 bookings/month',
-  '1 trip type',
-  '1 vessel',
-  'Cash/Venmo/Zelle payments',
-  'NOAA weather alerts',
+  'Online booking page (DockSlot branding)',
+  'Up to 10 bookings/month',
+  '1 trip type, 1 vessel',
+  'Basic email confirmations',
   'Digital waivers',
+  'Week calendar view',
   'Dock Mode',
-  'Basic calendar view',
+  'Cash/Venmo/Zelle payments',
+  'Meeting spot & availability',
 ];
 
 const CAPTAIN_FEATURES = [
-  'Everything in Deckhand',
-  'Unlimited bookings',
-  'Unlimited trip types & vessels',
-  'Stripe deposit collection',
-  'SMS reminders',
-  'Custom branding',
-  'Full analytics & reports',
-  'Promo codes',
-  'Waitlist',
-  'Booking modifications',
-  'CSV export',
+  'Everything in Deckhand, plus:',
+  'Unlimited bookings, trip types & vessels',
+  'Stripe deposit & payment collection',
+  'DockSlot Helm (tide, wind, sunset from NOAA)',
+  'NOAA weather alerts & monitoring',
+  'Float Plan daily schedule',
+  'Full dashboard stats & analytics',
+  'Full email suite (reminders, reviews, weather)',
+  'SMS notifications',
+  'Custom booking page branding',
+  'Guest CRM & passenger manifest',
+  'Booking modifications & waitlist',
+  "Captain's Logbook & guest portal",
+  'Reviews & ratings',
+  'Promo codes & CSV export',
+  'Day + week calendar, Quick Block',
+  'Keyboard shortcuts & quick actions',
+  'Hibernation mode',
   'Priority email support',
 ];
 
@@ -253,7 +260,7 @@ export function BillingClient({
         </div>
         {billingInterval === 'annual' && (
           <span className="ml-2 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
-            Save up to {formatCents(PRICING.fleet.annualSavings)}
+            Save {formatCents(PRICING.captain.annualSavings)}/year
           </span>
         )}
       </div>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { List, ChevronLeft, ChevronRight, FilterX } from 'lucide-react'
+import { List, ChevronLeft, ChevronRight, FilterX, Lock } from 'lucide-react'
 import BookingFilters, { BookingFilterState } from '../schedule/BookingFilters'
 import { BookingWithDetails } from '@/lib/db/types'
 import { ExportButton } from './ExportButton'
@@ -11,6 +11,9 @@ import BulkActionsBar from '../components/BulkActionsBar'
 import { SwipeableBookingRow } from './SwipeableBookingRow'
 import { BookingDetailDrawer } from './BookingDetailDrawer'
 import { EmptyState } from '@/components/EmptyState'
+import { useSubscription } from '@/lib/subscription/context'
+import { canUseFeature } from '@/lib/subscription/gates'
+import { GatedButton } from '@/components/GatedButton'
 
 const PAGE_SIZE = 25
 
@@ -21,6 +24,11 @@ interface BookingsListClientProps {
 export function BookingsListClient({ captainId }: BookingsListClientProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { tier } = useSubscription()
+  const isDeckhand = tier === 'deckhand'
+  const hasAdvancedFilters = canUseFeature(tier, 'advanced_filters')
+  const hasBulkActions = canUseFeature(tier, 'bulk_actions')
+  const hasFilterPresets = canUseFeature(tier, 'filter_presets')
   const [bookings, setBookings] = useState<BookingWithDetails[]>([])
   const [availableTags, setAvailableTags] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -242,18 +250,31 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
     <div className={`space-y-6 ${selectedBookings.size > 0 ? 'pb-24' : ''}`}>
       {/* Filters & Presets */}
       <div className="space-y-3">
-        <div className="flex items-center justify-end">
-          <FilterPresetsMenu
-            captainId={captainId}
-            currentFilters={filters}
-            onApplyPreset={handleFilterChange}
+        {/* Filter Presets - hidden for deckhand */}
+        {hasFilterPresets && (
+          <div className="flex items-center justify-end">
+            <FilterPresetsMenu
+              captainId={captainId}
+              currentFilters={filters}
+              onApplyPreset={handleFilterChange}
+            />
+          </div>
+        )}
+        {/* Advanced Filters - deckhand only sees search, Captain+ sees full filters */}
+        {hasAdvancedFilters ? (
+          <BookingFilters
+            key={filterResetKey}
+            onFilterChange={handleFilterChange}
+            availableTags={availableTags}
           />
-        </div>
-        <BookingFilters
-          key={filterResetKey}
-          onFilterChange={handleFilterChange}
-          availableTags={availableTags}
-        />
+        ) : (
+          <BookingFilters
+            key={filterResetKey}
+            onFilterChange={handleFilterChange}
+            availableTags={[]}
+            deckhandMode
+          />
+        )}
       </div>
 
       {/* Results Count & Export */}
@@ -269,11 +290,13 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
             </>
           )}
         </p>
-        <ExportButton
-          captainId={captainId}
-          filters={filters}
-          totalCount={totalCount}
-        />
+        <GatedButton feature="csv_export">
+          <ExportButton
+            captainId={captainId}
+            filters={filters}
+            totalCount={totalCount}
+          />
+        </GatedButton>
       </div>
 
       {/* Bookings List */}
@@ -312,8 +335,8 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
         )
       ) : (
         <div className="space-y-3">
-          {/* Select All */}
-          {bookings.length > 0 && (
+          {/* Select All - hidden for deckhand */}
+          {hasBulkActions && bookings.length > 0 && (
             <div className="flex items-center gap-3 rounded border border-slate-200 bg-slate-50 px-4 py-2">
               <input
                 type="checkbox"
@@ -331,8 +354,8 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
             <SwipeableBookingRow
               key={booking.id}
               booking={booking}
-              isSelected={selectedBookings.has(booking.id)}
-              onSelect={handleSelectBooking}
+              isSelected={hasBulkActions ? selectedBookings.has(booking.id) : false}
+              onSelect={hasBulkActions ? handleSelectBooking : undefined}
               onWeatherHold={handleWeatherHold}
               onViewDetail={handleViewDetail}
             />
@@ -385,8 +408,8 @@ export function BookingsListClient({ captainId }: BookingsListClientProps) {
         </nav>
       )}
 
-      {/* Bulk Actions Bar */}
-      {selectedBookings.size > 0 && (
+      {/* Bulk Actions Bar - hidden for deckhand */}
+      {hasBulkActions && selectedBookings.size > 0 && (
         <BulkActionsBar
           selectedCount={selectedBookings.size}
           onCancel={() => {}}

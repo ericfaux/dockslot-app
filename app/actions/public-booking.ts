@@ -35,7 +35,8 @@ export type ErrorCode =
   | 'UNAVAILABLE'
   | 'CAPACITY'
   | 'DATABASE'
-  | 'HIBERNATING';
+  | 'HIBERNATING'
+  | 'BOOKING_LIMIT';
 
 export interface ActionResult<T> {
   success: boolean;
@@ -809,7 +810,7 @@ export async function createPublicBooking(
   // Get captain profile
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
-    .select('timezone, is_hibernating, advance_booking_days')
+    .select('timezone, is_hibernating, advance_booking_days, subscription_tier, monthly_booking_count, booking_count_reset_date')
     .eq('id', params.captain_id)
     .single();
 
@@ -819,6 +820,45 @@ export async function createPublicBooking(
 
   if (profile.is_hibernating) {
     return { success: false, error: 'Captain is not accepting bookings', code: 'HIBERNATING' };
+  }
+
+  // Lazy reset: if current month (UTC) differs from booking_count_reset_date, reset the count
+  let currentBookingCount = profile.monthly_booking_count ?? 0;
+  const now = new Date();
+  const currentYear = now.getUTCFullYear();
+  const currentMonth = now.getUTCMonth();
+
+  if (profile.booking_count_reset_date) {
+    const resetDate = new Date(profile.booking_count_reset_date);
+    if (resetDate.getUTCFullYear() !== currentYear || resetDate.getUTCMonth() !== currentMonth) {
+      currentBookingCount = 0;
+      await supabase
+        .from('profiles')
+        .update({
+          monthly_booking_count: 0,
+          booking_count_reset_date: now.toISOString().split('T')[0],
+        })
+        .eq('id', params.captain_id);
+    }
+  } else {
+    // No reset date set yet — initialize it
+    currentBookingCount = 0;
+    await supabase
+      .from('profiles')
+      .update({
+        monthly_booking_count: 0,
+        booking_count_reset_date: now.toISOString().split('T')[0],
+      })
+      .eq('id', params.captain_id);
+  }
+
+  // Enforce booking limit for deckhand tier
+  if (profile.subscription_tier === 'deckhand' && currentBookingCount >= 10) {
+    return {
+      success: false,
+      error: "This captain's schedule is currently full.",
+      code: 'BOOKING_LIMIT',
+    };
   }
 
   // Get trip type
@@ -959,6 +999,14 @@ export async function createPublicBooking(
       }
     }
   }
+
+  // Increment monthly booking count for the captain
+  await supabase
+    .from('profiles')
+    .update({
+      monthly_booking_count: currentBookingCount + 1,
+    })
+    .eq('id', params.captain_id);
 
   // Log booking creation
   await supabase

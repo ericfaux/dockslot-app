@@ -93,6 +93,7 @@ export function FloatingActionButton({
     }
   }, [onShowShortcuts])
 
+  // Build actions list, filtering out gated features when handlers are undefined
   const actions: FABAction[] = [
     {
       id: 'new-booking',
@@ -101,26 +102,38 @@ export function FloatingActionButton({
       shortcut: 'N',
       onClick: handleNewBooking,
     },
-    {
-      id: 'block-time',
-      icon: <CalendarX className="h-5 w-5" />,
-      label: 'Block Time',
-      shortcut: 'B',
-      onClick: handleBlockTime,
-    },
-    {
-      id: 'quick-note',
-      icon: <StickyNote className="h-5 w-5" />,
-      label: 'Quick Note',
-      onClick: handleQuickNote,
-    },
-    {
-      id: 'shortcuts',
-      icon: <Keyboard className="h-5 w-5" />,
-      label: 'Shortcuts',
-      shortcut: '?',
-      onClick: handleShowShortcuts,
-    },
+    ...(onBlockTime
+      ? [
+          {
+            id: 'block-time',
+            icon: <CalendarX className="h-5 w-5" />,
+            label: 'Block Time',
+            shortcut: 'B',
+            onClick: handleBlockTime,
+          },
+        ]
+      : []),
+    ...(onQuickNote
+      ? [
+          {
+            id: 'quick-note',
+            icon: <StickyNote className="h-5 w-5" />,
+            label: 'Quick Note',
+            onClick: handleQuickNote,
+          },
+        ]
+      : []),
+    ...(onShowShortcuts
+      ? [
+          {
+            id: 'shortcuts',
+            icon: <Keyboard className="h-5 w-5" />,
+            label: 'Shortcuts',
+            shortcut: '?',
+            onClick: handleShowShortcuts,
+          },
+        ]
+      : []),
   ]
 
   return (

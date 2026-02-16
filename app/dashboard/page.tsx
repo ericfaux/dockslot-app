@@ -20,7 +20,7 @@ import { BookingLinkCard } from "@/components/BookingLinkCard";
 import { ActionItemsWidget } from "./components/ActionItemsWidget";
 import WeatherAlertWidget from "./components/WeatherAlertWidget";
 import { getActionItems } from "@/app/actions/action-items";
-import { BookingStatus, ACTIVE_BOOKING_STATUSES } from "@/lib/db/types";
+import { BookingStatus, ACTIVE_BOOKING_STATUSES, type SubscriptionTier } from "@/lib/db/types";
 import { addHours } from "date-fns";
 import { expireOverdueBookings } from "@/app/actions/bookings";
 import { getCachedWeatherData, type WeatherData } from "@/lib/weather/cache";
@@ -30,6 +30,8 @@ import { OnboardingChecklist } from "./components/OnboardingChecklist";
 import { HelpTooltip } from "@/components/HelpTooltip";
 import { WelcomeBanner } from "./components/WelcomeBanner";
 import { FeatureNudges } from "./components/FeatureNudges";
+import { LockedFeatureOverlay } from "@/components/LockedFeatureOverlay";
+import { BookingCountBanner } from "./components/BookingCountBanner";
 
 // WeatherData type imported from @/lib/weather/cache
 
@@ -424,7 +426,7 @@ export default async function DashboardPage() {
   if (user) {
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('meeting_spot_latitude, meeting_spot_longitude, timezone, business_name, full_name, dock_mode_enabled, season_revenue_goal_cents, is_hibernating, hibernation_end_date')
+      .select('meeting_spot_latitude, meeting_spot_longitude, timezone, business_name, full_name, dock_mode_enabled, season_revenue_goal_cents, is_hibernating, hibernation_end_date, subscription_tier, monthly_booking_count, booking_count_reset_date')
       .eq('id', user.id)
       .single();
 
@@ -438,8 +440,9 @@ export default async function DashboardPage() {
       captainTimezone = (profile.timezone && profile.timezone !== "UTC") ? profile.timezone : "America/New_York";
       dockModeEnabled = profile.dock_mode_enabled || false;
 
-      // Fetch weather data with caching (stale-while-revalidate)
-      if (profile.meeting_spot_latitude && profile.meeting_spot_longitude) {
+      // Fetch weather data with caching (skip for deckhand - saves NOAA API calls)
+      const tier = profile.subscription_tier ?? 'deckhand';
+      if (tier !== 'deckhand' && profile.meeting_spot_latitude && profile.meeting_spot_longitude) {
         try {
           weatherData = await getCachedWeatherData(
             profile.meeting_spot_latitude,
@@ -742,6 +745,20 @@ export default async function DashboardPage() {
 
   const hasRevenueGoal = seasonRevenueGoalCents > 0;
 
+  // Subscription tier for gating dashboard widgets
+  const subscriptionTier = (captainProfile?.subscription_tier as SubscriptionTier) ?? 'deckhand';
+  const isDeckhand = subscriptionTier === 'deckhand';
+  const bookingCount = captainProfile?.monthly_booking_count ?? 0;
+
+  // Static placeholder weather data for Deckhand users (never show real NOAA data)
+  const deckhandPlaceholderWeather: WeatherData = {
+    waterTemp: 72,
+    windSpeed: 8,
+    windDirection: 'SW',
+    sunset: '7:42 PM',
+    lastUpdated: Date.now(),
+  };
+
   const METRICS = {
     revenuePercent,
     hasRevenueGoal,
@@ -756,15 +773,32 @@ export default async function DashboardPage() {
       {/* ═══ WELCOME BANNER (first-run) ═══ */}
       <WelcomeBanner />
 
+      {/* ═══ BOOKING COUNT BANNER (Deckhand only) ═══ */}
+      {isDeckhand && (
+        <BookingCountBanner count={bookingCount} limit={10} />
+      )}
+
       {/* ═══ SECTION 1: THE HORIZON WIDGET ═══ */}
       <section aria-label="Day Overview">
-        <HorizonWidget
-          captainName={displayName}
-          timezone={captainTimezone}
-          weatherData={weatherData}
-          lat={captainProfile?.meeting_spot_latitude}
-          lon={captainProfile?.meeting_spot_longitude}
-        />
+        {isDeckhand ? (
+          <LockedFeatureOverlay feature="helm_dashboard" pattern="widget">
+            <HorizonWidget
+              captainName={displayName}
+              timezone={captainTimezone}
+              weatherData={deckhandPlaceholderWeather}
+              lat={null}
+              lon={null}
+            />
+          </LockedFeatureOverlay>
+        ) : (
+          <HorizonWidget
+            captainName={displayName}
+            timezone={captainTimezone}
+            weatherData={weatherData}
+            lat={captainProfile?.meeting_spot_latitude}
+            lon={captainProfile?.meeting_spot_longitude}
+          />
+        )}
       </section>
 
       {/* ═══ DOCK MODE BUTTON ═══ */}
@@ -800,11 +834,23 @@ export default async function DashboardPage() {
           <HelpTooltip text="DockSlot monitors NOAA marine weather for your location and alerts you about dangerous conditions before upcoming trips." />
           <div className="h-px flex-1 bg-slate-200" />
         </div>
-        <WeatherAlertWidget
-          lat={captainProfile?.meeting_spot_latitude ?? null}
-          lon={captainProfile?.meeting_spot_longitude ?? null}
-          upcomingBookingsCount={upcoming48hCount}
-        />
+        {isDeckhand ? (
+          <LockedFeatureOverlay feature="weather_alerts" pattern="widget">
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-3 rounded-full bg-emerald-400" />
+                <span className="text-sm font-medium text-emerald-800">Good Conditions</span>
+              </div>
+              <p className="mt-1 text-xs text-emerald-600">Wind: 8 kts SW &bull; Clear skies</p>
+            </div>
+          </LockedFeatureOverlay>
+        ) : (
+          <WeatherAlertWidget
+            lat={captainProfile?.meeting_spot_latitude ?? null}
+            lon={captainProfile?.meeting_spot_longitude ?? null}
+            upcomingBookingsCount={upcoming48hCount}
+          />
+        )}
       </section>
 
       {/* ═══ ONBOARDING CHECKLIST (for new captains) ═══ */}
@@ -826,14 +872,14 @@ export default async function DashboardPage() {
 
       {/* ═══ SECTION 1.5: QUICK STATS ═══ */}
       <section aria-label="Quick Statistics">
-        <QuickStatsWidgets captainId={user?.id || ''} />
+        <QuickStatsWidgets captainId={user?.id || ''} subscriptionTier={subscriptionTier} />
       </section>
 
       {/* ═══ SECTION 2: FUEL GAUGES ═══ */}
-      {(METRICS.hasRevenueGoal || METRICS.pendingItems > 0) && (
+      {((!isDeckhand && METRICS.hasRevenueGoal) || METRICS.pendingItems > 0) && (
         <section aria-label="Key Metrics" className="py-2">
           <div className="grid grid-cols-2 gap-6 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-12">
-            {METRICS.hasRevenueGoal && (
+            {!isDeckhand && METRICS.hasRevenueGoal && (
               <FuelGauge
                 value={METRICS.revenuePercent}
                 maxValue={100}
@@ -871,13 +917,28 @@ export default async function DashboardPage() {
           <HelpTooltip text="Your Float Plan shows today's trips at a glance — guest names, times, party sizes, waiver status, and weather conditions." />
           <div className="h-px flex-1 bg-slate-200" />
         </div>
-        <FloatPlanWidget
-          todayTrips={todayTrips}
-          tomorrowTrips={tomorrowTrips}
-          nextUpcomingTrip={nextUpcomingTrip}
-          weather={floatPlanWeather}
-          timezone={captainTimezone}
-        />
+        {isDeckhand ? (
+          <LockedFeatureOverlay feature="float_plan" pattern="widget">
+            <FloatPlanWidget
+              todayTrips={[
+                { id: 'sample-1', scheduledStart: new Date().toISOString(), scheduledEnd: new Date().toISOString(), tripType: 'Offshore Fishing', guestName: 'John Smith', guestPhone: null, partySize: 4, vesselCapacity: 6, status: 'confirmed' as const, paymentStatus: 'deposit_paid' as const, waiversSigned: 3, waiversTotal: 4 },
+                { id: 'sample-2', scheduledStart: new Date().toISOString(), scheduledEnd: new Date().toISOString(), tripType: 'Sunset Cruise', guestName: 'Jane Doe', guestPhone: null, partySize: 2, vesselCapacity: 6, status: 'confirmed' as const, paymentStatus: 'fully_paid' as const, waiversSigned: 2, waiversTotal: 2 },
+              ]}
+              tomorrowTrips={[]}
+              nextUpcomingTrip={null}
+              weather={null}
+              timezone={captainTimezone}
+            />
+          </LockedFeatureOverlay>
+        ) : (
+          <FloatPlanWidget
+            todayTrips={todayTrips}
+            tomorrowTrips={tomorrowTrips}
+            nextUpcomingTrip={nextUpcomingTrip}
+            weather={floatPlanWeather}
+            timezone={captainTimezone}
+          />
+        )}
       </section>
 
       {/* ═══ SECTION 3.3: ACTION ITEMS ═══ */}
@@ -888,7 +949,7 @@ export default async function DashboardPage() {
           </span>
           <div className="h-px flex-1 bg-slate-200" />
         </div>
-        <ActionItemsWidget items={actionItems} />
+        <ActionItemsWidget items={actionItems} subscriptionTier={subscriptionTier} />
       </section>
 
       {/* ═══ SECTION 3.5: BOOKING LINK ═══ */}

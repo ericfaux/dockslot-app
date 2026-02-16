@@ -41,7 +41,8 @@ export function Calendar({
   refreshKey = 0,
   availabilityStartHour,
   availabilityEndHour,
-}: ExtendedCalendarProps) {
+  dayViewLocked,
+}: ExtendedCalendarProps & { dayViewLocked?: boolean }) {
   const isMobile = useIsMobile();
   const [currentDate, setCurrentDate] = useState(initialDate);
   const [currentView, setCurrentView] = useState<CalendarView>(initialView);
@@ -55,12 +56,12 @@ export function Calendar({
     setCurrentView(initialView);
   }, [initialView]);
 
-  // Default to day view on mobile
+  // Default to day view on mobile (unless day view is locked for deckhand users)
   useEffect(() => {
-    if (isMobile && currentView === 'week') {
+    if (isMobile && currentView === 'week' && !dayViewLocked) {
       setCurrentView('day');
     }
-  }, [isMobile]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isMobile, dayViewLocked]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Calculate date range based on current view
   const getDateRange = useCallback((date: Date, view: CalendarView) => {
@@ -189,6 +190,7 @@ export function Calendar({
           isLoading={isLoading}
           availabilityStartHour={availabilityStartHour}
           availabilityEndHour={availabilityEndHour}
+          dayViewLocked={dayViewLocked}
         />
       );
     case 'week':
@@ -209,6 +211,7 @@ export function Calendar({
           isLoading={isLoading}
           availabilityStartHour={availabilityStartHour}
           availabilityEndHour={availabilityEndHour}
+          dayViewLocked={dayViewLocked}
         />
       );
   }

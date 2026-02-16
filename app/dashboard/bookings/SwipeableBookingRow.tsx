@@ -32,7 +32,7 @@ const STATUS_TEXT_ON_LIGHT: Record<BookingStatus, string> = {
 interface SwipeableBookingRowProps {
   booking: BookingWithDetails
   isSelected: boolean
-  onSelect: (id: string) => void
+  onSelect?: (id: string) => void
   onWeatherHold: (id: string) => void
   onViewDetail: (booking: BookingWithDetails) => void
 }
@@ -121,16 +121,18 @@ export function SwipeableBookingRow({
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {/* Checkbox */}
-        <input
-          type="checkbox"
-          name="booking-select"
-          value={booking.id}
-          checked={isSelected}
-          onChange={() => onSelect(booking.id)}
-          onClick={(e) => e.stopPropagation()}
-          className="mt-1 h-4 w-4 rounded border-slate-300 bg-slate-100 text-cyan-500 focus:ring-2 focus:ring-cyan-500 focus:ring-offset-0"
-        />
+        {/* Checkbox - only shown when bulk select is available */}
+        {onSelect && (
+          <input
+            type="checkbox"
+            name="booking-select"
+            value={booking.id}
+            checked={isSelected}
+            onChange={() => onSelect(booking.id)}
+            onClick={(e) => e.stopPropagation()}
+            className="mt-1 h-4 w-4 rounded border-slate-300 bg-slate-100 text-cyan-500 focus:ring-2 focus:ring-cyan-500 focus:ring-offset-0"
+          />
+        )}
 
         <div
           role="button"

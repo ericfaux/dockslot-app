@@ -10,6 +10,10 @@ import { UnblockConfirmModal } from './UnblockConfirmModal';
 import { QuickBookingModal } from './QuickBookingModal';
 import { createBlackoutDate, createBlackoutDateRange, deleteBlackoutDate } from '@/app/actions/blackout';
 import { quickCreateBooking } from '@/app/actions/bookings';
+import { useSubscription } from '@/lib/subscription/context';
+import { canUseFeature } from '@/lib/subscription/gates';
+import { GatedButton } from '@/components/GatedButton';
+import { UpgradeModal } from '@/components/UpgradeModal';
 
 interface ScheduleClientProps {
   captainId: string;
@@ -28,7 +32,13 @@ interface ScheduleClientProps {
 export function ScheduleClient({ captainId, timezone, isHibernating, hibernationEndDate, availabilityStartHour, availabilityEndHour }: ScheduleClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialView: CalendarView = searchParams.get('view') === 'day' ? 'day' : 'week';
+  const { tier } = useSubscription();
+  const isDeckhand = tier === 'deckhand';
+  const canUseDayView = canUseFeature(tier, 'day_calendar_view');
+  const [showDayViewUpgrade, setShowDayViewUpgrade] = useState(false);
+
+  // Force week view for deckhand users (day view is a Captain feature)
+  const initialView: CalendarView = (!canUseDayView || searchParams.get('view') !== 'day') ? 'week' : 'day';
   const [selectedBooking, setSelectedBooking] = useState<CalendarBooking | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
@@ -115,11 +125,16 @@ export function ScheduleClient({ captainId, timezone, isHibernating, hibernation
   }, [selectedBlackout]);
 
   // View change handler - persists view in URL
+  // Deckhand users are blocked from switching to day view
   const handleViewChange = useCallback((view: CalendarView) => {
+    if (view === 'day' && !canUseDayView) {
+      setShowDayViewUpgrade(true);
+      return;
+    }
     const url = new URL(window.location.href);
     url.searchParams.set('view', view);
     window.history.replaceState({}, '', url.toString());
-  }, []);
+  }, [canUseDayView]);
 
   // Empty slot click handler - opens quick booking modal
   const handleEmptySlotClick = useCallback((date: Date, hour: number) => {
@@ -182,6 +197,7 @@ export function ScheduleClient({ captainId, timezone, isHibernating, hibernation
         refreshKey={refreshKey}
         availabilityStartHour={availabilityStartHour}
         availabilityEndHour={availabilityEndHour}
+        dayViewLocked={!canUseDayView}
       />
 
       {/* Booking Detail Panel (slide-over) */}
@@ -216,6 +232,13 @@ export function ScheduleClient({ captainId, timezone, isHibernating, hibernation
         onClose={handleCloseQuickBooking}
         onCreateBooking={handleCreateManualBooking}
         onQuickCreate={handleQuickCreate}
+      />
+
+      {/* Day View Upgrade Modal */}
+      <UpgradeModal
+        isOpen={showDayViewUpgrade}
+        onClose={() => setShowDayViewUpgrade(false)}
+        feature="day_calendar_view"
       />
     </div>
   );
