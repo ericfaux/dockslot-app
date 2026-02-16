@@ -20,6 +20,10 @@ const DEFAULT_PREFERENCES: Omit<EmailPreferences, 'captain_id' | 'created_at' | 
   trip_reminder_timing: ['24h'],
   weather_alert_enabled: true,
   review_request_enabled: true,
+  review_request_timing: '24h',
+  review_request_custom_message: null,
+  google_review_link: null,
+  include_google_review_link: false,
   cancellation_notification_enabled: true,
   sms_booking_confirmation: true,
   sms_day_of_reminder: true,
@@ -84,6 +88,19 @@ export async function updateEmailPreferences(
     }
   }
 
+  // Validate review_request_timing
+  if (params.review_request_timing) {
+    const validTimings = ['immediate', '8h', '24h', '48h'];
+    if (!validTimings.includes(params.review_request_timing)) {
+      return { success: false, error: 'Invalid review request timing value' };
+    }
+  }
+
+  // Validate google_review_link if provided
+  if (params.google_review_link && !params.google_review_link.startsWith('https://')) {
+    return { success: false, error: 'Google review link must start with https://' };
+  }
+
   // Validate logo_url if provided
   if (params.logo_url && params.logo_url.length > 500) {
     return { success: false, error: 'Logo URL too long' };
@@ -102,6 +119,7 @@ export async function updateEmailPreferences(
     'sms_booking_confirmation',
     'sms_day_of_reminder',
     'sms_weather_hold',
+    'include_google_review_link',
   ] as const;
 
   for (const field of boolFields) {
@@ -114,12 +132,18 @@ export async function updateEmailPreferences(
     updateData.trip_reminder_timing = params.trip_reminder_timing;
   }
 
+  if (params.review_request_timing !== undefined) {
+    updateData.review_request_timing = params.review_request_timing;
+  }
+
   const textFields = [
     { key: 'custom_what_to_bring' as const, max: 2000 },
     { key: 'business_name_override' as const, max: 200 },
     { key: 'business_phone_override' as const, max: 20 },
     { key: 'logo_url' as const, max: 500 },
     { key: 'email_signature' as const, max: 1000 },
+    { key: 'review_request_custom_message' as const, max: 2000 },
+    { key: 'google_review_link' as const, max: 500 },
   ];
 
   for (const { key, max } of textFields) {

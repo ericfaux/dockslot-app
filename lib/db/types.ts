@@ -461,6 +461,10 @@ export interface EmailPreferences {
   trip_reminder_timing: ('24h' | '48h')[];
   weather_alert_enabled: boolean;
   review_request_enabled: boolean;
+  review_request_timing: 'immediate' | '8h' | '24h' | '48h';
+  review_request_custom_message: string | null;
+  google_review_link: string | null;
+  include_google_review_link: boolean;
   cancellation_notification_enabled: boolean;
   sms_booking_confirmation: boolean;
   sms_day_of_reminder: boolean;
