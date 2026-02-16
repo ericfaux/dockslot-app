@@ -2,6 +2,8 @@
 
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { PromoCode, PromoCodeStats } from '@/lib/db/types';
+import type { SubscriptionTier } from '@/lib/db/types';
+import { canUseFeature } from '@/lib/subscription/gates';
 
 // ============================================================================
 // Types
@@ -47,6 +49,17 @@ export async function createPromoCode(params: CreatePromoCodeParams): Promise<Ac
 
     if (authError || !user) {
       return { success: false, error: 'Not authenticated' };
+    }
+
+    // Check subscription tier — promo codes require Captain or Fleet
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('subscription_tier')
+      .eq('id', user.id)
+      .single();
+
+    if (profile && !canUseFeature(profile.subscription_tier as SubscriptionTier, 'promo_codes')) {
+      return { success: false, error: 'Promo codes require a Captain or Fleet subscription.' };
     }
 
     // Validate code format

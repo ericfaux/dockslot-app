@@ -3,7 +3,7 @@ import Stripe from 'stripe';
 import { createSupabaseServiceClient } from '@/utils/supabase/service';
 import { sendBookingConfirmation, sendBalancePaymentConfirmation } from '@/lib/email/resend';
 import { format, parseISO } from 'date-fns';
-import { getStripe } from '@/lib/stripe/config';
+import { getStripe, getTierFromPriceId } from '@/lib/stripe/config';
 
 export async function POST(request: NextRequest) {
   try {
@@ -207,7 +207,7 @@ export async function POST(request: NextRequest) {
     }
 
     // ========================================================================
-    // SUBSCRIPTION EVENTS (Captain Pro billing)
+    // SUBSCRIPTION EVENTS (Captain / Fleet billing)
     // ========================================================================
 
     if (event.type === 'customer.subscription.created' || event.type === 'customer.subscription.updated') {
@@ -221,11 +221,15 @@ export async function POST(request: NextRequest) {
 
       const isActive = ['active', 'trialing'].includes(subscription.status);
 
+      // Derive tier from the subscription's price ID
+      const priceId = subscription.items?.data?.[0]?.price?.id;
+      const tier = priceId ? getTierFromPriceId(priceId) : 'deckhand';
+
       // In Stripe SDK v20+, current_period_end is on SubscriptionItem, not Subscription
       const periodEnd = subscription.items?.data?.[0]?.current_period_end;
 
       const updateData: Record<string, unknown> = {
-        subscription_tier: isActive ? 'pro' : 'starter',
+        subscription_tier: isActive ? tier : 'deckhand',
         stripe_subscription_id: subscription.id,
         subscription_status: subscription.status === 'active' ? 'active'
           : subscription.status === 'trialing' ? 'trialing'
@@ -261,11 +265,11 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ received: true });
       }
 
-      // Downgrade to starter
+      // Downgrade to deckhand
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
-          subscription_tier: 'starter',
+          subscription_tier: 'deckhand',
           subscription_status: 'canceled',
           stripe_subscription_id: null,
         })

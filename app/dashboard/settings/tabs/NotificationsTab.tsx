@@ -10,7 +10,9 @@ import {
   Palette,
   AlertTriangle,
 } from 'lucide-react';
-import { EmailPreferences } from '@/lib/db/types';
+import { EmailPreferences, SubscriptionTier } from '@/lib/db/types';
+import { canUseFeature } from '@/lib/subscription/gates';
+import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { getEmailPreferences, updateEmailPreferences } from '@/app/actions/email-preferences';
 import { getProfile } from '@/app/actions/profile';
 
@@ -28,7 +30,12 @@ function containsPlaceholderText(value: string): boolean {
   );
 }
 
-export function NotificationsTab() {
+interface NotificationsTabProps {
+  subscriptionTier: SubscriptionTier;
+}
+
+export function NotificationsTab({ subscriptionTier }: NotificationsTabProps) {
+  const canUseSms = canUseFeature(subscriptionTier, 'sms_reminders');
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isLoading, setIsLoading] = useState(true);
@@ -238,30 +245,40 @@ export function NotificationsTab() {
           <MessageSquare className="h-5 w-5 text-cyan-600" />
           <h3 className="text-lg font-semibold text-slate-900">SMS Notifications</h3>
         </div>
-        <p className="text-sm text-slate-400 mb-6">
-          Critical text messages sent to guests who provide a phone number. Messages are kept short with a link to full details.
-        </p>
+        {canUseSms ? (
+          <>
+            <p className="text-sm text-slate-400 mb-6">
+              Critical text messages sent to guests who provide a phone number. Messages are kept short with a link to full details.
+            </p>
 
-        <div className="space-y-4">
-          <ToggleRow
-            label="Booking Confirmation SMS"
-            description="Text confirmation when booking is created"
-            checked={smsBookingConfirmation}
-            onChange={setSmsBookingConfirmation}
+            <div className="space-y-4">
+              <ToggleRow
+                label="Booking Confirmation SMS"
+                description="Text confirmation when booking is created"
+                checked={smsBookingConfirmation}
+                onChange={setSmsBookingConfirmation}
+              />
+              <ToggleRow
+                label="Day-of Reminder SMS"
+                description="Short text on the day of the trip"
+                checked={smsDayOfReminder}
+                onChange={setSmsDayOfReminder}
+              />
+              <ToggleRow
+                label="Weather Hold SMS"
+                description="Text when trip is placed on weather hold"
+                checked={smsWeatherHold}
+                onChange={setSmsWeatherHold}
+              />
+            </div>
+          </>
+        ) : (
+          <UpgradePrompt
+            feature="SMS Reminders"
+            description="Send text confirmations, day-of reminders, and weather alerts to your guests."
+            requiredTier="captain"
           />
-          <ToggleRow
-            label="Day-of Reminder SMS"
-            description="Short text on the day of the trip"
-            checked={smsDayOfReminder}
-            onChange={setSmsDayOfReminder}
-          />
-          <ToggleRow
-            label="Weather Hold SMS"
-            description="Text when trip is placed on weather hold"
-            checked={smsWeatherHold}
-            onChange={setSmsWeatherHold}
-          />
-        </div>
+        )}
       </div>
 
       {/* Branding & Customization */}

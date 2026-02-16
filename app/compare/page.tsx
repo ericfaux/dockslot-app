@@ -504,10 +504,14 @@ export default function ComparePage() {
                 <Anchor className="h-6 w-6 text-cyan-400" />
                 <h3 className="text-xl font-bold text-white">DockSlot</h3>
               </div>
-              <div className="mb-4">
+              <div className="mb-1">
+                <span className="text-sm text-slate-400">Free &mdash; </span>
                 <span className="text-4xl font-bold text-white">$29</span>
                 <span className="text-slate-400">/month</span>
               </div>
+              <p className="mb-4 text-xs text-slate-500">
+                Captain plan. Free Deckhand tier also available. Fleet from $79/mo.
+              </p>
               <ul className="mb-6 space-y-2 text-sm text-slate-300">
                 <li className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-emerald-400" />
@@ -515,7 +519,7 @@ export default function ComparePage() {
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-emerald-400" />
-                  Zero booking fees
+                  0% commission, always
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-emerald-400" />
@@ -527,7 +531,7 @@ export default function ComparePage() {
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-emerald-400" />
-                  Payment processing
+                  Stripe payment processing
                 </li>
               </ul>
               <p className="text-center text-sm text-cyan-400">

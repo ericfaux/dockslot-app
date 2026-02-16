@@ -44,8 +44,9 @@ export type PaymentType = 'deposit' | 'balance' | 'refund' | 'tip';
 
 export type PaymentRecordStatus = 'pending' | 'succeeded' | 'failed' | 'refunded';
 
-export type SubscriptionTier = 'starter' | 'pro';
+export type SubscriptionTier = 'deckhand' | 'captain' | 'fleet';
 export type SubscriptionStatus = 'active' | 'trialing' | 'past_due' | 'canceled' | 'unpaid';
+export type BillingInterval = 'monthly' | 'annual';
 
 // ============================================================================
 // Table Interfaces

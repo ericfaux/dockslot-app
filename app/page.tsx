@@ -320,80 +320,99 @@ export default function LandingPage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-              Simple, honest pricing
+              Keep every dollar you earn
             </h2>
             <p className="mt-4 text-lg text-slate-600">
-              Free during early access. We&apos;ll always have a free tier for
-              small operators.
+              0% commission on every plan. Always. Other platforms take 10-30% of every trip &mdash; DockSlot takes zero.
             </p>
           </div>
 
-          <div className="mx-auto mt-12 grid max-w-4xl gap-8 lg:grid-cols-2">
-            {/* Free Tier */}
-            <div className="rounded-2xl border-2 border-cyan-600 bg-white p-8 shadow-sm">
-              <div className="mb-1 inline-flex rounded-full bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-700">
-                EARLY ACCESS
-              </div>
-              <h3 className="mt-3 text-2xl font-bold text-slate-900">
-                Starter
-              </h3>
+          <div className="mx-auto mt-12 grid max-w-5xl gap-8 lg:grid-cols-3">
+            {/* Deckhand (Free) */}
+            <div className="rounded-2xl border-2 border-slate-200 bg-white p-8 shadow-sm">
+              <h3 className="text-2xl font-bold text-slate-900">Deckhand</h3>
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-5xl font-bold tracking-tight text-slate-900">
-                  $0
-                </span>
+                <span className="text-5xl font-bold tracking-tight text-slate-900">$0</span>
                 <span className="text-lg text-slate-500">/month</span>
               </div>
               <p className="mt-3 text-sm text-slate-600">
-                Everything you need to start taking bookings online. Free
-                forever for small operators.
+                Everything you need to start taking bookings online. Free forever.
               </p>
               <Link
                 href="/login?mode=register"
-                className="mt-6 block rounded-lg bg-cyan-600 px-4 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-cyan-700"
+                className="mt-6 block rounded-lg border border-slate-300 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
               >
                 Get Started Free
               </Link>
               <ul className="mt-6 space-y-3">
                 <PricingFeature text="Online booking page" />
                 <PricingFeature text="Up to 30 bookings/month" />
-                <PricingFeature text="Automated confirmations" />
+                <PricingFeature text="1 trip type & 1 vessel" />
                 <PricingFeature text="NOAA weather alerts" />
                 <PricingFeature text="Digital waivers" />
                 <PricingFeature text="Dock Mode" />
               </ul>
             </div>
 
-            {/* Pro Tier */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-              <div className="mb-1 inline-flex rounded-full bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-700">
-                MOST POPULAR
-              </div>
-              <h3 className="mt-3 text-2xl font-bold text-slate-900">
-                Captain Pro
-              </h3>
-              <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-5xl font-bold tracking-tight text-slate-900">
-                  $29
+            {/* Captain */}
+            <div className="relative rounded-2xl border-2 border-cyan-600 bg-white p-8 shadow-sm">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                <span className="rounded-full bg-cyan-600 px-3 py-1 text-xs font-bold text-white">
+                  MOST POPULAR
                 </span>
+              </div>
+              <h3 className="text-2xl font-bold text-slate-900">Captain</h3>
+              <div className="mt-4 flex items-baseline gap-1">
+                <span className="text-5xl font-bold tracking-tight text-slate-900">$29</span>
                 <span className="text-lg text-slate-500">/month</span>
               </div>
+              <p className="mt-1 text-xs text-slate-400">or $249/year (save $99)</p>
               <p className="mt-3 text-sm text-slate-600">
-                For busy captains who need advanced tools and unlimited
-                bookings.
+                For working captains who need advanced tools and unlimited bookings.
               </p>
               <Link
-                href="/login?mode=register&plan=pro"
-                className="mt-6 block rounded-lg bg-slate-900 px-4 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+                href="/login?mode=register&plan=captain"
+                className="mt-6 block rounded-lg bg-cyan-600 px-4 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-cyan-700"
               >
-                Start with Pro
+                Start with Captain
               </Link>
               <ul className="mt-6 space-y-3">
-                <PricingFeature text="Everything in Starter" />
-                <PricingFeature text="Unlimited bookings" />
-                <PricingFeature text="Deposit collection via Stripe" />
+                <PricingFeature text="Everything in Deckhand" />
+                <PricingFeature text="Unlimited bookings & trip types" />
+                <PricingFeature text="Stripe deposit collection" />
                 <PricingFeature text="SMS reminders" />
                 <PricingFeature text="Custom branding" />
-                <PricingFeature text="Priority support" />
+                <PricingFeature text="Full analytics & reports" />
+                <PricingFeature text="Promo codes" />
+                <PricingFeature text="Priority email support" />
+              </ul>
+            </div>
+
+            {/* Fleet */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+              <h3 className="text-2xl font-bold text-slate-900">Fleet</h3>
+              <div className="mt-4 flex items-baseline gap-1">
+                <span className="text-5xl font-bold tracking-tight text-slate-900">$79</span>
+                <span className="text-lg text-slate-500">/month</span>
+              </div>
+              <p className="mt-1 text-xs text-slate-400">or $699/year (save $249)</p>
+              <p className="mt-3 text-sm text-slate-600">
+                For captains with multiple boats or a growing team.
+              </p>
+              <Link
+                href="/login?mode=register&plan=fleet"
+                className="mt-6 block rounded-lg bg-slate-900 px-4 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+              >
+                Start with Fleet
+              </Link>
+              <ul className="mt-6 space-y-3">
+                <PricingFeature text="Everything in Captain" />
+                <PricingFeature text="Multi-vessel management" />
+                <PricingFeature text="Staff accounts (up to 5)" />
+                <PricingFeature text="Advanced analytics" />
+                <PricingFeature text="API access / Calendar embed" />
+                <PricingFeature text="White-label booking page" />
+                <PricingFeature text="Priority phone support" />
               </ul>
             </div>
           </div>
