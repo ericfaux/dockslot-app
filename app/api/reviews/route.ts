@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { enforceFeature } from '@/lib/subscription/enforce'
 
 // Submit a review (public endpoint, guest access via booking token)
 export async function POST(req: NextRequest) {
@@ -41,6 +42,10 @@ export async function POST(req: NextRequest) {
     if (booking.management_token !== token) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 403 })
     }
+
+    // Verify the captain has access to the reviews feature
+    const gate = await enforceFeature(supabase, booking.captain_id, 'reviews_ratings')
+    if (gate) return gate
 
     // Check if booking is completed
     if (booking.status !== 'completed') {
@@ -125,6 +130,10 @@ export async function GET(req: NextRequest) {
         { status: 400 }
       )
     }
+
+    // Verify the captain has access to the reviews feature
+    const gate = await enforceFeature(supabase, captainId, 'reviews_ratings')
+    if (gate) return gate
 
     // Build query
     let query = supabase

@@ -10,16 +10,18 @@ import {
   AlertCircle,
   Download,
 } from 'lucide-react';
-import { Profile } from '@/lib/db/types';
+import { Profile, SubscriptionTier } from '@/lib/db/types';
+import { canUseFeature } from '@/lib/subscription/gates';
 import { updateProfile } from '@/app/actions/profile';
 import { CalendarExport } from '../components/CalendarExport';
 
 interface AdvancedTabProps {
   initialProfile: Profile | null;
   calendarToken: string;
+  subscriptionTier: SubscriptionTier;
 }
 
-export function AdvancedTab({ initialProfile, calendarToken }: AdvancedTabProps) {
+export function AdvancedTab({ initialProfile, calendarToken, subscriptionTier }: AdvancedTabProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);

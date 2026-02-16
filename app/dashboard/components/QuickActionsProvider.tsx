@@ -9,6 +9,8 @@ import { GlobalSearch } from './GlobalSearch'
 import { QuickNoteModal } from './QuickNoteModal'
 import { BlackoutModal } from '../schedule/BlackoutModal'
 import { createBlackout } from '@/app/actions/blackout'
+import { useSubscription } from '@/lib/subscription/context'
+import { canUseFeature } from '@/lib/subscription/gates'
 
 interface QuickActionsProviderProps {
   children: React.ReactNode
@@ -16,6 +18,10 @@ interface QuickActionsProviderProps {
 
 export function QuickActionsProvider({ children }: QuickActionsProviderProps) {
   const router = useRouter()
+  const { tier } = useSubscription()
+  const hasKeyboardShortcuts = canUseFeature(tier, 'keyboard_shortcuts')
+  const hasQuickNote = canUseFeature(tier, 'quick_note')
+  const hasQuickBlock = canUseFeature(tier, 'quick_block')
 
   // Modal states
   const [showShortcuts, setShowShortcuts] = useState(false)
@@ -30,20 +36,20 @@ export function QuickActionsProvider({ children }: QuickActionsProviderProps) {
   }, [router])
 
   const handleBlockTime = useCallback(() => {
-    setShowBlockTime(true)
-  }, [])
+    if (hasQuickBlock) setShowBlockTime(true)
+  }, [hasQuickBlock])
 
   const handleQuickNote = useCallback(() => {
-    setShowQuickNote(true)
-  }, [])
+    if (hasQuickNote) setShowQuickNote(true)
+  }, [hasQuickNote])
 
   const handleShowSearch = useCallback(() => {
     setShowSearch(true)
   }, [])
 
   const handleShowShortcuts = useCallback(() => {
-    setShowShortcuts(true)
-  }, [])
+    if (hasKeyboardShortcuts) setShowShortcuts(true)
+  }, [hasKeyboardShortcuts])
 
   // Handle blackout submission
   const handleBlockTimeSubmit = useCallback(
@@ -72,13 +78,23 @@ export function QuickActionsProvider({ children }: QuickActionsProviderProps) {
     [router]
   )
 
-  // Register keyboard shortcuts
-  useKeyboardShortcuts({
-    onNewBooking: handleNewBooking,
-    onBlockTime: handleBlockTime,
-    onShowSearch: handleShowSearch,
-    onShowShortcutsHelp: handleShowShortcuts,
-  })
+  // Register keyboard shortcuts only for Captain+ users
+  useKeyboardShortcuts(
+    hasKeyboardShortcuts
+      ? {
+          onNewBooking: handleNewBooking,
+          onBlockTime: handleBlockTime,
+          onShowSearch: handleShowSearch,
+          onShowShortcutsHelp: handleShowShortcuts,
+        }
+      : {
+          // Deckhand: no keyboard shortcuts registered
+          onNewBooking: () => {},
+          onBlockTime: () => {},
+          onShowSearch: () => {},
+          onShowShortcutsHelp: () => {},
+        }
+  )
 
   return (
     <>
@@ -87,33 +103,39 @@ export function QuickActionsProvider({ children }: QuickActionsProviderProps) {
       {/* Floating Action Button */}
       <FloatingActionButton
         onNewBooking={handleNewBooking}
-        onBlockTime={handleBlockTime}
-        onQuickNote={handleQuickNote}
-        onShowShortcuts={handleShowShortcuts}
+        onBlockTime={hasQuickBlock ? handleBlockTime : undefined}
+        onQuickNote={hasQuickNote ? handleQuickNote : undefined}
+        onShowShortcuts={hasKeyboardShortcuts ? handleShowShortcuts : undefined}
       />
 
-      {/* Modals */}
-      <ShortcutsHelpModal
-        isOpen={showShortcuts}
-        onClose={() => setShowShortcuts(false)}
-      />
+      {/* Modals — only render for Captain+ */}
+      {hasKeyboardShortcuts && (
+        <ShortcutsHelpModal
+          isOpen={showShortcuts}
+          onClose={() => setShowShortcuts(false)}
+        />
+      )}
 
       <GlobalSearch
         isOpen={showSearch}
         onClose={() => setShowSearch(false)}
       />
 
-      <QuickNoteModal
-        isOpen={showQuickNote}
-        onClose={() => setShowQuickNote(false)}
-      />
+      {hasQuickNote && (
+        <QuickNoteModal
+          isOpen={showQuickNote}
+          onClose={() => setShowQuickNote(false)}
+        />
+      )}
 
-      <BlackoutModal
-        isOpen={showBlockTime}
-        onClose={() => setShowBlockTime(false)}
-        onSubmit={handleBlockTimeSubmit}
-        isPending={isBlockingTime}
-      />
+      {hasQuickBlock && (
+        <BlackoutModal
+          isOpen={showBlockTime}
+          onClose={() => setShowBlockTime(false)}
+          onSubmit={handleBlockTimeSubmit}
+          isPending={isBlockingTime}
+        />
+      )}
     </>
   )
 }

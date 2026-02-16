@@ -19,6 +19,9 @@ import {
 } from 'lucide-react';
 import { BookingWithDetails } from '@/lib/db/types';
 import StatusBadge, { PaymentBadge } from '@/app/dashboard/components/StatusBadge';
+import { useSubscription } from '@/lib/subscription/context';
+import { canUseFeature } from '@/lib/subscription/gates';
+import { GatedButton } from '@/components/GatedButton';
 
 interface BookingHeaderProps {
   booking: BookingWithDetails;
@@ -27,6 +30,8 @@ interface BookingHeaderProps {
 
 export function BookingHeader({ booking, onRefresh }: BookingHeaderProps) {
   const router = useRouter();
+  const { tier } = useSubscription();
+  const hasBookingModifications = canUseFeature(tier, 'booking_modifications');
   const [showActions, setShowActions] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -215,23 +220,27 @@ export function BookingHeader({ booking, onRefresh }: BookingHeaderProps) {
           {/* Primary Actions */}
           {canModify && (
             <>
-              <button
-                onClick={() => router.push(`/dashboard/schedule?booking=${booking.id}`)}
-                className="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100"
-              >
-                <Edit2 className="h-4 w-4" />
-                Edit
-              </button>
+              <GatedButton feature="booking_modifications">
+                <button
+                  onClick={() => router.push(`/dashboard/schedule?booking=${booking.id}`)}
+                  className="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100"
+                >
+                  <Edit2 className="h-4 w-4" />
+                  Edit
+                </button>
+              </GatedButton>
 
               {booking.status !== 'weather_hold' && ['confirmed', 'rescheduled'].includes(booking.status) && (
-                <button
-                  onClick={handleWeatherHold}
-                  disabled={isProcessing}
-                  className="flex items-center gap-2 rounded-lg border border-amber-500/50 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-600 transition-colors hover:bg-amber-50 disabled:opacity-50"
-                >
-                  <CloudRain className="h-4 w-4" />
-                  Weather Hold
-                </button>
+                <GatedButton feature="booking_modifications">
+                  <button
+                    onClick={handleWeatherHold}
+                    disabled={isProcessing}
+                    className="flex items-center gap-2 rounded-lg border border-amber-500/50 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-600 transition-colors hover:bg-amber-50 disabled:opacity-50"
+                  >
+                    <CloudRain className="h-4 w-4" />
+                    Weather Hold
+                  </button>
+                </GatedButton>
               )}
 
               {['confirmed', 'rescheduled'].includes(booking.status) && (

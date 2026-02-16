@@ -19,7 +19,9 @@ import {
   Link2,
   LifeBuoy,
 } from 'lucide-react';
-import { Profile, HibernationSubscriber, TripType } from '@/lib/db/types';
+import { Profile, HibernationSubscriber, TripType, SubscriptionTier } from '@/lib/db/types';
+import { canUseFeature } from '@/lib/subscription/gates';
+import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { updateProfile } from '@/app/actions/profile';
 import {
   getHibernationSubscribers,
@@ -35,9 +37,13 @@ import PromoCodesClient from '../promo-codes/PromoCodesClient';
 interface BookingPageTabProps {
   initialProfile: Profile | null;
   tripTypes?: TripType[];
+  subscriptionTier: SubscriptionTier;
 }
 
-export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTabProps) {
+export function BookingPageTab({ initialProfile, tripTypes = [], subscriptionTier }: BookingPageTabProps) {
+  const canCustomizeBranding = canUseFeature(subscriptionTier, 'custom_booking_branding');
+  const canUsePromoCodes = canUseFeature(subscriptionTier, 'promo_codes');
+  const canUseHibernation = canUseFeature(subscriptionTier, 'hibernation_mode');
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -216,34 +222,42 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
         <p className="mb-4 text-sm text-slate-400">
           Choose a custom URL for your booking page instead of using the default ID-based link.
         </p>
-        <div>
-          <label htmlFor="bookingSlug" className={labelClassName}>
-            Booking Slug
-          </label>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-slate-500 whitespace-nowrap">/book/</span>
-            <input
-              type="text"
-              id="bookingSlug"
-              value={bookingSlug}
-              onChange={(e) => handleSlugChange(e.target.value)}
-              maxLength={50}
-              placeholder="erics-boats"
-              className={`${inputClassName} font-mono ${slugError ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-500' : ''}`}
-            />
-          </div>
-          {slugError && (
-            <p className="mt-1.5 text-xs text-rose-500">{slugError}</p>
-          )}
-          {!slugError && bookingSlug && (
-            <p className="mt-1.5 text-xs text-emerald-600">
-              Your booking page will be available at /book/{bookingSlug}
+        {canCustomizeBranding ? (
+          <div>
+            <label htmlFor="bookingSlug" className={labelClassName}>
+              Booking Slug
+            </label>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-slate-500 whitespace-nowrap">/book/</span>
+              <input
+                type="text"
+                id="bookingSlug"
+                value={bookingSlug}
+                onChange={(e) => handleSlugChange(e.target.value)}
+                maxLength={50}
+                placeholder="erics-boats"
+                className={`${inputClassName} font-mono ${slugError ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-500' : ''}`}
+              />
+            </div>
+            {slugError && (
+              <p className="mt-1.5 text-xs text-rose-500">{slugError}</p>
+            )}
+            {!slugError && bookingSlug && (
+              <p className="mt-1.5 text-xs text-emerald-600">
+                Your booking page will be available at /book/{bookingSlug}
+              </p>
+            )}
+            <p className="mt-1.5 text-xs text-slate-500">
+              {bookingSlug.length}/50 characters. Lowercase letters, numbers, and hyphens only (3-50 chars).
             </p>
-          )}
-          <p className="mt-1.5 text-xs text-slate-500">
-            {bookingSlug.length}/50 characters. Lowercase letters, numbers, and hyphens only (3-50 chars).
-          </p>
-        </div>
+          </div>
+        ) : (
+          <UpgradePrompt
+            feature="Custom Booking URL"
+            description="Set a custom URL slug for your booking page."
+            requiredTier="captain"
+          />
+        )}
       </section>
 
       {/* Branding */}
@@ -256,81 +270,91 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
           Customize the look of your public booking page with your own branding.
         </p>
 
-        {/* Hero Image */}
-        <ImageUpload
-          currentImageUrl={heroImageUrl || null}
-          onUpload={(url) => setHeroImageUrl(url)}
-          onRemove={() => setHeroImageUrl('')}
-          bucket="captain-assets"
-          storagePath={`${initialProfile?.id}/hero`}
-          label="Hero Image"
-          hint="Displayed as the cover photo on your booking page. Recommended: 1200x400px."
-          aspectRatio="16/5"
-        />
-
-        {/* Booking Tagline */}
-        <div className="mt-4">
-          <label htmlFor="bookingTagline" className={labelClassName}>
-            Booking Tagline
-          </label>
-          <input
-            type="text"
-            id="bookingTagline"
-            value={bookingTagline}
-            onChange={(e) => setBookingTagline(e.target.value)}
-            maxLength={200}
-            placeholder="e.g., Experience the best fishing in the Gulf!"
-            className={inputClassName}
-          />
-          <p className="mt-1.5 text-xs text-slate-500">
-            {bookingTagline.length}/200 characters. Displayed below your business name on the booking page.
-          </p>
-        </div>
-
-        {/* Brand Accent Color */}
-        <div className="mt-4">
-          <label className={labelClassName}>Brand Accent Color</label>
-          <div className="flex items-center gap-3">
-            <input
-              type="color"
-              value={brandAccentColor}
-              onChange={(e) => setBrandAccentColor(e.target.value)}
-              className="h-10 w-14 cursor-pointer rounded border border-slate-200 bg-white p-1"
+        {canCustomizeBranding ? (
+          <>
+            {/* Hero Image */}
+            <ImageUpload
+              currentImageUrl={heroImageUrl || null}
+              onUpload={(url) => setHeroImageUrl(url)}
+              onRemove={() => setHeroImageUrl('')}
+              bucket="captain-assets"
+              storagePath={`${initialProfile?.id}/hero`}
+              label="Hero Image"
+              hint="Displayed as the cover photo on your booking page. Recommended: 1200x400px."
+              aspectRatio="16/5"
             />
-            <input
-              type="text"
-              value={brandAccentColor}
-              onChange={(e) => {
-                const val = e.target.value;
-                if (/^#[0-9a-fA-F]{0,6}$/.test(val) || val === '#') {
-                  setBrandAccentColor(val);
-                }
-              }}
-              maxLength={7}
-              className={`${inputClassName} w-28 font-mono`}
-            />
-            <div
-              className="h-10 flex-1 rounded-lg flex items-center justify-center text-white text-sm font-medium"
-              style={{ backgroundColor: brandAccentColor }}
-            >
-              Preview
+
+            {/* Booking Tagline */}
+            <div className="mt-4">
+              <label htmlFor="bookingTagline" className={labelClassName}>
+                Booking Tagline
+              </label>
+              <input
+                type="text"
+                id="bookingTagline"
+                value={bookingTagline}
+                onChange={(e) => setBookingTagline(e.target.value)}
+                maxLength={200}
+                placeholder="e.g., Experience the best fishing in the Gulf!"
+                className={inputClassName}
+              />
+              <p className="mt-1.5 text-xs text-slate-500">
+                {bookingTagline.length}/200 characters. Displayed below your business name on the booking page.
+              </p>
             </div>
-          </div>
-          <div className="mt-1.5 flex items-center justify-between">
-            <p className="text-xs text-slate-500">
-              Used for buttons and highlights on your booking page.
-            </p>
-            {brandAccentColor !== '#0891b2' && (
-              <button
-                type="button"
-                onClick={() => setBrandAccentColor('#0891b2')}
-                className="text-xs text-cyan-600 hover:underline"
-              >
-                Reset to default
-              </button>
-            )}
-          </div>
-        </div>
+
+            {/* Brand Accent Color */}
+            <div className="mt-4">
+              <label className={labelClassName}>Brand Accent Color</label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="color"
+                  value={brandAccentColor}
+                  onChange={(e) => setBrandAccentColor(e.target.value)}
+                  className="h-10 w-14 cursor-pointer rounded border border-slate-200 bg-white p-1"
+                />
+                <input
+                  type="text"
+                  value={brandAccentColor}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (/^#[0-9a-fA-F]{0,6}$/.test(val) || val === '#') {
+                      setBrandAccentColor(val);
+                    }
+                  }}
+                  maxLength={7}
+                  className={`${inputClassName} w-28 font-mono`}
+                />
+                <div
+                  className="h-10 flex-1 rounded-lg flex items-center justify-center text-white text-sm font-medium"
+                  style={{ backgroundColor: brandAccentColor }}
+                >
+                  Preview
+                </div>
+              </div>
+              <div className="mt-1.5 flex items-center justify-between">
+                <p className="text-xs text-slate-500">
+                  Used for buttons and highlights on your booking page.
+                </p>
+                {brandAccentColor !== '#0891b2' && (
+                  <button
+                    type="button"
+                    onClick={() => setBrandAccentColor('#0891b2')}
+                    className="text-xs text-cyan-600 hover:underline"
+                  >
+                    Reset to default
+                  </button>
+                )}
+              </div>
+            </div>
+          </>
+        ) : (
+          <UpgradePrompt
+            feature="Custom Booking Branding"
+            description="Upload a hero image, set a tagline, and choose a custom accent color for your booking page."
+            requiredTier="captain"
+          />
+        )}
       </section>
 
       {/* Embed on Your Website */}
@@ -433,8 +457,8 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
         )}
       </section>
 
-      {/* Hibernation Mode */}
-      <section className={sectionClassName}>
+      {/* Hibernation Mode — hidden for Deckhand */}
+      {canUseHibernation && <section className={sectionClassName}>
         <div className="mb-4 flex items-center gap-2">
           <Moon className="h-5 w-5 text-cyan-600" />
           <h2 className="text-lg font-semibold text-slate-900">Hibernation Mode</h2>
@@ -630,7 +654,7 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
             </div>
           )}
         </div>
-      </section>
+      </section>}
 
       {/* Save Button for Booking Page settings */}
       <div className="flex items-center justify-end gap-3 pt-2">
@@ -657,16 +681,18 @@ export function BookingPageTab({ initialProfile, tripTypes = [] }: BookingPageTa
         </button>
       </div>
 
-      {/* Promo Codes Section */}
-      <section className="rounded-xl border border-slate-200 bg-white p-6">
-        <div className="mb-4 flex items-center gap-2">
-          <Tag className="h-5 w-5 text-cyan-600" />
-          <h2 className="text-lg font-semibold text-slate-900">Promo Codes</h2>
-        </div>
-        <PromoCodesClient
-          tripTypes={tripTypes.map(tt => ({ id: tt.id, title: tt.title }))}
-        />
-      </section>
+      {/* Promo Codes Section — hidden for Deckhand */}
+      {canUsePromoCodes && (
+        <section className="rounded-xl border border-slate-200 bg-white p-6">
+          <div className="mb-4 flex items-center gap-2">
+            <Tag className="h-5 w-5 text-cyan-600" />
+            <h2 className="text-lg font-semibold text-slate-900">Promo Codes</h2>
+          </div>
+          <PromoCodesClient
+            tripTypes={tripTypes.map(tt => ({ id: tt.id, title: tt.title }))}
+          />
+        </section>
+      )}
 
       {/* Referral Program Section */}
       <section className="rounded-xl border border-slate-200 bg-white p-6">

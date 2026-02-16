@@ -36,6 +36,7 @@ interface NotificationsTabProps {
 
 export function NotificationsTab({ subscriptionTier }: NotificationsTabProps) {
   const canUseSms = canUseFeature(subscriptionTier, 'sms_reminders');
+  const canUseFullEmail = canUseFeature(subscriptionTier, 'full_email_suite');
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isLoading, setIsLoading] = useState(true);
@@ -193,16 +194,18 @@ export function NotificationsTab({ subscriptionTier }: NotificationsTabProps) {
           <ToggleRow
             label="Deposit Reminder"
             description="Sent to guests with pending deposits after 24 hours"
-            checked={depositReminder}
+            checked={canUseFullEmail ? depositReminder : false}
             onChange={setDepositReminder}
+            disabled={!canUseFullEmail}
           />
           <ToggleRow
             label="Trip Reminder"
             description="Sent before the scheduled trip"
-            checked={tripReminder}
+            checked={canUseFullEmail ? tripReminder : false}
             onChange={setTripReminder}
+            disabled={!canUseFullEmail}
           />
-          {tripReminder && (
+          {canUseFullEmail && tripReminder && (
             <div className="ml-12 flex gap-3">
               <TimingButton
                 label="24 hours before"
@@ -221,14 +224,16 @@ export function NotificationsTab({ subscriptionTier }: NotificationsTabProps) {
           <ToggleRow
             label="Weather Alert"
             description="Notify guest when trip is placed on weather hold"
-            checked={weatherAlert}
+            checked={canUseFullEmail ? weatherAlert : false}
             onChange={setWeatherAlert}
+            disabled={!canUseFullEmail}
           />
           <ToggleRow
             label="Review Request"
             description="Sent after trip completion asking for a review"
-            checked={reviewRequest}
+            checked={canUseFullEmail ? reviewRequest : false}
             onChange={setReviewRequest}
+            disabled={!canUseFullEmail}
           />
           <ToggleRow
             label="Cancellation / Reschedule Notification"
@@ -236,6 +241,14 @@ export function NotificationsTab({ subscriptionTier }: NotificationsTabProps) {
             checked={cancellationNotification}
             onChange={setCancellationNotification}
           />
+          {!canUseFullEmail && (
+            <UpgradePrompt
+              feature="Full Email Suite"
+              description="Unlock deposit reminders, trip reminders, weather alerts, and review request emails."
+              requiredTier="captain"
+              compact
+            />
+          )}
         </div>
       </div>
 
@@ -425,14 +438,16 @@ function ToggleRow({
   description,
   checked,
   onChange,
+  disabled = false,
 }: {
   label: string;
   description: string;
   checked: boolean;
   onChange: (val: boolean) => void;
+  disabled?: boolean;
 }) {
   return (
-    <div className="flex items-start justify-between gap-4">
+    <div className={`flex items-start justify-between gap-4 ${disabled ? 'opacity-50' : ''}`}>
       <div>
         <p className="text-sm font-medium text-slate-900">{label}</p>
         <p className="text-xs text-slate-400">{description}</p>
@@ -441,10 +456,11 @@ function ToggleRow({
         type="button"
         role="switch"
         aria-checked={checked}
-        onClick={() => onChange(!checked)}
-        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${
-          checked ? 'bg-cyan-600' : 'bg-slate-100'
-        }`}
+        aria-disabled={disabled}
+        onClick={() => !disabled && onChange(!checked)}
+        className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors ${
+          disabled ? 'cursor-not-allowed' : 'cursor-pointer'
+        } ${checked ? 'bg-cyan-600' : 'bg-slate-100'}`}
       >
         <span
           className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition-transform ${

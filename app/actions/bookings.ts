@@ -57,6 +57,7 @@ export type BookingErrorCode =
   | 'BLACKOUT'
   | 'OUTSIDE_HOURS'
   | 'HIBERNATING'
+  | 'BOOKING_LIMIT'
   | 'UNKNOWN';
 
 export interface ActionResult<T> {
@@ -197,6 +198,50 @@ export async function createBooking(
     };
   }
 
+  // Enforce booking limit for deckhand tier
+  let _currentBookingCount = 0;
+  {
+    const supabaseProfile = await createSupabaseServerClient();
+    const profileAny = profile as unknown as { subscription_tier?: string; monthly_booking_count?: number; booking_count_reset_date?: string | null };
+    _currentBookingCount = profileAny.monthly_booking_count ?? 0;
+    const now = new Date();
+    const currentYear = now.getUTCFullYear();
+    const currentMonth = now.getUTCMonth();
+    const resetDateStr = profileAny.booking_count_reset_date ?? null;
+
+    if (resetDateStr) {
+      const resetDate = new Date(resetDateStr);
+      if (resetDate.getUTCFullYear() !== currentYear || resetDate.getUTCMonth() !== currentMonth) {
+        _currentBookingCount = 0;
+        await supabaseProfile
+          .from('profiles')
+          .update({
+            monthly_booking_count: 0,
+            booking_count_reset_date: now.toISOString().split('T')[0],
+          })
+          .eq('id', params.captain_id);
+      }
+    } else {
+      // No reset date set yet — initialize it
+      _currentBookingCount = 0;
+      await supabaseProfile
+        .from('profiles')
+        .update({
+          monthly_booking_count: 0,
+          booking_count_reset_date: now.toISOString().split('T')[0],
+        })
+        .eq('id', params.captain_id);
+    }
+
+    if (profileAny.subscription_tier === 'deckhand' && _currentBookingCount >= 10) {
+      return {
+        success: false,
+        error: "You've reached your monthly booking limit. Upgrade to Captain for unlimited bookings.",
+        code: 'BOOKING_LIMIT',
+      };
+    }
+  }
+
   // Check advance booking limit
   const daysUntilBooking = differenceInDays(parseISO(params.scheduled_start), new Date());
   if (daysUntilBooking > profile.advance_booking_days) {
@@ -330,6 +375,17 @@ export async function createBooking(
   if (insertError || !newBooking) {
     console.error('Error creating booking:', insertError);
     return { success: false, error: 'Failed to create booking', code: 'UNKNOWN' };
+  }
+
+  // Increment monthly booking count for the captain
+  {
+    const supabaseIncrement = await createSupabaseServerClient();
+    await supabaseIncrement
+      .from('profiles')
+      .update({
+        monthly_booking_count: _currentBookingCount + 1,
+      })
+      .eq('id', params.captain_id);
   }
 
   // Log the booking creation

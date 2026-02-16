@@ -18,6 +18,10 @@ import { PaymentTimeline } from './components/PaymentTimeline';
 import { PassengerManifest } from './components/PassengerManifest';
 import { ActivityLog } from './components/ActivityLog';
 import { NotesSection } from './components/NotesSection';
+import { useSubscription } from '@/lib/subscription/context';
+import { canUseFeature } from '@/lib/subscription/gates';
+import { GatedButton } from '@/components/GatedButton';
+import { LockedFeatureOverlay } from '@/components/LockedFeatureOverlay';
 
 interface WaiverSignatureWithTemplate extends WaiverSignature {
   waiver_template: {
@@ -56,6 +60,10 @@ interface BookingDetailClientProps {
 }
 
 export function BookingDetailClient({ bookingId, initialBooking }: BookingDetailClientProps) {
+  const { tier } = useSubscription();
+  const hasPrintBooking = canUseFeature(tier, 'print_booking');
+  const hasCaptainsLogbook = canUseFeature(tier, 'captains_logbook');
+  const hasGuestPortal = canUseFeature(tier, 'guest_portal');
   const [details, setDetails] = useState<BookingDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -142,13 +150,15 @@ export function BookingDetailClient({ bookingId, initialBooking }: BookingDetail
               <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
               Refresh
             </button>
-            <button
-              onClick={handlePrint}
-              className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 transition-colors hover:bg-slate-100"
-            >
-              <Printer className="h-4 w-4" />
-              Print
-            </button>
+            <GatedButton feature="print_booking">
+              <button
+                onClick={handlePrint}
+                className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 transition-colors hover:bg-slate-100"
+              >
+                <Printer className="h-4 w-4" />
+                Print
+              </button>
+            </GatedButton>
           </div>
         </div>
       </section>
@@ -180,7 +190,7 @@ export function BookingDetailClient({ bookingId, initialBooking }: BookingDetail
           {/* Guest Information */}
           <GuestInfoSection
             booking={booking}
-            guestToken={details?.guestToken || null}
+            guestToken={hasGuestPortal ? (details?.guestToken || null) : null}
           />
 
           {/* Payment Timeline */}
@@ -206,14 +216,26 @@ export function BookingDetailClient({ bookingId, initialBooking }: BookingDetail
 
         {/* Right Column - 1/3 width */}
         <div className="space-y-6 print:space-y-4">
-          {/* Notes Section */}
-          <NotesSection
-            bookingId={bookingId}
-            initialNotes={booking.internal_notes}
-            initialTags={booking.tags || []}
-            specialRequests={booking.special_requests}
-            onUpdate={handleRefresh}
-          />
+          {/* Notes Section (Captain's Logbook) */}
+          {hasCaptainsLogbook ? (
+            <NotesSection
+              bookingId={bookingId}
+              initialNotes={booking.internal_notes}
+              initialTags={booking.tags || []}
+              specialRequests={booking.special_requests}
+              onUpdate={handleRefresh}
+            />
+          ) : (
+            <LockedFeatureOverlay feature="captains_logbook">
+              <NotesSection
+                bookingId={bookingId}
+                initialNotes={booking.internal_notes}
+                initialTags={booking.tags || []}
+                specialRequests={booking.special_requests}
+                onUpdate={handleRefresh}
+              />
+            </LockedFeatureOverlay>
+          )}
 
           {/* Activity Log */}
           <ActivityLog

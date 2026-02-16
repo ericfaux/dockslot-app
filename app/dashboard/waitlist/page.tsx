@@ -1,17 +1,30 @@
-import { redirect } from 'next/navigation';
-import { createSupabaseServerClient } from '@/utils/supabase/server';
+import { requireAuth } from '@/lib/auth/server';
 import WaitlistClient from './WaitlistClient';
+import { LockedFeatureOverlay } from '@/components/LockedFeatureOverlay';
+import type { SubscriptionTier } from '@/lib/db/types';
 
 export default async function WaitlistPage() {
-  const supabase = await createSupabaseServerClient();
+  const { user, supabase } = await requireAuth();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Fetch subscription tier
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('subscription_tier')
+    .eq('id', user.id)
+    .single();
 
-  if (!user) {
-    redirect('/login');
+  const subscriptionTier = (profile?.subscription_tier ?? 'deckhand') as SubscriptionTier;
+  const isDeckhand = subscriptionTier === 'deckhand';
+
+  const content = <WaitlistClient />;
+
+  if (isDeckhand) {
+    return (
+      <LockedFeatureOverlay feature="waitlist" pattern="section">
+        {content}
+      </LockedFeatureOverlay>
+    );
   }
 
-  return <WaitlistClient />;
+  return content;
 }

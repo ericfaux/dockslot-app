@@ -29,6 +29,10 @@ import {
 import { BookingWithDetails, BookingStatus } from '@/lib/db/types'
 import StatusBadge, { PaymentBadge } from '@/app/dashboard/components/StatusBadge'
 import { formatCents } from '@/lib/utils/format'
+import { useSubscription } from '@/lib/subscription/context'
+import { canUseFeature } from '@/lib/subscription/gates'
+import { GatedButton } from '@/components/GatedButton'
+import { LockedFeatureOverlay } from '@/components/LockedFeatureOverlay'
 
 interface BookingDetailDrawerProps {
   booking: BookingWithDetails | null
@@ -44,6 +48,9 @@ export function BookingDetailDrawer({
   onRefresh,
 }: BookingDetailDrawerProps) {
   const router = useRouter()
+  const { tier } = useSubscription()
+  const hasBookingModifications = canUseFeature(tier, 'booking_modifications')
+  const hasCaptainsLogbook = canUseFeature(tier, 'captains_logbook')
   const [isProcessing, setIsProcessing] = useState(false)
   const [actionError, setActionError] = useState<string | null>(null)
   const drawerRef = useRef<HTMLDivElement>(null)
@@ -406,51 +413,77 @@ export function BookingDetailDrawer({
               </div>
             </div>
 
-            {/* Tags */}
-            {booking.tags && booking.tags.length > 0 && (
-              <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                <h3 className="mb-3 text-sm font-medium uppercase tracking-wider text-slate-500">
-                  Tags
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {booking.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="flex items-center gap-1 rounded-full bg-cyan-50 px-2.5 py-0.5 text-xs font-medium text-cyan-600"
-                    >
-                      <TagIcon className="h-3 w-3" />
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Notes */}
-            {(booking.internal_notes || booking.special_requests) && (
-              <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                <h3 className="mb-3 text-sm font-medium uppercase tracking-wider text-slate-500">
-                  Notes
-                </h3>
-                <div className="space-y-3">
-                  {booking.special_requests && (
-                    <div>
-                      <div className="mb-1 text-xs font-medium text-slate-400">Special Requests</div>
-                      <p className="whitespace-pre-wrap text-sm text-slate-600">
-                        {booking.special_requests}
-                      </p>
+            {/* Tags & Notes (Captain's Logbook) */}
+            {hasCaptainsLogbook ? (
+              <>
+                {booking.tags && booking.tags.length > 0 && (
+                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                    <h3 className="mb-3 text-sm font-medium uppercase tracking-wider text-slate-500">
+                      Tags
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {booking.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="flex items-center gap-1 rounded-full bg-cyan-50 px-2.5 py-0.5 text-xs font-medium text-cyan-600"
+                        >
+                          <TagIcon className="h-3 w-3" />
+                          {tag}
+                        </span>
+                      ))}
                     </div>
-                  )}
-                  {booking.internal_notes && (
+                  </div>
+                )}
+
+                {(booking.internal_notes || booking.special_requests) && (
+                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                    <h3 className="mb-3 text-sm font-medium uppercase tracking-wider text-slate-500">
+                      Notes
+                    </h3>
+                    <div className="space-y-3">
+                      {booking.special_requests && (
+                        <div>
+                          <div className="mb-1 text-xs font-medium text-slate-400">Special Requests</div>
+                          <p className="whitespace-pre-wrap text-sm text-slate-600">
+                            {booking.special_requests}
+                          </p>
+                        </div>
+                      )}
+                      {booking.internal_notes && (
+                        <div>
+                          <div className="mb-1 text-xs font-medium text-slate-400">Internal Notes</div>
+                          <p className="whitespace-pre-wrap text-sm text-slate-600">
+                            {booking.internal_notes}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <LockedFeatureOverlay feature="captains_logbook">
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                  <h3 className="mb-3 text-sm font-medium uppercase tracking-wider text-slate-500">
+                    Captain&apos;s Logbook
+                  </h3>
+                  <div className="space-y-3">
+                    <div>
+                      <div className="mb-1 text-xs font-medium text-slate-400">Tags</div>
+                      <div className="flex flex-wrap gap-2">
+                        <span className="rounded-full bg-cyan-50 px-2.5 py-0.5 text-xs font-medium text-cyan-600">VIP</span>
+                        <span className="rounded-full bg-cyan-50 px-2.5 py-0.5 text-xs font-medium text-cyan-600">Repeat</span>
+                      </div>
+                    </div>
                     <div>
                       <div className="mb-1 text-xs font-medium text-slate-400">Internal Notes</div>
                       <p className="whitespace-pre-wrap text-sm text-slate-600">
-                        {booking.internal_notes}
+                        Captain&apos;s notes and tags for this booking...
                       </p>
                     </div>
-                  )}
+                  </div>
                 </div>
-              </div>
+              </LockedFeatureOverlay>
             )}
 
             {/* View Full Details Link */}
@@ -503,19 +536,21 @@ export function BookingDetailDrawer({
               </button>
             )}
 
-            {/* Reschedule - navigates to schedule */}
+            {/* Reschedule - navigates to schedule (gated as booking modification) */}
             {canModify && (
-              <button
-                onClick={() => {
-                  router.push(`/dashboard/schedule?booking=${booking.id}`)
-                  onClose()
-                }}
-                disabled={isProcessing}
-                className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 disabled:opacity-50"
-              >
-                <RefreshCw className="h-4 w-4" />
-                Reschedule
-              </button>
+              <GatedButton feature="booking_modifications">
+                <button
+                  onClick={() => {
+                    router.push(`/dashboard/schedule?booking=${booking.id}`)
+                    onClose()
+                  }}
+                  disabled={isProcessing}
+                  className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 disabled:opacity-50"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  Reschedule
+                </button>
+              </GatedButton>
             )}
 
             {/* Send Reminder */}
@@ -542,16 +577,18 @@ export function BookingDetailDrawer({
               </button>
             )}
 
-            {/* Weather Hold */}
+            {/* Weather Hold (gated as booking modification) */}
             {['confirmed', 'rescheduled'].includes(booking.status) && booking.status !== 'weather_hold' && (
-              <button
-                onClick={() => handleStatusChange('weather_hold', 'Set this booking to weather hold? The guest will be notified.')}
-                disabled={isProcessing}
-                className="flex items-center justify-center gap-2 rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm font-medium text-amber-600 transition-colors hover:bg-amber-50 disabled:opacity-50"
-              >
-                <CloudRain className="h-4 w-4" />
-                Weather Hold
-              </button>
+              <GatedButton feature="booking_modifications">
+                <button
+                  onClick={() => handleStatusChange('weather_hold', 'Set this booking to weather hold? The guest will be notified.')}
+                  disabled={isProcessing}
+                  className="flex items-center justify-center gap-2 rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm font-medium text-amber-600 transition-colors hover:bg-amber-50 disabled:opacity-50"
+                >
+                  <CloudRain className="h-4 w-4" />
+                  Weather Hold
+                </button>
+              </GatedButton>
             )}
           </div>
         </div>

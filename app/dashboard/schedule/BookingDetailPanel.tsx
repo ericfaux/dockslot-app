@@ -50,6 +50,10 @@ import BookingQuickActions from '../components/BookingQuickActions';
 import ContactQuickActions from '../components/ContactQuickActions';
 import SendMessageModal from '../components/SendMessageModal';
 import CancellationPolicyDisplay from '../components/CancellationPolicyDisplay';
+import { useSubscription } from '@/lib/subscription/context';
+import { canUseFeature } from '@/lib/subscription/gates';
+import { GatedButton } from '@/components/GatedButton';
+import { LockedFeatureOverlay } from '@/components/LockedFeatureOverlay';
 
 interface BookingDetailPanelProps {
   booking: CalendarBooking | null;
@@ -84,6 +88,9 @@ export function BookingDetailPanel({
   const [balanceSuccess, setBalanceSuccess] = useState(false);
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [showSendMessageModal, setShowSendMessageModal] = useState(false);
+  const { tier } = useSubscription();
+  const hasBookingModifications = canUseFeature(tier, 'booking_modifications');
+  const hasCaptainsLogbook = canUseFeature(tier, 'captains_logbook');
 
   if (!booking) return null;
 
@@ -344,13 +351,24 @@ export function BookingDetailPanel({
             name={booking.guest_name}
           />
 
-          {/* Captain's Notes & Tags */}
-          <BookingNotesEditor
-            bookingId={booking.id}
-            initialNotes={booking.internal_notes || null}
-            initialTags={booking.tags || []}
-            onUpdate={onUpdated}
-          />
+          {/* Captain's Notes & Tags (Logbook) */}
+          {hasCaptainsLogbook ? (
+            <BookingNotesEditor
+              bookingId={booking.id}
+              initialNotes={booking.internal_notes || null}
+              initialTags={booking.tags || []}
+              onUpdate={onUpdated}
+            />
+          ) : (
+            <LockedFeatureOverlay feature="captains_logbook">
+              <BookingNotesEditor
+                bookingId={booking.id}
+                initialNotes={booking.internal_notes || null}
+                initialTags={booking.tags || []}
+                onUpdate={onUpdated}
+              />
+            </LockedFeatureOverlay>
+          )}
 
           {/* Booking Timeline */}
           <BookingTimeline bookingId={booking.id} />
@@ -457,19 +475,21 @@ export function BookingDetailPanel({
                 </div>
               )}
 
-              {/* Weather Hold - large button on mobile */}
+              {/* Weather Hold - large button on mobile (gated as a booking modification) */}
               {canSetWeatherHold && (
-                <button
-                  onClick={() => setShowWeatherModal(true)}
-                  disabled={isPending}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-amber-50 px-6 py-4 min-h-[52px] font-mono text-base md:text-lg font-bold uppercase tracking-wide text-amber-600 transition-all duration-75 ease-out hover:bg-amber-500/30 active:translate-y-0.5 disabled:opacity-50"
-                  style={{
-                    boxShadow: 'inset 0 1px 0 rgba(0,0,0,0.03)',
-                  }}
-                >
-                  <CloudRain className="h-5 w-5" />
-                  WEATHER HOLD
-                </button>
+                <GatedButton feature="booking_modifications">
+                  <button
+                    onClick={() => setShowWeatherModal(true)}
+                    disabled={isPending}
+                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-amber-50 px-6 py-4 min-h-[52px] font-mono text-base md:text-lg font-bold uppercase tracking-wide text-amber-600 transition-all duration-75 ease-out hover:bg-amber-500/30 active:translate-y-0.5 disabled:opacity-50"
+                    style={{
+                      boxShadow: 'inset 0 1px 0 rgba(0,0,0,0.03)',
+                    }}
+                  >
+                    <CloudRain className="h-5 w-5" />
+                    WEATHER HOLD
+                  </button>
+                </GatedButton>
               )}
 
               {/* Secondary Actions - 2-column grid with 44px min touch targets */}
@@ -527,14 +547,16 @@ export function BookingDetailPanel({
                 )}
               </div>
 
-              {/* Duplicate Button (always available) */}
-              <button
-                onClick={() => setShowDuplicateModal(true)}
-                className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 px-4 py-3 min-h-[44px] font-mono text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100"
-              >
-                <Copy className="h-4 w-4" />
-                Duplicate Booking
-              </button>
+              {/* Duplicate Button (gated as a booking modification) */}
+              <GatedButton feature="booking_modifications">
+                <button
+                  onClick={() => setShowDuplicateModal(true)}
+                  className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 px-4 py-3 min-h-[44px] font-mono text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100"
+                >
+                  <Copy className="h-4 w-4" />
+                  Duplicate Booking
+                </button>
+              </GatedButton>
             </div>
           )}
 
