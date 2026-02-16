@@ -2,6 +2,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 
 export async function signInAction(formData: FormData): Promise<void> {
@@ -51,6 +52,29 @@ export async function signInAction(formData: FormData): Promise<void> {
   }
 
   redirect("/dashboard");
+}
+
+export async function forgotPasswordAction(formData: FormData): Promise<void> {
+  const email = formData.get("email");
+
+  if (!email || typeof email !== "string" || !email.trim()) {
+    redirect("/login?mode=forgot&error=" + encodeURIComponent("Email is required"));
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const headersList = await headers();
+  const origin = headersList.get("origin") || process.env.NEXT_PUBLIC_APP_URL || "";
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+    redirectTo: `${origin}/auth/callback?next=/auth/reset-password`,
+  });
+
+  if (error) {
+    redirect("/login?mode=forgot&error=" + encodeURIComponent("Unable to send reset link. Please try again."));
+  }
+
+  // Always show success to avoid leaking whether an email exists
+  redirect("/login?mode=signin&success=" + encodeURIComponent("Check your email for a password reset link."));
 }
 
 export async function registerAction(formData: FormData): Promise<void> {
