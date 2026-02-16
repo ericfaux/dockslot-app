@@ -24,10 +24,16 @@ export async function POST(request: NextRequest) {
     const tier = (body.tier || 'captain') as 'captain' | 'fleet';
     const interval = (body.interval || 'monthly') as BillingInterval;
 
-    // Validate tier
-    if (tier !== 'captain' && tier !== 'fleet') {
+    // Validate tier — only captain is available for purchase right now
+    if (tier !== 'captain') {
+      if (tier === 'fleet') {
+        return NextResponse.json(
+          { error: 'Fleet plan is coming soon. Stay tuned!' },
+          { status: 400 }
+        );
+      }
       return NextResponse.json(
-        { error: 'Invalid tier. Must be "captain" or "fleet".' },
+        { error: 'Invalid tier.' },
         { status: 400 }
       );
     }

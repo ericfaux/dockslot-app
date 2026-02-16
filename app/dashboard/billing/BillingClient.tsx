@@ -14,7 +14,7 @@ import {
   Ship,
 } from 'lucide-react';
 import type { SubscriptionTier, SubscriptionStatus, BillingInterval } from '@/lib/db/types';
-import { getTierDisplayName, isUpgrade } from '@/lib/subscription/gates';
+import { getTierDisplayName } from '@/lib/subscription/gates';
 import { PRICING } from '@/lib/stripe/config';
 
 interface BillingClientProps {
@@ -394,25 +394,14 @@ export function BillingClient({
             For captains with multiple boats or a growing team.
           </p>
 
-          {/* Upgrade button for non-fleet users */}
+          {/* Fleet is coming soon — no active checkout */}
           {subscriptionTier !== 'fleet' && (
-            <button
-              onClick={() => handleSubscribe('fleet')}
-              disabled={loading !== null}
-              className="mb-6 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50"
+            <div
+              className="mb-6 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 font-semibold text-slate-400 cursor-not-allowed"
             >
-              {loading === 'subscribe-fleet' ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Redirecting...
-                </>
-              ) : (
-                <>
-                  <Crown className="h-4 w-4" />
-                  {isUpgrade(subscriptionTier, 'fleet') ? 'Upgrade to Fleet' : 'Switch to Fleet'}
-                </>
-              )}
-            </button>
+              <Crown className="h-4 w-4" />
+              Coming Soon
+            </div>
           )}
 
           <ul className="space-y-2">
