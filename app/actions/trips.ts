@@ -7,6 +7,8 @@
 
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { TripType } from '@/lib/db/types';
+import type { SubscriptionTier } from '@/lib/db/types';
+import { isAtTripTypeLimit } from '@/lib/subscription/gates';
 
 // ============================================================================
 // Types
@@ -101,6 +103,30 @@ export async function createTripType(
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) {
     return { success: false, error: 'Not authenticated', code: 'UNAUTHORIZED' };
+  }
+
+  // Check trip type limit for Deckhand plan
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('subscription_tier')
+    .eq('id', user.id)
+    .single();
+
+  if (profile) {
+    const tier = profile.subscription_tier as SubscriptionTier;
+    const { count } = await supabase
+      .from('trip_types')
+      .select('id', { count: 'exact', head: true })
+      .eq('owner_id', user.id)
+      .eq('is_active', true);
+
+    if (isAtTripTypeLimit(tier, count ?? 0)) {
+      return {
+        success: false,
+        error: 'Upgrade to Captain to create more trip types. The Deckhand plan is limited to 1 trip type.',
+        code: 'UNAUTHORIZED' as TripErrorCode,
+      };
+    }
   }
 
   // Validate required fields

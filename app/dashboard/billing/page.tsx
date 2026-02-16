@@ -30,7 +30,7 @@ export default async function BillingPage() {
       </section>
 
       <BillingClient
-        subscriptionTier={profile?.subscription_tier ?? 'starter'}
+        subscriptionTier={profile?.subscription_tier ?? 'deckhand'}
         subscriptionStatus={profile?.subscription_status ?? 'active'}
         periodEnd={profile?.subscription_current_period_end ?? null}
         hasStripeCustomer={!!profile?.stripe_customer_id}

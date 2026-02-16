@@ -3,16 +3,19 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Loader2 } from 'lucide-react';
-import { Vessel } from '@/lib/db/types';
+import { Vessel, SubscriptionTier } from '@/lib/db/types';
+import { isAtVesselLimit } from '@/lib/subscription/gates';
+import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { VesselCard } from '@/app/dashboard/vessels/components/VesselCard';
 import { VesselModal } from '@/app/dashboard/vessels/components/VesselModal';
 import { createVessel, updateVessel, deleteVessel } from '@/app/actions/vessels';
 
 interface VesselsTabProps {
   initialVessels: Vessel[];
+  subscriptionTier: SubscriptionTier;
 }
 
-export function VesselsTab({ initialVessels }: VesselsTabProps) {
+export function VesselsTab({ initialVessels, subscriptionTier }: VesselsTabProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [vessels, setVessels] = useState<Vessel[]>(initialVessels);
@@ -101,23 +104,32 @@ export function VesselsTab({ initialVessels }: VesselsTabProps) {
       )}
 
       {/* Add Vessel Button */}
-      <div className="flex justify-end">
-        <button
-          onClick={handleAddNew}
-          disabled={isPending}
-          className="group flex items-center gap-2 rounded-lg bg-cyan-600 px-4 py-2.5 text-sm font-medium text-white transition-all duration-75 hover:bg-cyan-500 active:translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
-          style={{
-            boxShadow: '0 4px 14px rgba(34, 211, 238, 0.25)',
-          }}
-        >
-          {isPending ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Plus className="h-4 w-4" />
-          )}
-          Add Vessel
-        </button>
-      </div>
+      {isAtVesselLimit(subscriptionTier, vessels.length) ? (
+        <UpgradePrompt
+          feature="More Vessels"
+          description="The Deckhand plan is limited to 1 vessel. Upgrade to add unlimited vessels."
+          requiredTier="captain"
+          compact
+        />
+      ) : (
+        <div className="flex justify-end">
+          <button
+            onClick={handleAddNew}
+            disabled={isPending}
+            className="group flex items-center gap-2 rounded-lg bg-cyan-600 px-4 py-2.5 text-sm font-medium text-white transition-all duration-75 hover:bg-cyan-500 active:translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
+            style={{
+              boxShadow: '0 4px 14px rgba(34, 211, 238, 0.25)',
+            }}
+          >
+            {isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Plus className="h-4 w-4" />
+            )}
+            Add Vessel
+          </button>
+        </div>
+      )}
 
       {/* Vessels List */}
       {vessels.length === 0 ? (

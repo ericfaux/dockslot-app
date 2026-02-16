@@ -1,4 +1,5 @@
 import Stripe from 'stripe';
+import type { SubscriptionTier, BillingInterval } from '@/lib/db/types';
 
 let stripeInstance: Stripe | null = null;
 
@@ -15,21 +16,67 @@ export function getStripe(): Stripe {
   return stripeInstance;
 }
 
-/**
- * Stripe Price ID for Captain Pro ($29/month).
- *
- * You must create a Product + Price in Stripe Dashboard:
- * 1. Go to https://dashboard.stripe.com/products
- * 2. Click "Add product"
- * 3. Name: "Captain Pro", Price: $29/month (recurring)
- * 4. Copy the Price ID (starts with price_) and set it below or as env var
- */
-export function getProPriceId(): string {
-  const priceId = process.env.STRIPE_PRO_PRICE_ID;
+// ============================================================================
+// Price ID Helpers
+// ============================================================================
+
+/** Get the Stripe Price ID for a given tier and billing interval */
+export function getPriceId(tier: 'captain' | 'fleet', interval: BillingInterval): string {
+  const envKey = `STRIPE_${tier.toUpperCase()}_${interval.toUpperCase()}_PRICE_ID`;
+  const priceId = process.env[envKey];
+
   if (!priceId) {
     throw new Error(
-      'STRIPE_PRO_PRICE_ID not configured. Create a $29/month product in Stripe Dashboard and add the Price ID to environment variables.'
+      `${envKey} not configured. Create the corresponding product/price in Stripe Dashboard and add the Price ID to environment variables.`
     );
   }
+
   return priceId;
 }
+
+/**
+ * Map a Stripe Price ID back to a subscription tier.
+ * Used by the webhook handler to determine which tier to set on the profile.
+ * Includes backward compatibility with the legacy STRIPE_PRO_PRICE_ID.
+ */
+export function getTierFromPriceId(priceId: string): SubscriptionTier {
+  const captainMonthly = process.env.STRIPE_CAPTAIN_MONTHLY_PRICE_ID;
+  const captainAnnual = process.env.STRIPE_CAPTAIN_ANNUAL_PRICE_ID;
+  const fleetMonthly = process.env.STRIPE_FLEET_MONTHLY_PRICE_ID;
+  const fleetAnnual = process.env.STRIPE_FLEET_ANNUAL_PRICE_ID;
+
+  // Legacy backward compatibility
+  const legacyPro = process.env.STRIPE_PRO_PRICE_ID;
+
+  if (priceId === captainMonthly || priceId === captainAnnual || priceId === legacyPro) {
+    return 'captain';
+  }
+  if (priceId === fleetMonthly || priceId === fleetAnnual) {
+    return 'fleet';
+  }
+
+  console.warn(`Unknown Stripe price ID: ${priceId}, defaulting to deckhand`);
+  return 'deckhand';
+}
+
+// ============================================================================
+// Pricing Constants (for UI display)
+// ============================================================================
+
+/** Pricing in cents for display purposes */
+export const PRICING = {
+  captain: {
+    monthly: 29_00,
+    annual: 249_00,
+    /** Effective monthly price when billed annually */
+    annualMonthly: Math.round(249_00 / 12),
+    annualSavings: 29_00 * 12 - 249_00,
+  },
+  fleet: {
+    monthly: 79_00,
+    annual: 699_00,
+    /** Effective monthly price when billed annually */
+    annualMonthly: Math.round(699_00 / 12),
+    annualSavings: 79_00 * 12 - 699_00,
+  },
+} as const;

@@ -16,7 +16,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { Profile, AvailabilityWindow, TripType, Vessel } from '@/lib/db/types';
+import { Profile, AvailabilityWindow, TripType, Vessel, SubscriptionTier } from '@/lib/db/types';
 import { ProfileTab } from '../tabs/ProfileTab';
 import { MeetingSpotTab } from '../tabs/MeetingSpotTab';
 import { TripTypesTab } from '../tabs/TripTypesTab';
@@ -150,10 +150,17 @@ export function SettingsTabs(props: SettingsTabsProps) {
           <MeetingSpotTab initialProfile={props.profile} />
         )}
         {activeTab === 'trip-types' && (
-          <TripTypesTab initialTripTypes={props.tripTypes} captainId={props.profile?.id} />
+          <TripTypesTab
+            initialTripTypes={props.tripTypes}
+            captainId={props.profile?.id}
+            subscriptionTier={(props.profile?.subscription_tier as SubscriptionTier) ?? 'deckhand'}
+          />
         )}
         {activeTab === 'vessels' && (
-          <VesselsTab initialVessels={props.vessels} />
+          <VesselsTab
+            initialVessels={props.vessels}
+            subscriptionTier={(props.profile?.subscription_tier as SubscriptionTier) ?? 'deckhand'}
+          />
         )}
         {activeTab === 'availability' && (
           <AvailabilityTab
@@ -171,10 +178,13 @@ export function SettingsTabs(props: SettingsTabsProps) {
             businessName={props.profile?.business_name || props.profile?.full_name || ''}
             email={props.userEmail}
             profile={props.profile}
+            subscriptionTier={(props.profile?.subscription_tier as SubscriptionTier) ?? 'deckhand'}
           />
         )}
         {activeTab === 'notifications' && (
-          <NotificationsTab />
+          <NotificationsTab
+            subscriptionTier={(props.profile?.subscription_tier as SubscriptionTier) ?? 'deckhand'}
+          />
         )}
         {activeTab === 'booking-page' && (
           <BookingPageTab initialProfile={props.profile} tripTypes={props.tripTypes} />

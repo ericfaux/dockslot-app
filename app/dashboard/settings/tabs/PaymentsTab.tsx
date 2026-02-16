@@ -3,7 +3,9 @@
 import { useState, useTransition } from 'react';
 import { PaymentsClient } from '@/app/dashboard/payments/PaymentsClient';
 import { updateProfile } from '@/app/actions/profile';
-import { Profile } from '@/lib/db/types';
+import { Profile, SubscriptionTier } from '@/lib/db/types';
+import { canUseFeature } from '@/lib/subscription/gates';
+import { UpgradePrompt } from '@/components/UpgradePrompt';
 import {
   Loader2,
   Save,
@@ -23,9 +25,11 @@ interface PaymentsTabProps {
   businessName: string;
   email: string;
   profile: Profile | null;
+  subscriptionTier: SubscriptionTier;
 }
 
 export function PaymentsTab(props: PaymentsTabProps) {
+  const canUseStripe = canUseFeature(props.subscriptionTier, 'stripe_payments');
   const [isPending, startTransition] = useTransition();
   const [venmoEnabled, setVenmoEnabled] = useState(props.profile?.venmo_enabled ?? false);
   const [venmoUsername, setVenmoUsername] = useState(props.profile?.venmo_username ?? '');
@@ -157,12 +161,20 @@ export function PaymentsTab(props: PaymentsTabProps) {
         <p className="text-sm text-slate-400 mb-4">
           Connect your Stripe account to accept deposits and payments from guests.
         </p>
-        <PaymentsClient
-          stripeAccountId={props.stripeAccountId}
-          stripeOnboardingComplete={props.stripeOnboardingComplete}
-          businessName={props.businessName}
-          email={props.email}
-        />
+        {canUseStripe ? (
+          <PaymentsClient
+            stripeAccountId={props.stripeAccountId}
+            stripeOnboardingComplete={props.stripeOnboardingComplete}
+            businessName={props.businessName}
+            email={props.email}
+          />
+        ) : (
+          <UpgradePrompt
+            feature="Stripe Payment Processing"
+            description="Accept card deposits and payments from guests with Stripe. Standard processing rates, no DockSlot markup."
+            requiredTier="captain"
+          />
+        )}
       </div>
 
       {/* Divider */}

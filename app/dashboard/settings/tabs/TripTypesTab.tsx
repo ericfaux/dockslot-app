@@ -3,7 +3,9 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Loader2, Archive, ChevronDown, ChevronRight } from 'lucide-react';
-import { TripType } from '@/lib/db/types';
+import { TripType, SubscriptionTier } from '@/lib/db/types';
+import { isAtTripTypeLimit } from '@/lib/subscription/gates';
+import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { TripTypeCard } from '@/app/dashboard/trips/components/TripTypeCard';
 import { TripTypeModal } from '@/app/dashboard/trips/components/TripTypeModal';
 import { createTripType, updateTripType, deleteTripType, reactivateTripType } from '@/app/actions/trips';
@@ -11,9 +13,10 @@ import { createTripType, updateTripType, deleteTripType, reactivateTripType } fr
 interface TripTypesTabProps {
   initialTripTypes: TripType[];
   captainId?: string;
+  subscriptionTier: SubscriptionTier;
 }
 
-export function TripTypesTab({ initialTripTypes, captainId }: TripTypesTabProps) {
+export function TripTypesTab({ initialTripTypes, captainId, subscriptionTier }: TripTypesTabProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [tripTypes, setTripTypes] = useState<TripType[]>(initialTripTypes);
@@ -133,23 +136,32 @@ export function TripTypesTab({ initialTripTypes, captainId }: TripTypesTabProps)
       )}
 
       {/* Add Trip Type Button */}
-      <div className="flex justify-end">
-        <button
-          onClick={handleAddNew}
-          disabled={isPending}
-          className="group flex items-center gap-2 rounded-lg bg-cyan-600 px-4 py-2.5 text-sm font-medium text-white transition-all duration-75 hover:bg-cyan-500 active:translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
-          style={{
-            boxShadow: '0 4px 14px rgba(34, 211, 238, 0.25)',
-          }}
-        >
-          {isPending ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Plus className="h-4 w-4" />
-          )}
-          Add Trip Type
-        </button>
-      </div>
+      {isAtTripTypeLimit(subscriptionTier, activeTripTypes.length) ? (
+        <UpgradePrompt
+          feature="More Trip Types"
+          description="The Deckhand plan is limited to 1 trip type. Upgrade to create unlimited trip types."
+          requiredTier="captain"
+          compact
+        />
+      ) : (
+        <div className="flex justify-end">
+          <button
+            onClick={handleAddNew}
+            disabled={isPending}
+            className="group flex items-center gap-2 rounded-lg bg-cyan-600 px-4 py-2.5 text-sm font-medium text-white transition-all duration-75 hover:bg-cyan-500 active:translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
+            style={{
+              boxShadow: '0 4px 14px rgba(34, 211, 238, 0.25)',
+            }}
+          >
+            {isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Plus className="h-4 w-4" />
+            )}
+            Add Trip Type
+          </button>
+        </div>
+      )}
 
       {/* Active Trip Types List */}
       {activeTripTypes.length === 0 ? (

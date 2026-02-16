@@ -7,6 +7,8 @@
 
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { Vessel } from '@/lib/db/types';
+import type { SubscriptionTier } from '@/lib/db/types';
+import { isAtVesselLimit } from '@/lib/subscription/gates';
 
 // ============================================================================
 // Types
@@ -93,6 +95,29 @@ export async function createVessel(
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) {
     return { success: false, error: 'Not authenticated', code: 'UNAUTHORIZED' };
+  }
+
+  // Check vessel limit for Deckhand plan
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('subscription_tier')
+    .eq('id', user.id)
+    .single();
+
+  if (profile) {
+    const tier = profile.subscription_tier as SubscriptionTier;
+    const { count } = await supabase
+      .from('vessels')
+      .select('id', { count: 'exact', head: true })
+      .eq('owner_id', user.id);
+
+    if (isAtVesselLimit(tier, count ?? 0)) {
+      return {
+        success: false,
+        error: 'Upgrade to Captain to add more vessels. The Deckhand plan is limited to 1 vessel.',
+        code: 'UNAUTHORIZED' as VesselErrorCode,
+      };
+    }
   }
 
   // Validate required fields
