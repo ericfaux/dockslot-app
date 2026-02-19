@@ -12,6 +12,7 @@ import {
   Loader2,
   Anchor,
   Ship,
+  ChevronDown,
 } from 'lucide-react';
 import type { SubscriptionTier, SubscriptionStatus, BillingInterval } from '@/lib/db/types';
 import { getTierDisplayName } from '@/lib/subscription/gates';
@@ -87,9 +88,12 @@ export function BillingClient({
   periodEnd,
   hasStripeCustomer,
 }: BillingClientProps) {
+  const isOnPaidPlan = subscriptionTier === 'captain' || subscriptionTier === 'fleet';
+
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [billingInterval, setBillingInterval] = useState<BillingInterval>('monthly');
+  const [showPlans, setShowPlans] = useState(!isOnPaidPlan);
   const searchParams = useSearchParams();
 
   const isSuccess = searchParams.get('success') === 'true';
@@ -97,7 +101,6 @@ export function BillingClient({
   const successTier = searchParams.get('tier');
   const isPastDue = subscriptionStatus === 'past_due';
   const isCanceledStatus = subscriptionStatus === 'canceled';
-  const isOnPaidPlan = subscriptionTier === 'captain' || subscriptionTier === 'fleet';
 
   const formattedPeriodEnd = periodEnd
     ? new Date(periodEnd).toLocaleDateString('en-US', {
@@ -234,210 +237,233 @@ export function BillingClient({
         </div>
       )}
 
-      {/* Billing Interval Toggle */}
-      <div className="flex items-center justify-center gap-1">
-        <div className="inline-flex items-center rounded-lg bg-slate-100 p-1">
-          <button
-            onClick={() => setBillingInterval('monthly')}
-            className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
-              billingInterval === 'monthly'
-                ? 'bg-white text-slate-900 shadow-sm'
-                : 'text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            Monthly
-          </button>
-          <button
-            onClick={() => setBillingInterval('annual')}
-            className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
-              billingInterval === 'annual'
-                ? 'bg-white text-slate-900 shadow-sm'
-                : 'text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            Annual
-          </button>
-        </div>
-        {billingInterval === 'annual' && (
-          <span className="ml-2 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
-            Save {formatCents(PRICING.captain.annualSavings)}/year
-          </span>
-        )}
-      </div>
-
-      {/* Plan Cards */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Deckhand (Free) */}
-        <div
-          className={`rounded-xl border-2 bg-white p-6 ${
-            subscriptionTier === 'deckhand' ? 'border-cyan-500' : 'border-slate-200'
-          }`}
+      {/* Plans Section */}
+      {isOnPaidPlan && !showPlans ? (
+        <button
+          onClick={() => setShowPlans(true)}
+          className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-6 py-4 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
         >
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <h3 className="text-lg font-semibold text-slate-800">Deckhand</h3>
-              <Anchor className="h-4 w-4 text-slate-400" />
-            </div>
-            {subscriptionTier === 'deckhand' && (
-              <span className="rounded-full bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-700">
-                CURRENT PLAN
-              </span>
-            )}
-          </div>
-          <div className="mb-4 flex items-baseline gap-1">
-            <span className="text-4xl font-bold text-slate-900">$0</span>
-            <span className="text-slate-500">/month</span>
-          </div>
-          <p className="mb-6 text-sm text-slate-500">
-            Everything you need to get started with online bookings.
-          </p>
-          <ul className="space-y-2">
-            {DECKHAND_FEATURES.map((feature) => (
-              <li key={feature} className="flex items-start gap-2 text-sm text-slate-600">
-                <Check className="h-4 w-4 flex-shrink-0 text-cyan-600 mt-0.5" />
-                {feature}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Captain */}
-        <div
-          className={`relative rounded-xl border-2 bg-white p-6 ${
-            subscriptionTier === 'captain' ? 'border-cyan-500' : 'border-cyan-300'
-          }`}
-        >
-          {/* Most Popular Badge */}
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-            <span className="rounded-full bg-cyan-600 px-3 py-1 text-xs font-bold text-white">
-              MOST POPULAR
-            </span>
-          </div>
-
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <h3 className="text-lg font-semibold text-slate-800">Captain</h3>
-              <Zap className="h-4 w-4 text-cyan-500" />
-            </div>
-            {subscriptionTier === 'captain' && (
-              <span className="rounded-full bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-700">
-                CURRENT PLAN
-              </span>
-            )}
-          </div>
-          <div className="mb-1 flex items-baseline gap-1">
-            <span className="text-4xl font-bold text-slate-900">
-              {getPrice('captain').display}
-            </span>
-            <span className="text-slate-500">{getPrice('captain').suffix}</span>
-          </div>
-          {getPrice('captain').billed && (
-            <p className="mb-4 text-xs text-slate-400">{getPrice('captain').billed}</p>
-          )}
-          {!getPrice('captain').billed && <div className="mb-4" />}
-          <p className="mb-6 text-sm text-slate-500">
-            For working captains who need advanced tools and unlimited bookings.
-          </p>
-
-          {/* Upgrade button for non-captain users */}
-          {subscriptionTier !== 'captain' && subscriptionTier !== 'fleet' && (
+          <span>View Plans & Upgrade Options</span>
+          <ChevronDown className="h-4 w-4 text-slate-400" />
+        </button>
+      ) : (
+        <>
+          {isOnPaidPlan && (
             <button
-              onClick={() => handleSubscribe('captain')}
-              disabled={loading !== null}
-              className="mb-6 flex w-full items-center justify-center gap-2 rounded-lg bg-cyan-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-cyan-700 disabled:opacity-50"
+              onClick={() => setShowPlans(false)}
+              className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-6 py-4 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
             >
-              {loading === 'subscribe-captain' ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Redirecting to checkout...
-                </>
-              ) : (
-                <>
-                  <Zap className="h-4 w-4" />
-                  Upgrade to Captain
-                </>
-              )}
+              <span>View Plans & Upgrade Options</span>
+              <ChevronDown className="h-4 w-4 rotate-180 text-slate-400 transition-transform" />
             </button>
           )}
 
-          <ul className="space-y-2">
-            {CAPTAIN_FEATURES.map((feature) => (
-              <li key={feature} className="flex items-start gap-2 text-sm text-slate-600">
-                <Check className="h-4 w-4 flex-shrink-0 text-cyan-600 mt-0.5" />
-                {feature}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Fleet */}
-        <div
-          className={`rounded-xl border-2 bg-white p-6 ${
-            subscriptionTier === 'fleet' ? 'border-cyan-500' : 'border-slate-200'
-          }`}
-        >
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <h3 className="text-lg font-semibold text-slate-800">Fleet</h3>
-              <Ship className="h-4 w-4 text-amber-500" />
+          {/* Billing Interval Toggle */}
+          <div className="flex items-center justify-center gap-1">
+            <div className="inline-flex items-center rounded-lg bg-slate-100 p-1">
+              <button
+                onClick={() => setBillingInterval('monthly')}
+                className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+                  billingInterval === 'monthly'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setBillingInterval('annual')}
+                className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+                  billingInterval === 'annual'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                Annual
+              </button>
             </div>
-            {subscriptionTier === 'fleet' && (
-              <span className="rounded-full bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-700">
-                CURRENT PLAN
+            {billingInterval === 'annual' && (
+              <span className="ml-2 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
+                Save {formatCents(PRICING.captain.annualSavings)}/year
               </span>
             )}
           </div>
-          <div className="mb-1 flex items-baseline gap-1">
-            <span className="text-4xl font-bold text-slate-900">
-              {getPrice('fleet').display}
-            </span>
-            <span className="text-slate-500">{getPrice('fleet').suffix}</span>
-          </div>
-          {getPrice('fleet').billed && (
-            <p className="mb-4 text-xs text-slate-400">{getPrice('fleet').billed}</p>
-          )}
-          {!getPrice('fleet').billed && <div className="mb-4" />}
-          <p className="mb-6 text-sm text-slate-500">
-            For captains with multiple boats or a growing team.
-          </p>
 
-          {/* Fleet is coming soon — no active checkout */}
-          {subscriptionTier !== 'fleet' && (
+          {/* Plan Cards */}
+          <div className="grid gap-6 lg:grid-cols-3">
+            {/* Deckhand (Free) */}
             <div
-              className="mb-6 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 font-semibold text-slate-400 cursor-not-allowed"
+              className={`rounded-xl border-2 bg-white p-6 ${
+                subscriptionTier === 'deckhand' ? 'border-cyan-500' : 'border-slate-200'
+              }`}
             >
-              <Crown className="h-4 w-4" />
-              Coming Soon
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg font-semibold text-slate-800">Deckhand</h3>
+                  <Anchor className="h-4 w-4 text-slate-400" />
+                </div>
+                {subscriptionTier === 'deckhand' && (
+                  <span className="rounded-full bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-700">
+                    CURRENT PLAN
+                  </span>
+                )}
+              </div>
+              <div className="mb-4 flex items-baseline gap-1">
+                <span className="text-4xl font-bold text-slate-900">$0</span>
+                <span className="text-slate-500">/month</span>
+              </div>
+              <p className="mb-6 text-sm text-slate-500">
+                Everything you need to get started with online bookings.
+              </p>
+              <ul className="space-y-2">
+                {DECKHAND_FEATURES.map((feature) => (
+                  <li key={feature} className="flex items-start gap-2 text-sm text-slate-600">
+                    <Check className="h-4 w-4 flex-shrink-0 text-cyan-600 mt-0.5" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
             </div>
-          )}
 
-          <ul className="space-y-2">
-            {FLEET_FEATURES.map((feature) => (
-              <li key={feature} className="flex items-start gap-2 text-sm text-slate-600">
-                <Check className="h-4 w-4 flex-shrink-0 text-cyan-600 mt-0.5" />
-                <span>
-                  {feature}
-                  {FLEET_COMING_SOON.includes(feature) && (
-                    <span className="ml-1.5 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700">
-                      COMING SOON
-                    </span>
-                  )}
+            {/* Captain */}
+            <div
+              className={`relative rounded-xl border-2 bg-white p-6 ${
+                subscriptionTier === 'captain' ? 'border-cyan-500' : 'border-cyan-300'
+              }`}
+            >
+              {/* Most Popular Badge */}
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                <span className="rounded-full bg-cyan-600 px-3 py-1 text-xs font-bold text-white">
+                  MOST POPULAR
                 </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
+              </div>
 
-      {/* Zero Commission Callout */}
-      <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-6 py-4 text-center">
-        <p className="text-sm font-semibold text-emerald-800">
-          0% commission on every plan. Always.
-        </p>
-        <p className="mt-1 text-xs text-emerald-600">
-          Your booking link. Your guests. Your money. Standard Stripe processing fees apply on Captain and Fleet plans.
-        </p>
-      </div>
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg font-semibold text-slate-800">Captain</h3>
+                  <Zap className="h-4 w-4 text-cyan-500" />
+                </div>
+                {subscriptionTier === 'captain' && (
+                  <span className="rounded-full bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-700">
+                    CURRENT PLAN
+                  </span>
+                )}
+              </div>
+              <div className="mb-1 flex items-baseline gap-1">
+                <span className="text-4xl font-bold text-slate-900">
+                  {getPrice('captain').display}
+                </span>
+                <span className="text-slate-500">{getPrice('captain').suffix}</span>
+              </div>
+              {getPrice('captain').billed && (
+                <p className="mb-4 text-xs text-slate-400">{getPrice('captain').billed}</p>
+              )}
+              {!getPrice('captain').billed && <div className="mb-4" />}
+              <p className="mb-6 text-sm text-slate-500">
+                For working captains who need advanced tools and unlimited bookings.
+              </p>
+
+              {/* Upgrade button for non-captain users */}
+              {subscriptionTier !== 'captain' && subscriptionTier !== 'fleet' && (
+                <button
+                  onClick={() => handleSubscribe('captain')}
+                  disabled={loading !== null}
+                  className="mb-6 flex w-full items-center justify-center gap-2 rounded-lg bg-cyan-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-cyan-700 disabled:opacity-50"
+                >
+                  {loading === 'subscribe-captain' ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Redirecting to checkout...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="h-4 w-4" />
+                      Upgrade to Captain
+                    </>
+                  )}
+                </button>
+              )}
+
+              <ul className="space-y-2">
+                {CAPTAIN_FEATURES.map((feature) => (
+                  <li key={feature} className="flex items-start gap-2 text-sm text-slate-600">
+                    <Check className="h-4 w-4 flex-shrink-0 text-cyan-600 mt-0.5" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Fleet */}
+            <div
+              className={`rounded-xl border-2 bg-white p-6 ${
+                subscriptionTier === 'fleet' ? 'border-cyan-500' : 'border-slate-200'
+              }`}
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg font-semibold text-slate-800">Fleet</h3>
+                  <Ship className="h-4 w-4 text-amber-500" />
+                </div>
+                {subscriptionTier === 'fleet' && (
+                  <span className="rounded-full bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-700">
+                    CURRENT PLAN
+                  </span>
+                )}
+              </div>
+              <div className="mb-1 flex items-baseline gap-1">
+                <span className="text-4xl font-bold text-slate-900">
+                  {getPrice('fleet').display}
+                </span>
+                <span className="text-slate-500">{getPrice('fleet').suffix}</span>
+              </div>
+              {getPrice('fleet').billed && (
+                <p className="mb-4 text-xs text-slate-400">{getPrice('fleet').billed}</p>
+              )}
+              {!getPrice('fleet').billed && <div className="mb-4" />}
+              <p className="mb-6 text-sm text-slate-500">
+                For captains with multiple boats or a growing team.
+              </p>
+
+              {/* Fleet is coming soon — no active checkout */}
+              {subscriptionTier !== 'fleet' && (
+                <div
+                  className="mb-6 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 font-semibold text-slate-400 cursor-not-allowed"
+                >
+                  <Crown className="h-4 w-4" />
+                  Coming Soon
+                </div>
+              )}
+
+              <ul className="space-y-2">
+                {FLEET_FEATURES.map((feature) => (
+                  <li key={feature} className="flex items-start gap-2 text-sm text-slate-600">
+                    <Check className="h-4 w-4 flex-shrink-0 text-cyan-600 mt-0.5" />
+                    <span>
+                      {feature}
+                      {FLEET_COMING_SOON.includes(feature) && (
+                        <span className="ml-1.5 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700">
+                          COMING SOON
+                        </span>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* Zero Commission Callout */}
+          <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-6 py-4 text-center">
+            <p className="text-sm font-semibold text-emerald-800">
+              0% commission on every plan. Always.
+            </p>
+            <p className="mt-1 text-xs text-emerald-600">
+              Your booking link. Your guests. Your money. Standard Stripe processing fees apply on Captain and Fleet plans.
+            </p>
+          </div>
+        </>
+      )}
 
       {/* Subscription Details (Paid plans) */}
       {isOnPaidPlan && (
@@ -494,7 +520,7 @@ export function BillingClient({
               ) : (
                 <>
                   <ExternalLink className="h-4 w-4" />
-                  Manage Billing & Payment Method
+                  Manage Billing
                 </>
               )}
             </button>
@@ -506,10 +532,10 @@ export function BillingClient({
       {!isOnPaidPlan && hasStripeCustomer && (
         <div className="rounded-xl border border-slate-200 bg-white p-6">
           <h3 className="mb-2 text-lg font-semibold text-slate-800">
-            Billing History
+            Manage Billing
           </h3>
           <p className="mb-4 text-sm text-slate-500">
-            View past invoices and update your payment method.
+            Manage your subscription, payment methods, and view past invoices.
           </p>
           <button
             onClick={handleManageBilling}
@@ -521,7 +547,7 @@ export function BillingClient({
             ) : (
               <CreditCard className="h-4 w-4" />
             )}
-            Billing Portal
+            Manage Billing
           </button>
         </div>
       )}
