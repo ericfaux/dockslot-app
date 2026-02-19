@@ -118,6 +118,15 @@ export async function POST(request: NextRequest) {
       ],
       success_url: `${appUrl}/dashboard/billing?success=true&tier=${tier}`,
       cancel_url: `${appUrl}/dashboard/billing?canceled=true`,
+      allow_promotion_codes: true,
+      custom_text: {
+        submit: {
+          message: `You're subscribing to DockSlot ${tier === 'captain' ? 'Captain' : 'Fleet'} (${interval === 'annual' ? 'billed annually' : 'billed monthly'}). Cancel anytime from your dashboard.`,
+        },
+        after_submit: {
+          message: 'Your plan activates immediately. Head to your dashboard to start managing bookings.',
+        },
+      },
       metadata: {
         dockslot_user_id: user.id,
         tier,
