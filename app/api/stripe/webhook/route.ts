@@ -49,9 +49,53 @@ export async function POST(request: NextRequest) {
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session;
 
-      // Subscription checkout — handled by customer.subscription.created
+      // Subscription checkout — activate the tier immediately
       if (session.mode === 'subscription') {
-        console.log(`✅ Subscription checkout completed for customer ${session.customer}`);
+        const userId = session.metadata?.dockslot_user_id;
+        const tier = session.metadata?.tier;
+        const subscriptionId = typeof session.subscription === 'string'
+          ? session.subscription
+          : session.subscription?.id ?? null;
+
+        if (!userId || !tier) {
+          console.error('Missing metadata in subscription checkout:', {
+            userId,
+            tier,
+            sessionId: session.id,
+          });
+          return NextResponse.json({ received: true });
+        }
+
+        // Validate tier is a known paid tier
+        const validTiers = ['captain', 'fleet'];
+        if (!validTiers.includes(tier)) {
+          console.error(`Invalid tier "${tier}" in subscription checkout metadata, session ${session.id}`);
+          return NextResponse.json({ received: true });
+        }
+
+        const updateData: Record<string, unknown> = {
+          subscription_tier: tier,
+          subscription_status: 'active',
+        };
+
+        if (subscriptionId) {
+          updateData.stripe_subscription_id = subscriptionId;
+        }
+
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update(updateData)
+          .eq('id', userId);
+
+        if (updateError) {
+          console.error('Failed to update profile from subscription checkout:', updateError);
+          return NextResponse.json(
+            { error: 'Failed to update profile' },
+            { status: 500 }
+          );
+        }
+
+        console.log(`✅ Subscription checkout completed: user ${userId} upgraded to ${tier}`);
         return NextResponse.json({ received: true });
       }
 
