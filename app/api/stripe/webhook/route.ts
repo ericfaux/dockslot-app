@@ -265,9 +265,17 @@ export async function POST(request: NextRequest) {
 
       const isActive = ['active', 'trialing'].includes(subscription.status);
 
-      // Derive tier from the subscription's price ID
+      // Derive tier from the subscription's price ID, falling back to metadata
       const priceId = subscription.items?.data?.[0]?.price?.id;
-      const tier = priceId ? getTierFromPriceId(priceId) : 'deckhand';
+      let tier = priceId ? getTierFromPriceId(priceId) : 'deckhand';
+
+      // Fallback: use metadata tier if price-based lookup returned deckhand
+      if (tier === 'deckhand') {
+        const metadataTier = subscription.metadata?.tier;
+        if (metadataTier === 'captain' || metadataTier === 'fleet') {
+          tier = metadataTier;
+        }
+      }
 
       // In Stripe SDK v20+, current_period_end is on SubscriptionItem, not Subscription
       const periodEnd = subscription.items?.data?.[0]?.current_period_end;
