@@ -175,12 +175,8 @@ export const FEATURE_METADATA: Partial<Record<GatedFeature, FeatureMeta>> = {
 
 /** Check if a feature is available on the given tier */
 export function canUseFeature(tier: SubscriptionTier, feature: GatedFeature): boolean {
-  // Fleet gets everything
-  if (tier === 'fleet') return true;
-  // Captain gets Captain-level features
-  if (tier === 'captain') return CAPTAIN_FEATURES.includes(feature);
-  // Deckhand gets none of the gated features
-  return false;
+  // Paywalls disabled — all features unlocked for all tiers
+  return true;
 }
 
 /** Get the minimum tier required for a feature (for upgrade prompts) */
@@ -199,8 +195,8 @@ export function isAtBookingLimit(
   tier: SubscriptionTier,
   currentMonthBookings: number
 ): boolean {
-  if (tier === 'captain' || tier === 'fleet') return false;
-  return currentMonthBookings >= DECKHAND_BOOKING_LIMIT;
+  // Paywalls disabled — no booking limits
+  return false;
 }
 
 /** Check if a captain has hit their trip type limit */
@@ -208,8 +204,8 @@ export function isAtTripTypeLimit(
   tier: SubscriptionTier,
   currentTripTypeCount: number
 ): boolean {
-  if (tier === 'captain' || tier === 'fleet') return false;
-  return currentTripTypeCount >= DECKHAND_TRIP_TYPE_LIMIT;
+  // Paywalls disabled — no trip type limits
+  return false;
 }
 
 /** Check if a captain has hit their vessel limit */
@@ -217,25 +213,25 @@ export function isAtVesselLimit(
   tier: SubscriptionTier,
   currentVesselCount: number
 ): boolean {
-  if (tier === 'captain' || tier === 'fleet') return false;
-  return currentVesselCount >= DECKHAND_VESSEL_LIMIT;
+  // Paywalls disabled — no vessel limits
+  return false;
 }
 
 /** Get the booking limit for a tier (null = unlimited) */
 export function getBookingLimit(tier: SubscriptionTier): number | null {
-  if (tier === 'deckhand') return DECKHAND_BOOKING_LIMIT;
+  // Paywalls disabled — unlimited for all
   return null;
 }
 
 /** Get the trip type limit for a tier (null = unlimited) */
 export function getTripTypeLimit(tier: SubscriptionTier): number | null {
-  if (tier === 'deckhand') return DECKHAND_TRIP_TYPE_LIMIT;
+  // Paywalls disabled — unlimited for all
   return null;
 }
 
 /** Get the vessel limit for a tier (null = unlimited) */
 export function getVesselLimit(tier: SubscriptionTier): number | null {
-  if (tier === 'deckhand') return DECKHAND_VESSEL_LIMIT;
+  // Paywalls disabled — unlimited for all
   return null;
 }
 
