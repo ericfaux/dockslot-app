@@ -367,7 +367,15 @@ export function BookingPageTab({ initialProfile, tripTypes = [], subscriptionTie
           <p className="mb-4 text-sm text-slate-400">
             Paste this code into your website to embed your trip selection directly on any page.
           </p>
-          <EmbedCodeSnippet captainId={initialProfile.id} bookingSlug={initialProfile.booking_slug} />
+          {canUseFeature(subscriptionTier, 'website_embed') ? (
+            <EmbedCodeSnippet captainId={initialProfile.id} bookingSlug={initialProfile.booking_slug} />
+          ) : (
+            <UpgradePrompt
+              feature="Website Embed"
+              description="Embed a booking widget on your own website with SEO-friendly structured data."
+              requiredTier="captain"
+            />
+          )}
         </section>
       )}
 
