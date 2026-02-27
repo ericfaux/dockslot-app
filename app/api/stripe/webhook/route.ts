@@ -119,7 +119,6 @@ export async function POST(request: NextRequest) {
           .update({
             balance_due_cents: 0,
             payment_status: 'fully_paid',
-            balance_paid_at: new Date().toISOString(),
           })
           .eq('id', balanceBookingId);
 
@@ -136,12 +135,12 @@ export async function POST(request: NextRequest) {
         const balanceCaptainAccount = session.metadata?.captainStripeAccountId;
         await supabase.from('booking_logs').insert({
           booking_id: balanceBookingId,
-          actor: 'system',
+          actor_type: 'system',
           entry_type: 'payment_received',
-          entry_text: balanceCaptainAccount
+          description: balanceCaptainAccount
             ? `Balance payment received via Stripe: $${(parseInt(balanceAmount) / 100).toFixed(2)} (captain payout: $${((parseInt(balanceAmount) - parseInt(balanceFee || '0')) / 100).toFixed(2)}, platform fee: $${(parseInt(balanceFee || '0') / 100).toFixed(2)})`
             : `Balance payment received via Stripe: $${(parseInt(balanceAmount) / 100).toFixed(2)}`,
-          metadata: {
+          new_value: {
             stripe_session_id: session.id,
             payment_intent: session.payment_intent,
             amount_cents: balanceAmount,
@@ -203,7 +202,6 @@ export async function POST(request: NextRequest) {
           balance_due_cents: Math.max(0, balanceDueAfterDeposit),
           status: 'confirmed',
           payment_status: isFullPayment ? 'fully_paid' : 'deposit_paid',
-          deposit_paid_at: new Date().toISOString(),
         })
         .eq('id', bookingId);
 
@@ -221,12 +219,12 @@ export async function POST(request: NextRequest) {
         .from('booking_logs')
         .insert({
           booking_id: bookingId,
-          actor: 'system',
+          actor_type: 'system',
           entry_type: 'payment_received',
-          entry_text: captainStripeAccountId
+          description: captainStripeAccountId
             ? `Deposit payment received via Stripe: $${(parseInt(depositAmount) / 100).toFixed(2)} (captain payout: $${((parseInt(depositAmount) - parseInt(applicationFee || '0')) / 100).toFixed(2)}, platform fee: $${(parseInt(applicationFee || '0') / 100).toFixed(2)})`
             : `Deposit payment received via Stripe: $${(parseInt(depositAmount) / 100).toFixed(2)}`,
-          metadata: {
+          new_value: {
             stripe_session_id: session.id,
             payment_intent: session.payment_intent,
             amount_cents: depositAmount,
@@ -294,7 +292,6 @@ export async function POST(request: NextRequest) {
           .update({
             balance_due_cents: 0,
             payment_status: 'fully_paid',
-            balance_paid_at: new Date().toISOString(),
           })
           .eq('id', bookingId);
 
@@ -309,10 +306,10 @@ export async function POST(request: NextRequest) {
         // Log the payment
         await supabase.from('booking_logs').insert({
           booking_id: bookingId,
-          actor: 'system',
+          actor_type: 'system',
           entry_type: 'payment_received',
-          entry_text: `Balance payment received via Stripe: $${(paymentIntent.amount / 100).toFixed(2)}`,
-          metadata: {
+          description: `Balance payment received via Stripe: $${(paymentIntent.amount / 100).toFixed(2)}`,
+          new_value: {
             payment_intent: paymentIntent.id,
             amount_cents: paymentIntent.amount,
           },
@@ -421,8 +418,6 @@ export async function POST(request: NextRequest) {
           subscription_tier: 'deckhand',
           subscription_status: 'canceled',
           stripe_subscription_id: null,
-          monthly_booking_count: 0,
-          booking_count_reset_date: new Date().toISOString().slice(0, 10),
         })
         .eq('id', userId);
 
