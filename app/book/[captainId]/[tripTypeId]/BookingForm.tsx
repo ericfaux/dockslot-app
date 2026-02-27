@@ -24,6 +24,7 @@ interface BookingFormProps {
   cancellationPolicy?: string;
   meetingSpotLatitude?: number;
   meetingSpotLongitude?: number;
+  waiversEnabled?: boolean;
 }
 
 // Booking steps for progress indicator
@@ -45,6 +46,7 @@ export function BookingForm({
   cancellationPolicy,
   meetingSpotLatitude,
   meetingSpotLongitude,
+  waiversEnabled,
 }: BookingFormProps) {
   const router = useRouter();
   const [step, setStep] = useState<'date' | 'details'>('date');
@@ -580,19 +582,21 @@ export function BookingForm({
           )}
 
           {/* Waiver Requirement Notice */}
-          <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
-            <div className="flex items-start gap-3">
-              <FileWarning className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-              <div>
-                <h4 className="text-sm font-medium text-blue-900 mb-1">
-                  Liability Waiver Required
-                </h4>
-                <p className="text-sm text-blue-700">
-                  All passengers must sign a liability waiver before the trip. Waiver links will be sent to your email after booking.
-                </p>
+          {waiversEnabled && (
+            <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+              <div className="flex items-start gap-3">
+                <FileWarning className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="text-sm font-medium text-blue-900 mb-1">
+                    Liability Waiver Required
+                  </h4>
+                  <p className="text-sm text-blue-700">
+                    All passengers must sign a liability waiver before the trip. Waiver links will be sent to your email after booking.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Cancellation Policy */}
           <CancellationPolicy policy={cancellationPolicy} />

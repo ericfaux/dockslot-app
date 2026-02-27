@@ -7,6 +7,7 @@ import {
   Save,
   Moon,
   FileText,
+  FileSignature,
   Gift,
   Tag,
   ChevronDown,
@@ -38,9 +39,10 @@ interface BookingPageTabProps {
   initialProfile: Profile | null;
   tripTypes?: TripType[];
   subscriptionTier: SubscriptionTier;
+  waiversEnabled?: boolean;
 }
 
-export function BookingPageTab({ initialProfile, tripTypes = [], subscriptionTier }: BookingPageTabProps) {
+export function BookingPageTab({ initialProfile, tripTypes = [], subscriptionTier, waiversEnabled = false }: BookingPageTabProps) {
   const canCustomizeBranding = canUseFeature(subscriptionTier, 'custom_booking_branding');
   const canUsePromoCodes = canUseFeature(subscriptionTier, 'promo_codes');
   const canUseHibernation = canUseFeature(subscriptionTier, 'hibernation_mode');
@@ -378,6 +380,31 @@ export function BookingPageTab({ initialProfile, tripTypes = [], subscriptionTie
           )}
         </section>
       )}
+
+      {/* Waiver Status */}
+      <section className={sectionClassName}>
+        <div className="mb-4 flex items-center gap-2">
+          <FileSignature className="h-5 w-5 text-cyan-600" />
+          <h2 className="text-lg font-semibold text-slate-900">Waivers</h2>
+        </div>
+        <div className={`rounded-lg border px-4 py-3 ${
+          waiversEnabled
+            ? 'border-cyan-200 bg-cyan-50'
+            : 'border-slate-200 bg-slate-50'
+        }`}>
+          <p className="text-sm text-slate-700">
+            {waiversEnabled
+              ? 'Waivers are enabled. Guests will see a waiver requirement notice on your booking page.'
+              : 'Waivers are disabled. No waiver notices are shown on your booking page.'}
+          </p>
+          <a
+            href="/dashboard/settings?tab=waivers"
+            className="mt-2 inline-block text-sm font-medium text-cyan-600 hover:text-cyan-500"
+          >
+            {waiversEnabled ? 'Manage waivers' : 'Enable waivers'} &rarr;
+          </a>
+        </div>
+      </section>
 
       {/* Cancellation Policy */}
       <section className={sectionClassName}>

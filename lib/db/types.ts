@@ -98,6 +98,7 @@ export interface Profile {
   booking_slug: string | null;
   booking_help_show_email: boolean;
   booking_help_show_phone: boolean;
+  waivers_enabled: boolean;
   monthly_booking_count: number;
   booking_count_reset_date: string;
 }
