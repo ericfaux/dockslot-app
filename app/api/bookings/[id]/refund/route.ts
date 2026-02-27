@@ -91,10 +91,16 @@ export async function POST(
     }
 
     // Create refund via Stripe
+    // reverse_transfer: pulls the captain's portion back from their connected account
+    // refund_application_fee: returns DockSlot's platform fee as well
+    // Both are needed for destination charge payments so the refund comes from the
+    // right place (captain's account) instead of DockSlot's platform balance.
     const refund = await stripe.refunds.create({
       payment_intent: booking.stripe_payment_intent_id,
       amount: refund_amount_cents,
       reason: 'requested_by_customer', // Stripe requires specific reason codes
+      reverse_transfer: true,
+      refund_application_fee: true,
       metadata: {
         booking_id: bookingId,
         captain_reason: reason.trim(),

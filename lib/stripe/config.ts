@@ -60,6 +60,24 @@ export function getTierFromPriceId(priceId: string): SubscriptionTier {
 }
 
 // ============================================================================
+// Platform Fee Configuration
+// ============================================================================
+
+/**
+ * Platform fee percentage that DockSlot keeps from each booking payment.
+ * The remainder is automatically transferred to the captain's connected account.
+ * Override with DOCKSLOT_PLATFORM_FEE_PERCENT env var (e.g., "10" for 10%).
+ */
+export const PLATFORM_FEE_PERCENT = Number(
+  process.env.DOCKSLOT_PLATFORM_FEE_PERCENT ?? 10
+);
+
+/** Calculate the platform fee (application_fee_amount) for a given payment amount in cents */
+export function calculatePlatformFee(amountCents: number): number {
+  return Math.round(amountCents * (PLATFORM_FEE_PERCENT / 100));
+}
+
+// ============================================================================
 // Pricing Constants (for UI display)
 // ============================================================================
 

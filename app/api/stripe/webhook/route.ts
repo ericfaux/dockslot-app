@@ -99,7 +99,91 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ received: true });
       }
 
-      // Deposit payment checkout
+      // Check if this is a balance payment checkout
+      const paymentType = session.metadata?.paymentType;
+
+      if (paymentType === 'balance') {
+        // ====================================================================
+        // BALANCE PAYMENT via Stripe Checkout
+        // ====================================================================
+        const balanceBookingId = session.metadata?.bookingId;
+        const balanceAmount = session.metadata?.balanceAmount;
+
+        if (!balanceBookingId || !balanceAmount) {
+          console.error('Missing balance payment metadata:', session.metadata);
+          return NextResponse.json({ error: 'Missing metadata' }, { status: 400 });
+        }
+
+        const { error: balanceUpdateError } = await supabase
+          .from('bookings')
+          .update({
+            balance_due_cents: 0,
+            payment_status: 'fully_paid',
+          })
+          .eq('id', balanceBookingId);
+
+        if (balanceUpdateError) {
+          console.error('Failed to update booking with balance payment:', balanceUpdateError);
+          return NextResponse.json(
+            { error: 'Failed to update booking' },
+            { status: 500 }
+          );
+        }
+
+        // Log balance payment
+        const balanceFee = session.metadata?.applicationFee;
+        const balanceCaptainAccount = session.metadata?.captainStripeAccountId;
+        await supabase.from('booking_logs').insert({
+          booking_id: balanceBookingId,
+          actor_type: 'system',
+          entry_type: 'payment_received',
+          description: balanceCaptainAccount
+            ? `Balance payment received via Stripe: $${(parseInt(balanceAmount) / 100).toFixed(2)} (captain payout: $${((parseInt(balanceAmount) - parseInt(balanceFee || '0')) / 100).toFixed(2)}, platform fee: $${(parseInt(balanceFee || '0') / 100).toFixed(2)})`
+            : `Balance payment received via Stripe: $${(parseInt(balanceAmount) / 100).toFixed(2)}`,
+          new_value: {
+            stripe_session_id: session.id,
+            payment_intent: session.payment_intent,
+            amount_cents: balanceAmount,
+            payment_type: 'balance',
+            ...(balanceCaptainAccount && {
+              captain_stripe_account_id: balanceCaptainAccount,
+              application_fee_cents: balanceFee,
+              captain_payout_cents: (parseInt(balanceAmount) - parseInt(balanceFee || '0')).toString(),
+            }),
+          },
+        });
+
+        // Send balance payment confirmation email
+        const { data: balanceBooking } = await supabase
+          .from('bookings')
+          .select(`
+            *,
+            trip_type:trip_types(title)
+          `)
+          .eq('id', balanceBookingId)
+          .single();
+
+        if (balanceBooking) {
+          const managementUrl = `${process.env.NEXT_PUBLIC_APP_URL}/manage/${balanceBooking.management_token}`;
+          const formattedDate = format(parseISO(balanceBooking.scheduled_start), 'EEEE, MMMM d, yyyy');
+
+          await sendBalancePaymentConfirmation({
+            to: balanceBooking.guest_email,
+            guestName: balanceBooking.guest_name,
+            tripType: balanceBooking.trip_type?.title || 'Charter Trip',
+            date: formattedDate,
+            amountPaid: `$${(parseInt(balanceAmount) / 100).toFixed(2)}`,
+            managementUrl,
+          });
+        }
+
+        console.log(`✅ Balance payment processed for booking ${balanceBookingId}`);
+        return NextResponse.json({ received: true });
+      }
+
+      // ====================================================================
+      // DEPOSIT PAYMENT via Stripe Checkout
+      // ====================================================================
       const { bookingId, depositAmount, totalAmount } = session.metadata || {};
 
       if (!bookingId || !depositAmount || !totalAmount) {
@@ -107,14 +191,17 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Missing metadata' }, { status: 400 });
       }
 
+      const balanceDueAfterDeposit = parseInt(totalAmount) - parseInt(depositAmount);
+      const isFullPayment = balanceDueAfterDeposit <= 0;
+
       // Update booking with deposit payment
       const { error: updateError } = await supabase
         .from('bookings')
         .update({
           deposit_paid_cents: parseInt(depositAmount),
-          balance_due_cents: parseInt(totalAmount) - parseInt(depositAmount),
+          balance_due_cents: Math.max(0, balanceDueAfterDeposit),
           status: 'confirmed',
-          deposit_paid_at: new Date().toISOString(),
+          payment_status: isFullPayment ? 'fully_paid' : 'deposit_paid',
         })
         .eq('id', bookingId);
 
@@ -126,18 +213,26 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Log the payment
+      // Log the payment (include transfer details if destination charge was used)
+      const { captainStripeAccountId, applicationFee } = session.metadata || {};
       const { error: logError } = await supabase
         .from('booking_logs')
         .insert({
           booking_id: bookingId,
-          actor: 'system',
+          actor_type: 'system',
           entry_type: 'payment_received',
-          entry_text: `Deposit payment received via Stripe: $${(parseInt(depositAmount) / 100).toFixed(2)}`,
-          metadata: {
+          description: captainStripeAccountId
+            ? `Deposit payment received via Stripe: $${(parseInt(depositAmount) / 100).toFixed(2)} (captain payout: $${((parseInt(depositAmount) - parseInt(applicationFee || '0')) / 100).toFixed(2)}, platform fee: $${(parseInt(applicationFee || '0') / 100).toFixed(2)})`
+            : `Deposit payment received via Stripe: $${(parseInt(depositAmount) / 100).toFixed(2)}`,
+          new_value: {
             stripe_session_id: session.id,
             payment_intent: session.payment_intent,
             amount_cents: depositAmount,
+            ...(captainStripeAccountId && {
+              captain_stripe_account_id: captainStripeAccountId,
+              application_fee_cents: applicationFee,
+              captain_payout_cents: (parseInt(depositAmount) - parseInt(applicationFee || '0')).toString(),
+            }),
           },
         });
 
@@ -197,7 +292,6 @@ export async function POST(request: NextRequest) {
           .update({
             balance_due_cents: 0,
             payment_status: 'fully_paid',
-            balance_paid_at: new Date().toISOString(),
           })
           .eq('id', bookingId);
 
@@ -212,10 +306,10 @@ export async function POST(request: NextRequest) {
         // Log the payment
         await supabase.from('booking_logs').insert({
           booking_id: bookingId,
-          actor: 'system',
+          actor_type: 'system',
           entry_type: 'payment_received',
-          entry_text: `Balance payment received via Stripe: $${(paymentIntent.amount / 100).toFixed(2)}`,
-          metadata: {
+          description: `Balance payment received via Stripe: $${(paymentIntent.amount / 100).toFixed(2)}`,
+          new_value: {
             payment_intent: paymentIntent.id,
             amount_cents: paymentIntent.amount,
           },
@@ -324,8 +418,6 @@ export async function POST(request: NextRequest) {
           subscription_tier: 'deckhand',
           subscription_status: 'canceled',
           stripe_subscription_id: null,
-          monthly_booking_count: 0,
-          booking_count_reset_date: new Date().toISOString().slice(0, 10),
         })
         .eq('id', userId);
 

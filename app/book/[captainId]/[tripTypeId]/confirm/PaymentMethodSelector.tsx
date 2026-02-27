@@ -30,6 +30,7 @@ interface PaymentMethodSelectorProps {
   zellePaymentInstructions: string | null;
   captainId: string;
   tripTypeId: string;
+  isFullPayment?: boolean;
 }
 
 export function PaymentMethodSelector({
@@ -46,6 +47,7 @@ export function PaymentMethodSelector({
   zellePaymentInstructions,
   captainId,
   tripTypeId,
+  isFullPayment,
 }: PaymentMethodSelectorProps) {
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethodType | null>(null);
   const [paymentSent, setPaymentSent] = useState(false);
@@ -209,6 +211,7 @@ export function PaymentMethodSelector({
           <StripeCheckoutButton
             bookingId={bookingId}
             depositAmount={depositAmount}
+            isFullPayment={isFullPayment}
           />
         </div>
       )}

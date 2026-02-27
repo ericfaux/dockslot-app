@@ -218,6 +218,20 @@ function TripTypeForm({ tripType, captainId, onSubmit, onClose, error }: TripTyp
                 required
               />
             </div>
+            {priceTotal && parseFloat(priceTotal) > 0 && depositAmount !== priceTotal && (
+              <button
+                type="button"
+                onClick={() => setDepositAmount(priceTotal)}
+                className="mt-1 text-xs text-cyan-600 hover:text-cyan-500"
+              >
+                Require full payment upfront
+              </button>
+            )}
+            {priceTotal && depositAmount === priceTotal && parseFloat(priceTotal) > 0 && (
+              <p className="mt-1 text-xs text-emerald-600">
+                Full payment will be collected at booking
+              </p>
+            )}
           </div>
         </div>
 
