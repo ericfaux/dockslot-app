@@ -102,6 +102,12 @@ export default async function ConfirmPage({ params, searchParams }: ConfirmPageP
   const depositPaid = booking.payment_status === 'deposit_paid' || booking.payment_status === 'fully_paid';
   const pendingVerification = booking.payment_status === 'pending_verification';
 
+  // Check if this trip requires full payment upfront (deposit = total price)
+  const isFullPayment = tripType ? tripType.deposit_amount >= tripType.price_total : false;
+  const expectedBalanceAfterDeposit = tripType
+    ? Math.max(0, booking.total_price_cents - Math.round(tripType.deposit_amount * 100))
+    : booking.balance_due_cents;
+
   // Generate short booking ID for payment reference
   const shortId = `DK-${bookingId.slice(0, 4).toUpperCase()}`;
 
@@ -346,14 +352,16 @@ export default async function ConfirmPage({ params, searchParams }: ConfirmPageP
                         Arrive at the meeting spot 15 minutes before departure.
                       </span>
                     </li>
-                    <li className="flex items-start gap-3">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-cyan-100 text-xs font-bold text-cyan-700 flex-shrink-0">
-                        4
-                      </span>
-                      <span className="text-slate-600">
-                        Balance of {formatCents(booking.balance_due_cents)} is due at the dock on the day of your trip.
-                      </span>
-                    </li>
+                    {booking.balance_due_cents > 0 && (
+                      <li className="flex items-start gap-3">
+                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-cyan-100 text-xs font-bold text-cyan-700 flex-shrink-0">
+                          4
+                        </span>
+                        <span className="text-slate-600">
+                          Balance of {formatCents(booking.balance_due_cents)} is due at the dock on the day of your trip.
+                        </span>
+                      </li>
+                    )}
                   </ol>
                 </div>
               </>
@@ -386,18 +394,26 @@ export default async function ConfirmPage({ params, searchParams }: ConfirmPageP
                 )}
                 {tripType && tripType.deposit_amount > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Deposit {depositPaid ? '(Paid)' : '(Due Now)'}</span>
+                    <span className="text-slate-500">
+                      {isFullPayment
+                        ? (depositPaid ? 'Full Payment (Paid)' : 'Full Payment (Due Now)')
+                        : (depositPaid ? 'Deposit (Paid)' : 'Deposit (Due Now)')}
+                    </span>
                     <span className={`font-medium ${depositPaid ? 'text-emerald-600' : 'text-cyan-700'}`}>
                       {formatDollars(tripType.deposit_amount)}
                     </span>
                   </div>
                 )}
-                <div className="border-t border-slate-200 pt-3 flex justify-between text-base">
-                  <span className="font-semibold text-slate-900">Balance Due at Trip</span>
-                  <span className="font-bold text-slate-900">
-                    {formatCents(booking.balance_due_cents)}
-                  </span>
-                </div>
+                {!isFullPayment && (
+                  <div className="border-t border-slate-200 pt-3 flex justify-between text-base">
+                    <span className="font-semibold text-slate-900">Balance Due at Trip</span>
+                    <span className="font-bold text-slate-900">
+                      {depositPaid
+                        ? formatCents(booking.balance_due_cents)
+                        : formatCents(expectedBalanceAfterDeposit)}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Payment Methods */}
@@ -417,6 +433,7 @@ export default async function ConfirmPage({ params, searchParams }: ConfirmPageP
                     zellePaymentInstructions={zellePaymentInstructions}
                     captainId={captainId}
                     tripTypeId={tripTypeId}
+                    isFullPayment={isFullPayment}
                   />
                 </div>
               )}
@@ -427,6 +444,7 @@ export default async function ConfirmPage({ params, searchParams }: ConfirmPageP
                   <StripeCheckoutButton
                     bookingId={booking.id}
                     depositAmount={tripType!.deposit_amount}
+                    isFullPayment={isFullPayment}
                   />
                 </div>
               )}

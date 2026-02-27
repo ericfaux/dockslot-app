@@ -2,14 +2,15 @@
 
 import { useState } from 'react';
 import { CreditCard } from 'lucide-react';
+import { formatCents } from '@/lib/utils/format';
 
-interface StripeCheckoutButtonProps {
+interface BalanceCheckoutButtonProps {
   bookingId: string;
-  depositAmount: number; // in dollars
-  isFullPayment?: boolean;
+  token: string;
+  balanceDueCents: number;
 }
 
-export function StripeCheckoutButton({ bookingId, depositAmount, isFullPayment }: StripeCheckoutButtonProps) {
+export function BalanceCheckoutButton({ bookingId, token, balanceDueCents }: BalanceCheckoutButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,16 +19,17 @@ export function StripeCheckoutButton({ bookingId, depositAmount, isFullPayment }
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch('/api/stripe/checkout', {
+      const response = await fetch('/api/stripe/checkout-balance', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ bookingId }),
+        body: JSON.stringify({ bookingId, token }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create checkout session');
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to create checkout session');
       }
 
       const { url } = await response.json();
@@ -38,7 +40,7 @@ export function StripeCheckoutButton({ bookingId, depositAmount, isFullPayment }
         throw new Error('No checkout URL returned');
       }
     } catch (err) {
-      console.error('Checkout error:', err);
+      console.error('Balance checkout error:', err);
       setError(
         err instanceof Error
           ? err.message
@@ -51,21 +53,20 @@ export function StripeCheckoutButton({ bookingId, depositAmount, isFullPayment }
   return (
     <div>
       {error && (
-        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4">
-          <p className="text-sm text-red-700">{error}</p>
+        <div className="mb-4 rounded-lg border border-red-500/50 bg-red-500/10 p-3">
+          <p className="text-sm text-red-400">{error}</p>
         </div>
       )}
 
       <button
         onClick={handleCheckout}
         disabled={isLoading}
-        className="w-full rounded-xl px-6 py-4 font-semibold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[52px]"
-        style={{ backgroundColor: 'var(--brand-accent, #0891b2)' }}
+        className="w-full rounded-lg bg-cyan-500 px-6 py-3 font-semibold text-slate-900 transition-all hover:bg-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
         {isLoading ? (
           <>
             <svg
-              className="animate-spin h-5 w-5 text-white"
+              className="animate-spin h-5 w-5"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
@@ -89,13 +90,13 @@ export function StripeCheckoutButton({ bookingId, depositAmount, isFullPayment }
         ) : (
           <>
             <CreditCard className="h-5 w-5" />
-            <span>Pay ${depositAmount.toFixed(2)} {isFullPayment ? '' : 'Deposit'}</span>
+            <span>Pay {formatCents(balanceDueCents)} Balance</span>
           </>
         )}
       </button>
 
-      <div className="mt-3 text-center text-xs text-slate-400">
-        Powered by Stripe - Secure payment processing
+      <div className="mt-2 text-center text-xs text-slate-500">
+        Secure payment via Stripe
       </div>
     </div>
   );

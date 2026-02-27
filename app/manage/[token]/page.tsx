@@ -20,15 +20,20 @@ import {
   Anchor,
 } from "lucide-react";
 import Link from "next/link";
+import { BalanceCheckoutButton } from "@/components/booking/BalanceCheckoutButton";
 
 interface ManageBookingProps {
   params: Promise<{
     token: string;
   }>;
+  searchParams: Promise<{
+    payment?: string;
+  }>;
 }
 
-export default async function ManageBookingPage({ params }: ManageBookingProps) {
+export default async function ManageBookingPage({ params, searchParams }: ManageBookingProps) {
   const { token } = await params;
+  const { payment } = await searchParams;
   const supabase = createSupabaseServiceClient();
   
   // Store token for reschedule link
@@ -98,6 +103,13 @@ export default async function ManageBookingPage({ params }: ManageBookingProps) 
   const isActive = ['confirmed', 'pending_deposit', 'rescheduled'].includes(booking.status);
   const isCancelled = booking.status === 'cancelled';
   const isWeatherHold = booking.status === 'weather_hold';
+
+  // Can the guest pay the balance online?
+  const canPayBalance =
+    booking.balance_due_cents > 0 &&
+    ['confirmed', 'rescheduled'].includes(booking.status) &&
+    !isPastTrip &&
+    !!profile?.stripe_account_id;
 
   // Status badge helper
   const getStatusBadge = () => {
@@ -357,12 +369,33 @@ export default async function ManageBookingPage({ params }: ManageBookingProps) 
                   {formatCents(booking.balance_due_cents)}
                 </span>
               </div>
-              {booking.balance_due_cents > 0 && (
+              {booking.balance_due_cents > 0 && !canPayBalance && (
                 <p className="mt-2 text-xs text-slate-500">
                   Balance due at time of trip
                 </p>
               )}
             </div>
+
+            {/* Balance Payment Success */}
+            {payment === 'balance_success' && booking.balance_due_cents <= 0 && (
+              <div className="mt-4 rounded-lg border border-green-500/50 bg-green-500/10 p-4">
+                <div className="flex items-center gap-2 text-green-400">
+                  <CheckCircle className="h-5 w-5" />
+                  <span className="text-sm font-semibold">Balance paid successfully!</span>
+                </div>
+              </div>
+            )}
+
+            {/* Pay Balance Online Button */}
+            {canPayBalance && (
+              <div className="mt-4">
+                <BalanceCheckoutButton
+                  bookingId={booking.id}
+                  token={token}
+                  balanceDueCents={booking.balance_due_cents}
+                />
+              </div>
+            )}
           </div>
         </div>
 
