@@ -12,7 +12,7 @@
 
 -- Step 1: Deactivate "Test" waivers that have associated signatures (preserve audit trail)
 UPDATE waiver_templates
-SET is_active = FALSE, updated_at = NOW()
+SET is_active = FALSE
 WHERE LOWER(title) = 'test'
   AND is_active = TRUE
   AND id IN (
