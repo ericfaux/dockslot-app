@@ -1,22 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
 import { createSupabaseServiceClient } from '@/utils/supabase/service';
-import { calculatePlatformFee } from '@/lib/stripe/config';
+import { getStripe, calculatePlatformFee } from '@/lib/stripe/config';
 import { isBefore, parseISO } from 'date-fns';
-
-function getStripeClient() {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) {
-    throw new Error('STRIPE_SECRET_KEY not configured');
-  }
-  return new Stripe(key, {
-    apiVersion: '2026-01-28.clover',
-  });
-}
 
 export async function POST(request: NextRequest) {
   try {
-    const stripe = getStripeClient();
+    const stripe = getStripe();
     const { bookingId, token } = await request.json();
 
     if (!bookingId || !token) {
