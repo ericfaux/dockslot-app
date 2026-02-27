@@ -977,7 +977,7 @@ export async function createPublicBooking(
     const [tripDetails, captainProfile, emailPrefs, waiverTemplate] = await Promise.all([
       supabase
         .from('trip_types')
-        .select('title, duration_hours, cancellation_policy_text, vessel_id')
+        .select('title, duration_hours, cancellation_policy_text')
         .eq('id', params.trip_type_id)
         .single(),
       supabase
@@ -999,9 +999,7 @@ export async function createPublicBooking(
         .single(),
     ]);
 
-    const vesselRes = tripDetails.data?.vessel_id
-      ? await supabase.from('vessels').select('name').eq('id', tripDetails.data.vessel_id).single()
-      : { data: null };
+    const vesselRes = await supabase.from('vessels').select('name').eq('owner_id', params.captain_id).limit(1).single();
 
     if (tripDetails.data && captainProfile.data) {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dockslot.app';
