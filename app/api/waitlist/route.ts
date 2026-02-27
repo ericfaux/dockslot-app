@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/utils/supabase/server';
 import { createSupabaseServiceClient } from '@/utils/supabase/service';
 import { WaitlistEntry, WaitlistStatus } from '@/lib/db/types';
-import { enforceFeature } from '@/lib/subscription/enforce';
 
 /**
  * GET /api/waitlist
@@ -18,9 +17,6 @@ export async function GET(request: NextRequest) {
   if (!user) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
-
-  const gate = await enforceFeature(supabase, user.id, 'waitlist');
-  if (gate) return gate;
 
   const searchParams = request.nextUrl.searchParams;
   const status = searchParams.get('status') as WaitlistStatus | null;
@@ -94,10 +90,6 @@ export async function POST(request: NextRequest) {
 
   // Use service client (public endpoint)
   const supabase = createSupabaseServiceClient();
-
-  // Verify the captain has access to the waitlist feature
-  const gate = await enforceFeature(supabase, captain_id, 'waitlist');
-  if (gate) return gate;
 
   // Check if guest already has active waitlist entry for this trip type + date
   const { data: existing } = await supabase

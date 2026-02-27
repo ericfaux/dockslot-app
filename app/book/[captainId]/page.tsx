@@ -1,8 +1,7 @@
 export const dynamic = 'force-dynamic';
 
-import { Anchor, AlertTriangle, CheckCircle, CalendarOff } from 'lucide-react';
+import { Anchor, AlertTriangle, CheckCircle } from 'lucide-react';
 import { getPublicCaptainProfile, getPublicTripTypes, getHibernationInfo, getCaptainSocialProof, resolveCaptainId } from '@/app/actions/public-booking';
-import { createSupabaseServiceClient } from '@/utils/supabase/service';
 import { TripCard } from '../components/TripCard';
 import { BrandedLayout } from '../components/BrandedLayout';
 import { CaptainInfoCard, CancellationPolicy, StarRating } from '@/components/booking/TrustSignals';
@@ -96,54 +95,10 @@ export default async function SelectTripPage({ params }: Props) {
   const tripTypes = tripTypesResult.success ? tripTypesResult.data! : [];
   const socialProof = socialProofResult.success ? socialProofResult.data! : null;
 
-  // Fetch subscription tier and booking count for limit enforcement + branding
-  const supabase = createSupabaseServiceClient();
-  const { data: tierData } = await supabase
-    .from('profiles')
-    .select('subscription_tier, monthly_booking_count, booking_count_reset_date')
-    .eq('id', captainId)
-    .single();
-
-  const subscriptionTier = tierData?.subscription_tier ?? 'deckhand';
-  let monthlyBookingCount = tierData?.monthly_booking_count ?? 0;
-  const isDeckhand = subscriptionTier === 'deckhand';
-
-  // Lazy reset: if current month (UTC) differs from booking_count_reset_date, reset the count
-  if (tierData) {
-    const now = new Date();
-    const currentYear = now.getUTCFullYear();
-    const currentMonth = now.getUTCMonth();
-
-    if (tierData.booking_count_reset_date) {
-      const resetDate = new Date(tierData.booking_count_reset_date);
-      if (resetDate.getUTCFullYear() !== currentYear || resetDate.getUTCMonth() !== currentMonth) {
-        monthlyBookingCount = 0;
-        await supabase
-          .from('profiles')
-          .update({
-            monthly_booking_count: 0,
-            booking_count_reset_date: now.toISOString().split('T')[0],
-          })
-          .eq('id', captainId);
-      }
-    } else {
-      monthlyBookingCount = 0;
-      await supabase
-        .from('profiles')
-        .update({
-          monthly_booking_count: 0,
-          booking_count_reset_date: now.toISOString().split('T')[0],
-        })
-        .eq('id', captainId);
-    }
-  }
-
-  const isScheduleFull = isDeckhand && monthlyBookingCount >= 10;
-
-  // Branding enforcement: deckhand tier uses default DockSlot styling only
-  const effectiveHeroImageUrl = isDeckhand ? null : profile.hero_image_url;
-  const effectiveBookingTagline = isDeckhand ? null : profile.booking_tagline;
-  const effectiveAccentColor = isDeckhand ? '#0891b2' : (profile.brand_accent_color || '#0891b2');
+  // Branding: use captain's custom styling
+  const effectiveHeroImageUrl = profile.hero_image_url;
+  const effectiveBookingTagline = profile.booking_tagline;
+  const effectiveAccentColor = profile.brand_accent_color || '#0891b2';
 
   const hasHero = !!effectiveHeroImageUrl;
 
@@ -281,30 +236,13 @@ export default async function SelectTripPage({ params }: Props) {
             />
           )}
 
-          {/* Schedule Full Message (Deckhand at booking limit) */}
-          {isScheduleFull ? (
-            <div className="rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-              <div className="flex justify-center mb-4">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-amber-50">
-                  <CalendarOff className="h-8 w-8 text-amber-500" />
-                </div>
-              </div>
-              <h2 className="text-xl font-semibold text-slate-900 mb-2">
-                This captain&apos;s schedule is currently full.
-              </h2>
-              <p className="text-slate-500">
-                Please check back later.
-              </p>
-            </div>
-          ) : (
-            <>
-              {/* Page Title */}
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold text-slate-900 mb-2">Select Your Trip</h2>
-                <p className="text-slate-500">
-                  Choose from the available charter experiences below.
-                </p>
-              </div>
+          {/* Page Title */}
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">Select Your Trip</h2>
+            <p className="text-slate-500">
+              Choose from the available charter experiences below.
+            </p>
+          </div>
 
               {/* Trip Cards */}
               {tripTypes.length === 0 ? (
@@ -370,8 +308,6 @@ export default async function SelectTripPage({ params }: Props) {
                   </div>
                 </div>
               )}
-            </>
-          )}
         </main>
 
         {/* Footer */}
