@@ -1,9 +1,8 @@
-import { redirect } from 'next/navigation';
 import { requireAuth } from '@/lib/auth/server';
-import { WaiverTemplateForm } from '../components/WaiverTemplateForm';
+import { NewWaiverFlow } from '../components/NewWaiverFlow';
 
 export default async function NewWaiverPage() {
-  const { user, supabase } = await requireAuth()
+  await requireAuth();
 
   return (
     <div className="max-w-4xl space-y-6">
@@ -14,7 +13,7 @@ export default async function NewWaiverPage() {
         </p>
       </div>
 
-      <WaiverTemplateForm />
+      <NewWaiverFlow />
     </div>
   );
 }

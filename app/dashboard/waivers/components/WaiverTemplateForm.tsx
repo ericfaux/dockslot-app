@@ -27,17 +27,22 @@ interface Props {
     is_active: boolean;
     version: number;
   };
+  /** Pre-fill values from a standard waiver template (for new templates only) */
+  prefill?: {
+    title: string;
+    content: string;
+  };
 }
 
-export function WaiverTemplateForm({ template }: Props) {
+export function WaiverTemplateForm({ template, prefill }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const [formData, setFormData] = useState({
-    title: template?.title || '',
-    content: template?.content || '',
+    title: template?.title || prefill?.title || '',
+    content: template?.content || prefill?.content || '',
     is_active: template?.is_active ?? true,
   });
 
