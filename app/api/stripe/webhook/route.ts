@@ -126,18 +126,26 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Log the payment
+      // Log the payment (include transfer details if destination charge was used)
+      const { captainStripeAccountId, applicationFee } = session.metadata || {};
       const { error: logError } = await supabase
         .from('booking_logs')
         .insert({
           booking_id: bookingId,
           actor: 'system',
           entry_type: 'payment_received',
-          entry_text: `Deposit payment received via Stripe: $${(parseInt(depositAmount) / 100).toFixed(2)}`,
+          entry_text: captainStripeAccountId
+            ? `Deposit payment received via Stripe: $${(parseInt(depositAmount) / 100).toFixed(2)} (captain payout: $${((parseInt(depositAmount) - parseInt(applicationFee || '0')) / 100).toFixed(2)}, platform fee: $${(parseInt(applicationFee || '0') / 100).toFixed(2)})`
+            : `Deposit payment received via Stripe: $${(parseInt(depositAmount) / 100).toFixed(2)}`,
           metadata: {
             stripe_session_id: session.id,
             payment_intent: session.payment_intent,
             amount_cents: depositAmount,
+            ...(captainStripeAccountId && {
+              captain_stripe_account_id: captainStripeAccountId,
+              application_fee_cents: applicationFee,
+              captain_payout_cents: (parseInt(depositAmount) - parseInt(applicationFee || '0')).toString(),
+            }),
           },
         });
 
