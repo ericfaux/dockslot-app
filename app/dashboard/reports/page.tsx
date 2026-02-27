@@ -7,8 +7,6 @@ import {
   getPromoCodeAnalytics,
 } from '@/app/actions/analytics';
 import { ReportsPageClient } from './components/ReportsPageClient';
-import { LockedFeatureOverlay } from '@/components/LockedFeatureOverlay';
-import type { SubscriptionTier } from '@/lib/db/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,16 +17,6 @@ export const metadata = {
 
 export default async function ReportsPage() {
   const { user, supabase } = await requireAuth();
-
-  // Fetch subscription tier
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('subscription_tier')
-    .eq('id', user.id)
-    .single();
-
-  const subscriptionTier = (profile?.subscription_tier ?? 'deckhand') as SubscriptionTier;
-  const isDeckhand = subscriptionTier === 'deckhand';
 
   // Fetch all analytics data in parallel
   const [revenueData, bookingData, guestData, seasonData, promoData] = await Promise.all([
@@ -52,7 +40,7 @@ export default async function ReportsPage() {
     // Ignore - badge is non-critical
   }
 
-  const content = (
+  return (
     <ReportsPageClient
       revenueData={revenueData}
       bookingData={bookingData}
@@ -63,14 +51,4 @@ export default async function ReportsPage() {
       pendingReportCount={pendingReportCount}
     />
   );
-
-  if (isDeckhand) {
-    return (
-      <LockedFeatureOverlay feature="reports" pattern="section">
-        {content}
-      </LockedFeatureOverlay>
-    );
-  }
-
-  return content;
 }

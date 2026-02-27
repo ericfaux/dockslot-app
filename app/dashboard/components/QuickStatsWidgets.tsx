@@ -19,18 +19,13 @@ interface QuickStats {
   revenueChange: number
 }
 
-import type { SubscriptionTier } from '@/lib/db/types'
-
 interface QuickStatsWidgetsProps {
   captainId: string
-  subscriptionTier?: SubscriptionTier
 }
 
 export default function QuickStatsWidgets({
   captainId,
-  subscriptionTier = 'deckhand',
 }: QuickStatsWidgetsProps) {
-  const isDeckhand = subscriptionTier === 'deckhand'
   const [stats, setStats] = useState<QuickStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
@@ -139,10 +134,7 @@ export default function QuickStatsWidgets({
     },
   ]
 
-  // Deckhand: only show basic counts (Today, This Week, Upcoming). Hide revenue-related stats.
-  const visibleWidgets = isDeckhand
-    ? widgets.filter((w) => ['Today', 'This Week', 'Upcoming'].includes(w.label))
-    : widgets
+  const visibleWidgets = widgets
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

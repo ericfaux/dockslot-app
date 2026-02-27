@@ -5,8 +5,6 @@ import { SideNav } from "./components/side-nav";
 import { MobileHeader } from "./components/mobile-header";
 import { MobileTabBar } from "./components/mobile-tab-bar";
 import { QuickActionsProvider } from "./components/QuickActionsProvider";
-import { SubscriptionProvider } from "@/lib/subscription/context";
-import type { SubscriptionTier } from "@/lib/db/types";
 
 export default async function DashboardLayout({
   children,
@@ -16,10 +14,10 @@ export default async function DashboardLayout({
   // Auth with automatic retry and redirect
   const { user, supabase: authSupabase } = await requireAuth();
 
-  // Check if captain has completed onboarding + fetch subscription data
+  // Check if captain has completed onboarding
   const { data: profile } = await authSupabase
     .from("profiles")
-    .select("onboarding_completed, subscription_tier, monthly_booking_count, booking_count_reset_date")
+    .select("onboarding_completed")
     .eq("id", user.id)
     .single();
 
@@ -27,22 +25,10 @@ export default async function DashboardLayout({
     redirect("/onboarding");
   }
 
-  const subscriptionTier = (profile?.subscription_tier as SubscriptionTier) ?? "deckhand";
-
-  // Lazy reset: if current month differs from booking_count_reset_date, reset count
-  const resetDate = profile?.booking_count_reset_date;
-  const today = new Date().toISOString().slice(0, 10);
-  if (resetDate && resetDate.slice(0, 7) !== today.slice(0, 7)) {
-    await authSupabase
-      .from("profiles")
-      .update({ monthly_booking_count: 0, booking_count_reset_date: today })
-      .eq("id", user.id);
-  }
-
   // Extract user details for the UI
   const userEmail = user.email ?? "Unknown";
 
-  // 5. Define the Sign Out Server Action
+  // Define the Sign Out Server Action
   async function signOutAction() {
     "use server";
     const supabase = await createSupabaseServerClient();
@@ -66,11 +52,9 @@ export default async function DashboardLayout({
       <main className="dashboard-content">
         <div className="min-h-screen bg-slate-50">
           <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4">
-            <SubscriptionProvider tier={subscriptionTier}>
-              <QuickActionsProvider>
-                {children}
-              </QuickActionsProvider>
-            </SubscriptionProvider>
+            <QuickActionsProvider>
+              {children}
+            </QuickActionsProvider>
           </div>
         </div>
       </main>

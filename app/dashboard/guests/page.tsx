@@ -1,8 +1,6 @@
 import { Suspense } from 'react';
 import { requireAuth } from '@/lib/auth/server';
 import { GuestsList } from './components/GuestsList';
-import { LockedFeatureOverlay } from '@/components/LockedFeatureOverlay';
-import type { SubscriptionTier } from '@/lib/db/types';
 
 export default async function GuestsPage() {
   const { user, supabase } = await requireAuth();
@@ -16,17 +14,15 @@ export default async function GuestsPage() {
       .order('created_at', { ascending: true }),
     supabase
       .from('profiles')
-      .select('business_name, subscription_tier')
+      .select('business_name')
       .eq('id', user.id)
       .single(),
   ]);
 
   const tripTypes = (tripTypesResult.data || []).map((t) => ({ id: t.id, title: t.title }));
   const businessName = profileResult.data?.business_name || 'Our Business';
-  const subscriptionTier = (profileResult.data?.subscription_tier ?? 'deckhand') as SubscriptionTier;
-  const isDeckhand = subscriptionTier === 'deckhand';
 
-  const content = (
+  return (
     <div className="space-y-6">
       {/* Header */}
       <div>
@@ -48,14 +44,4 @@ export default async function GuestsPage() {
       </Suspense>
     </div>
   );
-
-  if (isDeckhand) {
-    return (
-      <LockedFeatureOverlay feature="guest_crm" pattern="section">
-        {content}
-      </LockedFeatureOverlay>
-    );
-  }
-
-  return content;
 }

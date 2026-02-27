@@ -24,22 +24,14 @@ export interface ActionItem {
   bookingId?: string;
 }
 
-import type { SubscriptionTier } from '@/lib/db/types';
-
 interface ActionItemsWidgetProps {
   items: ActionItem[];
-  subscriptionTier?: SubscriptionTier;
 }
 
-export function ActionItemsWidget({ items, subscriptionTier = 'deckhand' }: ActionItemsWidgetProps) {
+export function ActionItemsWidget({ items }: ActionItemsWidgetProps) {
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
-  const isDeckhand = subscriptionTier === 'deckhand';
 
-  // Deckhand: filter out revenue-related and weather-related action items
-  const filteredItems = isDeckhand
-    ? items.filter(item => item.type !== 'payment' && item.type !== 'alert')
-    : items;
-  const visibleItems = filteredItems.filter(item => !dismissed.has(item.id));
+  const visibleItems = items.filter(item => !dismissed.has(item.id));
   const highPriorityCount = visibleItems.filter(i => i.priority === 'high').length;
 
   const handleDismiss = (itemId: string) => {

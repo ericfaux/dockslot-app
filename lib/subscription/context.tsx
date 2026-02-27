@@ -1,29 +1,16 @@
 'use client'
 
-import { createContext, useContext, ReactNode } from 'react'
 import type { SubscriptionTier } from '@/lib/db/types'
 
 interface SubscriptionContextValue {
   tier: SubscriptionTier
 }
 
-const SubscriptionContext = createContext<SubscriptionContextValue>({
-  tier: 'deckhand',
-})
-
-interface SubscriptionProviderProps {
-  tier: SubscriptionTier
-  children: ReactNode
-}
-
-export function SubscriptionProvider({ tier, children }: SubscriptionProviderProps) {
-  return (
-    <SubscriptionContext.Provider value={{ tier }}>
-      {children}
-    </SubscriptionContext.Provider>
-  )
-}
-
+/**
+ * useSubscription - Previously provided subscription tier context.
+ * Now always returns 'captain' since all users are on a single paid tier.
+ * Kept for backward compatibility with components that still reference it.
+ */
 export function useSubscription(): SubscriptionContextValue {
-  return useContext(SubscriptionContext)
+  return { tier: 'captain' }
 }
