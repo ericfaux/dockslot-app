@@ -977,7 +977,7 @@ export async function createPublicBooking(
     const [tripDetails, captainProfile, emailPrefs, waiverTemplate] = await Promise.all([
       supabase
         .from('trip_types')
-        .select('title, duration_hours, cancellation_policy_text, vessel_id')
+        .select('title, duration_hours, cancellation_policy_text')
         .eq('id', params.trip_type_id)
         .single(),
       supabase

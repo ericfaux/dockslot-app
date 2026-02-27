@@ -365,7 +365,7 @@ export async function createBooking(
     const supabaseEmail = await createSupabaseServerClient();
     const [tripDetails, emailPrefs, waiverTemplate] = await Promise.all([
       params.trip_type_id
-        ? supabaseEmail.from('trip_types').select('title, cancellation_policy_text, vessel_id').eq('id', params.trip_type_id).single()
+        ? supabaseEmail.from('trip_types').select('title, cancellation_policy_text').eq('id', params.trip_type_id).single()
         : { data: null },
       supabaseEmail.from('email_preferences').select('custom_what_to_bring, business_name_override, logo_url, email_signature, sms_booking_confirmation').eq('captain_id', params.captain_id).single(),
       supabaseEmail.from('waiver_templates').select('id').eq('owner_id', params.captain_id).eq('is_active', true).limit(1).single(),

@@ -218,17 +218,34 @@ export async function POST(request: NextRequest) {
     // Use service client (public endpoint)
     const supabase = createSupabaseServiceClient();
 
-    // Fetch trip type and vessel details for conflict checking
+    // Verify trip type exists and belongs to captain
     const { data: tripType, error: tripError } = await supabase
       .from('trip_types')
-      .select('vessel_id')
+      .select('id')
       .eq('id', trip_type_id)
+      .eq('owner_id', captain_id)
+      .eq('is_active', true)
       .single();
 
     if (tripError || !tripType) {
       return NextResponse.json(
         { error: 'Trip type not found' },
         { status: 404 }
+      );
+    }
+
+    // Look up captain's vessel (bookings.vessel_id is NOT NULL)
+    const { data: vessel } = await supabase
+      .from('vessels')
+      .select('id')
+      .eq('owner_id', captain_id)
+      .limit(1)
+      .single();
+
+    if (!vessel) {
+      return NextResponse.json(
+        { error: 'No vessel found for this captain' },
+        { status: 400 }
       );
     }
 
@@ -244,7 +261,7 @@ export async function POST(request: NextRequest) {
     // Check for booking conflicts
     const conflictCheck = await checkAllConflicts({
       profileId: captain_id,
-      vesselId: tripType.vessel_id,
+      vesselId: vessel.id,
       scheduledStart: new Date(scheduled_start),
       scheduledEnd: new Date(scheduled_end),
       bufferMinutes,
@@ -369,7 +386,7 @@ export async function POST(request: NextRequest) {
     const { data: safeResult, error: rpcError } = await supabase.rpc('insert_booking_safely', {
       p_captain_id: captain_id,
       p_trip_type_id: trip_type_id,
-      p_vessel_id: tripType.vessel_id || null,
+      p_vessel_id: vessel.id,
       p_guest_name: guest_name,
       p_guest_email: guest_email,
       p_guest_phone: guest_phone || null,
