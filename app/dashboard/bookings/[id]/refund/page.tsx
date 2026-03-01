@@ -32,7 +32,7 @@ export default async function RefundPage({ params }: RefundPageProps) {
       )
     `)
     .eq('id', id)
-    .eq('profile_id', user.id)
+    .eq('captain_id', user.id)
     .single();
 
   if (error || !booking) {

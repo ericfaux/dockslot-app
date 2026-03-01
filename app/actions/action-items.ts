@@ -32,7 +32,7 @@ export async function getActionItems(): Promise<ActionItem[]> {
   const { data: balanceDueBookings } = await supabase
     .from('bookings')
     .select('id, guest_name, scheduled_start, balance_due_cents, trip_type_id')
-    .eq('profile_id', user.id)
+    .eq('captain_id', user.id)
     .in('status', ['confirmed', 'rescheduled'])
     .gt('balance_due_cents', 0)
     .gte('scheduled_start', new Date().toISOString())
@@ -72,7 +72,7 @@ export async function getActionItems(): Promise<ActionItem[]> {
   const { data: pendingDeposits } = await supabase
     .from('bookings')
     .select('id, guest_name, guest_email, created_at, trip_type_id')
-    .eq('profile_id', user.id)
+    .eq('captain_id', user.id)
     .eq('status', 'pending_deposit')
     .lt('created_at', dayAgo)
     .order('created_at', { ascending: true })
@@ -103,7 +103,7 @@ export async function getActionItems(): Promise<ActionItem[]> {
   const { data: pendingVerifications } = await supabase
     .from('bookings')
     .select('id, guest_name, total_price_cents, payment_method, created_at, trip_type_id')
-    .eq('profile_id', user.id)
+    .eq('captain_id', user.id)
     .eq('payment_status', 'pending_verification')
     .order('created_at', { ascending: true })
     .limit(10);
@@ -145,7 +145,7 @@ export async function getActionItems(): Promise<ActionItem[]> {
   const { data: completedTrips } = await supabase
     .from('bookings')
     .select('id, guest_name, scheduled_start, trip_type_id')
-    .eq('profile_id', user.id)
+    .eq('captain_id', user.id)
     .eq('status', 'completed')
     .gte('scheduled_start', weekAgo)
     .is('trip_report_id', null)
@@ -182,7 +182,7 @@ export async function getActionItems(): Promise<ActionItem[]> {
   const { data: upcomingTrips } = await supabase
     .from('bookings')
     .select('id, guest_name, party_size, scheduled_start, trip_type_id, waiver_template_id')
-    .eq('profile_id', user.id)
+    .eq('captain_id', user.id)
     .in('status', ['confirmed', 'rescheduled'])
     .gte('scheduled_start', new Date().toISOString())
     .lt('scheduled_start', tomorrow)
@@ -230,7 +230,7 @@ export async function getActionItems(): Promise<ActionItem[]> {
   const { data: oldWeatherHolds } = await supabase
     .from('bookings')
     .select('id, guest_name, weather_hold_since, trip_type_id')
-    .eq('profile_id', user.id)
+    .eq('captain_id', user.id)
     .eq('status', 'weather_hold')
     .lt('weather_hold_since', weekAgo)
     .order('weather_hold_since', { ascending: true })

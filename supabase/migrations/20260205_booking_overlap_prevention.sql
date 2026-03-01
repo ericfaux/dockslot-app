@@ -86,7 +86,7 @@ BEGIN
     p_captain_id, p_trip_type_id, p_vessel_id,
     p_guest_name, p_guest_email, p_guest_phone,
     p_party_size, p_scheduled_start, p_scheduled_end,
-    p_special_requests, p_status, 'unpaid',
+    p_special_requests, p_status::booking_status, 'unpaid'::payment_status,
     p_total_price_cents, p_deposit_paid_cents, p_balance_due_cents,
     p_internal_notes, p_tags,
     p_referral_code, p_referral_discount_cents
