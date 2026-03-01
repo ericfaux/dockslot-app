@@ -172,6 +172,7 @@ export default async function BookingPage({ params }: BookingPageProps) {
             meetingSpotLatitude={profile.meeting_spot_latitude || undefined}
             meetingSpotLongitude={profile.meeting_spot_longitude || undefined}
             waiversEnabled={profile.waivers_enabled ?? false}
+            stripeConnected={!!profile.stripe_account_id}
           />
         </div>
       </div>

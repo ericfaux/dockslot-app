@@ -25,6 +25,7 @@ interface BookingFormProps {
   meetingSpotLatitude?: number;
   meetingSpotLongitude?: number;
   waiversEnabled?: boolean;
+  stripeConnected?: boolean;
 }
 
 // Booking steps for progress indicator
@@ -47,6 +48,7 @@ export function BookingForm({
   meetingSpotLatitude,
   meetingSpotLongitude,
   waiversEnabled,
+  stripeConnected = true,
 }: BookingFormProps) {
   const router = useRouter();
   const [step, setStep] = useState<'date' | 'details'>('date');
@@ -602,9 +604,11 @@ export function BookingForm({
           <CancellationPolicy policy={cancellationPolicy} />
 
           {/* Secure Payment Badge */}
-          <div className="flex justify-center py-2">
-            <SecurePaymentBadge />
-          </div>
+          {stripeConnected && (
+            <div className="flex justify-center py-2">
+              <SecurePaymentBadge />
+            </div>
+          )}
 
           {/* Error message */}
           {error && (
