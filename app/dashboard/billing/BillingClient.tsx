@@ -149,16 +149,13 @@ export function BillingClient({
         </div>
       )}
 
-      {/* Zero Commission Hero */}
-      <div className="rounded-xl border-2 border-emerald-300 bg-gradient-to-r from-emerald-50 to-teal-50 px-8 py-8 text-center">
-        <p className="text-3xl font-bold tracking-tight text-emerald-800">
-          0% commission. Always.
-        </p>
-        <p className="mt-2 text-base text-emerald-700">
-          Your booking link. Your guests. Your money.
-        </p>
-        <p className="mt-1 text-xs text-emerald-500">
-          Standard Stripe processing fees apply.
+      {/* Zero Commission */}
+      <div className="flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50/60 px-4 py-3">
+        <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
+          0% commission
+        </span>
+        <p className="text-sm text-emerald-700">
+          Your bookings, your revenue — always. <span className="text-emerald-500">Standard Stripe fees apply.</span>
         </p>
       </div>
 
