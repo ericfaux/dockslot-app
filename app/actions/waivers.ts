@@ -138,6 +138,41 @@ export async function getBookingWaiverInfo(
     return { success: false, error: 'Failed to load passengers', code: 'DATABASE' };
   }
 
+  // Check if the captain has waivers enabled
+  const { data: captainProfile } = await supabase
+    .from('profiles')
+    .select('waivers_enabled')
+    .eq('id', booking.captain_id)
+    .single();
+
+  // If waivers are disabled, return empty requirements
+  if (!captainProfile?.waivers_enabled) {
+    // Transform vessel and trip_type arrays to single objects
+    const transformedBooking = {
+      ...booking,
+      vessel: Array.isArray(booking.vessel) ? booking.vessel[0] || null : booking.vessel,
+      trip_type: Array.isArray(booking.trip_type) ? booking.trip_type[0] || null : booking.trip_type,
+      captain: Array.isArray(booking.captain) ? booking.captain[0] : booking.captain,
+    };
+
+    return {
+      success: true,
+      data: {
+        booking: transformedBooking as BookingWaiverInfo['booking'],
+        passengers: (passengers || []).map((p) => ({
+          passenger: p as Passenger,
+          signedWaivers: [],
+          pendingWaivers: [],
+          isComplete: true,
+        })),
+        requiredWaivers: [],
+        totalSigned: 0,
+        totalRequired: 0,
+        allComplete: true,
+      },
+    };
+  }
+
   // Get required waivers for this captain
   const { data: waivers, error: waiversError } = await supabase
     .from('waiver_templates')
@@ -279,6 +314,17 @@ export async function getWaiverForSigning(
 
   if (passengerError || !passenger) {
     return { success: false, error: 'Passenger not found', code: 'NOT_FOUND' };
+  }
+
+  // Check if the captain has waivers enabled
+  const { data: captainProfile } = await supabase
+    .from('profiles')
+    .select('waivers_enabled')
+    .eq('id', booking.captain_id)
+    .single();
+
+  if (!captainProfile?.waivers_enabled) {
+    return { success: false, error: 'Waivers are not required for this booking', code: 'NOT_FOUND' };
   }
 
   // Get the first required waiver that hasn't been signed
@@ -480,6 +526,34 @@ export async function submitWaiverSignature(
     success: true,
     data: { remainingWaivers },
   };
+}
+
+/**
+ * Toggle the waivers_enabled flag on the captain's profile
+ */
+export async function toggleWaiversEnabled(
+  enabled: boolean
+): Promise<WaiverActionResult<{ waivers_enabled: boolean }>> {
+  const supabase = await createSupabaseServerClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { success: false, error: 'Not authenticated', code: 'VALIDATION' };
+  }
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .update({ waivers_enabled: enabled })
+    .eq('id', user.id)
+    .select('waivers_enabled')
+    .single();
+
+  if (error) {
+    console.error('Failed to update waivers_enabled:', error);
+    return { success: false, error: 'Failed to update waiver settings', code: 'DATABASE' };
+  }
+
+  return { success: true, data: { waivers_enabled: data.waivers_enabled } };
 }
 
 /**

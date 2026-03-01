@@ -33,7 +33,7 @@ export default async function SettingsPage() {
       .order('created_at', { ascending: false }),
     supabase
       .from('profiles')
-      .select('stripe_account_id, stripe_onboarding_complete')
+      .select('stripe_account_id, stripe_onboarding_complete, waivers_enabled')
       .eq('id', user.id)
       .single(),
   ]);
@@ -90,6 +90,7 @@ export default async function SettingsPage() {
           tripTypes={tripTypes}
           vessels={vessels}
           waiverTemplates={waiverTemplates}
+          waiversEnabled={stripeProfile.data?.waivers_enabled ?? false}
           stripeAccountId={stripeProfile.data?.stripe_account_id ?? null}
           stripeOnboardingComplete={stripeProfile.data?.stripe_onboarding_complete ?? false}
         />

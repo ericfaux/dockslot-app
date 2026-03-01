@@ -45,6 +45,7 @@ export interface SettingsTabsProps {
   tripTypes: TripType[];
   vessels: Vessel[];
   waiverTemplates: WaiverTemplate[];
+  waiversEnabled: boolean;
   stripeAccountId: string | null;
   stripeOnboardingComplete: boolean;
 }
@@ -169,7 +170,10 @@ export function SettingsTabs(props: SettingsTabsProps) {
           />
         )}
         {activeTab === 'waivers' && (
-          <WaiversTab initialTemplates={props.waiverTemplates} />
+          <WaiversTab
+            initialTemplates={props.waiverTemplates}
+            waiversEnabled={props.waiversEnabled}
+          />
         )}
         {activeTab === 'payments' && (
           <PaymentsTab
@@ -191,6 +195,7 @@ export function SettingsTabs(props: SettingsTabsProps) {
             initialProfile={props.profile}
             tripTypes={props.tripTypes}
             subscriptionTier={(props.profile?.subscription_tier as SubscriptionTier) ?? 'deckhand'}
+            waiversEnabled={props.waiversEnabled}
           />
         )}
         {activeTab === 'advanced' && (

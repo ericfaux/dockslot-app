@@ -328,30 +328,53 @@ export default async function ConfirmPage({ params, searchParams }: ConfirmPageP
                 <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                   <h2 className="mb-4 text-lg font-semibold text-slate-900">What&apos;s Next?</h2>
                   <ol className="space-y-3 text-sm">
-                    <li className="flex items-start gap-3">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-cyan-100 text-xs font-bold text-cyan-700 flex-shrink-0">
-                        1
-                      </span>
-                      <span className="text-slate-600">
-                        Check your email for confirmation details and waiver links.
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-cyan-100 text-xs font-bold text-cyan-700 flex-shrink-0">
-                        2
-                      </span>
-                      <span className="text-slate-600">
-                        All passengers must sign the liability waiver before the trip.
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-cyan-100 text-xs font-bold text-cyan-700 flex-shrink-0">
-                        3
-                      </span>
-                      <span className="text-slate-600">
-                        Arrive at the meeting spot 15 minutes before departure.
-                      </span>
-                    </li>
+                    {profile?.waivers_enabled ? (
+                      <>
+                        <li className="flex items-start gap-3">
+                          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-cyan-100 text-xs font-bold text-cyan-700 flex-shrink-0">
+                            1
+                          </span>
+                          <span className="text-slate-600">
+                            Check your email for confirmation details and waiver links.
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-cyan-100 text-xs font-bold text-cyan-700 flex-shrink-0">
+                            2
+                          </span>
+                          <span className="text-slate-600">
+                            All passengers must sign the liability waiver before the trip.
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-cyan-100 text-xs font-bold text-cyan-700 flex-shrink-0">
+                            3
+                          </span>
+                          <span className="text-slate-600">
+                            Arrive at the meeting spot 15 minutes before departure.
+                          </span>
+                        </li>
+                      </>
+                    ) : (
+                      <>
+                        <li className="flex items-start gap-3">
+                          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-cyan-100 text-xs font-bold text-cyan-700 flex-shrink-0">
+                            1
+                          </span>
+                          <span className="text-slate-600">
+                            Check your email for confirmation details.
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-cyan-100 text-xs font-bold text-cyan-700 flex-shrink-0">
+                            2
+                          </span>
+                          <span className="text-slate-600">
+                            Arrive at the meeting spot 15 minutes before departure.
+                          </span>
+                        </li>
+                      </>
+                    )}
                     {booking.balance_due_cents > 0 && (
                       <li className="flex items-start gap-3">
                         <span className="flex h-6 w-6 items-center justify-center rounded-full bg-cyan-100 text-xs font-bold text-cyan-700 flex-shrink-0">

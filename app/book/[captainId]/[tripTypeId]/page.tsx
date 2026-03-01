@@ -171,6 +171,7 @@ export default async function BookingPage({ params }: BookingPageProps) {
             cancellationPolicy={profile.cancellation_policy || undefined}
             meetingSpotLatitude={profile.meeting_spot_latitude || undefined}
             meetingSpotLongitude={profile.meeting_spot_longitude || undefined}
+            waiversEnabled={profile.waivers_enabled ?? false}
           />
         </div>
       </div>
