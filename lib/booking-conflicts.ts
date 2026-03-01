@@ -34,7 +34,7 @@ export async function checkBookingConflict(params: {
   const { data: existingBookings, error } = await supabase
     .from('bookings')
     .select('id, guest_name, scheduled_start, scheduled_end, status')
-    .eq('profile_id', params.profileId)
+    .eq('captain_id', params.profileId)
     .eq('vessel_id', params.vesselId)
     .in('status', ['confirmed', 'rescheduled', 'pending_deposit'])
     .gte('scheduled_end', params.scheduledStart.toISOString())
@@ -106,7 +106,7 @@ export async function checkBufferTime(params: {
   const { data: nearbyBookings, error } = await supabase
     .from('bookings')
     .select('id, guest_name, scheduled_start, scheduled_end, status')
-    .eq('profile_id', params.profileId)
+    .eq('captain_id', params.profileId)
     .eq('vessel_id', params.vesselId)
     .in('status', ['confirmed', 'rescheduled'])
     .gte('scheduled_end', bufferStart.toISOString())

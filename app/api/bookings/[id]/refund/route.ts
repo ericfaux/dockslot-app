@@ -63,7 +63,7 @@ export async function POST(
       .from('bookings')
       .select('*, trip_type:trip_types(title)')
       .eq('id', bookingId)
-      .eq('profile_id', user.id)
+      .eq('captain_id', user.id)
       .single();
 
     if (bookingError || !booking) {
