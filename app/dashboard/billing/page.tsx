@@ -67,6 +67,57 @@ export default async function BillingPage() {
     } catch (err) {
       console.error('Billing page subscription sync failed:', err);
     }
+  } else if (
+    profile?.stripe_customer_id &&
+    (!profile.subscription_tier || profile.subscription_tier === 'deckhand') &&
+    !profile.stripe_subscription_id
+  ) {
+    // Safety net: user has a Stripe customer but no subscription ID in DB.
+    // Look up their active subscription directly from Stripe.
+    try {
+      const stripe = getStripe();
+      const subscriptions = await stripe.subscriptions.list({
+        customer: profile.stripe_customer_id,
+        status: 'active',
+        limit: 1,
+      });
+
+      const sub = subscriptions.data[0];
+      if (sub) {
+        const priceId = sub.items?.data?.[0]?.price?.id;
+        let tier = priceId ? getTierFromPriceId(priceId) : 'deckhand';
+        if (tier === 'deckhand') {
+          const metadataTier = sub.metadata?.tier;
+          if (metadataTier === 'captain' || metadataTier === 'fleet') {
+            tier = metadataTier;
+          }
+        }
+
+        if (tier !== 'deckhand') {
+          const periodEnd = sub.items?.data?.[0]?.current_period_end;
+          const serviceClient = createSupabaseServiceClient();
+          await serviceClient
+            .from('profiles')
+            .update({
+              subscription_tier: tier,
+              subscription_status: sub.status === 'active' ? 'active' : 'trialing',
+              stripe_subscription_id: sub.id,
+              ...(periodEnd && {
+                subscription_current_period_end: new Date(periodEnd * 1000).toISOString(),
+              }),
+            })
+            .eq('id', user.id);
+
+          syncedTier = tier as SubscriptionTier;
+          syncedStatus = (sub.status === 'active' ? 'active' : 'trialing') as SubscriptionStatus;
+          if (periodEnd) {
+            syncedPeriodEnd = new Date(periodEnd * 1000).toISOString();
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Billing page customer subscription sync failed:', err);
+    }
   }
 
   return (

@@ -39,7 +39,11 @@ export function getPriceId(tier: 'captain' | 'fleet', interval: BillingInterval)
  * Used by the webhook handler to determine which tier to set on the profile.
  * Includes backward compatibility with the legacy STRIPE_PRO_PRICE_ID.
  */
-export function getTierFromPriceId(priceId: string): SubscriptionTier {
+export function getTierFromPriceId(priceId: string | null | undefined): SubscriptionTier {
+  if (!priceId) {
+    return 'deckhand';
+  }
+
   const captainMonthly = process.env.STRIPE_CAPTAIN_MONTHLY_PRICE_ID;
   const captainAnnual = process.env.STRIPE_CAPTAIN_ANNUAL_PRICE_ID;
   const fleetMonthly = process.env.STRIPE_FLEET_MONTHLY_PRICE_ID;
@@ -55,8 +59,10 @@ export function getTierFromPriceId(priceId: string): SubscriptionTier {
     return 'fleet';
   }
 
-  console.warn(`Unknown Stripe price ID: ${priceId}, defaulting to deckhand`);
-  return 'deckhand';
+  // Captain is the only purchasable tier — default to captain rather than
+  // silently downgrading when env vars are misconfigured or price IDs rotate.
+  console.warn(`Unknown Stripe price ID: ${priceId}, defaulting to captain (only purchasable tier)`);
+  return 'captain';
 }
 
 // ============================================================================

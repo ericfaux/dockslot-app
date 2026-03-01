@@ -73,6 +73,20 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({ received: true });
         }
 
+        // Retrieve full subscription to get period end
+        let subscriptionPeriodEnd: string | undefined;
+        if (subscriptionId) {
+          try {
+            const fullSubscription = await stripe.subscriptions.retrieve(subscriptionId);
+            const periodEnd = fullSubscription.items?.data?.[0]?.current_period_end;
+            if (periodEnd) {
+              subscriptionPeriodEnd = new Date(periodEnd * 1000).toISOString();
+            }
+          } catch (err) {
+            console.error('Failed to retrieve subscription for period end:', err);
+          }
+        }
+
         const updateData: Record<string, unknown> = {
           subscription_tier: tier,
           subscription_status: 'active',
@@ -80,6 +94,10 @@ export async function POST(request: NextRequest) {
 
         if (subscriptionId) {
           updateData.stripe_subscription_id = subscriptionId;
+        }
+
+        if (subscriptionPeriodEnd) {
+          updateData.subscription_current_period_end = subscriptionPeriodEnd;
         }
 
         const { error: updateError } = await supabase
