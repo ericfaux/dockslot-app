@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirm your email</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #0f172a;">
+    <tr>
+      <td align="center" style="padding: 40px 16px;">
+
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 560px; border-collapse: collapse;">
+
+          <!-- Header -->
+          <tr>
+            <td style="padding: 40px 32px 32px; text-align: center; background: linear-gradient(to bottom, #0c4a6e, #1e293b); border-radius: 12px 12px 0 0;">
+              <!-- Anchor icon (inline SVG as data URI) -->
+              <img
+                src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='none' stroke='%2306b6d4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='5' r='3'/%3E%3Cline x1='12' y1='22' x2='12' y2='8'/%3E%3Cpath d='M5 12H2a10 10 0 0 0 20 0h-3'/%3E%3C/svg%3E"
+                alt=""
+                width="40"
+                height="40"
+                style="display: block; margin: 0 auto 16px;"
+              />
+              <h1 style="margin: 0; color: #06b6d4; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">DockSlot</h1>
+              <p style="margin: 8px 0 0; color: #94a3b8; font-size: 14px; letter-spacing: 2px; text-transform: uppercase;">Captain&rsquo;s Helm</p>
+            </td>
+          </tr>
+
+          <!-- Main Content -->
+          <tr>
+            <td style="padding: 40px 32px; background-color: #1e293b;">
+              <h2 style="margin: 0 0 12px; color: #f1f5f9; font-size: 22px; font-weight: 600;">Confirm your email</h2>
+              <p style="margin: 0 0 28px; color: #cbd5e1; font-size: 15px; line-height: 1.6;">
+                Welcome aboard! You&rsquo;re one step away from managing your charters like a pro. Tap the button below to verify your email and get started.
+              </p>
+
+              <!-- CTA Button -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="padding: 4px 0 32px;">
+                    <a href="{{ .ConfirmationURL }}"
+                       target="_blank"
+                       style="display: inline-block; background-color: #06b6d4; color: #0f172a; padding: 14px 40px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px; letter-spacing: 0.3px;">
+                      Verify Email Address
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Divider -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="border-top: 1px solid #334155; padding-top: 24px;">
+                    <p style="margin: 0 0 8px; color: #94a3b8; font-size: 13px;">
+                      If the button doesn&rsquo;t work, copy and paste this link into your browser:
+                    </p>
+                    <p style="margin: 0; word-break: break-all;">
+                      <a href="{{ .ConfirmationURL }}" style="color: #06b6d4; font-size: 13px; text-decoration: underline;">{{ .ConfirmationURL }}</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- What's Next Section -->
+          <tr>
+            <td style="padding: 28px 32px; background-color: #172033; border-top: 1px solid #334155;">
+              <h3 style="margin: 0 0 16px; color: #e2e8f0; font-size: 15px; font-weight: 600;">What&rsquo;s next?</h3>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding: 0 0 12px;">
+                    <table role="presentation" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="vertical-align: top; padding-right: 12px;">
+                          <span style="display: inline-block; width: 24px; height: 24px; line-height: 24px; text-align: center; background-color: #06b6d4; color: #0f172a; border-radius: 50%; font-size: 12px; font-weight: 700;">1</span>
+                        </td>
+                        <td style="vertical-align: top;">
+                          <p style="margin: 0; color: #cbd5e1; font-size: 14px; line-height: 1.5;">Set up your charter profile &amp; trip types</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 0 0 12px;">
+                    <table role="presentation" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="vertical-align: top; padding-right: 12px;">
+                          <span style="display: inline-block; width: 24px; height: 24px; line-height: 24px; text-align: center; background-color: #06b6d4; color: #0f172a; border-radius: 50%; font-size: 12px; font-weight: 700;">2</span>
+                        </td>
+                        <td style="vertical-align: top;">
+                          <p style="margin: 0; color: #cbd5e1; font-size: 14px; line-height: 1.5;">Configure your availability &amp; pricing</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 0;">
+                    <table role="presentation" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="vertical-align: top; padding-right: 12px;">
+                          <span style="display: inline-block; width: 24px; height: 24px; line-height: 24px; text-align: center; background-color: #06b6d4; color: #0f172a; border-radius: 50%; font-size: 12px; font-weight: 700;">3</span>
+                        </td>
+                        <td style="vertical-align: top;">
+                          <p style="margin: 0; color: #cbd5e1; font-size: 14px; line-height: 1.5;">Share your booking page &amp; start accepting charters</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 24px 32px; text-align: center; background-color: #0f172a; border-top: 1px solid #334155; border-radius: 0 0 12px 12px;">
+              <p style="margin: 0 0 8px; color: #64748b; font-size: 12px;">
+                Powered by <span style="color: #06b6d4; font-weight: 600;">DockSlot</span>
+              </p>
+              <p style="margin: 0; color: #475569; font-size: 11px;">
+                If you didn&rsquo;t create an account, you can safely ignore this email.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

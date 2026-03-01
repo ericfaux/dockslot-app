@@ -1,0 +1,29 @@
+# Supabase Local Development Configuration
+# Docs: https://supabase.com/docs/guides/local-development/cli/config
+
+[project]
+id = "dockslot"
+
+# =============================================================================
+# Auth – Email Templates
+# =============================================================================
+# These templates style the transactional emails Supabase Auth sends
+# (sign-up confirmation, password reset, magic link, etc.)
+# They use Go template variables: {{ .ConfirmationURL }}, {{ .Token }}, {{ .SiteURL }}
+#
+# IMPORTANT: To apply these to your hosted Supabase project, either:
+#   1. Run `supabase db push` with the Supabase CLI, or
+#   2. Copy the HTML from supabase/templates/*.html into your
+#      Supabase Dashboard → Authentication → Email Templates
+
+[auth]
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://localhost:3000"]
+
+[auth.email]
+enable_confirmations = true
+template = "./templates/confirmation.html"
+
+[auth.email.template.confirmation]
+subject = "Welcome to DockSlot — Confirm your email"
+content_path = "./templates/confirmation.html"
