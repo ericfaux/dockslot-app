@@ -81,16 +81,6 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     return NextResponse.json({ error: 'Failed to update entry' }, { status: 500 });
   }
 
-  // Log update
-  await supabase.from('audit_logs').insert({
-    table_name: 'waitlist_entries',
-    record_id: id,
-    action: 'update',
-    actor_id: user.id,
-    old_value: { status: entry.status },
-    new_value: { status: data.status },
-  });
-
   return NextResponse.json(data);
 }
 
@@ -132,14 +122,6 @@ export async function DELETE(request: NextRequest, { params }: Params) {
     console.error('Error deleting waitlist entry:', error);
     return NextResponse.json({ error: 'Failed to delete entry' }, { status: 500 });
   }
-
-  // Log deletion
-  await supabase.from('audit_logs').insert({
-    table_name: 'waitlist_entries',
-    record_id: id,
-    action: 'delete',
-    actor_id: user.id,
-  });
 
   return NextResponse.json({ success: true });
 }

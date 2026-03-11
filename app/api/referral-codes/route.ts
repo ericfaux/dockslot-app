@@ -108,14 +108,5 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to create code' }, { status: 500 });
   }
 
-  // Log the creation
-  await supabase.from('audit_logs').insert({
-    table_name: 'referral_codes',
-    record_id: data.id,
-    action: 'create',
-    actor_id: user.id,
-    new_value: data,
-  });
-
   return NextResponse.json(data);
 }

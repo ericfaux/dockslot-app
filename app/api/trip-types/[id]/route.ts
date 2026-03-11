@@ -68,15 +68,6 @@ export async function PATCH(
       return NextResponse.json({ error: 'Failed to update trip type' }, { status: 500 })
     }
 
-    // Audit log
-    await supabase.from('audit_logs').insert({
-      user_id: user.id,
-      action: 'updated_trip_type_policy',
-      entity_type: 'trip_type',
-      entity_id: tripTypeId,
-      changes: updates,
-    })
-
     return NextResponse.json({
       success: true,
       trip_type: updated,

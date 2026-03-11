@@ -96,17 +96,6 @@ export async function POST(
       )
     }
 
-    // Create audit log
-    await supabase.from('audit_logs').insert({
-      table_name: 'bookings',
-      record_id: newBooking.id,
-      action: 'create',
-      changed_fields: ['duplicated_from'],
-      old_values: null,
-      new_values: { duplicated_from: originalBooking.id },
-      user_id: user.id,
-    })
-
     // Create booking log
     await supabase.from('booking_logs').insert({
       booking_id: newBooking.id,

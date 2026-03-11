@@ -32,22 +32,9 @@ interface BookingLog {
   created_at: string
 }
 
-interface AuditLog {
-  id: string
-  table_name: string
-  record_id: string
-  action: string
-  changed_fields: string[] | null
-  old_values: Record<string, unknown> | null
-  new_values: Record<string, unknown> | null
-  user_id: string | null
-  created_at: string
-}
-
 interface TimelineEvent {
   id: string
   timestamp: string
-  type: 'booking_log' | 'audit_log'
   icon: React.ReactNode
   iconColor: string
   title: string
@@ -99,7 +86,7 @@ export default function BookingTimeline({ bookingId }: BookingTimelineProps) {
         }
 
         const data = await response.json()
-        const processedEvents = processTimelineData(data.logs, data.auditLogs)
+        const processedEvents = processTimelineData(data.logs)
         setEvents(processedEvents)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load timeline')
@@ -113,8 +100,7 @@ export default function BookingTimeline({ bookingId }: BookingTimelineProps) {
   }, [bookingId])
 
   const processTimelineData = (
-    logs: BookingLog[],
-    auditLogs: AuditLog[]
+    logs: BookingLog[]
   ): TimelineEvent[] => {
     const allEvents: TimelineEvent[] = []
 
@@ -124,7 +110,6 @@ export default function BookingTimeline({ bookingId }: BookingTimelineProps) {
       allEvents.push({
         id: `log-${log.id}`,
         timestamp: log.created_at,
-        type: 'booking_log',
         icon: <Icon className="h-4 w-4" />,
         iconColor: color,
         title: formatLogTitle(log.entry_type),
@@ -133,25 +118,6 @@ export default function BookingTimeline({ bookingId }: BookingTimelineProps) {
           old_value: log.old_value,
           new_value: log.new_value,
           actor: log.actor_type,
-        },
-      })
-    })
-
-    // Process audit logs
-    auditLogs.forEach((log) => {
-      const { icon: Icon, color } = getEventIcon(log.action)
-      allEvents.push({
-        id: `audit-${log.id}`,
-        timestamp: log.created_at,
-        type: 'audit_log',
-        icon: <Icon className="h-4 w-4" />,
-        iconColor: color,
-        title: formatAuditTitle(log.action, log.changed_fields),
-        description: formatAuditDescription(log),
-        metadata: {
-          changed_fields: log.changed_fields,
-          old_values: log.old_values,
-          new_values: log.new_values,
         },
       })
     })
@@ -167,38 +133,6 @@ export default function BookingTimeline({ bookingId }: BookingTimelineProps) {
       .split('_')
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ')
-  }
-
-  const formatAuditTitle = (
-    action: string,
-    changedFields: string[] | null
-  ): string => {
-    if (action === 'update' && changedFields && changedFields.length > 0) {
-      const fields = changedFields.map((f) =>
-        f.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
-      )
-      return `Updated ${fields.join(', ')}`
-    }
-    return action.charAt(0).toUpperCase() + action.slice(1)
-  }
-
-  const formatAuditDescription = (log: AuditLog): string => {
-    if (log.action === 'update' && log.changed_fields) {
-      const changes = log.changed_fields
-        .map((field) => {
-          const oldVal = log.old_values?.[field]
-          const newVal = log.new_values?.[field]
-          if (oldVal !== undefined && newVal !== undefined) {
-            return `${field}: ${JSON.stringify(oldVal)} → ${JSON.stringify(newVal)}`
-          }
-          return null
-        })
-        .filter(Boolean)
-        .join(', ')
-
-      return changes || 'Fields updated'
-    }
-    return `Booking ${log.action}`
   }
 
   const formatTimestamp = (isoString: string): string => {

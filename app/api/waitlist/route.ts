@@ -134,14 +134,5 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to create waitlist entry' }, { status: 500 });
   }
 
-  // Log creation
-  await supabase.from('audit_logs').insert({
-    table_name: 'waitlist_entries',
-    record_id: data.id,
-    action: 'create',
-    actor_id: null,
-    new_value: data,
-  });
-
   return NextResponse.json(data);
 }

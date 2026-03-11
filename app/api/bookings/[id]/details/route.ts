@@ -113,18 +113,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     // Fetch booking logs (activity timeline)
     const logs = await getBookingLogs(id);
 
-    // Fetch audit logs for additional timeline events
-    const { data: auditLogs, error: auditError } = await supabase
-      .from('audit_logs')
-      .select('*')
-      .eq('table_name', 'bookings')
-      .eq('record_id', id)
-      .order('created_at', { ascending: false });
-
-    if (auditError) {
-      console.error('Error fetching audit logs:', auditError);
-    }
-
     // Fetch guest token for this booking (for sending waiver links)
     const { data: guestToken, error: tokenError } = await supabase
       .from('guest_tokens')
@@ -144,7 +132,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       activeWaiverTemplate: activeWaiverTemplate || null,
       payments: payments || [],
       logs,
-      auditLogs: auditLogs || [],
+      auditLogs: [],
       guestToken: guestToken || null,
     });
   } catch (error) {

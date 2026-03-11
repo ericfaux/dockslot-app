@@ -74,15 +74,6 @@ export async function PATCH(
       )
     }
 
-    // Audit log
-    await supabase.from('audit_logs').insert({
-      user_id: user.id,
-      action: 'updated_review',
-      entity_type: 'review',
-      entity_id: reviewId,
-      changes: updates,
-    })
-
     return NextResponse.json({
       success: true,
       review: updated,
@@ -144,14 +135,6 @@ export async function DELETE(
         { status: 500 }
       )
     }
-
-    // Audit log
-    await supabase.from('audit_logs').insert({
-      user_id: user.id,
-      action: 'deleted_review',
-      entity_type: 'review',
-      entity_id: reviewId,
-    })
 
     return NextResponse.json({
       success: true,
