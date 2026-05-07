@@ -58,6 +58,11 @@ export interface Profile {
   full_name: string | null;
   timezone: string;
   stripe_account_id: string | null;
+  stripe_account_status: 'not_connected' | 'pending' | 'active' | 'restricted';
+  stripe_charges_enabled: boolean;
+  stripe_payouts_enabled: boolean;
+  stripe_details_submitted: boolean;
+  stripe_connected_at: string | null;
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
   subscription_tier: SubscriptionTier;

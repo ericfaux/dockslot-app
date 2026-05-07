@@ -1,46 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
-import Stripe from 'stripe';
-
-// Initialize Stripe (will fail gracefully if no API key)
-const stripe = process.env.STRIPE_SECRET_KEY
-  ? new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: '2026-04-22.dahlia',
-    })
-  : null;
+import { requireAuth } from '@/lib/auth/server';
+import {
+  createAccountLink,
+  createConnectedAccount,
+  markAccountPending,
+} from '@/lib/stripe/connect';
 
 export async function POST(request: NextRequest) {
-  // Check if Stripe is configured
-  if (!stripe) {
-    return NextResponse.json(
-      {
-        error:
-          'Stripe is not configured. Please add STRIPE_SECRET_KEY to environment variables.',
-      },
-      { status: 503 }
-    );
-  }
-
-  const supabase = await createClient();
-
-  // Authenticate user
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError || !user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
-    const body = await request.json();
-    const { businessName, email } = body;
+    const { user, supabase } = await requireAuth();
 
-    // Fetch profile
+    let body: { businessName?: string; email?: string } = {};
+    try {
+      body = await request.json();
+    } catch {
+      // Body is optional — fall through to profile lookups.
+    }
+
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('stripe_account_id')
+      .select('stripe_account_id, business_name, email')
       .eq('id', user.id)
       .single();
 
@@ -51,49 +30,65 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let accountId = profile?.stripe_account_id;
-
-    // Create Stripe Connect account if doesn't exist
-    if (!accountId) {
-      const account = await stripe.accounts.create({
-        type: 'express',
-        country: 'US',
-        email: email,
-        capabilities: {
-          card_payments: { requested: true },
-          transfers: { requested: true },
+    const ownerEmail = body.email ?? profile?.email ?? user.email ?? null;
+    if (!ownerEmail) {
+      return NextResponse.json(
+        {
+          error:
+            'A captain email is required to start Stripe Connect onboarding. Add an email to your profile first.',
         },
-        business_type: 'individual', // Most captains are sole proprietors
-        business_profile: {
-          name: businessName,
-          product_description: 'Charter fishing and boating services',
-          support_email: email,
-        },
-      });
-
-      accountId = account.id;
-
-      // Save account ID to profile
-      await supabase
-        .from('profiles')
-        .update({ stripe_account_id: accountId })
-        .eq('id', user.id);
+        { status: 400 }
+      );
     }
 
-    // Create account link for onboarding
-    const accountLink = await stripe.accountLinks.create({
-      account: accountId,
-      refresh_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/payments?refresh=true`,
-      return_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/payments?success=true`,
+    const businessName = body.businessName ?? profile?.business_name ?? null;
+
+    let accountId = profile?.stripe_account_id ?? null;
+
+    if (accountId) {
+      // Reusing an existing Express account (after disconnect, or to retry
+      // a stalled onboarding). Flip status to pending so the dashboard
+      // immediately reflects the new attempt; the return handler resyncs
+      // to active or restricted once Stripe processes the submission.
+      await markAccountPending(supabase, accountId);
+    } else {
+      const account = await createConnectedAccount({
+        ownerEmail,
+        captainId: user.id,
+        businessName,
+      });
+      accountId = account.id;
+
+      const { error: persistError } = await supabase
+        .from('profiles')
+        .update({
+          stripe_account_id: accountId,
+          stripe_account_status: 'pending',
+        })
+        .eq('id', user.id);
+
+      if (persistError) {
+        return NextResponse.json(
+          { error: 'Failed to persist Stripe account id' },
+          { status: 500 }
+        );
+      }
+    }
+
+    const origin = request.nextUrl.origin;
+    const link = await createAccountLink({
+      accountId,
+      refreshUrl: `${origin}/api/stripe/connect/refresh`,
+      returnUrl: `${origin}/api/stripe/connect/return`,
       type: 'account_onboarding',
+      collect: 'eventually_due',
     });
 
-    return NextResponse.json({ url: accountLink.url });
-  } catch (error) {
-    console.error('Stripe Connect onboarding error:', error);
-    return NextResponse.json(
-      { error: 'Failed to create Stripe onboarding link' },
-      { status: 500 }
-    );
+    return NextResponse.json({ url: link.url });
+  } catch (err) {
+    console.error('Stripe Connect onboard failed:', err);
+    const message =
+      err instanceof Error ? err.message : 'Failed to start Stripe onboarding';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
