@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   ExternalLink,
   CreditCard,
@@ -100,14 +100,22 @@ export function PaymentsDashboardClient({
   businessName,
   email,
 }: PaymentsDashboardClientProps) {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const stripeFeedbackKey = searchParams?.get('stripe') ?? null;
-  const stripeFeedback = stripeFeedbackKey
-    ? RETURN_FEEDBACK[stripeFeedbackKey] ?? null
-    : null;
+  // Suppress the missing-account banner when the page itself has an
+  // account on file — the banner copy contradicts the Resume onboarding
+  // card the page would otherwise render.
+  const suppressFeedback =
+    stripeFeedbackKey === 'missing-account' && stripeAccountId !== null;
+  const stripeFeedback =
+    stripeFeedbackKey && !suppressFeedback
+      ? RETURN_FEEDBACK[stripeFeedbackKey] ?? null
+      : null;
 
   const [loading, setLoading] = useState(false);
   const [onboardingLoading, setOnboardingLoading] = useState(false);
+  const [disconnectLoading, setDisconnectLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const isActive = stripeAccountStatus === 'active';
@@ -165,6 +173,30 @@ export function PaymentsDashboardClient({
     window.location.href = '/api/stripe/connect/refresh';
   };
 
+  const handleDisconnect = async () => {
+    setDisconnectLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/stripe/connect/disconnect', {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to disconnect Stripe account');
+      }
+
+      // Re-render the server component so it reads the freshly cleared
+      // status fields and renders the Connect CTA again.
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong');
+    } finally {
+      setDisconnectLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {stripeFeedback && (
@@ -218,7 +250,9 @@ export function PaymentsDashboardClient({
         <PendingCard
           accountId={stripeAccountId}
           loading={onboardingLoading}
+          disconnectLoading={disconnectLoading}
           onResume={handleResumeOnboarding}
+          onDisconnect={handleDisconnect}
         />
       )}
 
@@ -420,11 +454,15 @@ function ConnectCta({
 function PendingCard({
   accountId,
   loading,
+  disconnectLoading,
   onResume,
+  onDisconnect,
 }: {
   accountId: string | null;
   loading: boolean;
+  disconnectLoading: boolean;
   onResume: () => void;
+  onDisconnect: () => void;
 }) {
   return (
     <div className="rounded-lg border border-amber-200 bg-amber-50 p-6">
@@ -448,13 +486,22 @@ function PendingCard({
           </p>
         </div>
       </div>
-      <button
-        onClick={onResume}
-        disabled={loading}
-        className="rounded-lg bg-amber-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-amber-700 disabled:opacity-50"
-      >
-        Resume onboarding
-      </button>
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          onClick={onResume}
+          disabled={loading || disconnectLoading}
+          className="rounded-lg bg-amber-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-amber-700 disabled:opacity-50"
+        >
+          Resume onboarding
+        </button>
+        <button
+          onClick={onDisconnect}
+          disabled={loading || disconnectLoading}
+          className="rounded-lg border border-amber-300 bg-white px-4 py-2.5 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-100 disabled:opacity-50"
+        >
+          {disconnectLoading ? 'Disconnecting…' : 'Disconnect and start over'}
+        </button>
+      </div>
     </div>
   );
 }
