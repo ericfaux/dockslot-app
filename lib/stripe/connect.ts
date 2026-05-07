@@ -121,15 +121,16 @@ export async function syncAccountToProfile(
 ): Promise<string | null> {
   const derived = deriveStripeFields(account);
 
-  // The legacy stripe_onboarding_complete boolean is still read by the
-  // dashboard home and settings pages. Keep it coherent with the new
-  // status until those callers migrate.
+  // dashboard/page.tsx and dashboard/settings/page.tsx still SELECT the
+  // legacy stripe_onboarding_complete column, but that column was never
+  // added to public.profiles — those reads silently fail today. Writing
+  // it from here would 42703 the entire sync, so don't. Migrating those
+  // callers to read stripe_account_status === 'active' is a follow-up.
   const update: Record<string, unknown> = {
     stripe_account_status: derived.stripe_account_status,
     stripe_charges_enabled: derived.stripe_charges_enabled,
     stripe_payouts_enabled: derived.stripe_payouts_enabled,
     stripe_details_submitted: derived.stripe_details_submitted,
-    stripe_onboarding_complete: derived.stripe_account_status === 'active',
   };
 
   // Stamp stripe_connected_at on the FIRST transition into active so a
@@ -182,7 +183,6 @@ export async function markAccountDisconnected(
       stripe_charges_enabled: false,
       stripe_payouts_enabled: false,
       stripe_details_submitted: false,
-      stripe_onboarding_complete: false,
     })
     .eq('stripe_account_id', accountId);
 
