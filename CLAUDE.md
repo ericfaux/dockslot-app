@@ -58,10 +58,13 @@ URL: https://dockslot-app.vercel.app.
 - **Email:** `RESEND_API_KEY`, `RESEND_FROM_EMAIL` (defaults to Resend sandbox
   until domain is verified)
 - **SMS:** `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER`
-- **Stripe:** `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`,
-  `STRIPE_CAPTAIN_MONTHLY_PRICE_ID`, `STRIPE_CAPTAIN_ANNUAL_PRICE_ID`,
-  `STRIPE_FLEET_MONTHLY_PRICE_ID`, `STRIPE_FLEET_ANNUAL_PRICE_ID`,
-  `STRIPE_PRO_PRICE_ID` (legacy → maps to `captain` tier)
+- **Stripe:** `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET_PLATFORM`
+  (booking + subscription events), `STRIPE_WEBHOOK_SECRET_CONNECT`
+  (Connect `account.*` events — separate Stripe Dashboard endpoint with
+  scope = Connected accounts), `STRIPE_CAPTAIN_MONTHLY_PRICE_ID`,
+  `STRIPE_CAPTAIN_ANNUAL_PRICE_ID`, `STRIPE_FLEET_MONTHLY_PRICE_ID`,
+  `STRIPE_FLEET_ANNUAL_PRICE_ID`, `STRIPE_PRO_PRICE_ID` (legacy → maps to
+  `captain` tier)
 - **Stripe Connect:** `DOCKSLOT_PLATFORM_FEE_PERCENT` (defaults to 10)
 - **Cron security:** `CRON_SECRET`
 - **Vercel:** `VERCEL_OIDC_TOKEN` (auto), optional `VERCEL_TOKEN`
@@ -110,7 +113,11 @@ DockSlot keeps a platform fee (default 10%, configurable via
 `DOCKSLOT_PLATFORM_FEE_PERCENT`) on each booking payment via
 `application_fee_amount`. The remainder is auto-transferred to the captain.
 See `calculatePlatformFee()` in `/lib/stripe/config.ts`. Webhooks live under
-`/app/api/stripe/`.
+`/app/api/stripe/`. Two distinct webhook endpoints exist with separate
+signing secrets: `/api/stripe/webhook` (Your-account scope, booking +
+subscription events, `STRIPE_WEBHOOK_SECRET_PLATFORM`) and
+`/api/stripe/webhook-connect` (Connected-accounts scope, `account.*`
+lifecycle events, `STRIPE_WEBHOOK_SECRET_CONNECT`). Do not merge them.
 
 ## Cron jobs (Vercel)
 Defined in `vercel.json`:

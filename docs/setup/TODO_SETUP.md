@@ -84,8 +84,9 @@ These features are **built and ready** but require API keys/accounts to function
 3. Add to Vercel env vars:
    - `STRIPE_SECRET_KEY=sk_test_...`
    - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...`
-   - `STRIPE_WEBHOOK_SECRET=whsec_...`
-4. Set up webhook endpoint in Stripe dashboard
+   - `STRIPE_WEBHOOK_SECRET_PLATFORM=whsec_...` (booking + subscription events, "Your account" scope)
+   - `STRIPE_WEBHOOK_SECRET_CONNECT=whsec_...` (Connect `account.*` events, "Connected accounts" scope)
+4. Set up two webhook endpoints in Stripe dashboard (one per scope — see `STRIPE_SETUP.md`)
 
 **See:** `STRIPE_SETUP.md` for complete guide
 

@@ -8,10 +8,10 @@ import { getStripe, getTierFromPriceId } from '@/lib/stripe/config';
 export async function POST(request: NextRequest) {
   try {
     const stripe = getStripe();
-    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET_PLATFORM;
 
     if (!webhookSecret) {
-      console.error('STRIPE_WEBHOOK_SECRET not configured');
+      console.error('STRIPE_WEBHOOK_SECRET_PLATFORM not configured');
       return NextResponse.json(
         { error: 'Webhook not configured' },
         { status: 500 }
