@@ -9,9 +9,28 @@ Add these to both local `.env.local` and Vercel environment variables:
 STRIPE_SECRET_KEY=sk_test_... # or sk_live_... for production
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_... # or pk_live_... for production
 
-# Stripe Webhook Secret (from https://dashboard.stripe.com/webhooks)
-STRIPE_WEBHOOK_SECRET=whsec_...
+# Stripe Webhook Secrets (from https://dashboard.stripe.com/webhooks)
+# Two endpoints, two secrets — see "Two webhook endpoints" below.
+STRIPE_WEBHOOK_SECRET_PLATFORM=whsec_... # platform-scoped events
+STRIPE_WEBHOOK_SECRET_CONNECT=whsec_...  # Connect-scoped events
 ```
+
+## Two webhook endpoints
+
+DockSlot runs two distinct Stripe webhook endpoints with separate signing
+secrets. Stripe forces this split: each event destination has exactly one
+scope ("Your account" or "Connected accounts"), and the events we need
+land on different scopes. Keeping the routes and secrets separate also
+isolates the platform billing path from the captain lifecycle path so a
+misconfiguration on one side cannot poison the other.
+
+| Endpoint | Stripe scope | Events | Signing secret |
+|---|---|---|---|
+| `/api/stripe/webhook` | Your account | `checkout.session.completed`, `payment_intent.succeeded`, `customer.subscription.*`, `invoice.payment_failed` | `STRIPE_WEBHOOK_SECRET_PLATFORM` |
+| `/api/stripe/webhook-connect` | Connected accounts | `account.updated`, `account.application.deauthorized` | `STRIPE_WEBHOOK_SECRET_CONNECT` |
+
+Do not merge these routes back into a single handler. Future agents that
+touch this code: respect the split.
 
 ## Stripe Dashboard Setup
 
@@ -20,18 +39,35 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 2. Copy your **Secret key** (starts with `sk_test_` or `sk_live_`)
 3. Copy your **Publishable key** (starts with `pk_test_` or `pk_live_`)
 
-### 2. Set Up Webhook
+### 2. Set Up Webhooks (two endpoints)
+
+#### Platform endpoint (booking + subscription events)
 1. Go to https://dashboard.stripe.com/webhooks
 2. Click "Add endpoint"
 3. Enter your webhook URL:
    - **Development:** Use Stripe CLI or ngrok
    - **Production:** `https://dockslot-app.vercel.app/api/stripe/webhook`
-4. Select events to listen for:
+4. **Event destination scope:** "Your account"
+5. Select events to listen for:
    - `checkout.session.completed` ✅ (required)
    - `payment_intent.succeeded` (optional)
    - `payment_intent.payment_failed` (optional)
-5. Click "Add endpoint"
-6. Copy the **Signing secret** (starts with `whsec_`)
+   - `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted` (subscription billing)
+   - `invoice.payment_failed` (subscription billing)
+6. Click "Add endpoint"
+7. Copy the **Signing secret** → set as `STRIPE_WEBHOOK_SECRET_PLATFORM`
+
+#### Connect endpoint (captain account lifecycle)
+1. Go to https://dashboard.stripe.com/webhooks
+2. Click "Add endpoint"
+3. Enter your webhook URL:
+   - **Production:** `https://dockslot-app.vercel.app/api/stripe/webhook-connect`
+4. **Event destination scope:** "Connected accounts" (NOT "Your account" — this is the only thing distinguishing the two endpoints)
+5. Select events to listen for:
+   - `account.updated`
+   - `account.application.deauthorized`
+6. Click "Add endpoint"
+7. Copy the **Signing secret** → set as `STRIPE_WEBHOOK_SECRET_CONNECT`
 
 ### 3. Test in Development
 
@@ -44,11 +80,13 @@ brew install stripe/stripe-cli/stripe # macOS
 # Login
 stripe login
 
-# Forward webhooks to local server
+# Forward platform-scoped webhooks to local server
 stripe listen --forward-to localhost:3000/api/stripe/webhook
+# This prints a whsec_... — add it to .env.local as STRIPE_WEBHOOK_SECRET_PLATFORM
 
-# This will output your webhook signing secret
-# Add it to .env.local as STRIPE_WEBHOOK_SECRET
+# In a second terminal, forward Connect-scoped events for captain lifecycle
+stripe listen --forward-connect-to localhost:3000/api/stripe/webhook-connect
+# This prints a separate whsec_... — add it to .env.local as STRIPE_WEBHOOK_SECRET_CONNECT
 ```
 
 **Option B: ngrok**
