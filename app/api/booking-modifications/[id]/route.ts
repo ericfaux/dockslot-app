@@ -106,16 +106,6 @@ export async function PATCH(
       },
     })
 
-    // Audit log
-    await supabase.from('audit_logs').insert({
-      user_id: user.id,
-      booking_id: modRequest.booking_id,
-      action: `${status}_modification`,
-      entity_type: 'modification_request',
-      entity_id: modificationId,
-      changes: { status, captain_response: captainResponse },
-    })
-
     return NextResponse.json({
       success: true,
       modification: updated,

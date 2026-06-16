@@ -22,22 +22,9 @@ import {
 } from 'lucide-react';
 import { BookingLog } from '@/lib/db/types';
 
-interface AuditLog {
-  id: string;
-  table_name: string;
-  record_id: string;
-  action: string;
-  changed_fields: string[] | null;
-  old_values: Record<string, unknown> | null;
-  new_values: Record<string, unknown> | null;
-  user_id: string | null;
-  created_at: string;
-}
-
 interface TimelineEvent {
   id: string;
   timestamp: string;
-  type: 'booking_log' | 'audit_log';
   icon: React.ReactNode;
   iconColor: string;
   bgColor: string;
@@ -49,7 +36,6 @@ interface TimelineEvent {
 
 interface ActivityLogProps {
   logs: BookingLog[];
-  auditLogs: AuditLog[];
   isLoading: boolean;
 }
 
@@ -88,7 +74,7 @@ function formatActorType(actorType: string): string {
   }
 }
 
-export function ActivityLog({ logs, auditLogs, isLoading }: ActivityLogProps) {
+export function ActivityLog({ logs, isLoading }: ActivityLogProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Process and merge logs into timeline events
@@ -103,7 +89,6 @@ export function ActivityLog({ logs, auditLogs, isLoading }: ActivityLogProps) {
       events.push({
         id: `log-${log.id}`,
         timestamp: log.created_at,
-        type: 'booking_log',
         icon: <Icon className="h-4 w-4" />,
         iconColor: config.color,
         bgColor: config.bg,
@@ -117,42 +102,11 @@ export function ActivityLog({ logs, auditLogs, isLoading }: ActivityLogProps) {
       });
     });
 
-    // Process audit logs (only include meaningful ones not already in booking_logs)
-    auditLogs.forEach((log) => {
-      // Skip if there's already a booking log for this action
-      const isDuplicate = logs.some(
-        (bl) =>
-          Math.abs(new Date(bl.created_at).getTime() - new Date(log.created_at).getTime()) < 1000
-      );
-
-      if (isDuplicate) return;
-
-      const config = getEventConfig(log.action);
-      const Icon = config.icon;
-
-      events.push({
-        id: `audit-${log.id}`,
-        timestamp: log.created_at,
-        type: 'audit_log',
-        icon: <Icon className="h-4 w-4" />,
-        iconColor: config.color,
-        bgColor: config.bg,
-        title: formatAuditTitle(log.action, log.changed_fields),
-        description: formatAuditDescription(log),
-        actor: log.user_id ? 'Captain' : 'System',
-        metadata: {
-          changed_fields: log.changed_fields,
-          old_values: log.old_values,
-          new_values: log.new_values,
-        },
-      });
-    });
-
     // Sort by timestamp (newest first)
     return events.sort(
       (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
-  }, [logs, auditLogs]);
+  }, [logs]);
 
   const displayedEvents = isExpanded ? timelineEvents : timelineEvents.slice(0, 5);
   const hasMore = timelineEvents.length > 5;
@@ -276,63 +230,3 @@ function formatLogTitle(entryType: string): string {
     .join(' ');
 }
 
-function formatAuditTitle(action: string, changedFields: string[] | null): string {
-  if (action === 'update' && changedFields && changedFields.length > 0) {
-    const fields = changedFields
-      .filter((f) => !['updated_at'].includes(f))
-      .map((f) => f.replace(/_/g, ' '))
-      .slice(0, 2);
-
-    if (fields.length === 0) return 'Record Updated';
-    return `Updated ${fields.join(', ')}${changedFields.length > 2 ? '...' : ''}`;
-  }
-
-  switch (action) {
-    case 'insert':
-      return 'Record Created';
-    case 'delete':
-      return 'Record Deleted';
-    default:
-      return action.charAt(0).toUpperCase() + action.slice(1);
-  }
-}
-
-function formatAuditDescription(log: AuditLog): string {
-  if (log.action === 'update' && log.changed_fields) {
-    const meaningfulChanges = log.changed_fields.filter(
-      (f) => !['updated_at', 'created_at'].includes(f)
-    );
-
-    if (meaningfulChanges.length === 0) return 'Record updated';
-
-    const changes = meaningfulChanges
-      .slice(0, 2)
-      .map((field) => {
-        const oldVal = log.old_values?.[field];
-        const newVal = log.new_values?.[field];
-
-        // Format the field name
-        const fieldName = field.replace(/_/g, ' ');
-
-        // Format values nicely
-        const formatValue = (val: unknown): string => {
-          if (val === null || val === undefined) return 'empty';
-          if (typeof val === 'boolean') return val ? 'yes' : 'no';
-          if (typeof val === 'number') return val.toString();
-          if (typeof val === 'string' && val.length > 30) return val.slice(0, 30) + '...';
-          return String(val);
-        };
-
-        if (oldVal !== undefined && newVal !== undefined) {
-          return `${fieldName}: ${formatValue(oldVal)} → ${formatValue(newVal)}`;
-        }
-
-        return fieldName;
-      })
-      .join(', ');
-
-    return changes || 'Fields updated';
-  }
-
-  return `Booking ${log.action}`;
-}

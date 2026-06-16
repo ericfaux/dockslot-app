@@ -89,19 +89,6 @@ export async function POST(
       },
     })
 
-    // Audit log
-    await supabase.from('audit_logs').insert({
-      user_id: user.id,
-      booking_id: bookingId,
-      action: 'sent_sms',
-      entity_type: 'booking',
-      entity_id: bookingId,
-      changes: {
-        recipient: booking.guest_phone,
-        message_length: message.length,
-      },
-    })
-
     // If template was used, increment use count
     if (templateId) {
       await supabase.rpc('increment_template_use_count', {

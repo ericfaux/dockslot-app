@@ -74,15 +74,6 @@ export async function PATCH(
       )
     }
 
-    // Audit log
-    await supabase.from('audit_logs').insert({
-      table_name: 'bookings',
-      record_id: id,
-      action: 'update',
-      changed_fields: Object.keys(updates),
-      user_id: user.id,
-    })
-
     return NextResponse.json(data)
   } catch (error) {
     console.error('Unexpected error:', error)

@@ -103,19 +103,6 @@ export async function GET(request: NextRequest) {
 
       codesGenerated++;
 
-      // Log the code generation
-      await supabase.from('audit_logs').insert({
-        table_name: 'referral_codes',
-        record_id: booking.id,
-        action: 'create',
-        actor_id: null,
-        new_value: { 
-          code: generatedCode, 
-          guest_email: booking.guest_email,
-          auto_generated: true,
-          source: 'completed_booking'
-        },
-      });
     }
 
     return NextResponse.json({

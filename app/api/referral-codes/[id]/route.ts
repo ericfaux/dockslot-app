@@ -54,16 +54,6 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     return NextResponse.json({ error: 'Failed to update code' }, { status: 500 });
   }
 
-  // Log the change
-  await supabase.from('audit_logs').insert({
-    table_name: 'referral_codes',
-    record_id: id,
-    action: 'update',
-    actor_id: user.id,
-    old_value: { is_active: code.is_active },
-    new_value: { is_active: data.is_active },
-  });
-
   return NextResponse.json(data);
 }
 
@@ -112,14 +102,6 @@ export async function DELETE(request: NextRequest, { params }: Params) {
     console.error('Error deleting referral code:', error);
     return NextResponse.json({ error: 'Failed to delete code' }, { status: 500 });
   }
-
-  // Log deletion
-  await supabase.from('audit_logs').insert({
-    table_name: 'referral_codes',
-    record_id: id,
-    action: 'delete',
-    actor_id: user.id,
-  });
 
   return NextResponse.json({ success: true });
 }
