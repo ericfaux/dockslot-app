@@ -74,7 +74,12 @@ export function BillingClient({
       });
 
       if (!response.ok) {
-        const data = await response.json();
+        const data = await response.json().catch(() => ({}));
+        if (data.code === 'stripe_customer_missing') {
+          throw new Error(
+            "We couldn't find your billing account in Stripe, so the billing portal can't open. Email support@dockslot.app and we'll update or cancel your plan for you."
+          );
+        }
         throw new Error(data.error || 'Failed to open billing portal');
       }
 
